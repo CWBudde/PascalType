@@ -63,7 +63,7 @@ type
   protected
     FInterpreter : IPascalTypeInterpreter;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); virtual;
+    constructor Create(Interpreter: IPascalTypeInterpreter); reintroduce; virtual;
   end;
 
   // TrueType Table Directory type
@@ -114,6 +114,7 @@ type
   TCustomPascalTypeNamedTable = class(TCustomPascalTypeInterfaceTable)
   public
     class function GetTableType: TTableType; virtual; abstract;
+
     property TableType: TTableType read GetTableType;
   end;
 
@@ -253,7 +254,6 @@ type
   private
     FLength       : Word; // This is the length in bytes of the subtable.
     FLanguage     : Word; // Please see 'Note on the language field in 'cmap' subtables' in this document.
-    FGlyphIdArray : array [0..255] of SmallInt; // An array that maps character codes to glyph index values.
   protected
     function GetFormat: Word; override;
     procedure ResetToDefaults; override;
@@ -561,27 +561,23 @@ type
 
   // Table 'maxp' of Maximum Profile
 
-  TMaximumProfile = packed record
-    Version               : TFixedPoint;
-    numGlyphs             : Word;
-    maxPoints             : Word;
-    maxContours           : Word;
-    maxCompositePoints    : Word;
-    maxCompositeContours  : Word;
-    maxZones              : Word;
-    maxTwilightPoints     : Word;
-    maxStorage            : Word;
-    maxFunctionDefs       : Word;
-    maxInstructionDefs    : Word;
-    maxStackElements      : Word;
-    maxSizeOfInstructions : Word;
-    maxComponentElements  : Word;
-    maxComponentDepth     : Word;
-  end;
-
   TPascalTypeMaximumProfileTable = class(TCustomPascalTypeNamedTable)
   private
-    FMaximumProfile : TMaximumProfile;
+    FVersion               : TFixedPoint;
+    FNumGlyphs             : Word;
+    FMaxPoints             : Word;
+    FMaxContours           : Word;
+    FMaxCompositePoints    : Word;
+    FMaxCompositeContours  : Word;
+    FMaxZones              : Word;
+    FMaxTwilightPoints     : Word;
+    FMaxStorage            : Word;
+    FMaxFunctionDefs       : Word;
+    FMaxInstructionDefs    : Word;
+    FMaxStackElements      : Word;
+    FMaxSizeOfInstructions : Word;
+    FMaxComponentElements  : Word;
+    FMaxComponentDepth     : Word;
     procedure SetVersion(const Value: TFixedPoint);
     procedure SetMaxComponentDepth(const Value: Word);
     procedure SetMaxComponentElements(const Value: Word);
@@ -624,24 +620,22 @@ type
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
-
-    property MaximumProfile: TMaximumProfile read FMaximumProfile;
   published
-    property Version: TFixedPoint read FMaximumProfile.Version write SetVersion;
-    property NumGlyphs: Word read FMaximumProfile.NumGlyphs write SetNumGlyphs;
-    property MaxPoints: Word read FMaximumProfile.MaxPoints write SetMaxPoints;
-    property MaxContours: Word read FMaximumProfile.MaxContours write SetMaxContours;
-    property MaxCompositePoints: Word read FMaximumProfile.MaxCompositePoints write SetMaxCompositePoints;
-    property MaxCompositeContours: Word read FMaximumProfile.MaxCompositeContours write SetMaxCompositeContours;
-    property MaxZones: Word read FMaximumProfile.MaxZones write SetMaxZones;
-    property MaxTwilightPoints: Word read FMaximumProfile.MaxTwilightPoints write SetMaxTwilightPoints;
-    property MaxStorage: Word read FMaximumProfile.MaxStorage write SetMaxStorage;
-    property MaxFunctionDefs: Word read FMaximumProfile.MaxFunctionDefs write SetMaxFunctionDefs;
-    property MaxInstructionDefs: Word read FMaximumProfile.MaxInstructionDefs write SetMaxInstructionDefs;
-    property MaxStackElements: Word read FMaximumProfile.MaxStackElements write SetMaxStackElements;
-    property MaxSizeOfInstruction: Word read FMaximumProfile.MaxSizeOfInstructions write SetMaxSizeOfInstructions;
-    property MaxComponentElements: Word read FMaximumProfile.MaxComponentElements write SetMaxComponentElements;
-    property MaxComponentDepth: Word read FMaximumProfile.MaxComponentDepth write SetMaxComponentDepth;
+    property Version: TFixedPoint read FVersion write SetVersion;
+    property NumGlyphs: Word read FNumGlyphs write SetNumGlyphs;
+    property MaxPoints: Word read FMaxPoints write SetMaxPoints;
+    property MaxContours: Word read FMaxContours write SetMaxContours;
+    property MaxCompositePoints: Word read FMaxCompositePoints write SetMaxCompositePoints;
+    property MaxCompositeContours: Word read FMaxCompositeContours write SetMaxCompositeContours;
+    property MaxZones: Word read FMaxZones write SetMaxZones;
+    property MaxTwilightPoints: Word read FMaxTwilightPoints write SetMaxTwilightPoints;
+    property MaxStorage: Word read FMaxStorage write SetMaxStorage;
+    property MaxFunctionDefs: Word read FMaxFunctionDefs write SetMaxFunctionDefs;
+    property MaxInstructionDefs: Word read FMaxInstructionDefs write SetMaxInstructionDefs;
+    property MaxStackElements: Word read FMaxStackElements write SetMaxStackElements;
+    property MaxSizeOfInstruction: Word read FMaxSizeOfInstructions write SetMaxSizeOfInstructions;
+    property MaxComponentElements: Word read FMaxComponentElements write SetMaxComponentElements;
+    property MaxComponentDepth: Word read FMaxComponentDepth write SetMaxComponentDepth;
   end;
 
 
@@ -1826,7 +1820,6 @@ end;
 procedure TTrueTypeFontFormat0CharacterMap.LoadFromStream(Stream: TStream);
 var
   Value16   : Word;
-  CharIndex : Byte;
 begin
  with Stream do
   begin
@@ -2920,7 +2913,6 @@ var
   ContourIndex : Integer;
   PointIndex   : Integer;
   CntrPntIndex : Integer;
-  FlagIndex    : Integer;
   PointCount   : Integer;
   LastPoint    : Integer;
   Contour      : TPascalTypeContour;
@@ -2944,6 +2936,9 @@ begin
   begin
    // set end points of contours array size
    SetLength(EndPtsOfCont, FNumberOfContours);
+
+   // reset point count
+   PointCount := -1;
 
    // read end points
    for ContourIndex := 0 to FNumberOfContours - 1 do
@@ -4182,24 +4177,24 @@ begin
 end;
 
 procedure TTrueTypeFontControlValueTable.LoadFromStream(Stream: TStream);
-var
-  ByteSize : Cardinal;
 begin
  with Stream do
   begin
    SetLength(FControlValues, Size div 2);
-   ByteSize := Read(FControlValues[0], Length(FControlValues) * SizeOf(Word));
-   if ByteSize < Length(FControlValues) * SizeOf(Word)
+
+   // check for minimal table size
+   if Position + Length(FControlValues) * SizeOf(Word) > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // read control values
+   Read(FControlValues[0], Length(FControlValues) * SizeOf(Word));
   end;
 end;
 
 procedure TTrueTypeFontControlValueTable.SaveToStream(Stream: TStream);
 begin
- with Stream do
-  begin
-   Write(FControlValues, Length(FControlValues) * SizeOf(Word));
-  end;
+ // write control values
+ Stream.Write(FControlValues[0], Length(FControlValues) * SizeOf(Word));
 end;
 
 
@@ -4246,25 +4241,24 @@ begin
 end;
 
 procedure TCustomTrueTypeFontInstructionTable.LoadFromStream(Stream: TStream);
-var
-  ByteSize : Cardinal;
 begin
  with Stream do
   begin
    SetLength(FInstructions, Size);
 
-   ByteSize := Read(FInstructions[0], Length(FInstructions));
-   if ByteSize < Length(FInstructions)
+   // check for minimal table size
+   if Position + Length(FInstructions) > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // read control values
+   Read(FInstructions[0], Length(FInstructions) * SizeOf(Word));
   end;
 end;
 
 procedure TCustomTrueTypeFontInstructionTable.SaveToStream(Stream: TStream);
 begin
- with Stream do
-  begin
-   Write(FInstructions[0], Length(FInstructions));
-  end;
+ // write instructions
+ Stream.Write(FInstructions[0], Length(FInstructions));
 end;
 
 
@@ -4656,7 +4650,21 @@ begin
  if Dest is TPascalTypeMaximumProfileTable then
   with TPascalTypeMaximumProfileTable(Dest) do
    begin
-    FMaximumProfile := Self.FMaximumProfile;
+    FVersion               := Self.FVersion;
+    FNumGlyphs             := Self.FNumGlyphs;
+    FMaxPoints             := Self.FMaxPoints;
+    FMaxContours           := Self.FMaxContours;
+    FMaxCompositePoints    := Self.FMaxCompositePoints;
+    FMaxCompositeContours  := Self.FMaxCompositeContours;
+    FMaxZones              := Self.FMaxZones;
+    FMaxTwilightPoints     := Self.FMaxTwilightPoints;
+    FMaxStorage            := Self.FMaxStorage;
+    FMaxFunctionDefs       := Self.FMaxFunctionDefs;
+    FMaxInstructionDefs    := Self.FMaxInstructionDefs;
+    FMaxStackElements      := Self.FMaxStackElements;
+    FMaxSizeOfInstructions := Self.FMaxSizeOfInstructions;
+    FMaxComponentElements  := Self.FMaxComponentElements;
+    FMaxComponentDepth     := Self.FMaxComponentDepth;
    end
  else inherited;
 end;
@@ -4668,24 +4676,21 @@ end;
 
 procedure TPascalTypeMaximumProfileTable.ResetToDefaults;
 begin
- with FMaximumProfile do
-  begin
-   Version.Value := 1;
-   numGlyphs := 0;
-   maxPoints := 0;
-   maxContours := 0;
-   maxCompositePoints := 0;
-   maxCompositeContours := 0;
-   maxZones := 0;
-   maxTwilightPoints := 0;
-   maxStorage := 0;
-   maxFunctionDefs := 0;
-   maxInstructionDefs := 0;
-   maxStackElements := 0;
-   maxSizeOfInstructions := 0;
-   maxComponentElements := 0;
-   maxComponentDepth := 0;
-  end;
+ FVersion.Value := 1;
+ FNumGlyphs := 0;
+ FMaxPoints := 0;
+ FMaxContours := 0;
+ FMaxCompositePoints := 0;
+ FMaxCompositeContours := 0;
+ FMaxZones := 0;
+ FMaxTwilightPoints := 0;
+ FMaxStorage := 0;
+ FMaxFunctionDefs := 0;
+ FMaxInstructionDefs := 0;
+ FMaxStackElements := 0;
+ FMaxSizeOfInstructions := 0;
+ FMaxComponentElements := 0;
+ FMaxComponentDepth := 0;
 end;
 
 procedure TPascalTypeMaximumProfileTable.LoadFromStream(Stream: TStream);
@@ -4693,73 +4698,73 @@ var
   Value32 : Cardinal;
   Value16 : Word;
 begin
- with Stream, FMaximumProfile do
+ with Stream do
   begin
-   if Position + SizeOf(TMaximumProfile) > Size
+   if Position + $20 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
    Read(Value32, SizeOf(TFixedPoint));
-   Version := TFixedPoint(Swap32(Value32));
+   FVersion := TFixedPoint(Swap32(Value32));
 
    if Version.Value <> 1
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read glyphs count
    Read(Value16, SizeOf(Word));
-   numGlyphs := Swap16(Value16);
+   FNumGlyphs := Swap16(Value16);
 
    // read max points
    Read(Value16, SizeOf(Word));
-   maxPoints := Swap16(Value16);
+   FMaxPoints := Swap16(Value16);
 
    // read max contours
    Read(Value16, SizeOf(Word));
-   maxContours := Swap16(Value16);
+   FMaxContours := Swap16(Value16);
 
    // read max composite points
    Read(Value16, SizeOf(Word));
-   maxCompositePoints := Swap16(Value16);
+   FMaxCompositePoints := Swap16(Value16);
 
    // read max composite contours
    Read(Value16, SizeOf(Word));
-   maxCompositeContours := Swap16(Value16);
+   FMaxCompositeContours := Swap16(Value16);
 
    // read max zones
    Read(Value16, SizeOf(Word));
-   maxZones := Swap16(Value16);
+   FMaxZones := Swap16(Value16);
 
    // read max twilight points
    Read(Value16, SizeOf(Word));
-   maxTwilightPoints := Swap16(Value16);
+   FMaxTwilightPoints := Swap16(Value16);
 
    // read max storage
    Read(Value16, SizeOf(Word));
-   maxStorage := Swap16(Value16);
+   FMaxStorage := Swap16(Value16);
 
    // read max function defs
    Read(Value16, SizeOf(Word));
-   maxFunctionDefs := Swap16(Value16);
+   FMaxFunctionDefs := Swap16(Value16);
 
    // read max instruction defs
    Read(Value16, SizeOf(Word));
-   maxInstructionDefs := Swap16(Value16);
+   FMaxInstructionDefs := Swap16(Value16);
 
    // read max stack elements
    Read(Value16, SizeOf(Word));
-   maxStackElements := Swap16(Value16);
+   FMaxStackElements := Swap16(Value16);
 
    // read max size of instructions
    Read(Value16, SizeOf(Word));
-   maxSizeOfInstructions := Swap16(Value16);
+   FMaxSizeOfInstructions := Swap16(Value16);
 
    // read max component elements
    Read(Value16, SizeOf(Word));
-   maxComponentElements := Swap16(Value16);
+   FMaxComponentElements := Swap16(Value16);
 
    // read max component depth
    Read(Value16, SizeOf(Word));
-   maxComponentDepth := Swap16(Value16);
+   FMaxComponentDepth := Swap16(Value16);
   end;
 end;
 
@@ -4768,66 +4773,66 @@ var
   Value32 : Cardinal;
   Value16 : Word;
 begin
- with Stream, FMaximumProfile do
+ with Stream do
   begin
    // write version
-   Value32 := Swap32(Cardinal(Version));
+   Value32 := Swap32(Cardinal(FVersion));
    Write(Value32, SizeOf(TFixedPoint));
 
    // write glyphs count
-   Value16 := Swap16(numGlyphs);
+   Value16 := Swap16(FNumGlyphs);
    Write(Value16, SizeOf(Word));
 
    // write max points
-   Value16 := Swap16(maxPoints);
+   Value16 := Swap16(FMaxPoints);
    Write(Value16, SizeOf(Word));
 
    // write max contours
-   Value16 := Swap16(maxContours);
+   Value16 := Swap16(FMaxContours);
    Write(Value16, SizeOf(Word));
 
    // write max composite points
-   Value16 := Swap16(maxCompositePoints);
+   Value16 := Swap16(FMaxCompositePoints);
    Write(Value16, SizeOf(Word));
 
    // write max composite contours
-   Value16 := Swap16(maxCompositeContours);
+   Value16 := Swap16(FMaxCompositeContours);
    Write(Value16, SizeOf(Word));
 
    // write max zones
-   Value16 := Swap16(maxZones);
+   Value16 := Swap16(FMaxZones);
    Write(Value16, SizeOf(Word));
 
    // write max twilight points
-   Value16 := Swap16(maxTwilightPoints);
+   Value16 := Swap16(FMaxTwilightPoints);
    Write(Value16, SizeOf(Word));
 
    // write max storage
-   Value16 := Swap16(maxStorage);
+   Value16 := Swap16(FMaxStorage);
    Write(Value16, SizeOf(Word));
 
    // write max function defs
-   Value16 := Swap16(maxFunctionDefs);
+   Value16 := Swap16(FMaxFunctionDefs);
    Write(Value16, SizeOf(Word));
 
    // write max instruction defs
-   Value16 := Swap16(maxInstructionDefs);
+   Value16 := Swap16(FMaxInstructionDefs);
    Write(Value16, SizeOf(Word));
 
    // write max stack elements
-   Value16 := Swap16(maxStackElements);
+   Value16 := Swap16(FMaxStackElements);
    Write(Value16, SizeOf(Word));
 
    // write max size of instructions
-   Value16 := Swap16(maxSizeOfInstructions);
+   Value16 := Swap16(FMaxSizeOfInstructions);
    Write(Value16, SizeOf(Word));
 
    // write max component elements
-   Value16 := Swap16(maxComponentElements);
+   Value16 := Swap16(FMaxComponentElements);
    Write(Value16, SizeOf(Word));
 
    // write max component depth
-   Value16 := Swap16(maxComponentDepth);
+   Value16 := Swap16(FMaxComponentDepth);
    Write(Value16, SizeOf(Word));
   end;
 end;
@@ -4835,9 +4840,9 @@ end;
 procedure TPascalTypeMaximumProfileTable.SetMaxComponentDepth(
   const Value: Word);
 begin
- if FMaximumProfile.maxComponentDepth <> Value then
+ if FMaxComponentDepth <> Value then
   begin
-   FMaximumProfile.maxComponentDepth := Value;
+   FMaxComponentDepth := Value;
    MaxComponentDepthChanged;
   end;
 end;
@@ -4845,9 +4850,9 @@ end;
 procedure TPascalTypeMaximumProfileTable.SetMaxComponentElements(
   const Value: Word);
 begin
- if FMaximumProfile.maxComponentElements <> Value then
+ if FMaxComponentElements <> Value then
   begin
-   FMaximumProfile.maxComponentElements := Value;
+   FMaxComponentElements := Value;
    MaxComponentElementsChanged;
   end;
 end;
@@ -4855,9 +4860,9 @@ end;
 procedure TPascalTypeMaximumProfileTable.SetMaxCompositeContours(
   const Value: Word);
 begin
- if FMaximumProfile.maxCompositeContours <> Value then
+ if FMaxCompositeContours <> Value then
   begin
-   FMaximumProfile.maxCompositeContours := Value;
+   FMaxCompositeContours := Value;
    MaxCompositeContoursChanged;
   end;
 end;
@@ -4865,18 +4870,18 @@ end;
 procedure TPascalTypeMaximumProfileTable.SetMaxCompositePoints(
   const Value: Word);
 begin
- if FMaximumProfile.maxCompositePoints <> Value then
+ if FMaxCompositePoints <> Value then
   begin
-   FMaximumProfile.maxCompositePoints := Value;
+   FMaxCompositePoints := Value;
    MaxCompositePointsChanged;
   end;
 end;
 
 procedure TPascalTypeMaximumProfileTable.SetMaxContours(const Value: Word);
 begin
- if FMaximumProfile.maxContours <> Value then
+ if FMaxContours <> Value then
   begin
-   FMaximumProfile.maxContours := Value;
+   FMaxContours := Value;
    MaxContoursChanged;
   end;
 end;
@@ -4884,9 +4889,9 @@ end;
 procedure TPascalTypeMaximumProfileTable.SetMaxFunctionDefs(
   const Value: Word);
 begin
- if FMaximumProfile.maxFunctionDefs <> Value then
+ if FMaxFunctionDefs <> Value then
   begin
-   FMaximumProfile.maxFunctionDefs := Value;
+   FMaxFunctionDefs := Value;
    MaxFunctionDefsChanged;
   end;
 end;
@@ -4894,18 +4899,18 @@ end;
 procedure TPascalTypeMaximumProfileTable.SetMaxInstructionDefs(
   const Value: Word);
 begin
- if FMaximumProfile.maxInstructionDefs <> Value then
+ if FMaxInstructionDefs <> Value then
   begin
-   FMaximumProfile.maxInstructionDefs := Value;
+   FMaxInstructionDefs := Value;
    MaxInstructionDefsChanged;
   end;
 end;
 
 procedure TPascalTypeMaximumProfileTable.SetMaxPoints(const Value: Word);
 begin
- if FMaximumProfile.maxPoints <> Value then
+ if FMaxPoints <> Value then
   begin
-   FMaximumProfile.maxPoints := Value;
+   FMaxPoints := Value;
    MaxPointsChanged;
   end;
 end;
@@ -4913,9 +4918,9 @@ end;
 procedure TPascalTypeMaximumProfileTable.SetMaxSizeOfInstructions(
   const Value: Word);
 begin
- if FMaximumProfile.maxSizeOfInstructions <> Value then
+ if FMaxSizeOfInstructions <> Value then
   begin
-   FMaximumProfile.maxSizeOfInstructions := Value;
+   FMaxSizeOfInstructions := Value;
    MaxSizeOfInstructionsChanged;
   end;
 end;
@@ -4923,18 +4928,18 @@ end;
 procedure TPascalTypeMaximumProfileTable.SetMaxStackElements(
   const Value: Word);
 begin
- if FMaximumProfile.maxStackElements <> Value then
+ if FMaxStackElements <> Value then
   begin
-   FMaximumProfile.maxStackElements := Value;
+   FMaxStackElements := Value;
    MaxStackElementsChanged;
   end;
 end;
 
 procedure TPascalTypeMaximumProfileTable.SetMaxStorage(const Value: Word);
 begin
- if FMaximumProfile.maxStorage <> Value then
+ if FMaxStorage <> Value then
   begin
-   FMaximumProfile.maxStorage := Value;
+   FMaxStorage := Value;
    MaxStorageChanged;
   end;
 end;
@@ -4942,37 +4947,37 @@ end;
 procedure TPascalTypeMaximumProfileTable.SetMaxTwilightPoints(
   const Value: Word);
 begin
- if FMaximumProfile.maxTwilightPoints <> Value then
+ if FMaxTwilightPoints <> Value then
   begin
-   FMaximumProfile.maxTwilightPoints := Value;
+   FMaxTwilightPoints := Value;
    MaxTwilightPointsChanged;
   end;
 end;
 
 procedure TPascalTypeMaximumProfileTable.SetMaxZones(const Value: Word);
 begin
- if FMaximumProfile.maxZones <> Value then
+ if FMaxZones <> Value then
   begin
-   FMaximumProfile.maxZones := Value;
+   FMaxZones := Value;
    MaxZonesChanged;
   end;
 end;
 
 procedure TPascalTypeMaximumProfileTable.SetNumGlyphs(const Value: Word);
 begin
- if FMaximumProfile.numGlyphs <> Value then
+ if FNumGlyphs <> Value then
   begin
-   FMaximumProfile.numGlyphs := Value;
+   FNumGlyphs := Value;
    NumGlyphsChanged;
   end;
 end;
 
 procedure TPascalTypeMaximumProfileTable.SetVersion(const Value: TFixedPoint);
 begin
- if (FMaximumProfile.Version.Fract <> Value.Fract) or
-    (FMaximumProfile.Version.Value <> Value.Value) then
+ if (FVersion.Fract <> Value.Fract) or
+    (FVersion.Value <> Value.Value) then
   begin
-   FMaximumProfile.Version := Value;
+   FVersion := Value;
    VersionChanged;
   end;
 end;

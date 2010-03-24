@@ -690,8 +690,6 @@ begin
 end;
 
 procedure TTrueTypeFontDigitalSignatureTable.ResetToDefaults;
-var
-  SigIndex : Integer;
 begin
  FVersion := 1;
  FFlags := [];
@@ -1158,7 +1156,6 @@ procedure TTrueTypeFontHorizontalDeviceMetricsTable.LoadFromStream(
 var
   OffsetPosition   : Int64;
   SizeDeviceRecord : Cardinal;
-  Value32          : Cardinal;
   Value16          : Word;
   NumRecords       : SmallInt;
   RecordIndex      : Integer;
@@ -1208,7 +1205,6 @@ end;
 procedure TTrueTypeFontHorizontalDeviceMetricsTable.SaveToStream(
   Stream: TStream);
 var
-  Value32 : Cardinal;
   Value16 : Word;
 begin
  with Stream do
@@ -1443,8 +1439,6 @@ begin
 end;
 
 procedure TTrueTypeFontKerningSubTable.ResetToDefaults;
-var
-  OldFormatTable : TCustomTrueTypeFontKerningFormatSubTable;
 begin
  inherited;
  FVersion := 0;
@@ -1747,7 +1741,6 @@ procedure TTrueTypeFontKerningTable.SaveToStream(Stream: TStream);
 var
   Value16       : Word;
   SubTableIndex : Integer;
-  SubTable      : TTrueTypeFontKerningSubTable;
 begin
  with Stream do
   begin

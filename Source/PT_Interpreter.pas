@@ -220,6 +220,9 @@ function TCustomPascalTypeInterpreter.GetTableByTableType(
 var
   TableIndex : Integer;
 begin
+ // return nil if the table hasn't been found
+ Result := nil;
+
  if TableType = FHeaderTable.TableType then Result := FHeaderTable else
  if TableType = FHorizontalHeader.TableType then Result := FHorizontalHeader else
  if TableType = FHorizontalMetrics.TableType then Result := FHorizontalMetrics else
@@ -236,9 +239,11 @@ end;
 function TCustomPascalTypeInterpreter.GetTableByTableClass(
   TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
 var
-  TableIndex   : Integer;
-  CurrentTable : TCustomPascalTypeNamedTable;
+  TableIndex : Integer;
 begin
+ // return nil if the table hasn't been found
+ Result := nil;
+
  if TableClass = FHeaderTable.ClassType then Result := FHeaderTable else
  if TableClass = FHorizontalHeader.ClassType then Result := FHorizontalHeader else
  if TableClass = FHorizontalMetrics.ClassType then Result := FHorizontalMetrics else

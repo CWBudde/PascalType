@@ -1665,17 +1665,43 @@ end;
 procedure TOpenTypeFeatureListTable.SaveToStream(Stream: TStream);
 var
   StartPos     : Int64;
+  FeatureIndex : Integer;
+  FeatureList  : array of TTagOffsetRecord;
   Value16      : Word;
 begin
  with Stream do
   begin
    StartPos := Position;
 
-   // write script list count
-   Value16 := Swap16(FFeatureList.Count);
-   Write(Value16, SizeOf(Word));
+   // leave space for feature directory
+   Position := FFeatureList.Count * 6;
 
-   // todo
+   // build directory (to be written later) and write data
+   SetLength(FeatureList, FFeatureList.Count);
+   for FeatureIndex := 0 to FFeatureList.Count - 1 do
+    with TCustomOpenTypeFeatureTable(FFeatureList[FeatureIndex]) do
+     begin
+      // get table type
+      FeatureList[FeatureIndex].Tag := TableType;
+      FeatureList[FeatureIndex].Offset := Position;
+
+      // write feature to stream
+      SaveToStream(Stream);
+     end;
+
+   // write directory
+   Position := StartPos;
+
+   for FeatureIndex := 0 to Length(FeatureList) - 1 do
+    with FeatureList[FeatureIndex] do
+     begin
+      // write tag
+      Write(Tag, SizeOf(TTableType));
+
+      // write offset
+      Value16 := Swap16(Offset);
+      Write(Value16, SizeOf(Word));
+     end;
   end;
 end;
 
@@ -1736,7 +1762,6 @@ end;
 
 procedure TOpenTypeCoverage1Table.SaveToStream(Stream: TStream);
 var
-  StartPos   : Int64;
   GlyphIndex : Integer;
   Value16    : Word;
 begin
@@ -2149,7 +2174,6 @@ var
   ScriptListPosition  : Int64;
   FeatureListPosition : Int64;
   LookupListPosition  : Int64;
-  ScriptIndex         : Integer;
   Value32             : Cardinal;
   Value16             : Word;
 begin
@@ -2194,20 +2218,29 @@ begin
 
    // load lookup table
    FLookupListTable.LoadFromStream(Stream);
-
   end;
 end;
 
 procedure TCustomOpenTypeCommonTable.SaveToStream(Stream: TStream);
 var
-  Value32 : Cardinal;
-  Value16 : Word;
+  StartPos : Int64;
+  Value32  : Cardinal;
+  Value16  : Word;
 begin
  with Stream do
   begin
+   StartPos := Position;
+
    // write version
    Value32 := Swap32(Cardinal(FVersion));
    Write(Value32, SizeOf(TFixedPoint));
+
+   // write script list offset (fixed!)
+   Value16 := Swap16(10);
+   Write(Value16, SizeOf(Word));
+
+   Position := StartPos + 10;
+   FScriptListTable.SaveToStream(Stream);
 
 (*
    // write script list offset
