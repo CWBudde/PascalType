@@ -32,7 +32,12 @@ unit PT_Types;
 
 interface
 
+uses
+  SysUtils;
+
 type
+  EPascalTypeError = class(Exception);
+
   TTableType = array [0..3] of AnsiChar;
 
   TFixedPoint = packed record
