@@ -38,7 +38,7 @@ resourcestring
   RCStrCharMapErrorIdDelta = 'Error in Character Map: wrong ID delta (%d)';
   RCStrCharMapErrorReserved = 'Error in Character Map: wrong reserved value (%d)';
   RCStrCharMapErrorStartCount = 'Error in Character Map: wrong start count (%d)';
-  RCStrChecksumError = 'Checksum error!';
+  RCStrChecksumError = 'Checksum error at table ''%s''';
   RCStrCompositeGlyphFlagError = 'Composite Glyph Flag Error';
   RCStrErrorInKerningSubTable = 'Error in kerning subtable format 0';
   RCStrGlyphDataFlagRepeatError = 'Flag repeat error: %d / %d';
@@ -61,7 +61,7 @@ resourcestring
   RCStrUnknownGlyphDataType = 'Unknown glyph data type (%d)';
   RCStrUnknownOpcode = 'Unknown opcode (%d)';
   RCStrUnknownVersion = 'Unknown version';
-  RCStrUnsupportedPlatform = 'Unsupported Platform ID';
+  RCStrUnsupportedPlatform = 'Unsupported Platform ID (%d)';
   RCStrUnsupportedVersion = 'Unsupported version';
   RCStrWrongCharacterIndex = 'Wrong character index!';
   RCStrWrongEntrySelector = 'Wrong entry selector!';

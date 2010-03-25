@@ -32,6 +32,8 @@ unit PT_TablesOptional;
 
 interface
 
+{$I PT_Compiler.inc}
+
 uses
   Classes, Contnrs, PT_Types, PT_Tables;
 
@@ -41,7 +43,7 @@ type
   TTrueTypeFontDigitalSignatureBlock = class(TCustomPascalTypeTable)
   private
     FReserved  : array [0..1] of Word; // Reserved for later use; 0 for now
-    FSignature : array of Byte; // PKCS#7 packet
+    FSignature : array of Byte;        // PKCS#7 packet
     FFormat    : Cardinal;
     function GetSignatureByte(Index: Integer): Byte;
     function GetSignatureLength: Cardinal;

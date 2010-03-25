@@ -32,28 +32,24 @@ unit PT_Interpreter;
 
 interface
 
+{$I PT_Compiler.inc}
+
 uses
-  Classes, SysUtils, Types, Contnrs, PT_Types, PT_Tables;
+  Classes, SysUtils, Types, Contnrs, PT_Types, PT_TableDirectory, PT_Tables;
 
 type
-  TRequiredTable = (rtCharacterMapping, rtFontHeader, rtHorizontalHeader,
-    rtHorizontalMetrics, rtMaximumProfile, rtNaming,
-    rtPostScript, rtIndexLocation, rtGlyphData, rtOS2);
-  TRequiredTables = set of TRequiredTable;
-
   TCustomPascalTypeInterpreter = class(TInterfacedPersistent, IStreamPersist,
     IPascalTypeInterpreter)
-  private
-    FDirectoryTable     : TDirectoryTable;
-    FDirectoryTableList : TObjectList;
   protected
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; virtual; abstract;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; virtual; abstract;
+
+    procedure LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry); virtual; abstract;
   public
     constructor Create; virtual;
 
-    procedure LoadFromStream(Stream: TStream); virtual; abstract;
-    procedure SaveToStream(Stream: TStream); virtual; abstract;
+    procedure LoadFromStream(Stream: TStream); virtual;
+    procedure SaveToStream(Stream: TStream); virtual;
     procedure LoadFromFile(FileName: TFileName);
     procedure SaveToFile(FileName: TFileName);
   end;
@@ -67,15 +63,13 @@ type
     FNameTable          : TPascalTypeNameTable;
     FPostScriptTable    : TPascalTypePostscriptTable;
   protected
-    procedure OptimizeTableReadOrder; virtual;
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; override;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
+
+    procedure LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry); override;
   public
     constructor Create; override;
     destructor Destroy; override;
-
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
   published
     // required tables
     property HeaderTable: TPascalTypeHeaderTable read FHeaderTable;
@@ -97,25 +91,18 @@ type
     FPostScriptTable    : TPascalTypePostscriptTable;
 
     FOptionalTables     : TObjectList;
-    FSortTableByOffset  : Boolean;
 
+    function GetTableCount: Integer;
     function GetOptionalTableCount: Integer;
     function GetOptionalTable(Index: Integer): TCustomPascalTypeNamedTable;
-    function GetTableCount: Integer;
-    procedure SetSortTableByOffset(const Value: Boolean);
   protected
-    procedure SortTableByOffsetChanged; virtual;
-    procedure OptimizeTableReadOrder; virtual;
-
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; override;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
 
+    procedure LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry); override;
   public
     constructor Create; override;
     destructor Destroy; override;
-
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
 
     property OptionalTable[Index: Integer]: TCustomPascalTypeNamedTable read GetOptionalTable;
   published
@@ -130,7 +117,6 @@ type
 
     property TableCount: Integer read GetTableCount;
     property OptionalTableCount: Integer read GetOptionalTableCount;
-    property SortTableByOffset: Boolean read FSortTableByOffset write SetSortTableByOffset default True;
   end;
 
 implementation
@@ -138,12 +124,6 @@ implementation
 uses
   PT_ResourceStrings;
 
-
-function SortTableEntryByOffset(Item1, Item2: Pointer): Integer;
-begin
- Result := Integer(TPascalTypeDirectoryTableEntry(Item1).Offset >
-   TPascalTypeDirectoryTableEntry(Item2).Offset);
-end;
 
 function CalculateCheckSum(Stream : TMemoryStream): Cardinal;
 var
@@ -206,8 +186,6 @@ end;
 
 constructor TCustomPascalTypeInterpreter.Create;
 begin
- // create directory table list
- FDirectoryTableList := TObjectList.Create;
 end;
 
 procedure TCustomPascalTypeInterpreter.LoadFromFile(FileName: TFileName);
@@ -222,10 +200,142 @@ begin
  end;
 end;
 
+procedure TCustomPascalTypeInterpreter.LoadFromStream(Stream: TStream);
+var
+  DirectoryTable   : TDirectoryTable;
+  DirTableList     : TPascalTypeDirectoryTableList;
+  TableIndex       : Integer;
+  TableEntry       : TPascalTypeDirectoryTableEntry;
+
+  RequiredTables   : array [0..6] of TPascalTypeDirectoryTableEntry;
+  ReqTrueTypeTab   : array [0..1] of TPascalTypeDirectoryTableEntry;
+  OS2TableEntry    : TPascalTypeDirectoryTableEntry;
+begin
+ with Stream do
+  begin
+   // make sure at least the offset subtable is contained in the file
+   if Size < SizeOf(TDirectoryTable)
+    then raise EPascalTypeError.Create(RCStrWrongFilesize);
+
+   // read offset subtable
+   ReadBuffer(DirectoryTable, SizeOf(TDirectoryTable));
+
+   // check for known scaler types (OSX and Windows)
+   with DirectoryTable do
+    if not ((Version = $65757274) or (Version = $00000100))
+     then raise EPascalTypeError.Create(RCStrUnknownVersion);
+
+   // create directory table list
+   DirTableList := TPascalTypeDirectoryTableList.Create;
+   try
+    // read table entries from stream
+    for TableIndex := 0 to Swap(DirectoryTable.NumTables) - 1 do
+     begin
+      TableEntry := TPascalTypeDirectoryTableEntry.Create(Self);
+      TableEntry.LoadFromStream(Stream);
+
+      // add table entry as required table or add to directory table list
+      if TableEntry.TableType = 'head' then RequiredTables[0] := TableEntry else
+      if TableEntry.TableType = 'maxp' then RequiredTables[1] := TableEntry else
+      if TableEntry.TableType = 'hhea' then RequiredTables[2] := TableEntry else
+      if TableEntry.TableType = 'hmtx' then RequiredTables[3] := TableEntry else
+      if TableEntry.TableType = 'cmap' then RequiredTables[4] := TableEntry else
+      if TableEntry.TableType = 'name' then RequiredTables[5] := TableEntry else
+      if TableEntry.TableType = 'post' then RequiredTables[6] := TableEntry else
+      if TableEntry.TableType = 'glyf' then ReqTrueTypeTab[0] := TableEntry else
+      if TableEntry.TableType = 'loca' then ReqTrueTypeTab[1] := TableEntry else
+      if TableEntry.TableType = 'OS/2'
+       then OS2TableEntry := TableEntry
+       else DirTableList.Add(TableEntry);
+     end;
+
+    // optimize table read order
+    DirTableList.SortByOffset;
+
+    // read header table
+    if not Assigned(RequiredTables[0])
+     then raise EPascalTypeError.Create('Header table not found!');
+    LoadTableFromStream(Stream, RequiredTables[0]);
+
+    // read maximum profile table
+    if not Assigned(RequiredTables[1])
+     then raise EPascalTypeError.Create('Maximum profile table not found!');
+    LoadTableFromStream(Stream, RequiredTables[1]);
+
+    // read horizontal header table
+    if not Assigned(RequiredTables[2])
+     then raise EPascalTypeError.Create('Horizontal header table not found!');
+    LoadTableFromStream(Stream, RequiredTables[2]);
+
+    // read horizontal metrics table
+    if not Assigned(RequiredTables[3])
+     then raise EPascalTypeError.Create('Horizontal metrics table not found!');
+    LoadTableFromStream(Stream, RequiredTables[3]);
+
+    // read character map table
+    if not Assigned(RequiredTables[4])
+     then raise EPascalTypeError.Create('Character map table not found!');
+    LoadTableFromStream(Stream, RequiredTables[4]);
+
+    // read name table
+    if not Assigned(RequiredTables[5])
+     then raise EPascalTypeError.Create('Name table not found!');
+    LoadTableFromStream(Stream, RequiredTables[5]);
+
+    // read postscript table
+    if not Assigned(RequiredTables[6])
+     then raise EPascalTypeError.Create('Postscript table not found!');
+    LoadTableFromStream(Stream, RequiredTables[6]);
+
+    // eventually read OS/2 table or eventually raise an exception
+    if Assigned(OS2TableEntry)
+     then LoadTableFromStream(Stream, OS2TableEntry) else
+    if (DirectoryTable.Version = $00000100)
+     then raise EPascalTypeError.Create('OS/2 table not found!');
+
+    // TODO check if these are required by tables already read!!!
+    // read glyph data table
+    if Assigned(ReqTrueTypeTab[0])
+     then LoadTableFromStream(Stream, ReqTrueTypeTab[0]) else
+    if (DirectoryTable.Version = $65757274)
+     then raise EPascalTypeError.Create('Glyph data table not found!');
+
+    // read index to location table
+    if Assigned(ReqTrueTypeTab[1])
+     then LoadTableFromStream(Stream, ReqTrueTypeTab[1]) else
+    if (DirectoryTable.Version = $65757274)
+     then raise EPascalTypeError.Create('Index to Location table not found!');
+
+    // read other table entries from stream
+    for TableIndex := 0 to DirTableList.Count - 1
+     do LoadTableFromStream(Stream, DirTableList[TableIndex]);
+
+   finally
+    if Assigned(RequiredTables[0]) then FreeAndNil(RequiredTables[0]);
+    if Assigned(RequiredTables[1]) then FreeAndNil(RequiredTables[1]);
+    if Assigned(RequiredTables[2]) then FreeAndNil(RequiredTables[2]);
+    if Assigned(RequiredTables[3]) then FreeAndNil(RequiredTables[3]);
+    if Assigned(RequiredTables[4]) then FreeAndNil(RequiredTables[4]);
+    if Assigned(RequiredTables[5]) then FreeAndNil(RequiredTables[5]);
+    if Assigned(RequiredTables[6]) then FreeAndNil(RequiredTables[6]);
+    if Assigned(ReqTrueTypeTab[0]) then FreeAndNil(ReqTrueTypeTab[0]);
+    if Assigned(ReqTrueTypeTab[1]) then FreeAndNil(ReqTrueTypeTab[1]);
+    if Assigned(OS2TableEntry) then FreeAndNil(OS2TableEntry);
+    FreeAndNil(DirTableList);
+   end;
+  end;
+end;
+
 procedure TCustomPascalTypeInterpreter.SaveToFile(FileName: TFileName);
 begin
  raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
+
+procedure TCustomPascalTypeInterpreter.SaveToStream(Stream: TStream);
+begin
+ raise EPascalTypeError.Create(RCStrNotImplemented);
+end;
+
 
 { TPascalTypeScanner }
 
@@ -244,7 +354,6 @@ end;
 
 destructor TPascalTypeScanner.Destroy;
 begin
- FreeAndNil(FDirectoryTableList);
  FreeAndNil(FHeaderTable);
  FreeAndNil(FHorizontalHeader);
  FreeAndNil(FMaximumProfile);
@@ -279,173 +388,54 @@ begin
   else Result := nil;
 end;
 
-procedure TPascalTypeScanner.OptimizeTableReadOrder;
+procedure TPascalTypeScanner.LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry);
 var
-  TableIndex : Integer;
-begin
- // read 'head' table first
- for TableIndex := 0 to FDirectoryTableList.Count - 1 do
-  with TPascalTypeDirectoryTableEntry(FDirectoryTableList[TableIndex]) do
-   if TableType = 'head' then
-    begin
-     FDirectoryTableList.Move(TableIndex, 0);
-     Break;
-    end;
- // read 'maxp' table second
- for TableIndex := 1 to FDirectoryTableList.Count - 1 do
-  with TPascalTypeDirectoryTableEntry(FDirectoryTableList[TableIndex]) do
-   if TableType = 'maxp' then
-    begin
-     FDirectoryTableList.Move(TableIndex, 1);
-     Break;
-    end;
- // read 'hhea' table third
- for TableIndex := 2 to FDirectoryTableList.Count - 1 do
-  with TPascalTypeDirectoryTableEntry(FDirectoryTableList[TableIndex]) do
-   if TableType = 'hhea' then
-    begin
-     FDirectoryTableList.Move(TableIndex, 1);
-     Break;
-    end;
-end;
-
-procedure TPascalTypeScanner.LoadFromStream(Stream: TStream);
-var
-  TableIndex     : Integer;
-  TableEntry     : TPascalTypeDirectoryTableEntry;
-  NewTableList   : TObjectList;
-  TempList       : TObjectList;
-  RequiredTables : TRequiredTables;
   MemoryStream   : TMemoryStream;
+  {$IFDEF ChecksumTest}
   Checksum       : Cardinal;
+  {$ENDIF}
   TableClass     : TCustomPascalTypeNamedTableClass;
-  CurrentTable   : TCustomPascalTypeNamedTable;
 begin
+ MemoryStream := TMemoryStream.Create;
  with Stream do
-  begin
-   // make sure at least the offset subtable is contained in the file
-   if Size < SizeOf(TDirectoryTable)
-    then raise EPascalTypeError.Create(RCStrWrongFilesize);
+  try
+   // set stream position
+   Position := TableEntry.Offset;
 
-   // read offset subtable
-   ReadBuffer(FDirectoryTable, SizeOf(TDirectoryTable));
+   // copy from stream
+   MemoryStream.CopyFrom(Stream, 4 * ((TableEntry.Length + 3) div 4));
 
-   // check for known scaler types (OSX and Windows)
-   if not ((FDirectoryTable.Version = $65757274) or (FDirectoryTable.Version = $00000100))
-    then raise EPascalTypeError.Create(RCStrUnknownVersion);
+   {$IFDEF ChecksumTest}
+   // calculate checksum
+   if TableEntry.TableType = 'head'
+    then Checksum := TableEntry.CheckSum // CalculateHeadCheckSum(MemoryStream)
+    else Checksum := CalculateCheckSum(MemoryStream);
 
-   // create a new table list
-   NewTableList := TObjectList.Create;
-   try
-    // no required tables at first
-    RequiredTables := [];
+   // check checksum
+   if (Checksum <> TableEntry.CheckSum)
+    then raise EPascalTypeError.CreateFmt(RCStrChecksumError, [TableEntry.TableType]);
+   {$ENDIF}
 
-    // read table entries from stream
-    for TableIndex := 0 to Swap(FDirectoryTable.NumTables) - 1 do
-     begin
-      TableEntry := TPascalTypeDirectoryTableEntry.Create(Self);
-      TableEntry.LoadFromStream(Stream);
-      if TableEntry.TableType = 'cmap' then RequiredTables := RequiredTables + [rtCharacterMapping] else
-      if TableEntry.TableType = 'glyf' then RequiredTables := RequiredTables + [rtGlyphData] else
-      if TableEntry.TableType = 'head' then RequiredTables := RequiredTables + [rtFontHeader] else
-      if TableEntry.TableType = 'hhea' then RequiredTables := RequiredTables + [rtHorizontalHeader] else
-      if TableEntry.TableType = 'hmtx' then RequiredTables := RequiredTables + [rtHorizontalMetrics] else
-      if TableEntry.TableType = 'loca' then RequiredTables := RequiredTables + [rtIndexLocation] else
-      if TableEntry.TableType = 'maxp' then RequiredTables := RequiredTables + [rtMaximumProfile] else
-      if TableEntry.TableType = 'name' then RequiredTables := RequiredTables + [rtNaming] else
-      if TableEntry.TableType = 'post' then RequiredTables := RequiredTables + [rtPostScript] else
-      if TableEntry.TableType = 'OS/2' then RequiredTables := RequiredTables + [rtOS2];
+   // reset memory stream position
+   MemoryStream.Seek(soFromBeginning, 0);
 
-      // add table entry to directory table list
-      NewTableList.Add(TableEntry);
-     end;
+   // restore original table length
+   MemoryStream.Size := TableEntry.Length;
 
-    // check if all necessary tables are present
-    if RequiredTables - [rtCharacterMapping..rtPostScript] = []
-     then raise EPascalTypeError.Create(RCStrTablesMissing);
+   TableClass := FindTrueTypeFontTableByType(TableEntry.TableType);
+   if TableClass <> nil then
+    begin
+     // load table from stream
+     if TableClass = TPascalTypeHeaderTable then FHeaderTable.LoadFromStream(MemoryStream) else
+     if TableClass = TPascalTypeHorizontalHeaderTable then FHorizontalHeader.LoadFromStream(MemoryStream) else
+     if TableClass = TPascalTypePostscriptTable then FPostScriptTable.LoadFromStream(MemoryStream) else
+     if TableClass = TPascalTypeMaximumProfileTable then FMaximumProfile.LoadFromStream(MemoryStream) else
+     if TableClass = TPascalTypeNameTable then FNameTable.LoadFromStream(MemoryStream);
+    end;
 
-    if (FDirectoryTable.Version = $65757274) then
-     if not (rtGlyphData in RequiredTables)
-      then raise EPascalTypeError.Create(RCStrTablesMissing);
-
-    if (FDirectoryTable.Version = $00000100) then
-     if not (rtOS2 in RequiredTables)
-      then raise EPascalTypeError.Create(RCStrTablesMissing);
-
-    // exchange table list
-    TempList := FDirectoryTableList;
-    FDirectoryTableList := NewTableList;
-    NewTableList := TempList;
-   finally
-    FreeAndNil(NewTableList);
-   end;
-
-   // optimize table read order
-   FDirectoryTableList.Sort(SortTableEntryByOffset);
-   OptimizeTableReadOrder;
-
-   // create memory stream for checksum
-   MemoryStream := TMemoryStream.Create;
-   try
-    // read table entries from stream
-    for TableIndex := 0 to FDirectoryTableList.Count - 1 do
-     begin
-      TableEntry := TPascalTypeDirectoryTableEntry(FDirectoryTableList[TableIndex]);
-
-      // clear memory stream
-      MemoryStream.Clear;
-
-      // set stream position
-      Position := TableEntry.Offset;
-
-      // copy from stream
-      MemoryStream.CopyFrom(Stream, 4 * ((TableEntry.Length + 3) div 4));
-
-      // calculate checksum
-      if TableEntry.TableType = 'head'
-       then Checksum := TableEntry.CheckSum // CalculateHeadCheckSum(MemoryStream)
-       else Checksum := CalculateCheckSum(MemoryStream);
-
-      // check checksum
-      if Checksum <> TableEntry.CheckSum
-       then raise EPascalTypeError.Create(RCStrChecksumError);
-
-      // reset memory stream position 
-      MemoryStream.Seek(soFromBeginning, 0);
-      MemoryStream.Size := TableEntry.Length;
-
-      TableClass := FindTrueTypeFontTableByType(TableEntry.TableType);
-      if TableClass <> nil then
-       begin
-        CurrentTable := TableClass.Create(Self);
-        try
-         // load table from stream
-         CurrentTable.LoadFromStream(MemoryStream);
-
-         // assign tables
-         if TableClass = TPascalTypeHeaderTable then FHeaderTable.Assign(CurrentTable) else
-         if TableClass = TPascalTypeHorizontalHeaderTable then FHorizontalHeader.Assign(CurrentTable) else
-         if TableClass = TPascalTypePostscriptTable then FPostScriptTable.Assign(CurrentTable) else
-         if TableClass = TPascalTypeMaximumProfileTable then FMaximumProfile.Assign(CurrentTable) else
-         if TableClass = TPascalTypeNameTable then FNameTable.Assign(CurrentTable);
-        finally
-         // dispose temporary table
-         if Assigned(CurrentTable)
-          then FreeAndNil(CurrentTable);
-        end;
-       end;
-
-     end;
-   finally
-    FreeAndNil(MemoryStream);
-   end;
-
+  finally
+   FreeAndNil(MemoryStream);
   end;
-end;
-
-procedure TPascalTypeScanner.SaveToStream(Stream: TStream);
-begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -466,14 +456,10 @@ begin
 
  // create optional table list
  FOptionalTables := TObjectList.Create;
-
- // defaults
- FSortTableByOffset := True;
 end;
 
 destructor TPascalTypeInterpreter.Destroy;
 begin
- FreeAndNil(FDirectoryTableList);
  FreeAndNil(FHeaderTable);
  FreeAndNil(FHorizontalHeader);
  FreeAndNil(FHorizontalMetrics);
@@ -543,204 +529,76 @@ end;
 
 function TPascalTypeInterpreter.GetTableCount: Integer;
 begin
- Result := FDirectoryTableList.Count;
+ Result := 7 + FOptionalTables.Count;
 end;
 
-procedure TPascalTypeInterpreter.LoadFromStream(Stream: TStream);
+procedure TPascalTypeInterpreter.LoadTableFromStream(Stream: TStream;
+  TableEntry: TPascalTypeDirectoryTableEntry);
 var
-  TableIndex     : Integer;
-  TableEntry     : TPascalTypeDirectoryTableEntry;
-  NewTableList   : TObjectList;
-  TempList       : TObjectList;
-  RequiredTables : TRequiredTables;
   MemoryStream   : TMemoryStream;
+  {$IFDEF ChecksumTest}
   Checksum       : Cardinal;
+  {$ENDIF}
   TableClass     : TCustomPascalTypeNamedTableClass;
   CurrentTable   : TCustomPascalTypeNamedTable;
 begin
+ MemoryStream := TMemoryStream.Create;
  with Stream do
-  begin
-   // make sure at least the offset subtable is contained in the file
-   if Size < SizeOf(TDirectoryTable)
-    then raise EPascalTypeError.Create(RCStrWrongFilesize);
+  try
+   // set stream position
+   Position := TableEntry.Offset;
 
-   // read offset subtable
-   ReadBuffer(FDirectoryTable, SizeOf(TDirectoryTable));
+   // copy from stream
+   MemoryStream.CopyFrom(Stream, 4 * ((TableEntry.Length + 3) div 4));
 
-   // check for known scaler types (OSX and Windows)
-   if not ((FDirectoryTable.Version = $65757274) or (FDirectoryTable.Version = $00000100))
-    then raise EPascalTypeError.Create(RCStrUnknownVersion);
+   {$IFDEF ChecksumTest}
+   // calculate checksum
+   if TableEntry.TableType = 'head'
+    then Checksum := TableEntry.CheckSum // CalculateHeadCheckSum(MemoryStream)
+    else Checksum := CalculateCheckSum(MemoryStream);
 
-   // create a new table list
-   NewTableList := TObjectList.Create;
-   try
-    // no required tables at first
-    RequiredTables := [];
+   // check checksum
+   if (Checksum <> TableEntry.CheckSum)
+    then raise EPascalTypeError.CreateFmt(RCStrChecksumError, [TableEntry.TableType]);
+   {$ENDIF}
 
-    // read table entries from stream
-    for TableIndex := 0 to Swap(FDirectoryTable.NumTables) - 1 do
-     begin
-      TableEntry := TPascalTypeDirectoryTableEntry.Create(Self);
-      TableEntry.LoadFromStream(Stream);
-      if TableEntry.TableType = 'cmap' then RequiredTables := RequiredTables + [rtCharacterMapping] else
-      if TableEntry.TableType = 'glyf' then RequiredTables := RequiredTables + [rtGlyphData] else
-      if TableEntry.TableType = 'head' then RequiredTables := RequiredTables + [rtFontHeader] else
-      if TableEntry.TableType = 'hhea' then RequiredTables := RequiredTables + [rtHorizontalHeader] else
-      if TableEntry.TableType = 'hmtx' then RequiredTables := RequiredTables + [rtHorizontalMetrics] else
-      if TableEntry.TableType = 'loca' then RequiredTables := RequiredTables + [rtIndexLocation] else
-      if TableEntry.TableType = 'maxp' then RequiredTables := RequiredTables + [rtMaximumProfile] else
-      if TableEntry.TableType = 'name' then RequiredTables := RequiredTables + [rtNaming] else
-      if TableEntry.TableType = 'post' then RequiredTables := RequiredTables + [rtPostScript] else
-      if TableEntry.TableType = 'OS/2' then RequiredTables := RequiredTables + [rtOS2];
+   // reset memory stream position
+   MemoryStream.Seek(soFromBeginning, 0);
 
-      // add table entry to directory table list
-      NewTableList.Add(TableEntry);
-     end;
+   // restore original table length
+   MemoryStream.Size := TableEntry.Length;
 
-    // check if all necessary tables are present
-    if RequiredTables - [rtCharacterMapping..rtPostScript] = []
-     then raise EPascalTypeError.Create(RCStrTablesMissing);
+   TableClass := FindTrueTypeFontTableByType(TableEntry.TableType);
+   if TableClass <> nil then
+    begin
+     CurrentTable := TableClass.Create(Self);
+     try
+      // load table from stream
+      CurrentTable.LoadFromStream(MemoryStream);
 
-    if (FDirectoryTable.Version = $65757274) then
-     if not (rtGlyphData in RequiredTables)
-      then raise EPascalTypeError.Create(RCStrTablesMissing);
-
-    if (FDirectoryTable.Version = $00000100) then
-     if not (rtOS2 in RequiredTables)
-      then raise EPascalTypeError.Create(RCStrTablesMissing);
-
-    // exchange table list
-    TempList := FDirectoryTableList;
-    FDirectoryTableList := NewTableList;
-    NewTableList := TempList;
-   finally
-    FreeAndNil(NewTableList);
-   end;
-
-   // eventually sort by offset
-   if FSortTableByOffset
-    then FDirectoryTableList.Sort(SortTableEntryByOffset);
-
-   // optimize table read order
-   OptimizeTableReadOrder;
-
-   // clear optional table lists
-   FOptionalTables.Clear;
-
-   // create memory stream for checksum
-   MemoryStream := TMemoryStream.Create;
-   try
-    // read table entries from stream
-    for TableIndex := 0 to FDirectoryTableList.Count - 1 do
-     begin
-      TableEntry := TPascalTypeDirectoryTableEntry(FDirectoryTableList[TableIndex]);
-
-      // clear memory stream
-      MemoryStream.Clear;
-
-      // set stream position
-      Position := TableEntry.Offset;
-
-      // copy from stream
-      MemoryStream.CopyFrom(Stream, 4 * ((TableEntry.Length + 3) div 4));
-
-      // calculate checksum
-      if TableEntry.TableType = 'head'
-       then Checksum := TableEntry.CheckSum // CalculateHeadCheckSum(MemoryStream)
-       else Checksum := CalculateCheckSum(MemoryStream);
-
-      // check checksum
-      if Checksum <> TableEntry.CheckSum
-       then raise EPascalTypeError.Create(RCStrChecksumError);
-
-      // reset memory stream position 
-      MemoryStream.Seek(soFromBeginning, 0);
-      MemoryStream.Size := TableEntry.Length;
-
-      TableClass := FindTrueTypeFontTableByType(TableEntry.TableType);
-      if TableClass <> nil then
+      // assign tables
+      if TableClass = TPascalTypeHeaderTable then FHeaderTable.Assign(CurrentTable) else
+      if TableClass = TPascalTypeHorizontalHeaderTable then FHorizontalHeader.Assign(CurrentTable) else
+      if TableClass = TPascalTypeHorizontalMetricsTable then FHorizontalMetrics.Assign(CurrentTable) else
+      if TableClass = TPascalTypePostscriptTable then FPostScriptTable.Assign(CurrentTable) else
+      if TableClass = TPascalTypeMaximumProfileTable then FMaximumProfile.Assign(CurrentTable) else
+      if TableClass = TPascalTypeNameTable then FNameTable.Assign(CurrentTable) else
+      if TableClass = TPascalTypeCharacterMapTable then FCharacterMap.Assign(CurrentTable) else
        begin
-        CurrentTable := TableClass.Create(Self);
-        try
-         // load table from stream
-         CurrentTable.LoadFromStream(MemoryStream);
-
-         // assign tables
-         if TableClass = TPascalTypeHeaderTable then FHeaderTable.Assign(CurrentTable) else
-         if TableClass = TPascalTypeHorizontalHeaderTable then FHorizontalHeader.Assign(CurrentTable) else
-         if TableClass = TPascalTypeHorizontalMetricsTable then FHorizontalMetrics.Assign(CurrentTable) else
-         if TableClass = TPascalTypePostscriptTable then FPostScriptTable.Assign(CurrentTable) else
-         if TableClass = TPascalTypeMaximumProfileTable then FMaximumProfile.Assign(CurrentTable) else
-         if TableClass = TPascalTypeNameTable then FNameTable.Assign(CurrentTable) else
-         if TableClass = TPascalTypeCharacterMapTable then FCharacterMap.Assign(CurrentTable) else
-          begin
-           FOptionalTables.Add(CurrentTable);
-           CurrentTable := nil;
-          end;
-
-        finally
-         // dispose temporary table
-         if Assigned(CurrentTable)
-          then FreeAndNil(CurrentTable);
-        end;
+        FOptionalTables.Add(CurrentTable);
+        CurrentTable := nil;
        end;
 
+     finally
+      // dispose temporary table
+      if Assigned(CurrentTable)
+       then FreeAndNil(CurrentTable);
      end;
-   finally
-    FreeAndNil(MemoryStream);
-   end;
+    end;
 
+  finally
+   FreeAndNil(MemoryStream);
   end;
-end;
-
-procedure TPascalTypeInterpreter.SaveToStream(Stream: TStream);
-begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
-end;
-
-procedure TPascalTypeInterpreter.OptimizeTableReadOrder;
-var
-  TableIndex : Integer;
-begin
- // read 'head' table first
- for TableIndex := 0 to FDirectoryTableList.Count - 1 do
-  with TPascalTypeDirectoryTableEntry(FDirectoryTableList[TableIndex]) do
-   if TableType = 'head' then
-    begin
-     FDirectoryTableList.Move(TableIndex, 0);
-     Break;
-    end;
- // read 'maxp' table second
- for TableIndex := 1 to FDirectoryTableList.Count - 1 do
-  with TPascalTypeDirectoryTableEntry(FDirectoryTableList[TableIndex]) do
-   if TableType = 'maxp' then
-    begin
-     FDirectoryTableList.Move(TableIndex, 1);
-     Break;
-    end;
- // read 'hhea' table second
- for TableIndex := 2 to FDirectoryTableList.Count - 1 do
-  with TPascalTypeDirectoryTableEntry(FDirectoryTableList[TableIndex]) do
-   if TableType = 'hhea' then
-    begin
-     FDirectoryTableList.Move(TableIndex, 1);
-     Break;
-    end;
-end;
-
-procedure TPascalTypeInterpreter.SetSortTableByOffset(
-  const Value: Boolean);
-begin
- if FSortTableByOffset <> Value then
-  begin
-   FSortTableByOffset := Value;
-   SortTableByOffsetChanged;
-  end;
-end;
-
-procedure TPascalTypeInterpreter.SortTableByOffsetChanged;
-begin
- // todo: eventually sort current list
 end;
 
 end.

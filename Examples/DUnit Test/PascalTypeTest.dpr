@@ -28,7 +28,8 @@ uses
   PT_TablesOpenType in '..\..\Source\PT_TablesOpenType.pas',
   PT_TablesOpenTypeFeatures in '..\..\Source\PT_TablesOpenTypeFeatures.pas',
   PT_TablesOpenTypeScripts in '..\..\Source\PT_TablesOpenTypeScripts.pas',
-  PT_TablesOpenTypeLanguages in '..\..\Source\PT_TablesOpenTypeLanguages.pas';
+  PT_TablesOpenTypeLanguages in '..\..\Source\PT_TablesOpenTypeLanguages.pas',
+  PT_TableDirectory in '..\..\Source\PT_TableDirectory.pas';
 
 {$R *.RES}
 

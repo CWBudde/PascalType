@@ -32,10 +32,10 @@ unit PT_Tables;
 
 interface
 
+{$I PT_Compiler.inc}
+
 uses
   Classes, Contnrs, SysUtils, PT_Types;
-
-{$DEFINE AmbigiousExceptions}
 
 type
   TCustomPascalTypeNamedTable = class;
@@ -66,55 +66,9 @@ type
     constructor Create(Interpreter: IPascalTypeInterpreter); reintroduce; virtual;
   end;
 
-  // TrueType Table Directory type
-  TDirectoryTable = packed record
-    Version       : Cardinal;  // A tag to indicate the OFA scaler (should be $10000)
-    NumTables     : Word;      // number of tables
-    SearchRange   : Word;      // (maximum power of 2 <= numTables) * 16
-    EntrySelector : Word;      // log2(maximum power of 2 <= numTables)
-    RangeShift    : Word;      // numTables * 16 - searchRange
-  end;
-
-  // TrueType Table Directory Entry type
-  TDirectoryTableEntry = packed record
-    TableType : TTableType;  // Table type
-    CheckSum  : Cardinal;    // Table checksum
-    Offset    : Cardinal;    // Table file offset
-    Length    : Cardinal;    // Table length
-  end;
-
-  TPascalTypeDirectoryTableEntry = class(TCustomPascalTypeInterfaceTable)
-  private
-    FDirectoryTableEntry : TDirectoryTableEntry;
-    procedure SetCheckSum(const Value: Cardinal);
-    procedure SetLength(const Value: Cardinal);
-    procedure SetOffset(const Value: Cardinal);
-    procedure SetTableType(const Value: TTableType);
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-
-    procedure ChecksumChanged; virtual;
-    procedure LengthChanged; virtual;
-    procedure OffsetChanged; virtual;
-    procedure TableTypeChanged; virtual;
-    procedure ResetToDefaults; override;
-  public
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    property DirectoryTableEntry: TDirectoryTableEntry read FDirectoryTableEntry;
-
-    property TableType: TTableType read FDirectoryTableEntry.TableType write SetTableType;
-    property CheckSum: Cardinal read FDirectoryTableEntry.CheckSum write SetCheckSum;
-    property Offset: Cardinal read FDirectoryTableEntry.Offset write SetOffset;
-    property Length: Cardinal read FDirectoryTableEntry.Length write SetLength;
-  end;
-
-
   TCustomPascalTypeNamedTable = class(TCustomPascalTypeInterfaceTable)
   public
     class function GetTableType: TTableType; virtual; abstract;
-
     property TableType: TTableType read GetTableType;
   end;
 
@@ -1184,139 +1138,6 @@ constructor TCustomPascalTypeInterfaceTable.Create(
 begin
  FInterpreter := Interpreter;
  inherited Create;
-end;
-
-{ TPascalTypeDirectoryTableEntry }
-
-procedure TPascalTypeDirectoryTableEntry.AssignTo(Dest: TPersistent);
-begin
- if Dest is TPascalTypeDirectoryTableEntry then
-  with TPascalTypeDirectoryTableEntry(Dest) do
-   begin
-    FDirectoryTableEntry := Self.FDirectoryTableEntry;
-   end else inherited;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.LoadFromStream(Stream: TStream);
-var
-  Value : Cardinal;
-begin
- with Stream, FDirectoryTableEntry do
-  begin
-   if Position + SizeOf(TDirectoryTableEntry) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
-
-   // read table type
-   Read(TableType, SizeOf(TTableType));
-
-   // read checksum
-   Read(Value, SizeOf(LongInt));
-   CheckSum := Swap32(Value);
-
-   // read offset
-   Read(Value, SizeOf(LongInt));
-   Offset := Swap32(Value);
-
-   // read length
-   Read(Value, SizeOf(LongInt));
-   Length := Swap32(Value);
-  end;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.SaveToStream(Stream: TStream);
-var
-  Value : Cardinal;
-begin
- with Stream do
-  begin
-   if Position + SizeOf(TDirectoryTableEntry) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
-
-   with FDirectoryTableEntry do
-    begin
-     // read table type
-     Write(TableType, SizeOf(TTableType));
-
-     // write checksum
-     Value := Swap32(CheckSum);
-     Write(Value, SizeOf(LongInt));
-
-     // write offset
-     Value := Swap32(Offset);
-     Write(Value, SizeOf(LongInt));
-
-     // write length
-     Value := Swap32(Length);
-     Write(Value, SizeOf(LongInt));
-    end;
-  end;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.ResetToDefaults;
-begin
- with FDirectoryTableEntry do
-  begin
-   TableType := #0#0#0#0;
-   CheckSum  := 0;
-   Offset    := 0;
-   Length    := 0;
-  end;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.SetCheckSum(const Value: Cardinal);
-begin
- if FDirectoryTableEntry.CheckSum <> Value then
-  begin
-   FDirectoryTableEntry.CheckSum := Value;
-   ChecksumChanged;
-  end;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.SetLength(const Value: Cardinal);
-begin
- if FDirectoryTableEntry.Length <> Value then
-  begin
-   FDirectoryTableEntry.Length := Value;
-   LengthChanged;
-  end;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.SetOffset(const Value: Cardinal);
-begin
- if FDirectoryTableEntry.Offset <> Value then
-  begin
-   FDirectoryTableEntry.Offset := Value;
-   OffsetChanged;
-  end;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.SetTableType(const Value: TTableType);
-begin
- if FDirectoryTableEntry.TableType <> Value then
-  begin
-   FDirectoryTableEntry.TableType := Value;
-   TableTypeChanged;
-  end;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.ChecksumChanged;
-begin
- Changed;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.LengthChanged;
-begin
- Changed;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.OffsetChanged;
-begin
- Changed;
-end;
-
-procedure TPascalTypeDirectoryTableEntry.TableTypeChanged;
-begin
- Changed;
 end;
 
 
@@ -4512,11 +4333,12 @@ begin
     begin
      // read platform ID
      Read(Value16, SizeOf(Word));
-     case TPlatformID(Swap16(Value16)) of
+     Value16 := Swap16(Value16);
+     case TPlatformID(Value16) of
           piApple : NameRecord := TTrueTypeFontNamePlatformApple.Create;
         piUnicode : NameRecord := TTrueTypeFontNamePlatformUnicode.Create;
       piMicrosoft : NameRecord := TTrueTypeFontNamePlatformMicrosoft.Create;
-      else raise EPascalTypeError.Create(RCStrUnsupportedPlatform);
+      else raise EPascalTypeError.CreateFmt(RCStrUnsupportedPlatform, [Value16]);
      end;
 
      NameRecord.LoadFromStream(Stream);

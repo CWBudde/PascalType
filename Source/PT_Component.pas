@@ -32,6 +32,8 @@ unit PT_Component;
 
 interface
 
+{$I PT_Compiler.inc}
+
 {$R Default.res}
 
 uses
