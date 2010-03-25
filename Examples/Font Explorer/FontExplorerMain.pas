@@ -807,13 +807,13 @@ begin
      SubItems.Add(FloatToStrF(FontRevision.Value + FontRevision.Fract / (1 shl 16), ffGeneral, 4, 4));
     end;
 
+(*
    with ListView.Items.Add do
     begin
      Caption := 'Checksum Adjustment';
      SubItems.Add(IntToStr(CheckSumAdjustment));
     end;
 
-(*
    with ListView.Items.Add do
     begin
      Caption := 'Flags';
@@ -823,20 +823,20 @@ begin
 
    with ListView.Items.Add do
     begin
-     Caption := 'UnitsPerEm';
+     Caption := 'Units per em';
      SubItems.Add(IntToStr(UnitsPerEm));
     end;
 
    with ListView.Items.Add do
     begin
-     Caption := 'CreatedDate';
-     SubItems.Add(IntToStr(CreatedDate));
+     Caption := 'Created';
+     SubItems.Add(DateTimeToStr(CreatedDate / 86400 + EncodeDate(1904, 1, 1)));
     end;
 
    with ListView.Items.Add do
     begin
-     Caption := 'ModifiedDate';
-     SubItems.Add(IntToStr(ModifiedDate));
+     Caption := 'Modified';
+     SubItems.Add(DateTimeToStr(ModifiedDate / 86400 + EncodeDate(1904, 1, 1)));
     end;
 
    with ListView.Items.Add do

@@ -14,7 +14,8 @@ uses
   PT_TablesOpenTypeFeatures in '..\..\Source\PT_TablesOpenTypeFeatures.pas',
   PT_TablesOpenTypeLanguages in '..\..\Source\PT_TablesOpenTypeLanguages.pas',
   PT_TablesOpenTypeScripts in '..\..\Source\PT_TablesOpenTypeScripts.pas',
-  PT_ByteCodeInterpreter in '..\..\Source\PT_ByteCodeInterpreter.pas';
+  PT_ByteCodeInterpreter in '..\..\Source\PT_ByteCodeInterpreter.pas',
+  PT_UnicodeNames in '..\..\Source\PT_UnicodeNames.pas';
 
 {$R *.res}
 

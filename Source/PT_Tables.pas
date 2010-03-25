@@ -204,16 +204,8 @@ type
     property XMax: SmallInt read FXMax write SetXMax; // for all glyph bounding boxes
     property YMax: SmallInt read FYMax write SetYMax; // for all glyph bounding boxes
     property MacStyle: TMacStyles read FMacStyle write SetMacStyle;
-
     property LowestRecPPEM: Word read FLowestRecPPEM write SetLowestRecPPEM; //smallest readable size in pixels
     property FontDirectionHint: TFontDirectionHint read FFontDirectionHint write SetFontDirectionHint; //0 Mixed directional glyphs
-       {
-          1 Only strongly left to right glyphs
-          2 Like 1 but also contains neutrals
-          -1 Only strongly right to left glyphs
-          -2 Like -1 but also contains neutrals
-       }
-
     property IndexToLocFormat: Word read FIndexToLocFormat write SetIndexToLocFormat; // 0 for short offsets, 1 for long
     property GlyphDataFormat: Word read FGlyphDataFormat write SetGlyphDataFormat; // 0 for current format
   end;
@@ -851,6 +843,7 @@ type
     property Name: WideString read FNameString;
     property NameID: TNameID read FNameID;
     property PlatformID: TPlatformID read GetPlatformID;
+    property LanguageID: Word read FLanguageID;
   end;
 
   TTrueTypeFontNamePlatformUnicode = class(TCustomTrueTypeFontNamePlatform)
@@ -1434,11 +1427,11 @@ begin
 
    // read CreatedDate
    Read(Value64, SizeOf(Int64));
-   FCreatedDate := Swap16(Value64);
+   FCreatedDate := Swap64(Value64);
 
    // read ModifiedDate
    Read(Value64, SizeOf(Int64));
-   FModifiedDate := Swap16(Value64);
+   FModifiedDate := Swap64(Value64);
 
    // read xMin
    Read(Value16, SizeOf(SmallInt));
