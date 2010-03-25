@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ComCtrls, StdCtrls, ExtCtrls, ToolWin, ActnList, StdActns, AppEvnts,
   ImgList, PT_Types, PT_Tables, PT_TablesOptional, PT_TablesOpenType,
-  PT_Interpreter, PT_ByteCodeInterpreter;
+  PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames;
 
 {.$DEFINE ShowContours}
 
@@ -74,7 +74,10 @@ type
     FScaler       : Single;
     procedure SetFontSize(const Value: Integer);
     procedure InitializeDefaultListView;
+    procedure FontChanged;
   protected
+    procedure ListViewColumns(Columns: Array of string);
+
     procedure DisplayCharacterMapSubTable(CharacterMapSubTable: TCustomCharacterMapDirectoryEntry);
     procedure DisplayCharacterMapTable(CharacterMapTable: TPascalTypeCharacterMapTable);
     procedure DisplayControlValueTable(ControlValueTable: TTrueTypeFontControlValueTable);
@@ -177,25 +180,29 @@ end;
 
 procedure TFmTTF.InitializeDefaultListView;
 begin
+ // add columns
+ ListViewColumns(['Name', 'Value']);
+end;
+
+procedure TFmTTF.ListViewColumns(Columns: array of string);
+var
+  ColumnIndex : Integer;
+begin
  // clear list view
  ListView.Clear;
 
  // clear columns
  ListView.Columns.Clear;
 
- // add name column
- with ListView.Columns.Add do
-  begin
-   Caption := 'Name';
-   Width := ListView.Width div 3;
-  end;
-
- // add value column
- with ListView.Columns.Add do
-  begin
-   Caption := 'Value';
-   Width := ListView.Width div 3;
-  end;
+ // add column
+ for ColumnIndex := 0 to Length(Columns) - 1 do
+  with ListView.Columns.Add do
+   begin
+    Caption := Columns[ColumnIndex];
+    Width := Min(256, (ListView.Width - 16) div (Length(Columns)));
+    MinWidth := 64;
+    AutoSize := True;
+   end;
 end;
 
 procedure TFmTTF.SetFontSize(const Value: Integer);
@@ -248,30 +255,22 @@ end;
 procedure TFmTTF.DisplayCharacterMapSubTable(
   CharacterMapSubTable: TCustomCharacterMapDirectoryEntry);
 var
-  CharIndex  : Integer;
   GlyphIndex : Integer;
+  GlyphName  : string;
+  CharIndex  : Word;
 begin
  with CharacterMapSubTable do
   begin
-   // clear list view
-   ListView.Clear;
+   // add columns
+   ListViewColumns(['Character', 'Glyph #', 'Description']);
 
-   // clear columns
-   ListView.Columns.Clear;
+   // set width
+   ListView.Columns[0].Width := 64;
+   ListView.Columns[1].Width := 64;
+   ListView.Columns[2].Width := ListView.Width - 196;
 
-   // add character column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Character';
-     Width := Min(128, ListView.Width div 3);
-    end;
-
-   // add glyph column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Glyph #';
-     Width := ListView.Width div 3;
-    end;
+   // begin update (lock)
+   ListView.Items.BeginUpdate;
 
    if CharacterMap is TTrueTypeFontFormat0CharacterMap then
     for CharIndex := Low(Byte) to High(Byte) do
@@ -281,18 +280,26 @@ begin
        SubItems.Add(IntToStr(CharacterMap.CharacterToGlyph(CharIndex)));
       end else
    if CharacterMap is TTrueTypeFontFormat4CharacterMap then
-    for CharIndex := $20 to $100 do
+    for CharIndex := $20 to $FFFF do
      begin
       // get glyph index
       GlyphIndex := CharacterMap.CharacterToGlyph(CharIndex);
 
       if GlyphIndex > 0 then
-       with ListView.Items.Add do
-        begin
-         Caption := 'U+' + IntToHex(CharIndex, 4);
-         SubItems.Add(IntToStr(CharacterMap.CharacterToGlyph(CharIndex)));
-        end;
+       begin
+        GlyphName := GetUnicodeName(CharIndex);
+        if GlyphName <> '' then
+         with ListView.Items.Add do
+          begin
+           Caption := 'U+' + IntToHex(CharIndex, 4);
+           SubItems.Add(IntToStr(CharacterMap.CharacterToGlyph(CharIndex)));
+           SubItems.Add(GlyphName);
+          end;
+       end;
      end;
+
+   // end update (unlock)
+   ListView.Items.EndUpdate;
 
    ListView.BringToFront;
   end;
@@ -328,25 +335,11 @@ var
 begin
  with ControlValueTable do
   begin
-   // clear list view
-   ListView.Clear;
+   // add columns
+   ListViewColumns(['Index', 'Value']);
 
-   // clear columns
-   ListView.Columns.Clear;
-
-   // add index column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Index';
-     Width := Min(64, ListView.Width div 3);
-    end;
-
-   // add value column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Value';
-     Width := ListView.Width div 3;
-    end;
+   // begin update (lock)
+   ListView.Items.BeginUpdate;
 
    // add control values
    for ControlValueIndex := 0 to ControlValueCount - 1 do
@@ -355,6 +348,9 @@ begin
       Caption := IntToStr(ControlValueIndex);
       SubItems.Add(IntToStr(ControlValue[ControlValueIndex]));
      end;
+
+   // end update (unlock)
+   ListView.Items.EndUpdate;
 
    ListView.BringToFront;
   end;
@@ -368,32 +364,11 @@ var
 begin
  with ClasDefinitionTable do
   begin
-   // clear list view
-   ListView.Clear;
+   // add columns
+   ListViewColumns(['Glyph #', 'Class', 'Description']);
 
-   // clear columns
-   ListView.Columns.Clear;
-
-   // add glyph column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Glyph #';
-     Width := Min(128, ListView.Width div 3);
-    end;
-
-   // add class column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Class';
-     Width := Min(128, ListView.Width div 3);
-    end;
-
-   // add description column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Description';
-     Width := ListView.Width div 3;
-    end;
+   // begin update (lock)
+   ListView.Items.BeginUpdate;
 
    if ClasDefinitionTable is TOpenTypeClassDefinitionFormat1Table then
     with TOpenTypeClassDefinitionFormat1Table(ClasDefinitionTable) do
@@ -427,6 +402,9 @@ begin
           end;
          end;
 
+   // end update (unlock)
+   ListView.Items.EndUpdate;
+
    ListView.BringToFront;
   end;
 end;
@@ -440,6 +418,9 @@ begin
   begin
    InitializeDefaultListView;
 
+   // begin update (lock)
+   ListView.Items.BeginUpdate;
+
    // add coverage offset
    for CoverageIndex := 0 to CoverageCount - 1 do
     with ListView.Items.Add do
@@ -447,6 +428,9 @@ begin
       Caption := 'Coverage Offset - #' + IntToStr(CoverageIndex);
       SubItems.Add(IntToStr(Coverage[CoverageIndex]));
      end;
+
+   // end update (lock)
+   ListView.Items.EndUpdate;
 
    ListView.BringToFront;
   end;
@@ -619,32 +603,11 @@ var
 begin
  with KerningSubtable do
   begin
-   // clear list view
-   ListView.Clear;
+   // add columns
+   ListViewColumns(['Left Glyph #', 'Right Glyph #', 'Value']);
 
-   // clear columns
-   ListView.Columns.Clear;
-
-   // add left glyph column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Left Glyph #';
-     Width := ListView.Width div 4;
-    end;
-
-   // add right glyph column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Right Glyph #';
-     Width := ListView.Width div 4;
-    end;
-
-   // add value column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Value';
-     Width := ListView.Width div 4;
-    end;
+   // begin update (lock)
+   ListView.Items.BeginUpdate;
 
    if FormatTable is TTrueTypeFontKerningFormat0SubTable then
     with TTrueTypeFontKerningFormat0SubTable(FormatTable) do
@@ -655,6 +618,9 @@ begin
         SubItems.Add(IntToStr(Pair[GlyphIndex].Right));
         SubItems.Add(IntToStr(Pair[GlyphIndex].Value));
        end;
+
+   // end update (unlock)
+   ListView.Items.EndUpdate;
 
    ListView.BringToFront;
   end;
@@ -685,25 +651,11 @@ var
 begin
  with GaspTable do
   begin
-   // clear list view
-   ListView.Clear;
+   // add columns
+   ListViewColumns(['Range (ppem)', 'Behaviour']);
 
-   // clear columns
-   ListView.Columns.Clear;
-
-   // add range column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Range (ppem)';
-     Width := ListView.Width div 3;
-    end;
-
-   // add behaviour column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Behaviour';
-     Width := ListView.Width div 3;
-    end;
+   // begin update (lock)
+   ListView.Items.BeginUpdate;
 
    LastPPEM := 0;
 
@@ -726,6 +678,9 @@ begin
        else SubItems.Add('unknown: ' + IntToStr(Range[RangeIndex].GaspFlag));
       end;
      end;
+
+   // end update (unlock)
+   ListView.Items.EndUpdate;
 
    ListView.BringToFront;
   end;
@@ -1019,32 +974,11 @@ var
 begin
  with HorizontalMetricsTable do
   begin
-   // clear list view
-   ListView.Clear;
+   // add columns
+   ListViewColumns(['Glyph #', 'Advanced Width', 'Left Side Bearing']);
 
-   // clear columns
-   ListView.Columns.Clear;
-
-   // add glyph number column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Glyph #';
-     Width := Min(64, ListView.Width div 3);
-    end;
-
-   // add advanced width column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Advanced Width';
-     Width := ListView.Width div 3;
-    end;
-
-   // add left side bearing column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Left Side Bearing';
-     Width := ListView.Width div 3;
-    end;
+   // begin update (lock)
+   ListView.Items.BeginUpdate;
 
    for HorizontalMetricIndex := 0 to HorizontalMetricCount - 1 do
     with ListView.Items.Add do
@@ -1053,6 +987,9 @@ begin
       SubItems.Add(IntToStr(HorizontalMetric[HorizontalMetricIndex].AdvanceWidth));
       SubItems.Add(IntToStr(HorizontalMetric[HorizontalMetricIndex].Bearing));
      end;
+
+   // end update (unlock)
+   ListView.Items.EndUpdate;
 
    ListView.BringToFront;
   end;
@@ -1085,25 +1022,29 @@ end;
 
 procedure TFmTTF.DisplayLinearThresholdTable(
   LinearThresholdTable: TTrueTypeFontLinearThresholdTable);
+var
+  VerticalPenIndex : Integer;
 begin
  with LinearThresholdTable do
   begin
-   InitializeDefaultListView;
+   // add columns
+   ListViewColumns(['Glyph #', 'Value']);
 
-   // add version
-   with ListView.Items.Add do
-    begin
-     Caption := 'Version';
-     SubItems.Add(IntToStr(Version));
-    end;
+   // begin update (lock)
+   ListView.Items.BeginUpdate;
 
-   // add Number of Glyphs
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of Glyphs';
-     SubItems.Add(IntToStr(VerticalPelCount));
-    end;
+   // add thresholds
+   for VerticalPenIndex := 0 to VerticalPelCount - 1 do
+    with ListView.Items.Add do
+     begin
+      Caption := IntToStr(VerticalPenIndex + 1);
+      SubItems.Add(IntToStr(VerticalPel[VerticalPenIndex]));
+     end;
 
+   // end update (unlock)
+   ListView.Items.EndUpdate;
+
+   // bring listview to front
    ListView.BringToFront;
   end;
 end;
@@ -1114,25 +1055,8 @@ var
 begin
  with LocationTable do
   begin
-   // clear list view
-   ListView.Clear;
-
-   // clear columns
-   ListView.Columns.Clear;
-
-   // add glyph column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Glyph #';
-     Width := Min(128, ListView.Width div 3);
-    end;
-
-   // add offset column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Offset';
-     Width := ListView.Width div 3;
-    end;
+   // add columns
+   ListViewColumns(['Glyph #', 'Offset']);
 
    // add locations
    for LocationIndex := 0 to LocationCount - 1 do
@@ -1804,32 +1728,11 @@ var
 begin
  with SimpleGlyphData do
   begin
-   // clear list view
-   ListView.Clear;
+   // add columns
+   ListViewColumns(['Point #', 'Position', 'Type']);
 
-   // clear columns
-   ListView.Columns.Clear;
-
-   // add point column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Point #';
-     Width := Min(96, ListView.Width div 3);
-    end;
-
-   // add position column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Position';
-     Width := ListView.Width div 3;
-    end;
-
-   // add type column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Type';
-     Width := ListView.Width div 3;
-    end;
+   // begin update (lock)
+   ListView.Items.BeginUpdate;
 
    PointCnt := 0;
    for ContourIndex := 0 to ContourCount - 1 do
@@ -1844,6 +1747,9 @@ begin
        Inc(PointCnt);
       end;
 
+   // end update (unlock)
+   ListView.Items.EndUpdate;
+
    ListView.BringToFront;
   end;
 end;
@@ -1854,32 +1760,11 @@ var
 begin
  with Contour do
   begin
-   // clear list view
-   ListView.Clear;
+   // add columns
+   ListViewColumns(['Point #', 'Position', 'Type']);
 
-   // clear columns
-   ListView.Columns.Clear;
-
-   // add point column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Point #';
-     Width := ListView.Width div 3;
-    end;
-
-   // add position column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Position';
-     Width := ListView.Width div 3;
-    end;
-
-   // add type column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Type';
-     Width := ListView.Width div 3;
-    end;
+   // begin update
+   ListView.Items.BeginUpdate;
 
    for PointIndex := 0 to PointCount - 1 do
     with Point[PointIndex], ListView.Items.Add do
@@ -1890,6 +1775,9 @@ begin
        then SubItems.Add('On')
        else SubItems.Add('Off');
      end;
+
+   // end update
+   ListView.Items.EndUpdate;
 
    ListView.BringToFront;
   end;
@@ -2223,25 +2111,11 @@ var
 begin
  with PostscriptTable do
   begin
-   // clear list view
-   ListView.Clear;
+   // add columns
+   ListViewColumns(['Glyph #', 'Name']);
 
-   // clear columns
-   ListView.Columns.Clear;
-
-   // add glyph column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Glyph #';
-     Width := Min(128, ListView.Width div 3);
-    end;
-
-   // add value column
-   with ListView.Columns.Add do
-    begin
-     Caption := 'Name';
-     Width := ListView.Width div 3;
-    end;
+   // begin update (lock)
+   ListView.Items.BeginUpdate;
 
    // add glyph index
    for GlyphIndex := 0 to GlyphIndexCount - 1 do
@@ -2250,6 +2124,9 @@ begin
       Caption := IntToStr(GlyphIndex);
       SubItems.Add(GlyphIndexToString(GlyphIndex));
      end;
+
+   // end update (unlock)
+   ListView.Items.EndUpdate;
 
    ListView.BringToFront;
   end;
@@ -2491,222 +2368,270 @@ end;
 
 procedure TFmTTF.LoadFromFile(Filename: TFileName);
 var
-  OptTableIndex : Integer;
-  SubtableIndex : Integer;
-  Node, SubNode : TTreeNode;
-  SubSubNode    : TTreeNode;
-  SubSubIndex   : Integer;
-  str           : string;
+  Start, Stop, Freq : Int64;
 begin
  if FileExists(FileName) then
   begin
+   // query start
+   QueryPerformanceCounter(Start);
+
+   // load font file
    FInterpreter.LoadFromFile(FileName);
 
-   with FInterpreter, TreeView do
+   // query stop
+   QueryPerformanceCounter(Stop);
+
+   // query performance frequency
+   QueryPerformanceFrequency(Freq);
+
+   // initialize listview
+   InitializeDefaultListView;
+
+   // add loading time
+   with ListView.Items.Add do
     begin
-     // set width and height of current glyph bitmap
-     FScaler := Fppem / HeaderTable.UnitsPerEm;
-     FCurrentGlyph.Width := Fppem * (1 shl 16) div (HeaderTable.UnitsPerEm);
-     FCurrentGlyph.Height := Fppem * (1 shl 16) div (HeaderTable.UnitsPerEm);
-
-     // clear existing items
-     Items.Clear;
-
-     // add root item
-     Items.AddChild(nil, ExtractFileName(FileName));
-
-     // add font header table
-     Items.AddChildObject(Items[0], 'head', HeaderTable);
-
-     // add character mapping
-     Node := Items.AddChildObject(Items[0], 'cmap', CharacterMap);
-     for SubtableIndex := 0 to CharacterMap.CharacterMapSubtableCount - 1 do
-      begin
-       case CharacterMap.CharacterMapSubtable[SubtableIndex].PlatformID of
-        piUnicode   : Items.AddChildObjectFirst(Node, 'Unicode', CharacterMap.CharacterMapSubtable[SubtableIndex]);
-        piApple     : Items.AddChildObjectFirst(Node, 'Apple', CharacterMap.CharacterMapSubtable[SubtableIndex]);
-        piMicrosoft : Items.AddChildObjectFirst(Node, 'Microsoft', CharacterMap.CharacterMapSubtable[SubtableIndex]);
-        else Items.AddChildObjectFirst(Node, 'Unknown', CharacterMap.CharacterMapSubtable[SubtableIndex]);
-       end;
-      end;
-
-     // add horizontal header
-     Items.AddChildObject(Items[0], 'hhea', HorizontalHeader);
-
-     // add horizontal metrics
-     Items.AddChildObject(Items[0], 'hmtx', HorizontalMetrics);
-
-     // add postscript table
-     Node := Items.AddChildObject(Items[0], 'post', PostScriptTable);
-     if Assigned(PostScriptTable.PostscriptV2Table)
-      then Items.AddChildObjectFirst(Node, 'Glyph Names', PostScriptTable.PostscriptV2Table);
-
-     // add maximum profile table
-     Items.AddChildObject(Items[0], 'maxp', MaximumProfile);
-
-     // add name table
-     Node := Items.AddChildObject(Items[0], 'name', NameTable);
-
-     // check for Unicode
-     for SubtableIndex := 0 to NameTable.NameRecordCount- 1 do
-      if NameTable.NameRecord[SubtableIndex].PlatformID = piUnicode then
-       begin
-        Items.AddChildObject(Node, 'Unicode', NameTable);
-        Break;
-       end;
-
-     // check for Apple
-     for SubtableIndex := 0 to NameTable.NameRecordCount- 1 do
-      if NameTable.NameRecord[SubtableIndex].PlatformID = piApple then
-       begin
-        Items.AddChildObject(Node, 'Apple', NameTable);
-        Break;
-       end;
-
-     // check for Microsoft
-     for SubtableIndex := 0 to NameTable.NameRecordCount- 1 do
-      if NameTable.NameRecord[SubtableIndex].PlatformID = piMicrosoft then
-       begin
-        Items.AddChildObject(Node, 'Microsoft', NameTable);
-        Break;
-       end;
-
-     // add additional tables
-     for OptTableIndex := 0 to OptionalTableCount - 1 do
-      with OptionalTable[OptTableIndex] do
-       begin
-        Node := Items.AddChildObject(Items[0], GetTableType, OptionalTable[OptTableIndex]);
-
-        // digital signature
-        if OptionalTable[OptTableIndex] is TTrueTypeFontDigitalSignatureTable then
-         with TTrueTypeFontDigitalSignatureTable(OptionalTable[OptTableIndex]) do
-          for SubtableIndex := 0 to SignatureCount - 1
-           do Items.AddChildObject(Node, 'Signature #' + IntToStr(SubtableIndex + 1), SignatureBlock[SubtableIndex]) else
-
-        // kerning table
-        if OptionalTable[OptTableIndex] is TTrueTypeFontKerningTable then
-         with TTrueTypeFontKerningTable(OptionalTable[OptTableIndex]) do
-          for SubtableIndex := 0 to KerningSubtableCount - 1 do
-           begin
-            str := 'Subtable #' + IntToStr(SubtableIndex + 1);
-            if KerningSubtable[SubtableIndex].IsHorizontal
-             then str := str + ' (horizontal'
-             else str := str + ' (vertical';
-
-            if KerningSubtable[SubtableIndex].IsMinimum
-             then str := str + ', minimum)'
-             else str := str + ', kerning)';
-
-            Items.AddChildObject(Node, str, KerningSubtable[SubtableIndex]);
-           end else
-
-        // open type common table
-        if OptionalTable[OptTableIndex] is TOpenTypeGlyphDefinitionTable then
-         with TOpenTypeGlyphDefinitionTable(OptionalTable[OptTableIndex]) do
-          begin
-           Items.AddChildObject(Node, 'Class Definition', GlyphClassDefinition);
-           Items.AddChildObject(Node, 'Mark Attachment Class Definition', MarkAttachmentClassDefinition);
-//           Items.AddChildObject(Node, 'Mark Set', MarkGlyphSet);
-          end else
-
-        // open type common table
-        if OptionalTable[OptTableIndex] is TCustomOpenTypeCommonTable then
-         with TCustomOpenTypeCommonTable(OptionalTable[OptTableIndex]) do
-          begin
-
-           // script subtable
-           SubNode := Items.AddChildObject(Node, 'Scripts', ScriptListTable);
-           with ScriptListTable do
-            for SubtableIndex := 0 to LanguageSystemCount - 1 do
-             begin
-              str := LanguageSystem[SubtableIndex].DisplayName;
-              SubSubNode := Items.AddChildObject(SubNode, str, LanguageSystem[SubtableIndex]);
-
-              // add default language system
-              if Assigned(LanguageSystem[SubtableIndex].DefaultLangSys)
-               then Items.AddChildObject(SubSubNode, '(default)', LanguageSystem[SubtableIndex].DefaultLangSys);
-
-              for SubSubIndex := 0 to LanguageSystem[SubtableIndex].LanguageSystemTableCount - 1 do
-               begin
-                str := LanguageSystem[SubtableIndex].LanguageSystemTable[SubSubIndex].DisplayName;
-                Items.AddChildObject(SubSubNode, str, LanguageSystem[SubtableIndex].LanguageSystemTable[SubSubIndex]);
-               end;
-
-             end;
-
-           // features subtable
-           SubNode := Items.AddChildObject(Node, 'Features', FeatureListTable);
-           with FeatureListTable do
-            for SubtableIndex := 0 to FeatureCount - 1 do
-             begin
-              str := 'Feature #' + IntToStr(SubtableIndex + 1);
-
-              if Assigned(Feature[SubtableIndex])
-               then str := str + ' (' + Feature[SubtableIndex].DisplayName + ')';
-
-              SubSubNode := Items.AddChildObject(SubNode, str, Feature[SubtableIndex]);
-
-              for SubSubIndex := 0 to Feature[SubtableIndex].LookupListCount - 1 do
-               begin
-                str := 'Loopup #'  + IntToStr(Feature[SubtableIndex].LookupList[SubSubIndex] + 1);
-                Items.AddChildObject(SubSubNode, str, LookUpListTable.LookUpTable[Feature[SubtableIndex].LookupList[SubSubIndex]]);
-               end;
-             end;
-
-           // lookups subtable
-           SubNode := Items.AddChildObject(Node, 'Lookups', LookUpListTable);
-           with LookUpListTable do
-            for SubtableIndex := 0 to LookupTableCount - 1 do
-             begin
-              str := 'Loopup #' + IntToStr(SubtableIndex + 1);
-              str := str + ' (Type ' + IntToStr(LookUpTable[SubtableIndex].LookupType) + ')';
-              SubSubNode := Items.AddChildObject(SubNode, str, LookUpTable[SubtableIndex]);
-
-              for SubSubIndex := 0 to LookUpTable[SubtableIndex].SubtableCount - 1 do
-               begin
-                str := 'Table #'  + IntToStr(SubSubIndex + 1);
-                if LookUpTable[SubtableIndex].Subtable[SubSubIndex] is TCustomOpenTypeCoverageTable then
-                 case TCustomOpenTypeCoverageTable(LookUpTable[SubtableIndex].Subtable[SubSubIndex]).Format of
-                  cfList : str := str + ' (List)';
-                  cfRange : str := str + ' (Range)';
-                 end;
-
-                Items.AddChildObject(SubSubNode, str, LookUpTable[SubtableIndex].Subtable[SubSubIndex]);
-               end;
-             end;
-
-          end else
-
-        // glyph data table
-        if OptionalTable[OptTableIndex] is TTrueTypeFontGlyphDataTable then
-         with TTrueTypeFontGlyphDataTable(OptionalTable[OptTableIndex]) do
-          for SubtableIndex := 0 to GlyphDataCount - 1 do
-           begin
-            SubNode := Items.AddChildObject(Node, 'Glyph #' + IntToStr(SubtableIndex + 1), GlyphData[SubtableIndex]);
-            if Assigned(GlyphData[SubtableIndex]) then
-             begin
-              Items.AddChildObject(SubNode, 'Outline', GlyphData[SubtableIndex]);
-              if GlyphData[SubtableIndex] is TTrueTypeFontSimpleGlyphData then
-               begin
-                SubSubNode := Items.AddChildObject(SubNode, 'Points', GlyphData[SubtableIndex]);
-                {$IFDEF ShowContours}
-                with TTrueTypeFontSimpleGlyphData(GlyphData[SubtableIndex]) do
-                 for SubSubIndex := 0 to ContourCount - 1
-                  do Items.AddChildObject(SubSubNode, 'Contour #' + IntToStr(SubSubIndex + 1), Contour[SubSubIndex]);
-                {$ENDIF}
-               end;
-              Items.AddChildObject(SubNode, 'Instructions', GlyphData[SubtableIndex].Instructions)
-             end;
-           end;
-       end;
-
-     // expand tree
-     Items[0].Expanded := True;
+     Caption := 'loading time';
+     SubItems.Add(FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms');
     end;
+
+   // clear existing items on treeview
+   TreeView.Items.Clear;
+
+   // add root item on treeview
+   TreeView.Items.AddChild(nil, ExtractFileName(FileName));
+
+   // query start
+   QueryPerformanceCounter(Start);
+
+   FontChanged;
+
+   // query stop
+   QueryPerformanceCounter(Stop);
+
+   // add building tree time
+   with ListView.Items.Add do
+    begin
+     Caption := 'building tree time';
+     SubItems.Add(FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms');
+    end;
+
+   ListView.BringToFront;
+
+   Caption := 'PascalType Font Explorer [' + ExtractFileName(Filename) + ']';
   end
  else raise Exception.Create('File does not exists');
+end;
 
- Caption := 'PascalType Font Explorer [' + ExtractFileName(Filename) + ']';
+procedure TFmTTF.FontChanged;
+var
+  OptTableIndex     : Integer;
+  SubtableIndex     : Integer;
+  Node, SubNode     : TTreeNode;
+  SubSubNode        : TTreeNode;
+  SubSubIndex       : Integer;
+  str               : string;
+begin
+ with FInterpreter, TreeView do
+  begin
+   // set width and height of current glyph bitmap
+   FScaler := Fppem / HeaderTable.UnitsPerEm;
+   FCurrentGlyph.Width := Fppem * (1 shl 16) div (HeaderTable.UnitsPerEm);
+   FCurrentGlyph.Height := Fppem * (1 shl 16) div (HeaderTable.UnitsPerEm);
+
+   // begin update
+   Items.BeginUpdate;
+
+   // add font header table
+   Items.AddChildObject(Items[0], 'head', HeaderTable);
+
+   // add character mapping
+   Node := Items.AddChildObject(Items[0], 'cmap', CharacterMap);
+   for SubtableIndex := 0 to CharacterMap.CharacterMapSubtableCount - 1 do
+    begin
+     case CharacterMap.CharacterMapSubtable[SubtableIndex].PlatformID of
+      piUnicode   : Items.AddChildObjectFirst(Node, 'Unicode', CharacterMap.CharacterMapSubtable[SubtableIndex]);
+      piApple     : Items.AddChildObjectFirst(Node, 'Apple', CharacterMap.CharacterMapSubtable[SubtableIndex]);
+      piMicrosoft : Items.AddChildObjectFirst(Node, 'Microsoft', CharacterMap.CharacterMapSubtable[SubtableIndex]);
+      else Items.AddChildObjectFirst(Node, 'Unknown', CharacterMap.CharacterMapSubtable[SubtableIndex]);
+     end;
+    end;
+
+   // add horizontal header
+   Items.AddChildObject(Items[0], 'hhea', HorizontalHeader);
+
+   // add horizontal metrics
+   Items.AddChildObject(Items[0], 'hmtx', HorizontalMetrics);
+
+   // add postscript table
+   Node := Items.AddChildObject(Items[0], 'post', PostScriptTable);
+   if Assigned(PostScriptTable.PostscriptV2Table)
+    then Items.AddChildObjectFirst(Node, 'Glyph Names', PostScriptTable.PostscriptV2Table);
+
+   // add maximum profile table
+   Items.AddChildObject(Items[0], 'maxp', MaximumProfile);
+
+   // add name table
+   Node := Items.AddChildObject(Items[0], 'name', NameTable);
+
+   // check for Unicode
+   for SubtableIndex := 0 to NameTable.NameRecordCount- 1 do
+    if NameTable.NameRecord[SubtableIndex].PlatformID = piUnicode then
+     begin
+      Items.AddChildObject(Node, 'Unicode', NameTable);
+      Break;
+     end;
+
+   // check for Apple
+   for SubtableIndex := 0 to NameTable.NameRecordCount- 1 do
+    if NameTable.NameRecord[SubtableIndex].PlatformID = piApple then
+     begin
+      Items.AddChildObject(Node, 'Apple', NameTable);
+      Break;
+     end;
+
+   // check for Microsoft
+   for SubtableIndex := 0 to NameTable.NameRecordCount- 1 do
+    if NameTable.NameRecord[SubtableIndex].PlatformID = piMicrosoft then
+     begin
+      Items.AddChildObject(Node, 'Microsoft', NameTable);
+      Break;
+     end;
+
+   // add additional tables
+   for OptTableIndex := 0 to OptionalTableCount - 1 do
+    with OptionalTable[OptTableIndex] do
+     begin
+      Node := Items.AddChildObject(Items[0], GetTableType, OptionalTable[OptTableIndex]);
+
+      // digital signature
+      if OptionalTable[OptTableIndex] is TTrueTypeFontDigitalSignatureTable then
+       with TTrueTypeFontDigitalSignatureTable(OptionalTable[OptTableIndex]) do
+        for SubtableIndex := 0 to SignatureCount - 1
+         do Items.AddChildObject(Node, 'Signature #' + IntToStr(SubtableIndex + 1), SignatureBlock[SubtableIndex]) else
+
+      // kerning table
+      if OptionalTable[OptTableIndex] is TTrueTypeFontKerningTable then
+       with TTrueTypeFontKerningTable(OptionalTable[OptTableIndex]) do
+        for SubtableIndex := 0 to KerningSubtableCount - 1 do
+         begin
+          str := 'Subtable #' + IntToStr(SubtableIndex + 1);
+          if KerningSubtable[SubtableIndex].IsHorizontal
+           then str := str + ' (horizontal'
+           else str := str + ' (vertical';
+
+          if KerningSubtable[SubtableIndex].IsMinimum
+           then str := str + ', minimum)'
+           else str := str + ', kerning)';
+
+          Items.AddChildObject(Node, str, KerningSubtable[SubtableIndex]);
+         end else
+
+      // open type common table
+      if OptionalTable[OptTableIndex] is TOpenTypeGlyphDefinitionTable then
+       with TOpenTypeGlyphDefinitionTable(OptionalTable[OptTableIndex]) do
+        begin
+         Items.AddChildObject(Node, 'Class Definition', GlyphClassDefinition);
+         Items.AddChildObject(Node, 'Mark Attachment Class Definition', MarkAttachmentClassDefinition);
+//           Items.AddChildObject(Node, 'Mark Set', MarkGlyphSet);
+        end else
+
+      // open type common table
+      if OptionalTable[OptTableIndex] is TCustomOpenTypeCommonTable then
+       with TCustomOpenTypeCommonTable(OptionalTable[OptTableIndex]) do
+        begin
+
+         // script subtable
+         SubNode := Items.AddChildObject(Node, 'Scripts', ScriptListTable);
+         with ScriptListTable do
+          for SubtableIndex := 0 to LanguageSystemCount - 1 do
+           begin
+            str := LanguageSystem[SubtableIndex].DisplayName;
+            SubSubNode := Items.AddChildObject(SubNode, str, LanguageSystem[SubtableIndex]);
+
+            // add default language system
+            if Assigned(LanguageSystem[SubtableIndex].DefaultLangSys)
+             then Items.AddChildObject(SubSubNode, '(default)', LanguageSystem[SubtableIndex].DefaultLangSys);
+
+            for SubSubIndex := 0 to LanguageSystem[SubtableIndex].LanguageSystemTableCount - 1 do
+             begin
+              str := LanguageSystem[SubtableIndex].LanguageSystemTable[SubSubIndex].DisplayName;
+              Items.AddChildObject(SubSubNode, str, LanguageSystem[SubtableIndex].LanguageSystemTable[SubSubIndex]);
+             end;
+
+           end;
+
+         // features subtable
+         SubNode := Items.AddChildObject(Node, 'Features', FeatureListTable);
+         with FeatureListTable do
+          for SubtableIndex := 0 to FeatureCount - 1 do
+           begin
+            str := 'Feature #' + IntToStr(SubtableIndex + 1);
+
+            if Assigned(Feature[SubtableIndex])
+             then str := str + ' (' + Feature[SubtableIndex].DisplayName + ')';
+
+            SubSubNode := Items.AddChildObject(SubNode, str, Feature[SubtableIndex]);
+
+            for SubSubIndex := 0 to Feature[SubtableIndex].LookupListCount - 1 do
+             begin
+              str := 'Loopup #'  + IntToStr(Feature[SubtableIndex].LookupList[SubSubIndex] + 1);
+              Items.AddChildObject(SubSubNode, str, LookUpListTable.LookUpTable[Feature[SubtableIndex].LookupList[SubSubIndex]]);
+             end;
+           end;
+
+         // lookups subtable
+         SubNode := Items.AddChildObject(Node, 'Lookups', LookUpListTable);
+         with LookUpListTable do
+          for SubtableIndex := 0 to LookupTableCount - 1 do
+           begin
+            str := 'Loopup #' + IntToStr(SubtableIndex + 1);
+            str := str + ' (Type ' + IntToStr(LookUpTable[SubtableIndex].LookupType) + ')';
+            SubSubNode := Items.AddChildObject(SubNode, str, LookUpTable[SubtableIndex]);
+
+            for SubSubIndex := 0 to LookUpTable[SubtableIndex].SubtableCount - 1 do
+             begin
+              str := 'Table #'  + IntToStr(SubSubIndex + 1);
+              if LookUpTable[SubtableIndex].Subtable[SubSubIndex] is TCustomOpenTypeCoverageTable then
+               case TCustomOpenTypeCoverageTable(LookUpTable[SubtableIndex].Subtable[SubSubIndex]).Format of
+                cfList : str := str + ' (List)';
+                cfRange : str := str + ' (Range)';
+               end;
+
+              Items.AddChildObject(SubSubNode, str, LookUpTable[SubtableIndex].Subtable[SubSubIndex]);
+             end;
+           end;
+
+        end else
+
+      // glyph data table
+      if OptionalTable[OptTableIndex] is TTrueTypeFontGlyphDataTable then
+       with TTrueTypeFontGlyphDataTable(OptionalTable[OptTableIndex]) do
+        for SubtableIndex := 0 to GlyphDataCount - 1 do
+         begin
+          SubNode := Items.AddChildObject(Node, 'Glyph #' + IntToStr(SubtableIndex + 1), GlyphData[SubtableIndex]);
+          if Assigned(GlyphData[SubtableIndex]) then
+           begin
+            Items.AddChildObject(SubNode, 'Outline', GlyphData[SubtableIndex]);
+            if GlyphData[SubtableIndex] is TTrueTypeFontSimpleGlyphData then
+             begin
+              SubSubNode := Items.AddChildObject(SubNode, 'Points', GlyphData[SubtableIndex]);
+              {$IFDEF ShowContours}
+              with TTrueTypeFontSimpleGlyphData(GlyphData[SubtableIndex]) do
+               for SubSubIndex := 0 to ContourCount - 1
+                do Items.AddChildObject(SubSubNode, 'Contour #' + IntToStr(SubSubIndex + 1), Contour[SubSubIndex]);
+              {$ENDIF}
+             end;
+            Items.AddChildObject(SubNode, 'Instructions', GlyphData[SubtableIndex].Instructions)
+           end;
+         end;
+     end;
+
+   // end update
+   Items.EndUpdate;
+
+   // expand tree
+   Items[0].Expanded := True;
+  end;
 end;
 
 end.

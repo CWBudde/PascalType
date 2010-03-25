@@ -772,9 +772,30 @@ end;
 
 procedure TOpenTypeMarkGlyphSetTable.SaveToStream(
   Stream: TStream);
+var
+  CoverageIndex : Integer;
+  Value32       : Cardinal;
+  Value16       : Word;
 begin
  inherited;
 
+ with Stream do
+  begin
+   // write version
+   Value16 := Swap16(FTableFormat);
+   Write(Value16, SizeOf(Word));
+
+   // read coverage length
+   Value16 := Swap16(Length(FCoverage));
+   Write(Value16, SizeOf(Word));
+
+   // write coverage data
+   for CoverageIndex := 0 to Length(FCoverage) - 1 do
+    begin
+     Value32 := Swap32(FCoverage[CoverageIndex]);
+     Write(Value32, SizeOf(Cardinal));
+    end;
+  end;
 end;
 
 procedure TOpenTypeMarkGlyphSetTable.SetTableFormat(
@@ -941,36 +962,87 @@ end;
 
 procedure TOpenTypeGlyphDefinitionTable.SaveToStream(Stream: TStream);
 var
-  Value32 : Cardinal;
-  Value16 : Word;
+  StartPos : Int64;
+  Value32  : Cardinal;
+  Value16  : Word;
+  Offsets  : array [0..4] of Word;
 begin
  with Stream do
   begin
+   // remember start position
+   StartPos := Position;
+
    // write version
    Value32 := Swap32(Cardinal(Version));
    Write(Value32, SizeOf(TFixedPoint));
 
-(*
+   // reset offset array to zero
+   FillChar(Offsets[0], 5 * SizeOf(Word), 0);
+
+   // skip directory for now
+   Seek(SizeOf(Offsets), soCurrent);
+
    // write glyph class definition
-   Value16 := Swap16(FGlyphClassDef);
+   if Assigned(FGlyphClassDef) then
+    begin
+     Offsets[0] := Word(Position - StartPos);
+     FGlyphClassDef.SaveToStream(Stream);
+    end;
+
+(*
+   // write attachment list
+   if Assigned(FAttachList) then
+    begin
+     Offsets[1] := Word(Position - StartPos);
+     FAttachList.SaveToStream(Stream);
+    end;
+
+   // write ligature caret list
+   if Assigned(FLigCaretList) then
+    begin
+     Offsets[2] := Word(Position - StartPos);
+     FLigCaretList.SaveToStream(Stream);
+    end;
+*)
+
+   // write mark attachment class definition
+   if Assigned(FMarkAttachClassDef) then
+    begin
+     Offsets[3] := Word(Position - StartPos);
+     FMarkAttachClassDef.SaveToStream(Stream);
+    end;
+
+   // write mark glyph set definition
+   if Assigned(FMarkGlyphSetsDef) then
+    begin
+     Offsets[4] := Word(Position - StartPos);
+     FMarkGlyphSetsDef.SaveToStream(Stream);
+    end;
+
+   // skip directory for now
+   Position := StartPos + SizeOf(TFixedPoint);
+
+   // write directory
+
+   // write glyph class definition
+   Value16 := Swap16(Offsets[0]);
    Write(Value16, SizeOf(Word));
 
    // write attach list
-   Value16 := Swap16(FAttachList);
+   Value16 := Swap16(Offsets[1]);
    Write(Value16, SizeOf(Word));
 
    // write ligature caret list
-   Value16 := Swap16(FLigCaretList);
+   Value16 := Swap16(Offsets[2]);
    Write(Value16, SizeOf(Word));
 
    // write mark attach class definition
-   Value16 := Swap16(FMarkAttachClassDef);
+   Value16 := Swap16(Offsets[3]);
    Write(Value16, SizeOf(Word));
 
    // write mark glyph set
-   Value16 := Swap16(FMarkGlyphSetsDef);
+   Value16 := Swap16(Offsets[4]);
    Write(Value16, SizeOf(Word));
-*)
   end;
 end;
 
@@ -1036,14 +1108,11 @@ end;
 
 procedure TCustomOpenTypeLanguageSystemTable.LoadFromStream(Stream: TStream);
 var
-  StartPos       : Int64;
-  FeatureIndex   : Integer;
-  Value16        : Word;
+  FeatureIndex : Integer;
+  Value16      : Word;
 begin
  with Stream do
   begin
-   StartPos := Position;
-
    // read default language system
    Read(Value16, SizeOf(Word));
    FLookupOrder := Swap16(Value16);
@@ -1067,9 +1136,8 @@ end;
 
 procedure TCustomOpenTypeLanguageSystemTable.SaveToStream(Stream: TStream);
 var
-  StartPos       : Int64;
-  FeatureIndex   : Integer;
-  Value16        : Word;
+  FeatureIndex : Integer;
+  Value16      : Word;
 begin
  with Stream do
   begin
@@ -1200,7 +1268,7 @@ begin
     if Assigned(Self.FDefaultLangSys) then
      begin
       if not Assigned(FDefaultLangSys)
-       then FDefaultLangSys := TCustomOpenTypeLanguageSystemTable.Create(FInterpreter);
+       then FDefaultLangSys := TOpenTypeDefaultLanguageSystemTable.Create(FInterpreter);
 
       FDefaultLangSys.Assign(Self.FDefaultLangSys);
      end else
@@ -1229,7 +1297,7 @@ begin
   begin
    StartPos := Position;
 
-   // read default language system
+   // read default language system offset
    Read(Value16, SizeOf(Word));
    DefaultLangSys := Swap16(Value16);
 
@@ -1259,7 +1327,7 @@ begin
     end else
    if Assigned(FDefaultLangSys)
     then FreeAndNil(FDefaultLangSys);
-   
+
    // clear existing language tables
    FLanguageSystemTables.Clear;
 
@@ -1287,63 +1355,59 @@ end;
 
 procedure TCustomOpenTypeScriptTable.SaveToStream(Stream: TStream);
 var
+  StartPos       : Int64;
   LangSysIndex   : Integer;
-  LangTable      : TCustomOpenTypeLanguageSystemTable;
-  DefaultLangSys : Word;
+  LangSysRecords : array of TTagOffsetRecord;
   Value16        : Word;
 begin
  with Stream do
   begin
-(*
+   // remember start position of the stream
+   StartPos := Position;
+
    // write default language system offset
    if Assigned(FDefaultLangSys)
-    then Value16 := 4 + 6 * Length(LangSysRecords);
+    then Value16 := 4 + 6 * FLanguageSystemTables.Count
     else Value16 := 0;
    Write(Value16, SizeOf(Word));
 
-   // write language system record count
-   Value16 := Swap16(Length(LangSysRecords));
+   // write feature list count
+   Value16 := Swap16(FLanguageSystemTables.Count);
    Write(Value16, SizeOf(Word));
 
-   for LangSysIndex := 0 to Length(LangSysRecords) - 1 do
-    begin
-     // write table type
-     Write(LangSysRecords[LangSysIndex].Tag, SizeOf(TTableType));
+   // leave space for feature directory
+   Seek(6 * FLanguageSystemTables.Count, soCurrent);
 
-     // write offset
-     Value16 := Swap16(LangSysRecords[LangSysIndex].Offset);
-     Write(Value16, SizeOf(Word));
-    end;
-
-   // load default language system
+   // eventually write default language system
    if Assigned(FDefaultLangSys)
-    begin
-     if not Assigned(FDefaultLangSys)
-      then FDefaultLangSys := TCustomOpenTypeLanguageSystemTable.Create(FInterpreter);
+    then FDefaultLangSys.SaveToStream(Stream);
 
-     FDefaultLangSys.LoadFromStream(Stream);
-    end else
-   if Assigned(FDefaultLangSys)
-    then FreeAndNil(FDefaultLangSys);
-   
-   // clear existing language tables
-   FLanguageSystemTables.Clear;
+   // build directory (to be written later) and write data
+   SetLength(LangSysRecords, FLanguageSystemTables.Count);
+   for LangSysIndex := 0 to Length(LangSysRecords) - 1 do
+    with TCustomOpenTypeLanguageSystemTable(FLanguageSystemTables[LangSysIndex]) do
+     begin
+      // get table type
+      LangSysRecords[LangSysIndex].Tag := TableType;
+      LangSysRecords[LangSysIndex].Offset := Position;
+
+      // write feature to stream
+      SaveToStream(Stream);
+     end;
+
+   // write directory
+   Position := StartPos + 4;
 
    for LangSysIndex := 0 to Length(LangSysRecords) - 1 do
-    begin
-     // create language table entry
-     LangTable := TCustomOpenTypeLanguageSystemTable.Create(FInterpreter);
+    with LangSysRecords[LangSysIndex] do
+     begin
+      // write tag
+      Write(Tag, SizeOf(TTableType));
 
-     // set position
-     Position := StartPos + LangSysRecords[LangSysIndex].Offset;
-
-     // read language system table entry from stream
-     LangTable.LoadFromStream(Stream);
-
-     // add to language system tables
-     FLanguageSystemTables.Add(LangTable);
-    end;
-*)
+      // write offset
+      Value16 := Swap16(Offset);
+      Write(Value16, SizeOf(Word));
+     end;
   end;
 end;
 
@@ -1399,13 +1463,12 @@ end;
 
 procedure TOpenTypeScriptListTable.LoadFromStream(Stream: TStream);
 var
-  StartPos     : Int64;
-  ScriptIndex  : Integer;
-  LangSysIndex : Integer;
-  Value16      : Word;
-  ScriptList   : array of TTagOffsetRecord;
-  LangSys      : TCustomOpenTypeScriptTable;
-  LangSysClass : TOpenTypeScriptTableClass;
+  StartPos         : Int64;
+  ScriptIndex      : Integer;
+  ScriptList       : array of TTagOffsetRecord;
+  ScriptTable      : TCustomOpenTypeScriptTable;
+  ScriptTableClass : TOpenTypeScriptTableClass;
+  Value16          : Word;
 begin
  with Stream do
   begin
@@ -1431,21 +1494,21 @@ begin
    for ScriptIndex := 0 to Length(ScriptList) - 1 do
     begin
      // find language class
-     LangSysClass := FindScriptByType(ScriptList[ScriptIndex].Tag);
+     ScriptTableClass := FindScriptByType(ScriptList[ScriptIndex].Tag);
 
-     if Assigned(LangSysClass) then
+     if Assigned(ScriptTableClass) then
       begin
        // create language system entry
-       LangSys := LangSysClass.Create(FInterpreter);
+       ScriptTable := ScriptTableClass.Create(FInterpreter);
 
        // set position to actual script list entry
        Position := StartPos + ScriptList[ScriptIndex].Offset;
 
        // load from stream
-       LangSys.LoadFromStream(Stream);
+       ScriptTable.LoadFromStream(Stream);
 
        // add to language system list
-       FLangSysList.Add(LangSys)
+       FLangSysList.Add(ScriptTable)
       end;
     end;
   end;
@@ -1500,14 +1563,11 @@ end;
 
 procedure TCustomOpenTypeFeatureTable.LoadFromStream(Stream: TStream);
 var
-  StartPos    : Int64;
   LookupIndex : Word;
   Value16     : Word;
 begin
  with Stream do
   begin
-   StartPos := Position;
-
    // read feature parameter offset
    Read(Value16, SizeOf(Word));
    FFeatureParams := Swap16(Value16);
@@ -1527,14 +1587,11 @@ end;
 
 procedure TCustomOpenTypeFeatureTable.SaveToStream(Stream: TStream);
 var
-  StartPos    : Int64;
   LookupIndex : Word;
   Value16     : Word;
 begin
  with Stream do
   begin
-   StartPos := Position;
-
    // read feature parameter offset
    Read(Value16, SizeOf(Word));
    FFeatureParams := Swap16(Value16);
@@ -1621,7 +1678,7 @@ begin
   begin
    StartPos := Position;
 
-   // read script list count
+   // read feature list count
    Read(Value16, SizeOf(Word));
    SetLength(FeatureList, Swap16(Value16));
 
@@ -1673,8 +1730,12 @@ begin
   begin
    StartPos := Position;
 
+   // write feature list count
+   Value16 := Swap16(FFeatureList.Count);
+   Write(Value16, SizeOf(Word));
+
    // leave space for feature directory
-   Position := FFeatureList.Count * 6;
+   Seek(FFeatureList.Count * 6, soCurrent);
 
    // build directory (to be written later) and write data
    SetLength(FeatureList, FFeatureList.Count);
@@ -1690,7 +1751,7 @@ begin
      end;
 
    // write directory
-   Position := StartPos;
+   Position := StartPos + 2;
 
    for FeatureIndex := 0 to Length(FeatureList) - 1 do
     with FeatureList[FeatureIndex] do

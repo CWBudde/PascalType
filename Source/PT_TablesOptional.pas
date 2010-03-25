@@ -42,7 +42,7 @@ type
   private
     FReserved  : array [0..1] of Word; // Reserved for later use; 0 for now
     FSignature : array of Byte; // PKCS#7 packet
-    FFormat: Cardinal;
+    FFormat    : Cardinal;
     function GetSignatureByte(Index: Integer): Byte;
     function GetSignatureLength: Cardinal;
     procedure SetReserved(const Index: Integer; const Value: Word);

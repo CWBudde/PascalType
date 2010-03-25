@@ -299,7 +299,6 @@ type
   private
     FCharacterMap : TCustomTrueTypeFontCharacterMap;
     FEncodingID   : Word;
-    FOffset       : LongInt;
     function GetEncodingIDAsWord: Word;
     procedure SetEncodingIDAsWord(const Value: Word);
   protected
@@ -311,13 +310,14 @@ type
     procedure EncodingIDChanged; virtual;
     property PlatformSpecificID: Word read GetEncodingIDAsWord write SetEncodingIDAsWord;
   public
-    constructor Create; override;
+    constructor Create(EncodingID: Word); reintroduce; virtual;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
     property PlatformID: TPlatformID read GetPlatformID;
+    property EncodingID: Word read GetEncodingIDAsWord;
     property CharacterMap: TCustomTrueTypeFontCharacterMap read FCharacterMap;
   end;
 
@@ -919,36 +919,6 @@ type
 
   // Table "OS/2"
 
-  TOS2Table = packed record
-    Version             : Word;                     // table version number (set to 0)
-    XAvgCharWidth       : SmallInt;                 // average weighted advance width of lower case letters and space
-    UsWeightClass       : TOS2WeightClass;          // visual weight (degree of blackness or thickness) of stroke in glyphs
-    UsWidthClass        : TOS2WidthClass;           // relative change from the normal aspect ratio (width to height ratio) as specified by a font designer for the glyphs in the font
-    FsType              : SmallInt;                 // characteristics and properties of this font (set undefined bits to zero)
-    YSubscriptXSize     : SmallInt;                 // recommended horizontal size in pixels for subscripts
-    YSubscriptYSize     : SmallInt;                 // recommended vertical size in pixels for subscripts
-    YSubScriptXOffset   : SmallInt;                 // recommended horizontal offset for subscripts
-    YSubscriptYOffset   : SmallInt;                 // recommended vertical offset form the baseline for subscripts
-    YSuperscriptXSize   : SmallInt;                 // recommended horizontal size in pixels for superscripts
-    YSuperscriptYSize   : SmallInt;                 // recommended vertical size in pixels for superscripts
-    YSuperscriptXOffset : SmallInt;                 // recommended horizontal offset for superscripts
-    YSuperscriptYOffset : SmallInt;                 // recommended vertical offset from the baseline for superscripts
-    YStrikeoutSize      : SmallInt;                 // width of the strikeout stroke
-    YStrikeoutPosition  : SmallInt;                 // position of the strikeout stroke relative to the baseline
-    SFamilyClass        : SmallInt;                 // classification of font-family design.
-    Panose              : array [0..9] of Byte;     // 10 byte series of number used to describe the visual characteristics of a given typeface
-    UlUnicodeRange      : array [0..3] of Cardinal; // Field is split into two bit fields of 96 and 36 bits each. The low 96 bits are used to specify the Unicode blocks encompassed by the font file. The high 32 bits are used to specify the character or script sets covered by the font file. Bit assignments are pending. Set to 01
-    AchVendID           : TTableType;               // four character identifier for the font vendor
-    FsSelection         : Word;                     // 2-byte bit field containing information concerning the nature of the font patterns
-    UsFirstCharIndex    : Word;                     // The minimum Unicode index in this font.
-    UsLastCharIndex     : Word;                     // The maximum Unicode index in this font.
-    STypoAscender       : SmallInt;
-    STypoDescender      : SmallInt;
-    STypoLineGap        : SmallInt;
-    UsWinAscent         : Word;
-    UsWinDescent        : Word;
-  end;
-
   TOS2TableAddendum1 = packed record
     UlCodePageRange1    : Cardinal;
     UlCodePageRange2    : Cardinal;
@@ -964,7 +934,33 @@ type
 
   TTrueTypeFontOS2Table = class(TCustomPascalTypeNamedTable)
   private
-    FOS2Table : TOS2Table;
+    FVersion             : Word;                     // table version number (set to 0)
+    FXAvgCharWidth       : SmallInt;                 // average weighted advance width of lower case letters and space
+    FUsWeightClass       : TOS2WeightClass;          // visual weight (degree of blackness or thickness) of stroke in glyphs
+    FUsWidthClass        : TOS2WidthClass;           // relative change from the normal aspect ratio (width to height ratio) as specified by a font designer for the glyphs in the font
+    FFsType              : SmallInt;                 // characteristics and properties of this font (set undefined bits to zero)
+    FYSubscriptXSize     : SmallInt;                 // recommended horizontal size in pixels for subscripts
+    FYSubscriptYSize     : SmallInt;                 // recommended vertical size in pixels for subscripts
+    FYSubScriptXOffset   : SmallInt;                 // recommended horizontal offset for subscripts
+    FYSubscriptYOffset   : SmallInt;                 // recommended vertical offset form the baseline for subscripts
+    FYSuperscriptXSize   : SmallInt;                 // recommended horizontal size in pixels for superscripts
+    FYSuperscriptYSize   : SmallInt;                 // recommended vertical size in pixels for superscripts
+    FYSuperscriptXOffset : SmallInt;                 // recommended horizontal offset for superscripts
+    FYSuperscriptYOffset : SmallInt;                 // recommended vertical offset from the baseline for superscripts
+    FYStrikeoutSize      : SmallInt;                 // width of the strikeout stroke
+    FYStrikeoutPosition  : SmallInt;                 // position of the strikeout stroke relative to the baseline
+    FSFamilyClass        : SmallInt;                 // classification of font-family design.
+    FPanose              : array [0..9] of Byte;     // 10 byte series of number used to describe the visual characteristics of a given typeface
+    FUlUnicodeRange      : array [0..3] of Cardinal; // Field is split into two bit fields of 96 and 36 bits each. The low 96 bits are used to specify the Unicode blocks encompassed by the font file. The high 32 bits are used to specify the character or script sets covered by the font file. Bit assignments are pending. Set to 01
+    FAchVendID           : TTableType;               // four character identifier for the font vendor
+    FFsSelection         : Word;                     // 2-byte bit field containing information concerning the nature of the font patterns
+    FUsFirstCharIndex    : Word;                     // The minimum Unicode index in this font.
+    FUsLastCharIndex     : Word;                     // The maximum Unicode index in this font.
+    FSTypoAscender       : SmallInt;
+    FSTypoDescender      : SmallInt;
+    FSTypoLineGap        : SmallInt;
+    FUsWinAscent         : Word;
+    FUsWinDescent        : Word;
     procedure SetVersion(const Value: Word);
     procedure SetAchVendID(const Value: TTableType);
     procedure SetFsSelection(const Value: Word);
@@ -1028,33 +1024,31 @@ type
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
-    property OS2Table: TOS2Table read FOS2Table;
-
-    property Version: Word read FOS2Table.Version write SetVersion;
-    property XAvgCharWidth: SmallInt read FOS2Table.XAvgCharWidth write SetXAvgCharWidth;
-    property UsWeightClass: TOS2WeightClass read FOS2Table.UsWeightClass write SetUsWeightClass;
-    property UsWidthClass: TOS2WidthClass read FOS2Table.UsWidthClass write SetUsWidthClass;
-    property FsType: SmallInt read FOS2Table.FsType write SetFsType;
-    property YSubscriptXSize: SmallInt read FOS2Table.YSubscriptXSize write SetYSubscriptXSize;
-    property YSubscriptYSize: SmallInt read FOS2Table.YSubscriptYSize write SetYSubscriptYSize;
-    property YSubScriptXOffset: SmallInt read FOS2Table.YSubScriptXOffset write SetYSubScriptXOffset;
-    property YSubscriptYOffset: SmallInt read FOS2Table.YSubscriptYOffset write SetYSubscriptYOffset;
-    property YSuperscriptXSize: SmallInt read FOS2Table.YSuperscriptXSize write SetYSuperscriptXSize;
-    property YSuperscriptYSize: SmallInt read FOS2Table.YSuperscriptYSize write SetYSuperscriptYSize;
-    property YSuperscriptXOffset: SmallInt read FOS2Table.YSuperscriptXOffset write SetYSuperscriptXOffset;
-    property YSuperscriptYOffset: SmallInt read FOS2Table.YSuperscriptYOffset write SetYSuperscriptYOffset;
-    property YStrikeoutSize: SmallInt read FOS2Table.YStrikeoutSize write SetYStrikeoutSize;
-    property YStrikeoutPosition: SmallInt read FOS2Table.YStrikeoutPosition write SetYStrikeoutPosition;
-    property SFamilyClass: SmallInt read FOS2Table.SFamilyClass write SetSFamilyClass;
-    property AchVendID: TTableType read FOS2Table.AchVendID write SetAchVendID;
-    property FsSelection: Word read FOS2Table.FsSelection write SetFsSelection;
-    property UsFirstCharIndex: Word read FOS2Table.UsFirstCharIndex write SetUsFirstCharIndex;
-    property UsLastCharIndex: Word read FOS2Table.UsLastCharIndex write SetUsLastCharIndex;
-    property STypoAscender: SmallInt read FOS2Table.STypoAscender write SetSTypoAscender;
-    property STypoDescender: SmallInt read FOS2Table.STypoDescender write SetSTypoDescender;
-    property STypoLineGap: SmallInt read FOS2Table.STypoLineGap write SetSTypoLineGap;
-    property UsWinAscent: Word read FOS2Table.UsWinAscent write SetUsWinAscent;
-    property UsWinDescent: Word read FOS2Table.UsWinDescent write SetUsWinDescent;
+    property Version: Word read FVersion write SetVersion;
+    property XAvgCharWidth: SmallInt read FXAvgCharWidth write SetXAvgCharWidth;
+    property UsWeightClass: TOS2WeightClass read FUsWeightClass write SetUsWeightClass;
+    property UsWidthClass: TOS2WidthClass read FUsWidthClass write SetUsWidthClass;
+    property FsType: SmallInt read FFsType write SetFsType;
+    property YSubscriptXSize: SmallInt read FYSubscriptXSize write SetYSubscriptXSize;
+    property YSubscriptYSize: SmallInt read FYSubscriptYSize write SetYSubscriptYSize;
+    property YSubScriptXOffset: SmallInt read FYSubScriptXOffset write SetYSubScriptXOffset;
+    property YSubscriptYOffset: SmallInt read FYSubscriptYOffset write SetYSubscriptYOffset;
+    property YSuperscriptXSize: SmallInt read FYSuperscriptXSize write SetYSuperscriptXSize;
+    property YSuperscriptYSize: SmallInt read FYSuperscriptYSize write SetYSuperscriptYSize;
+    property YSuperscriptXOffset: SmallInt read FYSuperscriptXOffset write SetYSuperscriptXOffset;
+    property YSuperscriptYOffset: SmallInt read FYSuperscriptYOffset write SetYSuperscriptYOffset;
+    property YStrikeoutSize: SmallInt read FYStrikeoutSize write SetYStrikeoutSize;
+    property YStrikeoutPosition: SmallInt read FYStrikeoutPosition write SetYStrikeoutPosition;
+    property SFamilyClass: SmallInt read FSFamilyClass write SetSFamilyClass;
+    property AchVendID: TTableType read FAchVendID write SetAchVendID;
+    property FsSelection: Word read FFsSelection write SetFsSelection;
+    property UsFirstCharIndex: Word read FUsFirstCharIndex write SetUsFirstCharIndex;
+    property UsLastCharIndex: Word read FUsLastCharIndex write SetUsLastCharIndex;
+    property STypoAscender: SmallInt read FSTypoAscender write SetSTypoAscender;
+    property STypoDescender: SmallInt read FSTypoDescender write SetSTypoDescender;
+    property STypoLineGap: SmallInt read FSTypoLineGap write SetSTypoLineGap;
+    property UsWinAscent: Word read FUsWinAscent write SetUsWinAscent;
+    property UsWinDescent: Word read FUsWinDescent write SetUsWinDescent;
   end;
 
 
@@ -2138,10 +2132,10 @@ end;
 
 { TCustomCharacterMapDirectoryEntry }
 
-constructor TCustomCharacterMapDirectoryEntry.Create;
+constructor TCustomCharacterMapDirectoryEntry.Create(EncodingID: Word);
 begin
- inherited;
-
+ FEncodingID := EncodingID;
+ inherited Create;
 end;
 
 destructor TCustomCharacterMapDirectoryEntry.Destroy;
@@ -2157,8 +2151,7 @@ begin
  if Dest is TCustomCharacterMapDirectoryEntry then
   with TCustomCharacterMapDirectoryEntry(Dest) do
    begin
-    FEncodingID   := Self.FEncodingID;
-    FOffset       := Self.FOffset;
+    FEncodingID := Self.FEncodingID;
     FCharacterMap.Assign(Self.FCharacterMap);
    end else inherited;
 end;
@@ -2169,7 +2162,6 @@ begin
   then FreeAndNil(FCharacterMap);
 
  FEncodingID := 0;
- FOffset := 0;
 end;
 
 procedure TCustomCharacterMapDirectoryEntry.EncodingIDChanged;
@@ -2184,28 +2176,14 @@ end;
 
 procedure TCustomCharacterMapDirectoryEntry.LoadFromStream(Stream: TStream);
 var
-  Value32 : Cardinal;
   Value16 : Word;
   OldMap  : TCustomTrueTypeFontCharacterMap;
 begin
  with Stream do
   begin
-   // read encoding ID
+   // read format
    Read(Value16, SizeOf(Word));
-   FEncodingID := Swap16(Value16);
-
-   // read offset
-   Read(Value32, SizeOf(Cardinal));
-   FOffset := Swap32(Value32);
-
-   // damn hack: assume that the stream starts at the beginning of the table
-   Position := FOffset;
-
-   // read offset
-   Read(Value16, SizeOf(Word));
-   Value16 := Swap16(Value16);
-
-   case Value16 of
+   case Swap16(Value16) of
     0 : begin
          OldMap := FCharacterMap;
          FCharacterMap := TTrueTypeFontFormat0CharacterMap.Create;
@@ -2232,20 +2210,9 @@ begin
 end;
 
 procedure TCustomCharacterMapDirectoryEntry.SaveToStream(Stream: TStream);
-var
-  Value32 : Cardinal;
-  Value16 : Word;
 begin
- with Stream do
-  begin
-   // write encoding ID
-   Value16 := Swap16(FEncodingID);
-   Write(Value16, SizeOf(Word));
-
-   // write offset
-   Value32 := Swap32(FOffset);
-   Write(Value32, SizeOf(Cardinal));
-  end;
+ if Assigned(FCharacterMap)
+  then FCharacterMap.SaveToStream(Stream);
 end;
 
 procedure TCustomCharacterMapDirectoryEntry.SetEncodingIDAsWord(
@@ -2392,9 +2359,10 @@ var
   SubtableCount   : Integer;
   SubtableIndex   : Integer;
   CharMapDirEntry : TCustomCharacterMapDirectoryEntry;
-  CharacterMap    : TCustomTrueTypeFontCharacterMap;
   Value32         : Cardinal;
   Value16         : Word;
+  PlatformID      : Word;
+  EncodingID      : Word;
 begin
  with Stream do
   begin
@@ -2403,7 +2371,7 @@ begin
 
    // store stream start position
    StartPos := Position;
-   Assert(StartPos = 0); // asser this for the damn hack used in this table!!!
+   Assert(StartPos = 0); // assert this for the damn hack used in this table!!!
 
    // read Version
    Read(Value16, SizeOf(Word));
@@ -2427,50 +2395,34 @@ begin
    // read directory entry
    for SubtableIndex := 0 to SubtableCount - 1 do
     begin
-     Position := StartPos + 4 + SubtableIndex * 8; 
+     Position := StartPos + 4 + SubtableIndex * 8;
 
      // read Platform ID
      Read(Value16, SizeOf(Word));
-     Value16 := Swap16(Value16);
+     PlatformID := Swap16(Value16);
 
-     case Value16 of
-       0 : CharMapDirEntry := TUnicodeCharacterMapDirectoryEntry.Create;
-       1 : CharMapDirEntry := TMacintoshCharacterMapDirectoryEntry.Create;
-       3 : CharMapDirEntry := TMicrosoftCharacterMapDirectoryEntry.Create;
-      else CharMapDirEntry := TGenericCharacterMapDirectoryEntry.Create;
+     // read encoding ID
+     Read(Value16, SizeOf(Word));
+     EncodingID := Swap16(Value16);
+
+     // create character map based on encoding
+     case PlatformID of
+       0 : CharMapDirEntry := TUnicodeCharacterMapDirectoryEntry.Create(EncodingID);
+       1 : CharMapDirEntry := TMacintoshCharacterMapDirectoryEntry.Create(EncodingID);
+       3 : CharMapDirEntry := TMicrosoftCharacterMapDirectoryEntry.Create(EncodingID);
+      else CharMapDirEntry := TGenericCharacterMapDirectoryEntry.Create(EncodingID);
      end;
 
+     // read and apply offset
+     Read(Value32, SizeOf(Cardinal));
+     Position := StartPos + Swap32(Value32);
+
+     // load character map entry from stream
      CharMapDirEntry.LoadFromStream(Stream);
 
      if Assigned(CharMapDirEntry)
       then FSubtableList.Add(CharMapDirEntry);
     end;
-
-(*
-     // read length
-     Read(Value16, SizeOf(Word));
-     PlatformSpecificID := Swap16(Value16);
-
-     // read offset
-     Read(Value32, SizeOf(Cardinal));
-     Offset := Swap32(Value32);
-   // clear existing signatures
-   FCharacterMap.Clear;
-
-   // read digital signatures
-   for DirIndex := 0 to Length(Directory) - 1 do
-    with Directory[DirIndex] do
-     begin
-      CharacterMap := TCustomTrueTypeFontCharacterMap.Create;
-
-      Position := StartPos + Offset;
-
-      // load digital signature from stream
-      CharacterMap.LoadFromStream(Stream);
-
-      FCharacterMap.Add(CharacterMap);
-     end;
-*)
   end;
 end;
 
@@ -2478,7 +2430,7 @@ procedure TPascalTypeCharacterMapTable.SaveToStream(Stream: TStream);
 var
   StartPos  : Int64;
   DirIndex  : Integer;
-//  Directory : array of TCharacterMapDirectoryEntry;
+  Directory : array of Cardinal;
   Value32   : Cardinal;
   Value16   : Word;
 begin
@@ -2496,39 +2448,36 @@ begin
    Write(Value16, SizeOf(Word));
 
    // offset directory
-   Seek(soFromCurrent, FSubtableList.Count * 3 * SizeOf(Cardinal));
+   Seek(soFromCurrent, 6 * FSubtableList.Count);
 
-(*
-   // build directory and store signature
-   for DirIndex := 0 to FCharacterMap.Count - 1 do
-    with TCustomTrueTypeFontCharacterMap(FCharacterMap[DirIndex]) do
+   // build directory (to be written later) and write data
+   SetLength(Directory, FSubtableList.Count);
+
+   for DirIndex := 0 to FSubtableList.Count - 1 do
+    with TCustomCharacterMapDirectoryEntry(FSubtableList[DirIndex]) do
      begin
-      Directory[DirIndex].Format := Format;
-      Directory[DirIndex].Offset := Position - StartPos;
+      Directory[DirIndex] := Cardinal(Position - StartPos);
       SaveToStream(Stream);
-      Directory[DirIndex].Length := (Position - StartPos) - Directory[DirIndex].Offset;
      end;
 
    // locate directory
-   Position := StartPos + 3 * SizeOf(Word);
+   Position := StartPos + 4;
 
-   // write directory entries
-   for DirIndex := 0 to Length(Directory) - 1 do
-    with Directory[DirIndex], TCustomTrueTypeFontCharacterMap(FSignatures[DirIndex]) do
+   for DirIndex := 0 to FSubtableList.Count - 1 do
+    with TCustomCharacterMapDirectoryEntry(FSubtableList[DirIndex]) do
      begin
       // write format
-      Value32 := Swap32(Format);
-      Write(Value32, SizeOf(Cardinal));
+      Value16 := Word(PlatformID);
+      Write(Value16, SizeOf(Word));
 
-      // write length
-      Value32 := Swap32(Length);
-      Write(Value32, SizeOf(Cardinal));
+      // write encoding ID
+      Value16 := EncodingID;
+      Write(Value16, SizeOf(Word));
 
       // write offset
-      Value32 := Swap32(Offset);
+      Value32 := Directory[DirIndex];
       Write(Value32, SizeOf(Cardinal));
      end;
-*)
   end;
 end;
 
@@ -5077,7 +5026,33 @@ begin
  if Dest is TPascalTypeNameTable then
   with TPascalTypeNameTable(Dest) do
    begin
-    FOS2Table := Self.FOS2Table;
+    FVersion             := Self.FVersion;
+    FXAvgCharWidth       := Self.FXAvgCharWidth;
+    FUsWeightClass       := Self.FUsWeightClass;
+    FUsWidthClass        := Self.FUsWidthClass;
+    FFsType              := Self.FFsType;
+    FYSubscriptXSize     := Self.FYSubscriptXSize;
+    FYSubscriptYSize     := Self.FYSubscriptYSize;
+    FYSubScriptXOffset   := Self.FYSubScriptXOffset;
+    FYSubscriptYOffset   := Self.FYSubscriptYOffset;
+    FYSuperscriptXSize   := Self.FYSuperscriptXSize;
+    FYSuperscriptYSize   := Self.FYSuperscriptYSize;
+    FYSuperscriptXOffset := Self.FYSuperscriptXOffset;
+    FYSuperscriptYOffset := Self.FYSuperscriptYOffset;
+    FYStrikeoutSize      := Self.FYStrikeoutSize;
+    FYStrikeoutPosition  := Self.FYStrikeoutPosition;
+    FSFamilyClass        := Self.FSFamilyClass;
+    FPanose              := Self.FPanose;
+    FUlUnicodeRange      := Self.FUlUnicodeRange;
+    FAchVendID           := Self.FAchVendID;
+    FFsSelection         := Self.FFsSelection;
+    FUsFirstCharIndex    := Self.FUsFirstCharIndex;
+    FUsLastCharIndex     := Self.FUsLastCharIndex;
+    FSTypoAscender       := Self.FSTypoAscender;
+    FSTypoDescender      := Self.FSTypoDescender;
+    FSTypoLineGap        := Self.FSTypoLineGap;
+    FUsWinAscent         := Self.FUsWinAscent;
+    FUsWinDescent        := Self.FUsWinDescent;
    end
  else inherited;
 end;
@@ -5089,50 +5064,47 @@ end;
 
 procedure TTrueTypeFontOS2Table.ResetToDefaults;
 begin
- with FOS2Table do
-  begin
-   Version := 0;
-   XAvgCharWidth := 0;
-   UsWeightClass := wcNormal;
-   UsWidthClass := wcMediumNormal;
-   FsType := 0;
-   YSubscriptXSize := 0;
-   YSubscriptYSize := 0;
-   YSubScriptXOffset := 0;
-   YSubscriptYOffset := 0;
-   YSuperscriptXSize := 0;
-   YSuperscriptYSize := 0;
-   YSuperscriptXOffset := 0;
-   YSuperscriptYOffset := 0;
-   YStrikeoutSize := 0;
-   YStrikeoutPosition := 0;
-   SFamilyClass := 0;
-   FillChar(Panose, 10, 0);
-   FillChar(UlUnicodeRange, 4, 0);
-   AchVendID := #0#0#0#0;
-   FsSelection := 0;
-   UsFirstCharIndex := 0;
-   UsLastCharIndex := 0;
-   STypoAscender := 0;
-   STypoDescender := 0;
-   STypoLineGap := 0;
-   UsWinAscent := 0;
-   UsWinDescent := 0;
-  end;
+ FVersion := 0;
+ FXAvgCharWidth := 0;
+ FUsWeightClass := wcNormal;
+ FUsWidthClass := wcMediumNormal;
+ FFsType := 0;
+ FYSubscriptXSize := 0;
+ FYSubscriptYSize := 0;
+ FYSubScriptXOffset := 0;
+ FYSubscriptYOffset := 0;
+ FYSuperscriptXSize := 0;
+ FYSuperscriptYSize := 0;
+ FYSuperscriptXOffset := 0;
+ FYSuperscriptYOffset := 0;
+ FYStrikeoutSize := 0;
+ FYStrikeoutPosition := 0;
+ FSFamilyClass := 0;
+ FillChar(FPanose, 10, 0);
+ FillChar(FUlUnicodeRange, 4, 0);
+ FAchVendID := #0#0#0#0;
+ FFsSelection := 0;
+ FUsFirstCharIndex := 0;
+ FUsLastCharIndex := 0;
+ FSTypoAscender := 0;
+ FSTypoDescender := 0;
+ FSTypoLineGap := 0;
+ FUsWinAscent := 0;
+ FUsWinDescent := 0;
 end;
 
 procedure TTrueTypeFontOS2Table.LoadFromStream(Stream: TStream);
 var
   Value16 : Word;
 begin
- with Stream, FOS2Table do
+ with Stream do
   begin
-   if Position + SizeOf(TOS2Table) > Size
+   if Position + 68 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
    Read(Value16, SizeOf(Word));
-   Version := Swap16(Value16);
+   FVersion := Swap16(Value16);
 
    // check version
    if not (Version in [0..3])
@@ -5141,104 +5113,104 @@ begin
 
    // read XAvgCharWidth
    Read(Value16, SizeOf(Word));
-   XAvgCharWidth := Swap16(Value16);
+   FXAvgCharWidth := Swap16(Value16);
 
    // read UsWeightClass
    Read(Value16, SizeOf(Word));
-//   UsWeightClass := Swap16(Value16);
+//   FUsWeightClass := Swap16(Value16);
 
    // read UsWidthClass
    Read(Value16, SizeOf(Word));
-//   UsWidthClass := Swap16(Value16);
+//   FUsWidthClass := Swap16(Value16);
 
    // read FsType
    Read(Value16, SizeOf(Word));
-   FsType := Swap16(Value16);
+   FFsType := Swap16(Value16);
 
    // read YSubscriptXSize
    Read(Value16, SizeOf(Word));
-   YSubscriptXSize := Swap16(Value16);
+   FYSubscriptXSize := Swap16(Value16);
 
    // read YSubscriptYSize
    Read(Value16, SizeOf(Word));
-   YSubscriptYSize := Swap16(Value16);
+   FYSubscriptYSize := Swap16(Value16);
 
    // read YSubScriptXOffset
    Read(Value16, SizeOf(Word));
-   YSubScriptXOffset := Swap16(Value16);
+   FYSubScriptXOffset := Swap16(Value16);
 
    // read YSubscriptYOffset
    Read(Value16, SizeOf(Word));
-   YSubscriptYOffset := Swap16(Value16);
+   FYSubscriptYOffset := Swap16(Value16);
 
    // read YSuperscriptXSize
    Read(Value16, SizeOf(Word));
-   YSuperscriptXSize := Swap16(Value16);
+   FYSuperscriptXSize := Swap16(Value16);
 
    // read YSuperscriptYSize
    Read(Value16, SizeOf(Word));
-   YSuperscriptYSize := Swap16(Value16);
+   FYSuperscriptYSize := Swap16(Value16);
 
    // read YSuperscriptXOffset
    Read(Value16, SizeOf(Word));
-   YSuperscriptXOffset := Swap16(Value16);
+   FYSuperscriptXOffset := Swap16(Value16);
 
    // read YSuperscriptYOffset
    Read(Value16, SizeOf(Word));
-   YSuperscriptYOffset := Swap16(Value16);
+   FYSuperscriptYOffset := Swap16(Value16);
 
    // read YStrikeoutSize
    Read(Value16, SizeOf(Word));
-   YStrikeoutSize := Swap16(Value16);
+   FYStrikeoutSize := Swap16(Value16);
 
    // read YStrikeoutPosition
    Read(Value16, SizeOf(Word));
-   YStrikeoutPosition := Swap16(Value16);
+   FYStrikeoutPosition := Swap16(Value16);
 
    // read SFamilyClass
    Read(Value16, SizeOf(Word));
-   SFamilyClass := Swap16(Value16);
+   FSFamilyClass := Swap16(Value16);
 
    // read Panose
-   Read(Panose, 10);
+   Read(FPanose, 10);
 
    // read UlUnicodeRange
-   Read(UlUnicodeRange, 4 * SizeOf(Cardinal));
+   Read(FUlUnicodeRange, 4 * SizeOf(Cardinal));
 
    // read AchVendID
-   Read(AchVendID, 4);
+   Read(FAchVendID, 4);
 
    // read FsSelection
    Read(Value16, SizeOf(Word));
-   FsSelection := Swap16(Value16);
+   FFsSelection := Swap16(Value16);
 
    // read UsFirstCharIndex
    Read(Value16, SizeOf(Word));
-   UsFirstCharIndex := Swap16(Value16);
+   FUsFirstCharIndex := Swap16(Value16);
 
    // read UsLastCharIndex
    Read(Value16, SizeOf(Word));
-   UsLastCharIndex := Swap16(Value16);
+   FUsLastCharIndex := Swap16(Value16);
 
    // read STypoAscender
    Read(Value16, SizeOf(Word));
-   STypoAscender := Swap16(Value16);
+   FSTypoAscender := Swap16(Value16);
 
    // read STypoDescender
    Read(Value16, SizeOf(Word));
-   STypoDescender := Swap16(Value16);
+   FSTypoDescender := Swap16(Value16);
 
    // read STypoLineGap
    Read(Value16, SizeOf(Word));
-   STypoLineGap := Swap16(Value16);
+   FSTypoLineGap := Swap16(Value16);
 
    // read UsWinAscent
    Read(Value16, SizeOf(Word));
-   UsWinAscent := Swap16(Value16);
+   FUsWinAscent := Swap16(Value16);
 
    // read UsWinDescent
    Read(Value16, SizeOf(Word));
-   UsWinDescent := Swap16(Value16);
+   FUsWinDescent := Swap16(Value16);
   end;
 end;
 
@@ -5246,14 +5218,14 @@ procedure TTrueTypeFontOS2Table.SaveToStream(Stream: TStream);
 var
   Value16 : Word;
 begin
- with Stream, FOS2Table do
+ with Stream do
   begin
    // write version
-   Value16 := Swap16(Version);
+   Value16 := Swap16(FVersion);
    Write(Value16, SizeOf(Word));
 
    // write XAvgCharWidth
-   Value16 := Swap16(XAvgCharWidth);
+   Value16 := Swap16(FXAvgCharWidth);
    Write(Value16, SizeOf(Word));
 
    // write UsWeightClass
@@ -5265,317 +5237,317 @@ begin
    Write(Value16, SizeOf(Word));
 
    // write FsType
-   Value16 := Swap16(FsType);
+   Value16 := Swap16(FFsType);
    Write(Value16, SizeOf(Word));
 
    // write YSubscriptXSize
-   Value16 := Swap16(YSubscriptXSize);
+   Value16 := Swap16(FYSubscriptXSize);
    Write(Value16, SizeOf(Word));
 
    // write YSubscriptYSize
-   Value16 := Swap16(YSubscriptYSize);
+   Value16 := Swap16(FYSubscriptYSize);
    Write(Value16, SizeOf(Word));
 
    // write YSubScriptXOffset
-   Value16 := Swap16(YSubScriptXOffset);
+   Value16 := Swap16(FYSubScriptXOffset);
    Write(Value16, SizeOf(Word));
 
    // write YSubscriptYOffset
-   Value16 := Swap16(YSubscriptYOffset);
+   Value16 := Swap16(FYSubscriptYOffset);
    Write(Value16, SizeOf(Word));
 
    // write YSuperscriptXSize
-   Value16 := Swap16(YSuperscriptXSize);
+   Value16 := Swap16(FYSuperscriptXSize);
    Write(Value16, SizeOf(Word));
 
    // write YSuperscriptYSize
-   Value16 := Swap16(YSuperscriptYSize);
+   Value16 := Swap16(FYSuperscriptYSize);
    Write(Value16, SizeOf(Word));
 
    // write YSuperscriptXOffset
-   Value16 := Swap16(YSuperscriptXOffset);
+   Value16 := Swap16(FYSuperscriptXOffset);
    Write(Value16, SizeOf(Word));
 
    // write YSuperscriptYOffset
-   Value16 := Swap16(YSuperscriptYOffset);
+   Value16 := Swap16(FYSuperscriptYOffset);
    Write(Value16, SizeOf(Word));
 
    // write YStrikeoutSize
-   Value16 := Swap16(YStrikeoutSize);
+   Value16 := Swap16(FYStrikeoutSize);
    Write(Value16, SizeOf(Word));
 
    // write YStrikeoutPosition
-   Value16 := Swap16(YStrikeoutPosition);
+   Value16 := Swap16(FYStrikeoutPosition);
    Write(Value16, SizeOf(Word));
 
    // write SFamilyClass
-   Value16 := Swap16(SFamilyClass);
+   Value16 := Swap16(FSFamilyClass);
    Write(Value16, SizeOf(Word));
 
    // read Panose
-   Write(Panose, 10);
+   Write(FPanose, 10);
 
    // read UlUnicodeRange
-   Write(UlUnicodeRange, 4 * SizeOf(Cardinal));
+   Write(FUlUnicodeRange, 4 * SizeOf(Cardinal));
 
    // read AchVendID
-   Write(AchVendID, 4);
+   Write(FAchVendID, 4);
 
    // write FsSelection
-   Value16 := Swap16(FsSelection);
+   Value16 := Swap16(FFsSelection);
    Write(Value16, SizeOf(Word));
 
    // write UsFirstCharIndex
-   Value16 := Swap16(UsFirstCharIndex);
+   Value16 := Swap16(FUsFirstCharIndex);
    Write(Value16, SizeOf(Word));
 
    // write UsLastCharIndex
-   Value16 := Swap16(UsLastCharIndex);
+   Value16 := Swap16(FUsLastCharIndex);
    Write(Value16, SizeOf(Word));
 
    // write STypoAscender
-   Value16 := Swap16(STypoAscender);
+   Value16 := Swap16(FSTypoAscender);
    Write(Value16, SizeOf(Word));
 
    // write STypoDescender
-   Value16 := Swap16(STypoDescender);
+   Value16 := Swap16(FSTypoDescender);
    Write(Value16, SizeOf(Word));
 
    // write STypoLineGap
-   Value16 := Swap16(STypoLineGap);
+   Value16 := Swap16(FSTypoLineGap);
    Write(Value16, SizeOf(Word));
 
    // write UsWinAscent
-   Value16 := Swap16(UsWinAscent);
+   Value16 := Swap16(FUsWinAscent);
    Write(Value16, SizeOf(Word));
 
    // write UsWinDescent
-   Value16 := Swap16(UsWinDescent);
+   Value16 := Swap16(FUsWinDescent);
    Write(Value16, SizeOf(Word));
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetAchVendID(const Value: TTableType);
 begin
- if FOS2Table.AchVendID <> Value then
+ if FAchVendID <> Value then
   begin
-   FOS2Table.AchVendID := Value;
+   FAchVendID := Value;
    AchVendIDChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetFsSelection(const Value: Word);
 begin
- if FOS2Table.FsSelection <> Value then
+ if FFsSelection <> Value then
   begin
-   FOS2Table.FsSelection := Value;
+   FFsSelection := Value;
    FsSelectionChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetFsType(const Value: SmallInt);
 begin
- if FOS2Table.FsType <> Value then
+ if FFsType <> Value then
   begin
-   FOS2Table.FsType := Value;
+   FFsType := Value;
    FsTypeChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetSFamilyClass(const Value: SmallInt);
 begin
- if FOS2Table.SFamilyClass <> Value then
+ if FSFamilyClass <> Value then
   begin
-   FOS2Table.SFamilyClass := Value;
+   FSFamilyClass := Value;
    SFamilyClassChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetSTypoAscender(const Value: SmallInt);
 begin
- if FOS2Table.STypoAscender <> Value then
+ if FSTypoAscender <> Value then
   begin
-   FOS2Table.STypoAscender := Value;
+   FSTypoAscender := Value;
    STypoAscenderChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetSTypoDescender(const Value: SmallInt);
 begin
- if FOS2Table.STypoDescender <> Value then
+ if FSTypoDescender <> Value then
   begin
-   FOS2Table.STypoDescender := Value;
+   FSTypoDescender := Value;
    STypoDescenderChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetSTypoLineGap(const Value: SmallInt);
 begin
- if FOS2Table.STypoLineGap <> Value then
+ if FSTypoLineGap <> Value then
   begin
-   FOS2Table.STypoLineGap := Value;
+   FSTypoLineGap := Value;
    STypoLineGapChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetUsFirstCharIndex(const Value: Word);
 begin
- if FOS2Table.UsFirstCharIndex <> Value then
+ if FUsFirstCharIndex <> Value then
   begin
-   FOS2Table.UsFirstCharIndex := Value;
+   FUsFirstCharIndex := Value;
    UsFirstCharIndexChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetUsLastCharIndex(const Value: Word);
 begin
- if FOS2Table.UsLastCharIndex <> Value then
+ if FUsLastCharIndex <> Value then
   begin
-   FOS2Table.UsLastCharIndex := Value;
+   FUsLastCharIndex := Value;
    UsLastCharIndexChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetUsWeightClass(const Value: TOS2WeightClass);
 begin
- if FOS2Table.UsWeightClass <> Value then
+ if FUsWeightClass <> Value then
   begin
-   FOS2Table.UsWeightClass := Value;
+   FUsWeightClass := Value;
    UsWeightClassChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetUsWidthClass(const Value: TOS2WidthClass);
 begin
- if FOS2Table.UsWidthClass <> Value then
+ if FUsWidthClass <> Value then
   begin
-   FOS2Table.UsWidthClass := Value;
+   FUsWidthClass := Value;
    UsWidthClassChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetUsWinAscent(const Value: Word);
 begin
- if FOS2Table.UsWinAscent <> Value then
+ if FUsWinAscent <> Value then
   begin
-   FOS2Table.UsWinAscent := Value;
+   FUsWinAscent := Value;
    UsWinAscentChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetUsWinDescent(const Value: Word);
 begin
- if FOS2Table.UsWinDescent <> Value then
+ if FUsWinDescent <> Value then
   begin
-   FOS2Table.UsWinDescent := Value;
+   FUsWinDescent := Value;
    UsWinDescentChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetXAvgCharWidth(const Value: SmallInt);
 begin
- if FOS2Table.XAvgCharWidth <> Value then
+ if FXAvgCharWidth <> Value then
   begin
-   FOS2Table.XAvgCharWidth := Value;
+   FXAvgCharWidth := Value;
    XAvgCharWidthChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetYStrikeoutPosition(const Value: SmallInt);
 begin
- if FOS2Table.YStrikeoutPosition <> Value then
+ if FYStrikeoutPosition <> Value then
   begin
-   FOS2Table.YStrikeoutPosition := Value;
+   FYStrikeoutPosition := Value;
    YStrikeoutPositionChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetYStrikeoutSize(const Value: SmallInt);
 begin
- if FOS2Table.YStrikeoutSize <> Value then
+ if FYStrikeoutSize <> Value then
   begin
-   FOS2Table.YStrikeoutSize := Value;
+   FYStrikeoutSize := Value;
    YStrikeoutSizeChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetYSubScriptXOffset(const Value: SmallInt);
 begin
- if FOS2Table.YSubScriptXOffset <> Value then
+ if FYSubScriptXOffset <> Value then
   begin
-   FOS2Table.YSubScriptXOffset := Value;
+   FYSubScriptXOffset := Value;
    YSubScriptXOffsetChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetYSubscriptXSize(const Value: SmallInt);
 begin
- if FOS2Table.YSubscriptXSize <> Value then
+ if FYSubscriptXSize <> Value then
   begin
-   FOS2Table.YSubscriptXSize := Value;
+   FYSubscriptXSize := Value;
    YSubscriptXSizeChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetYSubscriptYOffset(const Value: SmallInt);
 begin
- if FOS2Table.YSubscriptYOffset <> Value then
+ if FYSubscriptYOffset <> Value then
   begin
-   FOS2Table.YSubscriptYOffset := Value;
+   FYSubscriptYOffset := Value;
    YSubscriptYOffsetChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetYSubscriptYSize(const Value: SmallInt);
 begin
- if FOS2Table.YSubscriptYSize <> Value then
+ if FYSubscriptYSize <> Value then
   begin
-   FOS2Table.YSubscriptYSize := Value;
+   FYSubscriptYSize := Value;
    YSubscriptYSizeChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetYSuperscriptXOffset(const Value: SmallInt);
 begin
- if FOS2Table.YSuperscriptXOffset <> Value then
+ if FYSuperscriptXOffset <> Value then
   begin
-   FOS2Table.YSuperscriptXOffset := Value;
+   FYSuperscriptXOffset := Value;
    YSuperscriptXOffsetChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetYSuperscriptXSize(const Value: SmallInt);
 begin
- if FOS2Table.YSuperscriptXSize <> Value then
+ if FYSuperscriptXSize <> Value then
   begin
-   FOS2Table.YSuperscriptXSize := Value;
+   FYSuperscriptXSize := Value;
    YSuperscriptXSizeChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetYSuperscriptYOffset(const Value: SmallInt);
 begin
- if FOS2Table.YSuperscriptYOffset <> Value then
+ if FYSuperscriptYOffset <> Value then
   begin
-   FOS2Table.YSuperscriptYOffset := Value;
+   FYSuperscriptYOffset := Value;
    YSuperscriptYOffsetChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetYSuperscriptYSize(const Value: SmallInt);
 begin
- if FOS2Table.YSuperscriptYSize <> Value then
+ if FYSuperscriptYSize <> Value then
   begin
-   FOS2Table.YSuperscriptYSize := Value;
+   FYSuperscriptYSize := Value;
    YSuperscriptYSizeChanged;
   end;
 end;
 
 procedure TTrueTypeFontOS2Table.SetVersion(const Value: Word);
 begin
- if FOS2Table.Version <> Value then
+ if FVersion <> Value then
   begin
-   FOS2Table.Version := Value;
+   FVersion := Value;
    VersionChanged;
   end;
 end;

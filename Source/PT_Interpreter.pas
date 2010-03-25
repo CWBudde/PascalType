@@ -46,7 +46,20 @@ type
   private
     FDirectoryTable     : TDirectoryTable;
     FDirectoryTableList : TObjectList;
+  protected
+    function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; virtual; abstract;
+    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; virtual; abstract;
+  public
+    constructor Create; virtual;
 
+    procedure LoadFromStream(Stream: TStream); virtual; abstract;
+    procedure SaveToStream(Stream: TStream); virtual; abstract;
+    procedure LoadFromFile(FileName: TFileName);
+    procedure SaveToFile(FileName: TFileName);
+  end;
+
+  TPascalTypeInterpreter = class(TCustomPascalTypeInterpreter)
+  private
     // required tables
     FHeaderTable        : TPascalTypeHeaderTable;
     FHorizontalHeader   : TPascalTypeHorizontalHeaderTable;
@@ -57,25 +70,28 @@ type
     FPostScriptTable    : TPascalTypePostscriptTable;
 
     FOptionalTables     : TObjectList;
-    FSortTableByOffset: Boolean;
+    FSortTableByOffset  : Boolean;
+
     function GetOptionalTableCount: Integer;
     function GetOptionalTable(Index: Integer): TCustomPascalTypeNamedTable;
     function GetTableCount: Integer;
-    function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable;
-    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
     procedure SetSortTableByOffset(const Value: Boolean);
   protected
     procedure SortTableByOffsetChanged; virtual;
     procedure OptimizeTableReadOrder; virtual;
+
+    function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; override;
+    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
+
   public
-    constructor Create; virtual;
+    constructor Create; override;
     destructor Destroy; override;
 
-    procedure LoadFromStream(Stream: TStream);
-    procedure SaveToStream(Stream: TStream);
-    procedure LoadFromFile(FileName: TFileName);
-    procedure SaveToFile(FileName: TFileName);
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
 
+    property OptionalTable[Index: Integer]: TCustomPascalTypeNamedTable read GetOptionalTable;
+  published
     // required tables
     property HeaderTable: TPascalTypeHeaderTable read FHeaderTable;
     property HorizontalHeader: TPascalTypeHorizontalHeaderTable read FHorizontalHeader;
@@ -87,13 +103,7 @@ type
 
     property TableCount: Integer read GetTableCount;
     property OptionalTableCount: Integer read GetOptionalTableCount;
-    property OptionalTable[Index: Integer]: TCustomPascalTypeNamedTable read GetOptionalTable;
-
     property SortTableByOffset: Boolean read FSortTableByOffset write SetSortTableByOffset default True;
-  end;
-
-  TPascalTypeInterpreter = class(TCustomPascalTypeInterpreter)
-
   end;
 
 implementation
@@ -171,6 +181,30 @@ constructor TCustomPascalTypeInterpreter.Create;
 begin
  // create directory table list
  FDirectoryTableList := TObjectList.Create;
+end;
+
+procedure TCustomPascalTypeInterpreter.LoadFromFile(FileName: TFileName);
+var
+  FileStream : TFileStream;
+begin
+ FileStream := TFileStream.Create(FileName, fmOpenRead);
+ try
+  LoadFromStream(FileStream);
+ finally
+  FreeAndNil(FileStream);
+ end;
+end;
+
+procedure TCustomPascalTypeInterpreter.SaveToFile(FileName: TFileName);
+begin
+ raise EPascalTypeError.Create(RCStrNotImplemented);
+end;
+
+{ TPascalTypeInterpreter }
+
+constructor TPascalTypeInterpreter.Create;
+begin
+ inherited;
 
  // create required tables
  FHeaderTable        := TPascalTypeHeaderTable.Create(Self);
@@ -188,7 +222,7 @@ begin
  FSortTableByOffset := True;
 end;
 
-destructor TCustomPascalTypeInterpreter.Destroy;
+destructor TPascalTypeInterpreter.Destroy;
 begin
  FreeAndNil(FDirectoryTableList);
  FreeAndNil(FHeaderTable);
@@ -202,7 +236,7 @@ begin
  inherited;
 end;
 
-function TCustomPascalTypeInterpreter.GetOptionalTable(
+function TPascalTypeInterpreter.GetOptionalTable(
   Index: Integer): TCustomPascalTypeNamedTable;
 begin
  if (Index >= 0) and (Index < FOptionalTables.Count)
@@ -210,12 +244,12 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TCustomPascalTypeInterpreter.GetOptionalTableCount: Integer;
+function TPascalTypeInterpreter.GetOptionalTableCount: Integer;
 begin
  Result := FOptionalTables.Count;
 end;
 
-function TCustomPascalTypeInterpreter.GetTableByTableType(
+function TPascalTypeInterpreter.GetTableByTableType(
   TableType: TTableType): TCustomPascalTypeNamedTable;
 var
   TableIndex : Integer;
@@ -236,7 +270,7 @@ begin
     then Result := TCustomPascalTypeNamedTable(FOptionalTables[TableIndex]);
 end;
 
-function TCustomPascalTypeInterpreter.GetTableByTableClass(
+function TPascalTypeInterpreter.GetTableByTableClass(
   TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
 var
   TableIndex : Integer;
@@ -258,24 +292,12 @@ begin
     then Result := TCustomPascalTypeNamedTable(FOptionalTables[TableIndex]);
 end;
 
-function TCustomPascalTypeInterpreter.GetTableCount: Integer;
+function TPascalTypeInterpreter.GetTableCount: Integer;
 begin
  Result := FDirectoryTableList.Count;
 end;
 
-procedure TCustomPascalTypeInterpreter.LoadFromFile(FileName: TFileName);
-var
-  FileStream : TFileStream;
-begin
- FileStream := TFileStream.Create(FileName, fmOpenRead);
- try
-  LoadFromStream(FileStream);
- finally
-  FreeAndNil(FileStream);
- end;
-end;
-
-procedure TCustomPascalTypeInterpreter.LoadFromStream(Stream: TStream);
+procedure TPascalTypeInterpreter.LoadFromStream(Stream: TStream);
 var
   TableIndex     : Integer;
   TableEntry     : TPascalTypeDirectoryTableEntry;
@@ -422,7 +444,12 @@ begin
   end;
 end;
 
-procedure TCustomPascalTypeInterpreter.OptimizeTableReadOrder;
+procedure TPascalTypeInterpreter.SaveToStream(Stream: TStream);
+begin
+ raise EPascalTypeError.Create(RCStrNotImplemented);
+end;
+
+procedure TPascalTypeInterpreter.OptimizeTableReadOrder;
 var
   TableIndex : Integer;
 begin
@@ -452,17 +479,7 @@ begin
     end;
 end;
 
-procedure TCustomPascalTypeInterpreter.SaveToFile(FileName: TFileName);
-begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
-end;
-
-procedure TCustomPascalTypeInterpreter.SaveToStream(Stream: TStream);
-begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
-end;
-
-procedure TCustomPascalTypeInterpreter.SetSortTableByOffset(
+procedure TPascalTypeInterpreter.SetSortTableByOffset(
   const Value: Boolean);
 begin
  if FSortTableByOffset <> Value then
@@ -472,10 +489,9 @@ begin
   end;
 end;
 
-procedure TCustomPascalTypeInterpreter.SortTableByOffsetChanged;
+procedure TPascalTypeInterpreter.SortTableByOffsetChanged;
 begin
  // todo: eventually sort current list
 end;
-
 
 end.
