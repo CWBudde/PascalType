@@ -40,7 +40,7 @@ uses
 type
 
   // table 'DSIG'
-  TTrueTypeFontDigitalSignatureBlock = class(TCustomPascalTypeTable)
+  TPascalTypeDigitalSignatureBlock = class(TCustomPascalTypeTable)
   private
     FReserved  : array [0..1] of Word; // Reserved for later use; 0 for now
     FSignature : array of Byte;        // PKCS#7 packet
@@ -72,7 +72,7 @@ type
     Offset : Cardinal; // Offset to the signature block from the beginning of the table
   end;
 
-  TTrueTypeFontDigitalSignatureTable = class(TCustomPascalTypeNamedTable)
+  TPascalTypeDigitalSignatureTable = class(TCustomPascalTypeNamedTable)
   private
     FVersion    : Cardinal; // Version number of the DSIG table (0x00000001)
     FFlags      : TDigitalSignatureFlags; // Permission flags: Bit 0: cannot be resigned, Bits 1-7: Reserved (Set to 0)
@@ -80,7 +80,7 @@ type
     procedure SetVersion(const Value: Cardinal);
     procedure SetFlags(const Value: TDigitalSignatureFlags);
     function GetSignatureCount: Integer;
-    function GetSignatureBlock(Index: Integer): TTrueTypeFontDigitalSignatureBlock;
+    function GetSignatureBlock(Index: Integer): TPascalTypeDigitalSignatureBlock;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -99,7 +99,7 @@ type
     property Version: Cardinal read FVersion write SetVersion;
     property Flags: TDigitalSignatureFlags read FFlags write SetFlags;
     property SignatureCount: Integer read GetSignatureCount;
-    property SignatureBlock[Index: Integer]: TTrueTypeFontDigitalSignatureBlock read GetSignatureBlock;
+    property SignatureBlock[Index: Integer]: TPascalTypeDigitalSignatureBlock read GetSignatureBlock;
   end;
 
 
@@ -120,7 +120,7 @@ type
     NumRanges  : Word;
   end;
 
-  TTrueTypeFontGridFittingAndScanConversionProcedureTable = class(TCustomPascalTypeNamedTable)
+  TPascalTypeGridFittingAndScanConversionProcedureTable = class(TCustomPascalTypeNamedTable)
   private
     FGaspHeader : TGaspHeader;
     FGaspRanges : array of TGaspRange;
@@ -153,7 +153,7 @@ type
   end;
 *)
 
-  TTrueTypeFontHorizontalDeviceMetricsSubTable = class(TCustomPascalTypeInterfaceTable)
+  TPascalTypeHorizontalDeviceMetricsSubTable = class(TCustomPascalTypeInterfaceTable)
   private
     Fppem     : Byte;
     FMaxWidth : Byte;
@@ -176,7 +176,7 @@ type
     property Width[Index: Integer]: Byte read GetWidth;
   end;
 
-  TTrueTypeFontHorizontalDeviceMetricsTable = class(TCustomPascalTypeNamedTable)
+  TPascalTypeHorizontalDeviceMetricsTable = class(TCustomPascalTypeNamedTable)
   private
     FVersion   : Word;           // Table version number (0)
     FSubtables : TObjectList;
@@ -200,11 +200,11 @@ type
 
 
   // table 'kern'
-  TCustomTrueTypeFontKerningFormatSubTable = class(TCustomPascalTypeTable)
+  TCustomPascalTypeKerningFormatSubTable = class(TCustomPascalTypeTable)
   public
     function GetKerningValue(LeftGlyphIndex, RightGlyphIndex: Word): Word; virtual; abstract;
   end;
-  TCustomTrueTypeFontKerningFormatSubTableClass = class of TCustomTrueTypeFontKerningFormatSubTable;
+  TCustomPascalTypeKerningFormatSubTableClass = class of TCustomPascalTypeKerningFormatSubTable;
 
   TKerningFormat0SubTable = packed record
     Left  : Word; // The glyph index for the left-hand glyph in the kerning pair.
@@ -212,7 +212,7 @@ type
     Value : SmallInt; // The kerning value for the above pair, in FUnits. If this value is greater than zero, the characters will be moved apart. If this value is less than zero, the character will be moved closer together.
   end;
 
-  TTrueTypeFontKerningFormat0SubTable = class(TCustomTrueTypeFontKerningFormatSubTable)
+  TPascalTypeKerningFormat0SubTable = class(TCustomPascalTypeKerningFormatSubTable)
   private
     FPairs : array of TKerningFormat0SubTable;
     function GetPairCount: Integer;
@@ -230,7 +230,7 @@ type
     property Pair[Index: Integer]: TKerningFormat0SubTable read GetPair;
   end;
 
-  TTrueTypeFontKerningFormat2SubTable = class(TCustomTrueTypeFontKerningFormatSubTable)
+  TPascalTypeKerningFormat2SubTable = class(TCustomPascalTypeKerningFormatSubTable)
   protected
     procedure ResetToDefaults; override;
   public
@@ -238,12 +238,12 @@ type
     procedure SaveToStream(Stream: TStream); override;
   end;
 
-  TTrueTypeFontKerningSubTable = class(TCustomPascalTypeTable)
+  TPascalTypeKerningSubTable = class(TCustomPascalTypeTable)
   private
     FVersion     : Word;
     FLength      : Word;
     FCoverage    : Word;
-    FFormatTable : TCustomTrueTypeFontKerningFormatSubTable;
+    FFormatTable : TCustomPascalTypeKerningFormatSubTable;
     function GetFormat: Byte;
     function GetIsCrossStream: Boolean;
     function GetIsHorizontal: Boolean;
@@ -284,16 +284,16 @@ type
     property IsReplace: Boolean read GetIsReplace write SetIsReplace;
     property Format: Byte read GetFormat write SetFormat;
 
-    property FormatTable: TCustomTrueTypeFontKerningFormatSubTable read FFormatTable;
+    property FormatTable: TCustomPascalTypeKerningFormatSubTable read FFormatTable;
   end;
 
-  TTrueTypeFontKerningTable = class(TCustomPascalTypeNamedTable)
+  TPascalTypeKerningTable = class(TCustomPascalTypeNamedTable)
   private
     FKerningSubtableList : TObjectList;
     FVersion             : Word;
     procedure SetVersion(const Value: Word);
     function GetKerningSubtableCount: Integer;
-    function GetKerningSubtable(Index: Integer): TTrueTypeFontKerningSubTable;
+    function GetKerningSubtable(Index: Integer): TPascalTypeKerningSubTable;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -311,14 +311,14 @@ type
 
     property Version: Word read FVersion write SetVersion;
 
-    property KerningSubtable[Index: Integer]: TTrueTypeFontKerningSubTable read GetKerningSubtable;
+    property KerningSubtable[Index: Integer]: TPascalTypeKerningSubTable read GetKerningSubtable;
     property KerningSubtableCount: Integer read GetKerningSubtableCount;
   end;
 
 
   // table 'LTSH'
 
-  TTrueTypeFontLinearThresholdTable = class(TCustomPascalTypeNamedTable)
+  TPascalTypeLinearThresholdTable = class(TCustomPascalTypeNamedTable)
   private
     FVersion      : Word;
     FVerticalPels : array of Byte; // The vertical pel height at which the glyph can be assumed to scale linearly. On a per glyph basis.
@@ -344,7 +344,7 @@ type
 
   // table 'PCLT'
 
-  TTrueTypeFontPCL5Table = class(TCustomPascalTypeNamedTable)
+  TPascalTypePCL5Table = class(TCustomPascalTypeNamedTable)
   private
     FVersion             : TFixedPoint;
     FFontNumber          : TPcl5FontNumber;
@@ -421,7 +421,7 @@ type
 
   // table 'VDMX'
 
-  TTrueTypeFontVerticalDeviceMetricsTable = class(TCustomPascalTypeNamedTable)
+  TPascalTypeVerticalDeviceMetricsTable = class(TCustomPascalTypeNamedTable)
   private
     FVersion   : Word; // Version number (0 or 1).
     FNumRecs   : Word; // Number of VDMX groups present
@@ -439,7 +439,7 @@ type
 
 
   // table 'vhea'
-  TTrueTypeFontVerticalHeaderTable = class(TCustomPascalTypeNamedTable)
+  TPascalTypeVerticalHeaderTable = class(TCustomPascalTypeNamedTable)
   private
     FVersion              : TFixedPoint;
     FAscent               : SmallInt; // Distance in FUnits from the centerline to the previous line’s descent.
@@ -516,7 +516,7 @@ type
     TopSideBearing : SmallInt;
   end;
 
-  TTrueTypeFontVerticalMetricsTable = class(TCustomPascalTypeNamedTable)
+  TPascalTypeVerticalMetricsTable = class(TCustomPascalTypeNamedTable)
   private
     FVerticalMetrics : array of TVerticalMetric;
     function GetVerticalMetric(Index: Integer): TVerticalMetric;
@@ -542,12 +542,12 @@ uses
   Math, SysUtils, PT_ResourceStrings;
 
 
-{ TTrueTypeFontDigitalSignatureBlock }
+{ TPascalTypeDigitalSignatureBlock }
 
-procedure TTrueTypeFontDigitalSignatureBlock.AssignTo(Dest: TPersistent);
+procedure TPascalTypeDigitalSignatureBlock.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontDigitalSignatureBlock then
-  with TTrueTypeFontDigitalSignatureBlock(Dest) do
+ if Dest is TPascalTypeDigitalSignatureBlock then
+  with TPascalTypeDigitalSignatureBlock(Dest) do
    begin
     FReserved[0] := Self.FReserved[0];
     FReserved[1] := Self.FReserved[1];
@@ -556,14 +556,14 @@ begin
  else inherited;
 end;
 
-procedure TTrueTypeFontDigitalSignatureBlock.ResetToDefaults;
+procedure TPascalTypeDigitalSignatureBlock.ResetToDefaults;
 begin
  FReserved[0] := 0;
  FReserved[1] := 0;
  SetLength(FSignature, 0);
 end;
 
-function TTrueTypeFontDigitalSignatureBlock.GetSignatureByte(
+function TPascalTypeDigitalSignatureBlock.GetSignatureByte(
   Index: Integer): Byte;
 begin
  if (Index >= 0) and (Index < Length(FSignature))
@@ -571,12 +571,12 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TTrueTypeFontDigitalSignatureBlock.GetSignatureLength: Cardinal;
+function TPascalTypeDigitalSignatureBlock.GetSignatureLength: Cardinal;
 begin
  Result := Length(FSignature);
 end;
 
-procedure TTrueTypeFontDigitalSignatureBlock.LoadFromStream(Stream: TStream);
+procedure TPascalTypeDigitalSignatureBlock.LoadFromStream(Stream: TStream);
 var
   Value32  : Cardinal;
   Value16  : Word;
@@ -606,7 +606,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontDigitalSignatureBlock.SaveToStream(Stream: TStream);
+procedure TPascalTypeDigitalSignatureBlock.SaveToStream(Stream: TStream);
 var
   Value32  : Cardinal;
   Value16  : Word;
@@ -630,7 +630,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontDigitalSignatureBlock.SetFormat(const Value: Cardinal);
+procedure TPascalTypeDigitalSignatureBlock.SetFormat(const Value: Cardinal);
 begin
  if FFormat <> Value then
   begin
@@ -639,7 +639,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontDigitalSignatureBlock.SetReserved(const Index: Integer;
+procedure TPascalTypeDigitalSignatureBlock.SetReserved(const Index: Integer;
   const Value: Word);
 begin
  if FReserved[Index] <> Value then
@@ -649,35 +649,35 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontDigitalSignatureBlock.ReservedChanged;
+procedure TPascalTypeDigitalSignatureBlock.ReservedChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontDigitalSignatureBlock.FormatChanged;
+procedure TPascalTypeDigitalSignatureBlock.FormatChanged;
 begin
  Changed;
 end;
 
 
-{ TTrueTypeFontDigitalSignatureTable }
+{ TPascalTypeDigitalSignatureTable }
 
-constructor TTrueTypeFontDigitalSignatureTable.Create;
+constructor TPascalTypeDigitalSignatureTable.Create;
 begin
  FSignatures := TObjectList.Create(True);
  inherited;
 end;
 
-destructor TTrueTypeFontDigitalSignatureTable.Destroy;
+destructor TPascalTypeDigitalSignatureTable.Destroy;
 begin
  FreeAndNil(FSignatures);
  inherited;
 end;
 
-procedure TTrueTypeFontDigitalSignatureTable.AssignTo(Dest: TPersistent);
+procedure TPascalTypeDigitalSignatureTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontDigitalSignatureTable then
-  with TTrueTypeFontDigitalSignatureTable(Dest) do
+ if Dest is TPascalTypeDigitalSignatureTable then
+  with TPascalTypeDigitalSignatureTable(Dest) do
    begin
     FVersion := Self.FVersion;
     FFlags := Self.FFlags;
@@ -686,12 +686,12 @@ begin
  else inherited;
 end;
 
-class function TTrueTypeFontDigitalSignatureTable.GetTableType: TTableType;
+class function TPascalTypeDigitalSignatureTable.GetTableType: TTableType;
 begin
  Result := 'DSIG';
 end;
 
-procedure TTrueTypeFontDigitalSignatureTable.ResetToDefaults;
+procedure TPascalTypeDigitalSignatureTable.ResetToDefaults;
 begin
  FVersion := 1;
  FFlags := [];
@@ -700,25 +700,25 @@ begin
  FSignatures.Clear;
 end;
 
-function TTrueTypeFontDigitalSignatureTable.GetSignatureBlock(
-  Index: Integer): TTrueTypeFontDigitalSignatureBlock;
+function TPascalTypeDigitalSignatureTable.GetSignatureBlock(
+  Index: Integer): TPascalTypeDigitalSignatureBlock;
 begin
  if (Index >= 0) and (Index < SignatureCount)
-  then Result := TTrueTypeFontDigitalSignatureBlock(FSignatures[Index])
+  then Result := TPascalTypeDigitalSignatureBlock(FSignatures[Index])
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TTrueTypeFontDigitalSignatureTable.GetSignatureCount: Integer;
+function TPascalTypeDigitalSignatureTable.GetSignatureCount: Integer;
 begin
  Result := FSignatures.Count;
 end;
 
-procedure TTrueTypeFontDigitalSignatureTable.LoadFromStream(Stream: TStream);
+procedure TPascalTypeDigitalSignatureTable.LoadFromStream(Stream: TStream);
 var
   StartPos  : Int64;
   DirIndex  : Integer;
   Directory : array of TDigitalSignatureDirectory;
-  SigBlock  : TTrueTypeFontDigitalSignatureBlock;
+  SigBlock  : TPascalTypeDigitalSignatureBlock;
   Value32   : Cardinal;
   Value16   : Word;
 begin
@@ -774,7 +774,7 @@ begin
    for DirIndex := 0 to Length(Directory) - 1 do
     with Directory[DirIndex] do
      begin
-      SigBlock := TTrueTypeFontDigitalSignatureBlock.Create;
+      SigBlock := TPascalTypeDigitalSignatureBlock.Create;
 
       Position := StartPos + Offset;
 
@@ -790,7 +790,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontDigitalSignatureTable.SaveToStream(Stream: TStream);
+procedure TPascalTypeDigitalSignatureTable.SaveToStream(Stream: TStream);
 var
   StartPos  : Int64;
   DirIndex  : Integer;
@@ -822,7 +822,7 @@ begin
 
    // build directory and store signature
    for DirIndex := 0 to FSignatures.Count - 1 do
-    with TTrueTypeFontDigitalSignatureBlock(FSignatures[DirIndex]) do
+    with TPascalTypeDigitalSignatureBlock(FSignatures[DirIndex]) do
      begin
       Directory[DirIndex].Format := Format;
       Directory[DirIndex].Offset := Position - StartPos;
@@ -835,7 +835,7 @@ begin
 
    // write directory entries
    for DirIndex := 0 to Length(Directory) - 1 do
-    with Directory[DirIndex], TTrueTypeFontDigitalSignatureBlock(FSignatures[DirIndex]) do
+    with Directory[DirIndex], TPascalTypeDigitalSignatureBlock(FSignatures[DirIndex]) do
      begin
       // write format
       Value32 := Swap32(Format);
@@ -852,7 +852,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontDigitalSignatureTable.SetFlags(
+procedure TPascalTypeDigitalSignatureTable.SetFlags(
   const Value: TDigitalSignatureFlags);
 begin
  if FFlags <> Value then
@@ -862,7 +862,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontDigitalSignatureTable.SetVersion(
+procedure TPascalTypeDigitalSignatureTable.SetVersion(
   const Value: Cardinal);
 begin
  if (Version <> Value) then
@@ -872,36 +872,36 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontDigitalSignatureTable.FlagsChanged;
+procedure TPascalTypeDigitalSignatureTable.FlagsChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontDigitalSignatureTable.VersionChanged;
+procedure TPascalTypeDigitalSignatureTable.VersionChanged;
 begin
  Changed;
 end;
 
 
-{ TTrueTypeFontGridFittingAndScanConversionProcedureTable }
+{ TPascalTypeGridFittingAndScanConversionProcedureTable }
 
-procedure TTrueTypeFontGridFittingAndScanConversionProcedureTable.AssignTo(
+procedure TPascalTypeGridFittingAndScanConversionProcedureTable.AssignTo(
   Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontGridFittingAndScanConversionProcedureTable then
-  with TTrueTypeFontGridFittingAndScanConversionProcedureTable(Dest) do
+ if Dest is TPascalTypeGridFittingAndScanConversionProcedureTable then
+  with TPascalTypeGridFittingAndScanConversionProcedureTable(Dest) do
    begin
     FGaspHeader := Self.FGaspHeader;
    end
  else inherited;
 end;
 
-class function TTrueTypeFontGridFittingAndScanConversionProcedureTable.GetTableType: TTableType;
+class function TPascalTypeGridFittingAndScanConversionProcedureTable.GetTableType: TTableType;
 begin
  Result := 'gasp';
 end;
 
-procedure TTrueTypeFontGridFittingAndScanConversionProcedureTable.ResetToDefaults;
+procedure TPascalTypeGridFittingAndScanConversionProcedureTable.ResetToDefaults;
 begin
  with FGaspHeader do
   begin
@@ -910,7 +910,7 @@ begin
   end;
 end;
 
-function TTrueTypeFontGridFittingAndScanConversionProcedureTable.GetRange(
+function TPascalTypeGridFittingAndScanConversionProcedureTable.GetRange(
   Index: Integer): TGaspRange;
 begin
  if (Index >= 0) and (Index < Length(FGaspRanges))
@@ -918,12 +918,12 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TTrueTypeFontGridFittingAndScanConversionProcedureTable.GetRangeCount: Integer;
+function TPascalTypeGridFittingAndScanConversionProcedureTable.GetRangeCount: Integer;
 begin
  Result := Length(FGaspRanges);
 end;
 
-procedure TTrueTypeFontGridFittingAndScanConversionProcedureTable.LoadFromStream(
+procedure TPascalTypeGridFittingAndScanConversionProcedureTable.LoadFromStream(
   Stream: TStream);
 var
   Value16    : Word;
@@ -962,7 +962,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontGridFittingAndScanConversionProcedureTable.SaveToStream(
+procedure TPascalTypeGridFittingAndScanConversionProcedureTable.SaveToStream(
   Stream: TStream);
 var
   Value16    : Word;
@@ -992,7 +992,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontGridFittingAndScanConversionProcedureTable.SetVersion(
+procedure TPascalTypeGridFittingAndScanConversionProcedureTable.SetVersion(
   const Value: Word);
 begin
  if FGaspHeader.Version <> Value then
@@ -1002,19 +1002,19 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontGridFittingAndScanConversionProcedureTable.VersionChanged;
+procedure TPascalTypeGridFittingAndScanConversionProcedureTable.VersionChanged;
 begin
  Changed;
 end;
 
 
-{ TTrueTypeFontHorizontalDeviceMetricsSubTable }
+{ TPascalTypeHorizontalDeviceMetricsSubTable }
 
-procedure TTrueTypeFontHorizontalDeviceMetricsSubTable.AssignTo(
+procedure TPascalTypeHorizontalDeviceMetricsSubTable.AssignTo(
   Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontHorizontalDeviceMetricsSubTable then
-  with TTrueTypeFontHorizontalDeviceMetricsSubTable(Dest) do
+ if Dest is TPascalTypeHorizontalDeviceMetricsSubTable then
+  with TPascalTypeHorizontalDeviceMetricsSubTable(Dest) do
    begin
     Fppem := Self.Fppem;
     FMaxWidth := Self.FMaxWidth;
@@ -1023,7 +1023,7 @@ begin
  else inherited;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsSubTable.ResetToDefaults;
+procedure TPascalTypeHorizontalDeviceMetricsSubTable.ResetToDefaults;
 begin
  inherited;
  Fppem := 0;
@@ -1031,7 +1031,7 @@ begin
  SetLength(FWidths, 0);
 end;
 
-function TTrueTypeFontHorizontalDeviceMetricsSubTable.GetWidth(
+function TPascalTypeHorizontalDeviceMetricsSubTable.GetWidth(
   Index: Integer): Byte;
 begin
  if (Index >= 0) and (Index < Length(FWidths))
@@ -1039,7 +1039,7 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsSubTable.LoadFromStream(
+procedure TPascalTypeHorizontalDeviceMetricsSubTable.LoadFromStream(
   Stream: TStream);
 var
   MaxProfile : TPascalTypeMaximumProfileTable;
@@ -1067,7 +1067,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsSubTable.SaveToStream(
+procedure TPascalTypeHorizontalDeviceMetricsSubTable.SaveToStream(
   Stream: TStream);
 begin
  inherited;
@@ -1085,7 +1085,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsSubTable.SetMaxWidth(
+procedure TPascalTypeHorizontalDeviceMetricsSubTable.SetMaxWidth(
   const Value: Byte);
 begin
  if FMaxWidth <> Value then
@@ -1095,7 +1095,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsSubTable.Setppem(
+procedure TPascalTypeHorizontalDeviceMetricsSubTable.Setppem(
   const Value: Byte);
 begin
  if Fppem <> Value then
@@ -1105,36 +1105,36 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsSubTable.MaxWidthChanged;
+procedure TPascalTypeHorizontalDeviceMetricsSubTable.MaxWidthChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsSubTable.ppemChanged;
+procedure TPascalTypeHorizontalDeviceMetricsSubTable.ppemChanged;
 begin
  Changed;
 end;
 
 
-{ TTrueTypeFontHorizontalDeviceMetricsTable }
+{ TPascalTypeHorizontalDeviceMetricsTable }
 
-constructor TTrueTypeFontHorizontalDeviceMetricsTable.Create(
+constructor TPascalTypeHorizontalDeviceMetricsTable.Create(
   Interpreter: IPascalTypeInterpreter);
 begin
  FSubtables := TObjectList.Create;
  inherited;
 end;
 
-destructor TTrueTypeFontHorizontalDeviceMetricsTable.Destroy;
+destructor TPascalTypeHorizontalDeviceMetricsTable.Destroy;
 begin
  FreeAndNil(FSubtables);
  inherited;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsTable.AssignTo(Dest: TPersistent);
+procedure TPascalTypeHorizontalDeviceMetricsTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontHorizontalDeviceMetricsTable then
-  with TTrueTypeFontHorizontalDeviceMetricsTable(Dest) do
+ if Dest is TPascalTypeHorizontalDeviceMetricsTable then
+  with TPascalTypeHorizontalDeviceMetricsTable(Dest) do
    begin
     FVersion := Self.FVersion;
     FSubtables.Assign(Self.FSubtables);
@@ -1142,18 +1142,18 @@ begin
  else inherited;
 end;
 
-class function TTrueTypeFontHorizontalDeviceMetricsTable.GetTableType: TTableType;
+class function TPascalTypeHorizontalDeviceMetricsTable.GetTableType: TTableType;
 begin
  Result := 'hdmx';
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsTable.ResetToDefaults;
+procedure TPascalTypeHorizontalDeviceMetricsTable.ResetToDefaults;
 begin
  FVersion := 0;
  FSubtables.Clear;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsTable.LoadFromStream(
+procedure TPascalTypeHorizontalDeviceMetricsTable.LoadFromStream(
   Stream: TStream);
 var
   OffsetPosition   : Int64;
@@ -1161,7 +1161,7 @@ var
   Value16          : Word;
   NumRecords       : SmallInt;
   RecordIndex      : Integer;
-  SubTableRecord   : TTrueTypeFontHorizontalDeviceMetricsSubTable;
+  SubTableRecord   : TPascalTypeHorizontalDeviceMetricsSubTable;
 begin
  inherited;
 
@@ -1193,7 +1193,7 @@ begin
      Position := OffsetPosition + RecordIndex * SizeDeviceRecord;
 
      // create subtable entry
-     SubTableRecord := TTrueTypeFontHorizontalDeviceMetricsSubTable.Create(FInterpreter);
+     SubTableRecord := TPascalTypeHorizontalDeviceMetricsSubTable.Create(FInterpreter);
 
      // load subtable entry from stream
      SubTableRecord.LoadFromStream(Stream);
@@ -1204,7 +1204,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsTable.SaveToStream(
+procedure TPascalTypeHorizontalDeviceMetricsTable.SaveToStream(
   Stream: TStream);
 var
   Value16 : Word;
@@ -1228,7 +1228,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsTable.SetVersion(
+procedure TPascalTypeHorizontalDeviceMetricsTable.SetVersion(
   const Value: Word);
 begin
  if (FVersion <> Value) then
@@ -1238,22 +1238,22 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontHorizontalDeviceMetricsTable.VersionChanged;
+procedure TPascalTypeHorizontalDeviceMetricsTable.VersionChanged;
 begin
  Changed;
 end;
 
 
-{ TTrueTypeFontKerningFormat0SubTable }
+{ TPascalTypeKerningFormat0SubTable }
 
-procedure TTrueTypeFontKerningFormat0SubTable.ResetToDefaults;
+procedure TPascalTypeKerningFormat0SubTable.ResetToDefaults;
 begin
  inherited;
 
  SetLength(FPairs, 0);
 end;
 
-function TTrueTypeFontKerningFormat0SubTable.GetKerningValue(LeftGlyphIndex,
+function TPascalTypeKerningFormat0SubTable.GetKerningValue(LeftGlyphIndex,
   RightGlyphIndex: Word): Word;
 var
   PairIndex : Integer;
@@ -1268,7 +1268,7 @@ begin
     end;
 end;
 
-function TTrueTypeFontKerningFormat0SubTable.GetPair(
+function TPascalTypeKerningFormat0SubTable.GetPair(
   Index: Integer): TKerningFormat0SubTable;
 begin
  if (Index >= 0) and (Index < Length(FPairs))
@@ -1276,12 +1276,12 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TTrueTypeFontKerningFormat0SubTable.GetPairCount: Integer;
+function TPascalTypeKerningFormat0SubTable.GetPairCount: Integer;
 begin
  Result := Length(FPairs);
 end;
 
-procedure TTrueTypeFontKerningFormat0SubTable.LoadFromStream(Stream: TStream);
+procedure TPascalTypeKerningFormat0SubTable.LoadFromStream(Stream: TStream);
 var
   Value16       : Word;
   PairIndex     : Integer;
@@ -1343,7 +1343,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontKerningFormat0SubTable.SaveToStream(Stream: TStream);
+procedure TPascalTypeKerningFormat0SubTable.SaveToStream(Stream: TStream);
 var
   Value16       : Word;
   PairIndex     : Integer;
@@ -1393,45 +1393,45 @@ begin
 end;
 
 
-{ TTrueTypeFontKerningFormat2SubTable }
+{ TPascalTypeKerningFormat2SubTable }
 
-procedure TTrueTypeFontKerningFormat2SubTable.ResetToDefaults;
+procedure TPascalTypeKerningFormat2SubTable.ResetToDefaults;
 begin
  inherited;
 end;
 
-procedure TTrueTypeFontKerningFormat2SubTable.LoadFromStream(Stream: TStream);
-begin
- inherited;
-
- raise EPascalTypeError.Create('not yet implemented');
-end;
-
-procedure TTrueTypeFontKerningFormat2SubTable.SaveToStream(Stream: TStream);
+procedure TPascalTypeKerningFormat2SubTable.LoadFromStream(Stream: TStream);
 begin
  inherited;
 
  raise EPascalTypeError.Create('not yet implemented');
 end;
 
-
-{ TTrueTypeFontKerningSubTable }
-
-constructor TTrueTypeFontKerningSubTable.Create;
+procedure TPascalTypeKerningFormat2SubTable.SaveToStream(Stream: TStream);
 begin
- FFormatTable := TTrueTypeFontKerningFormat0SubTable.Create;
+ inherited;
+
+ raise EPascalTypeError.Create('not yet implemented');
+end;
+
+
+{ TPascalTypeKerningSubTable }
+
+constructor TPascalTypeKerningSubTable.Create;
+begin
+ FFormatTable := TPascalTypeKerningFormat0SubTable.Create;
  inherited;
 end;
 
-destructor TTrueTypeFontKerningSubTable.Destroy;
+destructor TPascalTypeKerningSubTable.Destroy;
 begin
  FreeAndNil(FFormatTable);
  inherited;
 end;
 
-procedure TTrueTypeFontKerningSubTable.AssignTo(Dest: TPersistent);
+procedure TPascalTypeKerningSubTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontKerningTable then
+ if Dest is TPascalTypeKerningTable then
   begin
    FVersion  := Self.FVersion;
    FLength   := Self.FLength;
@@ -1440,7 +1440,7 @@ begin
  else inherited;
 end;
 
-procedure TTrueTypeFontKerningSubTable.ResetToDefaults;
+procedure TPascalTypeKerningSubTable.ResetToDefaults;
 begin
  inherited;
  FVersion := 0;
@@ -1449,7 +1449,7 @@ begin
  AssignFormat;
 end;
 
-procedure TTrueTypeFontKerningSubTable.LoadFromStream(Stream: TStream);
+procedure TPascalTypeKerningSubTable.LoadFromStream(Stream: TStream);
 var
   Value16       : Word;
 begin
@@ -1491,7 +1491,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontKerningSubTable.SaveToStream(Stream: TStream);
+procedure TPascalTypeKerningSubTable.SaveToStream(Stream: TStream);
 var
   Value16       : Word;
 begin
@@ -1513,32 +1513,32 @@ begin
   end;
 end;
 
-function TTrueTypeFontKerningSubTable.GetFormat: Byte;
+function TPascalTypeKerningSubTable.GetFormat: Byte;
 begin
  Result := (FCoverage shr 8) and $FF;
 end;
 
-function TTrueTypeFontKerningSubTable.GetIsCrossStream: Boolean;
+function TPascalTypeKerningSubTable.GetIsCrossStream: Boolean;
 begin
  Result := (FCoverage and (1 shl 2)) > 0;
 end;
 
-function TTrueTypeFontKerningSubTable.GetIsHorizontal: Boolean;
+function TPascalTypeKerningSubTable.GetIsHorizontal: Boolean;
 begin
  Result := (FCoverage and 1) > 0;
 end;
 
-function TTrueTypeFontKerningSubTable.GetIsMinimum: Boolean;
+function TPascalTypeKerningSubTable.GetIsMinimum: Boolean;
 begin
  Result := (FCoverage and (1 shl 1)) > 0;
 end;
 
-function TTrueTypeFontKerningSubTable.GetIsReplace: Boolean;
+function TPascalTypeKerningSubTable.GetIsReplace: Boolean;
 begin
  Result := (FCoverage and (1 shl 3)) > 0;
 end;
 
-procedure TTrueTypeFontKerningSubTable.SetFormat(const Value: Byte);
+procedure TPascalTypeKerningSubTable.SetFormat(const Value: Byte);
 begin
  if Value <> Format then
   begin
@@ -1547,7 +1547,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontKerningSubTable.SetIsCrossStream(const Value: Boolean);
+procedure TPascalTypeKerningSubTable.SetIsCrossStream(const Value: Boolean);
 begin
  if IsCrossStream <> Value then
   begin
@@ -1556,7 +1556,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontKerningSubTable.SetIsHorizontal(const Value: Boolean);
+procedure TPascalTypeKerningSubTable.SetIsHorizontal(const Value: Boolean);
 begin
  if IsHorizontal <> Value then
   begin
@@ -1565,7 +1565,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontKerningSubTable.SetIsMinimum(const Value: Boolean);
+procedure TPascalTypeKerningSubTable.SetIsMinimum(const Value: Boolean);
 begin
  if IsMinimum <> Value then
   begin
@@ -1574,7 +1574,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontKerningSubTable.SetIsReplace(const Value: Boolean);
+procedure TPascalTypeKerningSubTable.SetIsReplace(const Value: Boolean);
 begin
  if IsReplace <> Value then
   begin
@@ -1583,7 +1583,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontKerningSubTable.SetVersion(const Value: Word);
+procedure TPascalTypeKerningSubTable.SetVersion(const Value: Word);
 begin
  if FVersion <> Value then
   begin
@@ -1592,12 +1592,12 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontKerningSubTable.AssignFormat;
+procedure TPascalTypeKerningSubTable.AssignFormat;
 var
-  OldFormatTable : TCustomTrueTypeFontKerningFormatSubTable;
+  OldFormatTable : TCustomPascalTypeKerningFormatSubTable;
 const
-  CFormatClasses : array [0..1] of TCustomTrueTypeFontKerningFormatSubTableClass =
-    (TTrueTypeFontKerningFormat0SubTable, TTrueTypeFontKerningFormat2SubTable);
+  CFormatClasses : array [0..1] of TCustomPascalTypeKerningFormatSubTableClass =
+    (TPascalTypeKerningFormat0SubTable, TPascalTypeKerningFormat2SubTable);
 begin
  case Format of
   0, 2 : if not (FFormatTable is CFormatClasses[Format shr 1]) then
@@ -1614,96 +1614,96 @@ begin
  end;
 end;
 
-procedure TTrueTypeFontKerningSubTable.FormatChanged;
+procedure TPascalTypeKerningSubTable.FormatChanged;
 begin
  AssignFormat;
  CoverageChanged;
 end;
 
-procedure TTrueTypeFontKerningSubTable.IsCrossStreamChanged;
+procedure TPascalTypeKerningSubTable.IsCrossStreamChanged;
 begin
  CoverageChanged;
 end;
 
-procedure TTrueTypeFontKerningSubTable.IsHorizontalChanged;
+procedure TPascalTypeKerningSubTable.IsHorizontalChanged;
 begin
  CoverageChanged;
 end;
 
-procedure TTrueTypeFontKerningSubTable.IsMinimumChanged;
+procedure TPascalTypeKerningSubTable.IsMinimumChanged;
 begin
  CoverageChanged;
 end;
 
-procedure TTrueTypeFontKerningSubTable.IsReplaceChanged;
+procedure TPascalTypeKerningSubTable.IsReplaceChanged;
 begin
  CoverageChanged;
 end;
 
-procedure TTrueTypeFontKerningSubTable.CoverageChanged;
+procedure TPascalTypeKerningSubTable.CoverageChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontKerningSubTable.VersionChanged;
+procedure TPascalTypeKerningSubTable.VersionChanged;
 begin
  Changed;
 end;
 
 
-{ TTrueTypeFontKerningTable }
+{ TPascalTypeKerningTable }
 
-constructor TTrueTypeFontKerningTable.Create;
+constructor TPascalTypeKerningTable.Create;
 begin
  FKerningSubtableList := TObjectList.Create;
  inherited;
 end;
 
-destructor TTrueTypeFontKerningTable.Destroy;
+destructor TPascalTypeKerningTable.Destroy;
 begin
  FreeAndNil(FKerningSubtableList);
  inherited;
 end;
 
-procedure TTrueTypeFontKerningTable.AssignTo(Dest: TPersistent);
+procedure TPascalTypeKerningTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontKerningTable then
+ if Dest is TPascalTypeKerningTable then
   begin
    FVersion := Self.FVersion;
   end
  else inherited;
 end;
 
-function TTrueTypeFontKerningTable.GetKerningSubtable(
-  Index: Integer): TTrueTypeFontKerningSubTable;
+function TPascalTypeKerningTable.GetKerningSubtable(
+  Index: Integer): TPascalTypeKerningSubTable;
 begin
  if (Index >= 0) and (Index < FKerningSubtableList.Count)
-  then Result := TTrueTypeFontKerningSubTable(FKerningSubtableList[Index])
+  then Result := TPascalTypeKerningSubTable(FKerningSubtableList[Index])
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TTrueTypeFontKerningTable.GetKerningSubtableCount: Integer;
+function TPascalTypeKerningTable.GetKerningSubtableCount: Integer;
 begin
  Result := FKerningSubtableList.Count;
 end;
 
-class function TTrueTypeFontKerningTable.GetTableType: TTableType;
+class function TPascalTypeKerningTable.GetTableType: TTableType;
 begin
  Result := 'kern';
 end;
 
-procedure TTrueTypeFontKerningTable.ResetToDefaults;
+procedure TPascalTypeKerningTable.ResetToDefaults;
 begin
  inherited;
  FKerningSubtableList.Clear;
 end;
 
-procedure TTrueTypeFontKerningTable.LoadFromStream(Stream: TStream);
+procedure TPascalTypeKerningTable.LoadFromStream(Stream: TStream);
 var
   Value16       : Word;
   SubTableCount : Word;
   SubTableIndex : Integer;
-  SubTable      : TTrueTypeFontKerningSubTable;
+  SubTable      : TPascalTypeKerningSubTable;
 begin
  inherited;
  
@@ -1729,7 +1729,7 @@ begin
 
    for SubTableIndex := 0 to SubTableCount - 1 do
     begin
-     SubTable := TTrueTypeFontKerningSubTable.Create;
+     SubTable := TPascalTypeKerningSubTable.Create;
 
      // load from stream
      SubTable.LoadFromStream(Stream);
@@ -1739,7 +1739,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontKerningTable.SaveToStream(Stream: TStream);
+procedure TPascalTypeKerningTable.SaveToStream(Stream: TStream);
 var
   Value16       : Word;
   SubTableIndex : Integer;
@@ -1756,11 +1756,11 @@ begin
 
    // save to stream
    for SubTableIndex := 0 to FKerningSubtableList.Count - 1
-    do TTrueTypeFontKerningSubTable(FKerningSubtableList[SubTableIndex]).SaveToStream(Stream);
+    do TPascalTypeKerningSubTable(FKerningSubtableList[SubTableIndex]).SaveToStream(Stream);
   end;
 end;
 
-procedure TTrueTypeFontKerningTable.SetVersion(const Value: Word);
+procedure TPascalTypeKerningTable.SetVersion(const Value: Word);
 begin
  if FVersion <> Value then
   begin
@@ -1769,18 +1769,18 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontKerningTable.VersionChanged;
+procedure TPascalTypeKerningTable.VersionChanged;
 begin
  Changed;
 end;
 
 
-{ TTrueTypeFontLinearThresholdTable }
+{ TPascalTypeLinearThresholdTable }
 
-procedure TTrueTypeFontLinearThresholdTable.AssignTo(Dest: TPersistent);
+procedure TPascalTypeLinearThresholdTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontLinearThresholdTable then
-  with TTrueTypeFontLinearThresholdTable(Dest) do
+ if Dest is TPascalTypeLinearThresholdTable then
+  with TPascalTypeLinearThresholdTable(Dest) do
    begin
     FVersion := Self.FVersion;
     FVerticalPels := Self.FVerticalPels;
@@ -1788,30 +1788,30 @@ begin
  else inherited;
 end;
 
-class function TTrueTypeFontLinearThresholdTable.GetTableType: TTableType;
+class function TPascalTypeLinearThresholdTable.GetTableType: TTableType;
 begin
  Result := 'LTSH';
 end;
 
-function TTrueTypeFontLinearThresholdTable.GetVerticalPel(Index: Integer): Byte;
+function TPascalTypeLinearThresholdTable.GetVerticalPel(Index: Integer): Byte;
 begin
  if (Index >= 0) and (Index < Length(FVerticalPels))
   then Result := FVerticalPels[Index]
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TTrueTypeFontLinearThresholdTable.GetVerticalPelCount: Integer;
+function TPascalTypeLinearThresholdTable.GetVerticalPelCount: Integer;
 begin
  Result := Length(FVerticalPels);
 end;
 
-procedure TTrueTypeFontLinearThresholdTable.ResetToDefaults;
+procedure TPascalTypeLinearThresholdTable.ResetToDefaults;
 begin
  FVersion := 0;
  SetLength(FVerticalPels, 0);
 end;
 
-procedure TTrueTypeFontLinearThresholdTable.LoadFromStream(Stream: TStream);
+procedure TPascalTypeLinearThresholdTable.LoadFromStream(Stream: TStream);
 var
   Value16 : Word;
 begin
@@ -1842,7 +1842,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontLinearThresholdTable.SaveToStream(Stream: TStream);
+procedure TPascalTypeLinearThresholdTable.SaveToStream(Stream: TStream);
 var
   Value16 : Word;
 begin
@@ -1861,7 +1861,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontLinearThresholdTable.SetVersion(const Value: Word);
+procedure TPascalTypeLinearThresholdTable.SetVersion(const Value: Word);
 begin
  if FVersion <> Value then
   begin
@@ -1870,18 +1870,18 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontLinearThresholdTable.VersionChanged;
+procedure TPascalTypeLinearThresholdTable.VersionChanged;
 begin
  Changed;
 end;
 
 
-{ TTrueTypeFontPCL5Table }
+{ TPascalTypePCL5Table }
 
-procedure TTrueTypeFontPCL5Table.AssignTo(Dest: TPersistent);
+procedure TPascalTypePCL5Table.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontPCL5Table then
-  with TTrueTypeFontPCL5Table(Dest) do
+ if Dest is TPascalTypePCL5Table then
+  with TPascalTypePCL5Table(Dest) do
    begin
     FVersion.Value := Self.FVersion.Value;
     FFontNumber := Self.FFontNumber;
@@ -1902,27 +1902,27 @@ begin
  else inherited;
 end;
 
-class function TTrueTypeFontPCL5Table.GetTableType: TTableType;
+class function TPascalTypePCL5Table.GetTableType: TTableType;
 begin
  Result := 'PCLT';
 end;
 
-function TTrueTypeFontPCL5Table.GetCharacterComplement: string;
+function TPascalTypePCL5Table.GetCharacterComplement: string;
 begin
  Result := FTypeface;
 end;
 
-function TTrueTypeFontPCL5Table.GetFileName: string;
+function TPascalTypePCL5Table.GetFileName: string;
 begin
  Result := FFileName;
 end;
 
-function TTrueTypeFontPCL5Table.GetTypeface: string;
+function TPascalTypePCL5Table.GetTypeface: string;
 begin
  Result := FTypeface;
 end;
 
-procedure TTrueTypeFontPCL5Table.ResetToDefaults;
+procedure TPascalTypePCL5Table.ResetToDefaults;
 begin
  FVersion.Value := 1;
  FFontNumber.Vendor := 0;
@@ -1944,7 +1944,7 @@ begin
  FPadding := 0;
 end;
 
-procedure TTrueTypeFontPCL5Table.LoadFromStream(Stream: TStream);
+procedure TPascalTypePCL5Table.LoadFromStream(Stream: TStream);
 var
   Value32 : Cardinal;
   Value16 : Word;
@@ -2014,7 +2014,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SaveToStream(Stream: TStream);
+procedure TPascalTypePCL5Table.SaveToStream(Stream: TStream);
 var
   Value32 : Cardinal;
   Value16 : Word;
@@ -2084,7 +2084,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetCapHeight(const Value: Word);
+procedure TPascalTypePCL5Table.SetCapHeight(const Value: Word);
 begin
  if FCapHeight <> Value then
   begin
@@ -2093,19 +2093,19 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetCharacterComplement(const Value: string);
+procedure TPascalTypePCL5Table.SetCharacterComplement(const Value: string);
 begin
  FillChar(FCharacterComplement[0], 8, 0);
  Move(Value[1], FCharacterComplement[0], Min(8, Length(Value)));
 end;
 
-procedure TTrueTypeFontPCL5Table.SetFileName(const Value: string);
+procedure TPascalTypePCL5Table.SetFileName(const Value: string);
 begin
  FillChar(FCharacterComplement[0], 6, 0);
  Move(Value[1], FCharacterComplement[0], Min(6, Length(Value)));
 end;
 
-procedure TTrueTypeFontPCL5Table.SetFontNumber(const Value: TPcl5FontNumber);
+procedure TPascalTypePCL5Table.SetFontNumber(const Value: TPcl5FontNumber);
 begin
  if Cardinal(FFontNumber) <> Cardinal(Value) then
   begin
@@ -2114,7 +2114,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetPadding(const Value: Byte);
+procedure TPascalTypePCL5Table.SetPadding(const Value: Byte);
 begin
  if FPadding <> Value then
   begin
@@ -2123,7 +2123,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetPitch(const Value: Word);
+procedure TPascalTypePCL5Table.SetPitch(const Value: Word);
 begin
  if FPitch <> Value then
   begin
@@ -2132,7 +2132,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetSerifStyle(const Value: Byte);
+procedure TPascalTypePCL5Table.SetSerifStyle(const Value: Byte);
 begin
  if FSerifStyle <> Value then
   begin
@@ -2141,7 +2141,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetStrokeWeight(const Value: AnsiChar);
+procedure TPascalTypePCL5Table.SetStrokeWeight(const Value: AnsiChar);
 begin
  if FStrokeWeight <> Value then
   begin
@@ -2150,7 +2150,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetStyle(const Value: Word);
+procedure TPascalTypePCL5Table.SetStyle(const Value: Word);
 begin
  if FStyle <> Value then
   begin
@@ -2159,7 +2159,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetSymbolSet(const Value: Word);
+procedure TPascalTypePCL5Table.SetSymbolSet(const Value: Word);
 begin
  if FSymbolSet <> Value then
   begin
@@ -2168,13 +2168,13 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetTypeface(const Value: string);
+procedure TPascalTypePCL5Table.SetTypeface(const Value: string);
 begin
  FillChar(FCharacterComplement[0], 16, 0);
  Move(Value[1], FCharacterComplement[0], Min(16, Length(Value)));
 end;
 
-procedure TTrueTypeFontPCL5Table.SetTypeFamily(const Value: Word);
+procedure TPascalTypePCL5Table.SetTypeFamily(const Value: Word);
 begin
  if FTypeFamily <> Value then
   begin
@@ -2183,7 +2183,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetVersion(const Value: TFixedPoint);
+procedure TPascalTypePCL5Table.SetVersion(const Value: TFixedPoint);
 begin
  if (FVersion.Fract <> Value.Fract) or
     (FVersion.Value <> Value.Value) then
@@ -2193,7 +2193,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetWidthType(const Value: AnsiChar);
+procedure TPascalTypePCL5Table.SetWidthType(const Value: AnsiChar);
 begin
  if FWidthType <> Value then
   begin
@@ -2202,7 +2202,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.SetXHeight(const Value: Word);
+procedure TPascalTypePCL5Table.SetXHeight(const Value: Word);
 begin
  if FXHeight <> Value then
   begin
@@ -2211,73 +2211,73 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPCL5Table.CapHeightChanged;
+procedure TPascalTypePCL5Table.CapHeightChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.FontNumberChanged;
+procedure TPascalTypePCL5Table.FontNumberChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.PaddingChanged;
+procedure TPascalTypePCL5Table.PaddingChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.PitchChanged;
+procedure TPascalTypePCL5Table.PitchChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.SerifStyleChanged;
+procedure TPascalTypePCL5Table.SerifStyleChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.StrokeWeightChanged;
+procedure TPascalTypePCL5Table.StrokeWeightChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.StyleChanged;
+procedure TPascalTypePCL5Table.StyleChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.SymbolSetChanged;
+procedure TPascalTypePCL5Table.SymbolSetChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.TypeFamilyChanged;
+procedure TPascalTypePCL5Table.TypeFamilyChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.VersionChanged;
+procedure TPascalTypePCL5Table.VersionChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.WidthTypeChanged;
+procedure TPascalTypePCL5Table.WidthTypeChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontPCL5Table.XHeightChanged;
+procedure TPascalTypePCL5Table.XHeightChanged;
 begin
  Changed;
 end;
 
 
-{ TTrueTypeFontVerticalDeviceMetricsTable }
+{ TPascalTypeVerticalDeviceMetricsTable }
 
-procedure TTrueTypeFontVerticalDeviceMetricsTable.AssignTo(Dest: TPersistent);
+procedure TPascalTypeVerticalDeviceMetricsTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontVerticalDeviceMetricsTable then
-  with TTrueTypeFontVerticalDeviceMetricsTable(Dest) do
+ if Dest is TPascalTypeVerticalDeviceMetricsTable then
+  with TPascalTypeVerticalDeviceMetricsTable(Dest) do
    begin
     FVersion := Self.FVersion;
     FNumRecs := Self.FNumRecs;
@@ -2286,19 +2286,19 @@ begin
  else inherited;
 end;
 
-class function TTrueTypeFontVerticalDeviceMetricsTable.GetTableType: TTableType;
+class function TPascalTypeVerticalDeviceMetricsTable.GetTableType: TTableType;
 begin
  Result := 'VDMX';
 end;
 
-procedure TTrueTypeFontVerticalDeviceMetricsTable.ResetToDefaults;
+procedure TPascalTypeVerticalDeviceMetricsTable.ResetToDefaults;
 begin
  FVersion   := 0;
  FNumRecs   := 0;
  FNumRatios := 0;
 end;
 
-procedure TTrueTypeFontVerticalDeviceMetricsTable.LoadFromStream(
+procedure TPascalTypeVerticalDeviceMetricsTable.LoadFromStream(
   Stream: TStream);
 var
   Value16 : Word;
@@ -2327,7 +2327,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalDeviceMetricsTable.SaveToStream(Stream: TStream);
+procedure TPascalTypeVerticalDeviceMetricsTable.SaveToStream(Stream: TStream);
 var
   Value16 : Word;
 begin
@@ -2348,11 +2348,11 @@ begin
 end;
 
 
-{ TTrueTypeFontVerticalHeaderTable }
+{ TPascalTypeVerticalHeaderTable }
 
-procedure TTrueTypeFontVerticalHeaderTable.AssignTo(Dest: TPersistent);
+procedure TPascalTypeVerticalHeaderTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontVerticalHeaderTable then
+ if Dest is TPascalTypeVerticalHeaderTable then
   begin
    FVersion              := Self.FVersion;
    FAscent               := Self.FAscent;
@@ -2371,12 +2371,12 @@ begin
  else inherited;
 end;
 
-class function TTrueTypeFontVerticalHeaderTable.GetTableType: TTableType;
+class function TPascalTypeVerticalHeaderTable.GetTableType: TTableType;
 begin
  Result := 'vhea';
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.ResetToDefaults;
+procedure TPascalTypeVerticalHeaderTable.ResetToDefaults;
 begin
  // not implemented yet
  FVersion.Value := 1;
@@ -2398,7 +2398,7 @@ begin
  inherited;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.LoadFromStream(
+procedure TPascalTypeVerticalHeaderTable.LoadFromStream(
   Stream: TStream);
 var
   Value32 : Cardinal;
@@ -2472,7 +2472,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SaveToStream(Stream: TStream);
+procedure TPascalTypeVerticalHeaderTable.SaveToStream(Stream: TStream);
 var
   Value32 : Cardinal;
   Value16 : SmallInt;
@@ -2539,7 +2539,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetAdvanceHeightMax(
+procedure TPascalTypeVerticalHeaderTable.SetAdvanceHeightMax(
   const Value: SmallInt);
 begin
  if FAdvanceHeightMax <> Value then
@@ -2549,7 +2549,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetAscent(
+procedure TPascalTypeVerticalHeaderTable.SetAscent(
   const Value: SmallInt);
 begin
  if Ascent <> Value then
@@ -2559,7 +2559,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetCaretOffset(
+procedure TPascalTypeVerticalHeaderTable.SetCaretOffset(
   const Value: SmallInt);
 begin
  if CaretOffset <> Value then
@@ -2569,7 +2569,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetCaretSlopeRise(
+procedure TPascalTypeVerticalHeaderTable.SetCaretSlopeRise(
   const Value: SmallInt);
 begin
  if CaretSlopeRise <> Value then
@@ -2579,7 +2579,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetCaretSlopeRun(
+procedure TPascalTypeVerticalHeaderTable.SetCaretSlopeRun(
   const Value: SmallInt);
 begin
  if CaretSlopeRun <> Value then
@@ -2589,7 +2589,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetDescent(
+procedure TPascalTypeVerticalHeaderTable.SetDescent(
   const Value: SmallInt);
 begin
  if Descent <> Value then
@@ -2599,7 +2599,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetLineGap(
+procedure TPascalTypeVerticalHeaderTable.SetLineGap(
   const Value: SmallInt);
 begin
  if LineGap <> Value then
@@ -2609,7 +2609,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetMetricDataFormat(
+procedure TPascalTypeVerticalHeaderTable.SetMetricDataFormat(
   const Value: SmallInt);
 begin
  if MetricDataFormat <> Value then
@@ -2619,7 +2619,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetMinBottomSideBearing(
+procedure TPascalTypeVerticalHeaderTable.SetMinBottomSideBearing(
   const Value: SmallInt);
 begin
  if MinBottomSideBearing <> Value then
@@ -2629,7 +2629,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetMinToSideBearing(
+procedure TPascalTypeVerticalHeaderTable.SetMinToSideBearing(
   const Value: SmallInt);
 begin
  if MinToSideBearing <> Value then
@@ -2639,7 +2639,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetNumOfLongVerMetrics(
+procedure TPascalTypeVerticalHeaderTable.SetNumOfLongVerMetrics(
   const Value: Word);
 begin
  if NumOfLongVerMetrics <> Value then
@@ -2649,7 +2649,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetVersion(
+procedure TPascalTypeVerticalHeaderTable.SetVersion(
   const Value: TFixedPoint);
 begin
  if (FVersion.Value <> Value.Value) or
@@ -2660,7 +2660,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.SetYMaxExtent(
+procedure TPascalTypeVerticalHeaderTable.SetYMaxExtent(
   const Value: SmallInt);
 begin
  if YMaxExtent <> Value then
@@ -2670,90 +2670,90 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.VersionChanged;
+procedure TPascalTypeVerticalHeaderTable.VersionChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.AscentChanged;
+procedure TPascalTypeVerticalHeaderTable.AscentChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.CaretOffsetChanged;
+procedure TPascalTypeVerticalHeaderTable.CaretOffsetChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.CaretSlopeRiseChanged;
+procedure TPascalTypeVerticalHeaderTable.CaretSlopeRiseChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.CaretSlopeRunChanged;
+procedure TPascalTypeVerticalHeaderTable.CaretSlopeRunChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.DescentChanged;
+procedure TPascalTypeVerticalHeaderTable.DescentChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.AdvanceHeightMaxChanged;
+procedure TPascalTypeVerticalHeaderTable.AdvanceHeightMaxChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.LineGapChanged;
+procedure TPascalTypeVerticalHeaderTable.LineGapChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.MetricDataFormatChanged;
+procedure TPascalTypeVerticalHeaderTable.MetricDataFormatChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.MinBottomSideBearingChanged;
+procedure TPascalTypeVerticalHeaderTable.MinBottomSideBearingChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.MinToSideBearingChanged;
+procedure TPascalTypeVerticalHeaderTable.MinToSideBearingChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.NumOfLongVerMetricsChanged;
+procedure TPascalTypeVerticalHeaderTable.NumOfLongVerMetricsChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontVerticalHeaderTable.YMaxExtentChanged;
+procedure TPascalTypeVerticalHeaderTable.YMaxExtentChanged;
 begin
  Changed;
 end;
 
 
-{ TTrueTypeFontVerticalMetricsTable }
+{ TPascalTypeVerticalMetricsTable }
 
-procedure TTrueTypeFontVerticalMetricsTable.AssignTo(Dest: TPersistent);
+procedure TPascalTypeVerticalMetricsTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontVerticalMetricsTable then
-  with TTrueTypeFontVerticalMetricsTable(Dest) do
+ if Dest is TPascalTypeVerticalMetricsTable then
+  with TPascalTypeVerticalMetricsTable(Dest) do
    begin
     FVerticalMetrics := Self.FVerticalMetrics;
    end
  else inherited;
 end;
 
-class function TTrueTypeFontVerticalMetricsTable.GetTableType: TTableType;
+class function TPascalTypeVerticalMetricsTable.GetTableType: TTableType;
 begin
  Result := 'vdmx';
 end;
 
-function TTrueTypeFontVerticalMetricsTable.GetVerticalMetric(
+function TPascalTypeVerticalMetricsTable.GetVerticalMetric(
   Index: Integer): TVerticalMetric;
 begin
  if (Index >= 0) and (Index < Length(FVerticalMetrics))
@@ -2761,29 +2761,29 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TTrueTypeFontVerticalMetricsTable.GetVerticalMetricCount: Integer;
+function TPascalTypeVerticalMetricsTable.GetVerticalMetricCount: Integer;
 begin
  Result := Length(FVerticalMetrics);
 end;
 
-procedure TTrueTypeFontVerticalMetricsTable.ResetToDefaults;
+procedure TPascalTypeVerticalMetricsTable.ResetToDefaults;
 begin
  inherited;
 
  SetLength(FVerticalMetrics, 0);
 end;
 
-procedure TTrueTypeFontVerticalMetricsTable.LoadFromStream(Stream: TStream);
+procedure TPascalTypeVerticalMetricsTable.LoadFromStream(Stream: TStream);
 var
   MtxIndex       : Integer;                                                  
-  VerticalHeader : TTrueTypeFontVerticalHeaderTable;
+  VerticalHeader : TPascalTypeVerticalHeaderTable;
   MaximumProfile : TPascalTypeMaximumProfileTable;
   Value16        : Word;
 begin
  inherited;
 
  // locate vertical metrics header
- VerticalHeader := TTrueTypeFontVerticalHeaderTable(FInterpreter.GetTableByTableClass(TTrueTypeFontVerticalHeaderTable));
+ VerticalHeader := TPascalTypeVerticalHeaderTable(FInterpreter.GetTableByTableClass(TPascalTypeVerticalHeaderTable));
  MaximumProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableType('maxp'));
  Assert(Assigned(MaximumProfile));
 
@@ -2819,16 +2819,16 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontVerticalMetricsTable.SaveToStream(Stream: TStream);
+procedure TPascalTypeVerticalMetricsTable.SaveToStream(Stream: TStream);
 var
   MtxIndex       : Integer;
-  VerticalHeader : TTrueTypeFontVerticalHeaderTable;
+  VerticalHeader : TPascalTypeVerticalHeaderTable;
   Value16        : Word;
 begin
  inherited;
 
  // locate vertical metrics header
- VerticalHeader := TTrueTypeFontVerticalHeaderTable(FInterpreter.GetTableByTableClass(TTrueTypeFontVerticalHeaderTable));
+ VerticalHeader := TPascalTypeVerticalHeaderTable(FInterpreter.GetTableByTableClass(TPascalTypeVerticalHeaderTable));
 
  // check if vertical metrics header is available
  if VerticalHeader = nil
@@ -2860,12 +2860,12 @@ end;
 
 
 initialization
-  RegisterTrueTypeFontTables([TTrueTypeFontDigitalSignatureTable,
-    TTrueTypeFontGridFittingAndScanConversionProcedureTable,
-    TTrueTypeFontHorizontalDeviceMetricsTable, TTrueTypeFontKerningTable,
-    TTrueTypeFontLinearThresholdTable, TTrueTypeFontPCL5Table,
-    TTrueTypeFontVerticalDeviceMetricsTable,
-    TTrueTypeFontVerticalHeaderTable,
-    TTrueTypeFontVerticalMetricsTable]);
+  RegisterPascalTypeTables([TPascalTypeDigitalSignatureTable,
+    TPascalTypeGridFittingAndScanConversionProcedureTable,
+    TPascalTypeHorizontalDeviceMetricsTable, TPascalTypeKerningTable,
+    TPascalTypeLinearThresholdTable, TPascalTypePCL5Table,
+    TPascalTypeVerticalDeviceMetricsTable,
+    TPascalTypeVerticalHeaderTable,
+    TPascalTypeVerticalMetricsTable]);
 
 end.

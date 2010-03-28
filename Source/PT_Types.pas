@@ -134,7 +134,7 @@ type
   TPlatformID = (
     piUnicode   = 0,  // Indicates Unicode version.
     piApple     = 1,  // Script Manager code.
-    piReserved  = 2,  // ISO encoding (do not use)
+    piISO       = 2,  // ISO encoding (do not use)
     piMicrosoft = 3,  // Microsoft encoding
     piCustom    = 4   // Custom
   );

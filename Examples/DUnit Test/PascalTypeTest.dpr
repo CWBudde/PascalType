@@ -29,7 +29,9 @@ uses
   PT_TablesOpenTypeFeatures in '..\..\Source\PT_TablesOpenTypeFeatures.pas',
   PT_TablesOpenTypeScripts in '..\..\Source\PT_TablesOpenTypeScripts.pas',
   PT_TablesOpenTypeLanguages in '..\..\Source\PT_TablesOpenTypeLanguages.pas',
-  PT_TableDirectory in '..\..\Source\PT_TableDirectory.pas';
+  PT_TableDirectory in '..\..\Source\PT_TableDirectory.pas',
+  PT_TablesPostscript in '..\..\Source\PT_TablesPostscript.pas',
+  PT_TablesTrueType in '..\..\Source\PT_TablesTrueType.pas';
 
 {$R *.RES}
 

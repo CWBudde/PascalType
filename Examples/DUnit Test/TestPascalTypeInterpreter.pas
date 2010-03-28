@@ -162,7 +162,7 @@ begin
    repeat
     Succeed := True;
     try
-     FPascalTypeScanner.LoadFromFile(SR.Name)
+     FPascalTypeScanner.LoadFromFile(SR.Name);
     except
      on e: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
      else Succeed := False;

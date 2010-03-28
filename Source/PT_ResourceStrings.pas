@@ -51,6 +51,7 @@ resourcestring
   RCStrNoMagic = 'There is no magic in it!';
   RCStrNotImplemented = 'not implemented';
   RCStrNoVerticalHeader = 'Vertical header not found';
+  RCStrPaddingByteError = 'Padding Byte <> 0!';
   RCStrTableIncomplete = 'Could not load the table entirely!';
   RCStrTablesMissing = 'Not all required tables are present!';
   RCStrTooManyContours = 'Too many contours (%d / %d)';

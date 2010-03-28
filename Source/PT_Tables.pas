@@ -332,179 +332,6 @@ type
   end;
 
 
-  // table 'glyf'
-
-  // TCustomTrueTypeFontInstructionTable
-
-  TTrueTypeFontGlyphInstructionTable = class(TCustomPascalTypeInterfaceTable)
-  private
-    FInstructions : array of Byte;
-    function GetInstruction(Index: Integer): Byte;
-    function GetInstructionCount: Integer;
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-
-    procedure ResetToDefaults; override;
-  public
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    property Instruction[Index: Integer]: Byte read GetInstruction;
-    property InstructionCount: Integer read GetInstructionCount;
-  end;
-
-
-  TCustomTrueTypeFontGlyphData = class(TCustomPascalTypeInterfaceTable)
-  private
-    procedure SetNumberOfContours(const Value: SmallInt);
-    procedure SetXMax(const Value: SmallInt);
-    procedure SetXMin(const Value: SmallInt);
-    procedure SetYMax(const Value: SmallInt);
-    procedure SetYMin(const Value: SmallInt);
-    procedure SetGlyphIndex(const Value: Integer);
-  protected
-    FNumberOfContours : SmallInt; // If the number of contours is greater than or equal to zero, this is a single glyph; if negative, this is a composite glyph.
-    FXMin             : SmallInt; // Minimum x for coordinate data.
-    FYMin             : SmallInt; // Minimum y for coordinate data.
-    FXMax             : SmallInt; // Maximum x for coordinate data.
-    FYMax             : SmallInt; // Maximum y for coordinate data.
-    FInstructions     : TTrueTypeFontGlyphInstructionTable;
-    FGlyphIndex       : Integer;
-
-    procedure AssignTo(Dest: TPersistent); override;
-
-    procedure ResetToDefaults; override;
-
-    procedure GlyphIndexChanged; virtual;
-    procedure NumberOfContoursChanged; virtual;
-    procedure XMaxChanged; virtual;
-    procedure XMinChanged; virtual;
-    procedure YMaxChanged; virtual;
-    procedure YMinChanged; virtual;
-  public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
-    destructor Destroy; override;
-
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    property NumberOfContours: SmallInt read FNumberOfContours write SetNumberOfContours;
-    property XMin: SmallInt read FXMin write SetXMin;
-    property YMin: SmallInt read FYMin write SetYMin;
-    property XMax: SmallInt read FXMax write SetXMax;
-    property YMax: SmallInt read FYMax write SetYMax;
-
-    property GlyphIndex: Integer read FGlyphIndex write SetGlyphIndex;
-
-    property Instructions: TTrueTypeFontGlyphInstructionTable read FInstructions;
-  end;
-
-  TContourPointRecord = record
-    XPos  : Integer;
-    YPos  : Integer;
-    Flags : Byte;
-  end;
-
-  TPascalTypeContour = class(TPersistent)
-  private
-    FPoints : array of TContourPointRecord;
-    function GetPoint(Index: Integer): TContourPointRecord;
-    function GetPointCount: Integer;
-    procedure SetPoint(Index: Integer; const Value: TContourPointRecord);
-    procedure SetPointCount(const Value: Integer);
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-    procedure PointCountChanged; virtual;
-  public
-    property Point[Index : Integer]: TContourPointRecord read GetPoint write SetPoint;
-    property PointCount: Integer read GetPointCount write SetPointCount;
-  end;
-
-  TTrueTypeFontSimpleGlyphData = class(TCustomTrueTypeFontGlyphData)
-  private
-    FContours : TObjectList;
-    function GetContour(Index: Integer): TPascalTypeContour;
-    function GetContourCount: Integer;
-  protected
-    procedure ResetToDefaults; override;
-  public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
-    destructor Destroy; override;
-
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    property Contour[Index : Integer]: TPascalTypeContour read GetContour;
-    property ContourCount: Integer read GetContourCount; 
-  end;
-
-  TPascalTypeCompositeGlyph = class(TCustomPascalTypeTable)
-  private
-    FFlags      : Word;     // Component flag
-    FGlyphIndex : SmallInt; // Glyph index of component
-    FArgument   : array [0..1] of Integer;
-    FScale      : array of Single;
-    procedure SetFlags(const Value: Word);
-    procedure SetGlyphIndex(const Value: SmallInt);
-    procedure FlagsChanged;
-    procedure GlyphIndexChanged;
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-    procedure ResetToDefaults; override;
-  public
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    property Flags: Word read FFlags write SetFlags;
-    property GlyphIndex: SmallInt read FGlyphIndex write SetGlyphIndex;
-    property ArgumentX: Integer read FArgument[0];
-    property ArgumentY: Integer read FArgument[1];
-  end;
-
-  TTrueTypeFontCompositeGlyphData = class(TCustomTrueTypeFontGlyphData)
-  private
-    FGlyphs : TObjectList;
-    function GetGlyphCount: Integer;
-    function GetCompositeGlyph(Index: Integer): TPascalTypeCompositeGlyph;
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-
-    procedure ResetToDefaults; override;
-
-  public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
-    destructor Destroy; override;
-
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    property GlyphCount: Integer read GetGlyphCount;
-    property Glyph[Index: Integer]: TPascalTypeCompositeGlyph read GetCompositeGlyph;
-  end;
-
-  TTrueTypeFontGlyphDataTable = class(TCustomPascalTypeNamedTable)
-  private
-    FGlyphDataList : TObjectList;
-    function GetGlyphDataCount: Integer;
-    function GetGlyphData(Index: Integer): TCustomTrueTypeFontGlyphData; // List of TCustomTrueTypeFontGlyphData
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-
-    procedure ResetToDefaults; override;
-  public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
-    destructor Destroy; override;
-
-    class function GetTableType: TTableType; override;
-
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    property GlyphDataCount: Integer read GetGlyphDataCount;
-    property GlyphData[Index: Integer]: TCustomTrueTypeFontGlyphData read GetGlyphData;
-  end;
-
-
   // Table 'maxp' of Maximum Profile
 
   TPascalTypeMaximumProfileTable = class(TCustomPascalTypeNamedTable)
@@ -684,92 +511,6 @@ type
   end;
 
 
-  // table 'loca'
-
-  TTrueTypeFontLocationTable = class(TCustomPascalTypeNamedTable)
-  private
-    FLocations : array of Cardinal;
-    function GetLocation(Index: Integer): Cardinal;
-    function GetLocationCount: Cardinal;
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-
-    procedure ResetToDefaults; override;
-  public
-    class function GetTableType: TTableType; override;
-
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    property Location[Index: Integer]: Cardinal read GetLocation; default;
-    property LocationCount: Cardinal read GetLocationCount; 
-  end;
-
-
-  // table 'cvt '
-
-  TTrueTypeFontControlValueTable = class(TCustomPascalTypeNamedTable)
-  private
-    FControlValues : array of SmallInt;
-    function GetControlValue(Index: Integer): SmallInt;
-    function GetControlValueCount: Integer;
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-
-    procedure ResetToDefaults; override;
-  public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
-    destructor Destroy; override;
-
-    class function GetTableType: TTableType; override;
-
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    property ControlValue[Index: Integer]: SmallInt read GetControlValue;
-    property ControlValueCount: Integer read GetControlValueCount;
-  end;
-
-
-  // TCustomTrueTypeFontInstructionTable
-
-  TCustomTrueTypeFontInstructionTable = class(TCustomPascalTypeNamedTable)
-  private
-    FInstructions : array of Byte;
-    function GetInstruction(Index: Integer): Byte;
-    function GetInstructionCount: Integer;
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-
-    procedure ResetToDefaults; override;
-  public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
-    destructor Destroy; override;
-
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    property Instruction[Index: Integer]: Byte read GetInstruction;
-    property InstructionCount: Integer read GetInstructionCount;
-  end;
-
-
-  // table 'fpgm'
-
-  TTrueTypeFontFontProgramTable = class(TCustomTrueTypeFontInstructionTable)
-  public
-    class function GetTableType: TTableType; override;
-  end;
-
-
-  // table 'prep'
-
-  TTrueTypeFontControlValueProgramTable = class(TCustomTrueTypeFontInstructionTable)
-  public
-    class function GetTableType: TTableType; override;
-  end;
-
-
   // table 'name'
 
   TCustomTrueTypeFontNamePlatform = class(TCustomPascalTypeTable)
@@ -836,6 +577,13 @@ type
     property PlatformSpecificID: TMicrosoftEncodingID read GetEncodingID write SetEncodingID;
   end;
 
+  TTrueTypeFontNamePlatformISO = class(TCustomTrueTypeFontNamePlatform)
+  protected
+    function GetPlatformID: TPlatformID; override;
+  public
+    procedure ReadStringFromStream(Stream: TStream; Length: Word); override;
+  end;
+
   TPascalTypeNameTable = class(TCustomPascalTypeNamedTable)
   private
     FFormat      : Word; // Format selector. Set to 0.
@@ -879,7 +627,7 @@ type
     usMaxContext        : Word;
   end;
 
-  TTrueTypeFontOS2Table = class(TCustomPascalTypeNamedTable)
+  TPascalTypeOS2Table = class(TCustomPascalTypeNamedTable)
   private
     FVersion             : Word;                     // table version number (set to 0)
     FXAvgCharWidth       : SmallInt;                 // average weighted advance width of lower case letters and space
@@ -1001,7 +749,7 @@ type
 
   // table 'post'
 
-  TTrueTypeFontPostscriptVersion2Table = class(TCustomPascalTypeTable)
+  TPascalTypePostscriptVersion2Table = class(TCustomPascalTypeTable)
   private
     FGlyphNameIndex : array of Word;   // This is not an offset, but is the ordinal number of the glyph in 'post' string tables.
     FNames          : array of ShortString;
@@ -1032,7 +780,7 @@ type
     FMaxMemType42       : LongInt;     // Maximum memory usage when a TrueType font is downloaded as a Type 42 font
     FMinMemType1        : LongInt;     // Minimum memory usage when a TrueType font is downloaded as a Type 1 font
     FMaxMemType1        : LongInt;     // Maximum memory usage when a TrueType font is downloaded as a Type 1 font
-    FPostscriptV2Table  : TTrueTypeFontPostscriptVersion2Table;
+    FPostscriptV2Table  : TPascalTypePostscriptVersion2Table;
     procedure SetVersion(const Value: TFixedPoint);
     procedure SetIsFixedPitch(const Value: LongInt);
     procedure SetItalicAngle(const Value: TFixedPoint);
@@ -1073,7 +821,7 @@ type
     property MaxMemType42: LongInt read FMaxMemType42 write SetMaxMemType42;
     property MinMemType1: LongInt read FMinMemType1 write SetMinMemType1;
     property MaxMemType1: LongInt read FMaxMemType1 write SetMaxMemType1;
-    property PostscriptV2Table: TTrueTypeFontPostscriptVersion2Table read FPostscriptV2Table;
+    property PostscriptV2Table: TPascalTypePostscriptVersion2Table read FPostscriptV2Table;
   end;
 
 
@@ -1081,9 +829,9 @@ function Swap16(Value: Word): Word;
 function Swap32(Value: Cardinal): Cardinal;
 function Swap64(Value: Int64): Int64;
 
-procedure RegisterTrueTypeFontTable(TableClass: TCustomPascalTypeNamedTableClass);
-procedure RegisterTrueTypeFontTables(TableClasses: array of TCustomPascalTypeNamedTableClass);
-function FindTrueTypeFontTableByType(TableType: TTableType): TCustomPascalTypeNamedTableClass;
+procedure RegisterPascalTypeTable(TableClass: TCustomPascalTypeNamedTableClass);
+procedure RegisterPascalTypeTables(TableClasses: array of TCustomPascalTypeNamedTableClass);
+function FindPascalTypeTableByType(TableType: TTableType): TCustomPascalTypeNamedTableClass;
 
 implementation
 
@@ -2310,1018 +2058,6 @@ begin
 end;
 
 
-{ TTrueTypeFontGlyphInstructionTable }
-
-procedure TTrueTypeFontGlyphInstructionTable.AssignTo(Dest: TPersistent);
-begin
- if Dest is TTrueTypeFontGlyphInstructionTable then
-  with TTrueTypeFontGlyphInstructionTable(Dest) do
-   begin
-    FInstructions := Self.FInstructions;
-   end
- else inherited;
-end;
-
-function TTrueTypeFontGlyphInstructionTable.GetInstruction(Index: Integer): Byte;
-begin
- if (Index < Length(FInstructions))
-  then Result := FInstructions[Index]
-  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
-end;
-
-function TTrueTypeFontGlyphInstructionTable.GetInstructionCount: Integer;
-begin
- Result := Length(FInstructions);
-end;
-
-procedure TTrueTypeFontGlyphInstructionTable.ResetToDefaults;
-begin
- SetLength(FInstructions, 0);
-end;
-
-procedure TTrueTypeFontGlyphInstructionTable.LoadFromStream(Stream: TStream);
-var
-  Value16    : Word;
-  MaxProfile : TPascalTypeMaximumProfileTable;
-begin
- MaxProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableType('maxp'));
- Assert(Assigned(MaxProfile));
-
- with Stream do
-  begin
-   // read instruction size
-   Read(Value16, SizeOf(Word));
-   Value16 := Swap16(Value16);
-
-   // check if instructions shall be ignored
-   if Value16 = $FFFF
-    then Exit;
-
-   // check if too many instuctions are present -> possible stream error
-   if Value16 > MaxProfile.MaxSizeOfInstruction
-    then raise EPascalTypeError.CreateFmt(RCStrTooManyInstructions, [Value16]);
-
-   // set instruction length
-   SetLength(FInstructions, Value16);
-
-   // read instructions
-   Read(FInstructions[0], Length(FInstructions));
-  end;
-end;
-
-procedure TTrueTypeFontGlyphInstructionTable.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
-begin
- with Stream do
-  begin
-   // write instruction size
-   Value16 := Swap16(Length(FInstructions));
-   Write(Value16, SizeOf(Word));
-
-   // write instructions
-   Write(FInstructions[0], Length(FInstructions));
-  end;
-end;
-
-
-{ TCustomTrueTypeFontGlyphData }
-
-constructor TCustomTrueTypeFontGlyphData.Create(Interpreter: IPascalTypeInterpreter);
-begin
- FInstructions := TTrueTypeFontGlyphInstructionTable.Create(Interpreter);
- inherited;
-end;
-
-destructor TCustomTrueTypeFontGlyphData.Destroy;
-begin
- FreeAndNil(FInstructions);
- inherited;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.GlyphIndexChanged;
-begin
- Changed;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.AssignTo(Dest: TPersistent);
-begin
- if Dest is TCustomTrueTypeFontGlyphData then
-  with TCustomTrueTypeFontGlyphData(Dest) do
-   begin
-    FNumberOfContours := Self.FNumberOfContours;
-    FXMin             := Self.FXMin;
-    FYMin             := Self.FYMin;
-    FXMax             := Self.FXMax;
-    FYMax             := Self.FYMax;
-    FGlyphIndex       := Self.FGlyphIndex;
-   end
- else inherited;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.ResetToDefaults;
-begin
- FNumberOfContours := 0;
- FXMin := 0;
- FYMin := 0;
- FXMax := 0;
- FYMax := 0;
- FGlyphIndex := -1;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.LoadFromStream(Stream: TStream);
-var
-  MaxProfile : TPascalTypeMaximumProfileTable;
-  Value16    : Word;
-begin
- // get maximum profile
- MaxProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableClass(TPascalTypeMaximumProfileTable));
-
- with Stream do
-  begin
-   if Position + 2 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
-
-   // read number of contours
-   Read(Value16, SizeOf(SmallInt));
-   FNumberOfContours := Swap16(Value16);
-
-   // check if maximum number of contours are exceeded
-   if FNumberOfContours > MaxProfile.MaxContours
-    then raise EPascalTypeError.CreateFmt(RCStrTooManyContours, [FNumberOfContours, MaxProfile.MaxContours]);
-
-   // check if glyph contains any information at all
-   if FNumberOfContours = 0
-    then Exit;
-
-   if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
-
-   // read XMin
-   Read(Value16, SizeOf(SmallInt));
-   FXMin := Swap16(Value16);
-
-   // read YMin
-   Read(Value16, SizeOf(SmallInt));
-   FYMin := Swap16(Value16);
-
-   // read XMax
-   Read(Value16, SizeOf(SmallInt));
-   FXMax := Swap16(Value16);
-
-   // read YMax
-   Read(Value16, SizeOf(SmallInt));
-   FYMax := Swap16(Value16);
-
-   Assert(FXMin <= FXMax);
-   Assert(FYMin <= FYMax);
-  end;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
-begin
- with Stream do
-  begin
-   // write number of contours
-   Value16 := Swap16(FNumberOfContours);
-   Write(Value16, SizeOf(SmallInt));
-
-   // write XMin
-   Value16 := Swap16(FXMin);
-   Write(Value16, SizeOf(SmallInt));
-
-   // write YMin
-   Value16 := Swap16(FYMin);
-   Write(Value16, SizeOf(SmallInt));
-
-   // write XMax
-   Value16 := Swap16(FXMax);
-   Write(Value16, SizeOf(SmallInt));
-
-   // write YMax
-   Value16 := Swap16(FYMax);
-   Write(Value16, SizeOf(SmallInt));
-  end;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.SetGlyphIndex(const Value: Integer);
-begin
- if FGlyphIndex <> Value then
-  begin
-   FGlyphIndex := Value;
-   GlyphIndexChanged;
-  end;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.SetNumberOfContours(
-  const Value: SmallInt);
-begin
- if FNumberOfContours <> Value then
-  begin
-   FNumberOfContours := Value;
-   NumberOfContoursChanged;
-  end;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.SetXMax(const Value: SmallInt);
-begin
- if FXMax <> Value then
-  begin
-   FXMax := Value;
-   XMaxChanged;
-  end;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.SetXMin(const Value: SmallInt);
-begin
- if FXMin <> Value then
-  begin
-   FXMin := Value;
-   XMinChanged;
-  end;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.SetYMax(const Value: SmallInt);
-begin
- if FYMax <> Value then
-  begin
-   FYMax := Value;
-   YMaxChanged;
-  end;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.SetYMin(const Value: SmallInt);
-begin
- if FYMin <> Value then
-  begin
-   FYMin := Value;
-   YMinChanged;
-  end;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.NumberOfContoursChanged;
-begin
- Changed;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.XMaxChanged;
-begin
- Changed;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.XMinChanged;
-begin
- Changed;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.YMaxChanged;
-begin
- Changed;
-end;
-
-procedure TCustomTrueTypeFontGlyphData.YMinChanged;
-begin
- Changed;
-end;
-
-
-{ TPascalTypeContour }
-
-procedure TPascalTypeContour.AssignTo(Dest: TPersistent);
-begin
- if Dest is TPascalTypeContour then
-  with TPascalTypeContour(Dest) do
-   begin
-
-   end
-  else inherited;
-end;
-
-function TPascalTypeContour.GetPoint(Index: Integer): TContourPointRecord;
-begin
- if (Index >= 0) and (Index < Length(FPoints))
-  then Result := FPoints[Index]
-  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
-end;
-
-procedure TPascalTypeContour.SetPoint(Index: Integer;
-  const Value: TContourPointRecord);
-begin
- if (Index >= 0) and (Index < Length(FPoints))
-  then FPoints[Index] := Value
-  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
-end;
-
-function TPascalTypeContour.GetPointCount: Integer;
-begin
- Result := Length(FPoints)
-end;
-
-procedure TPascalTypeContour.SetPointCount(const Value: Integer);
-begin
- if Value <> Length(FPoints) then
-  begin
-   SetLength(FPoints, Value);
-   PointCountChanged;
-  end;
-end;
-
-procedure TPascalTypeContour.PointCountChanged;
-begin
- // yet todo
-end;
-
-
-{ TTrueTypeFontSimpleGlyphData }
-
-constructor TTrueTypeFontSimpleGlyphData.Create(
-  Interpreter: IPascalTypeInterpreter);
-begin
- FContours := TObjectList.Create;
- inherited Create(Interpreter);
-end;
-
-destructor TTrueTypeFontSimpleGlyphData.Destroy;
-begin
- FreeAndNil(FContours);
- inherited;
-end;
-
-procedure TTrueTypeFontSimpleGlyphData.ResetToDefaults;
-begin
- FInstructions.ResetToDefaults;
-(*
- SetLength(FEndPtsOfContours, 0);
- SetLength(FFlags, 0);
-*)
-end;
-
-function TTrueTypeFontSimpleGlyphData.GetContour(
-  Index: Integer): TPascalTypeContour;
-begin
- if (Index >= 0) and (Index < FContours.Count)
-  then Result := TPascalTypeContour(FContours[Index])
-  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
-end;
-
-function TTrueTypeFontSimpleGlyphData.GetContourCount: Integer;
-begin
- Result := FContours.Count;
-end;
-
-procedure TTrueTypeFontSimpleGlyphData.LoadFromStream(Stream: TStream);
-var
-  ContourIndex : Integer;
-  PointIndex   : Integer;
-  CntrPntIndex : Integer;
-  PointCount   : Integer;
-  LastPoint    : Integer;
-  Contour      : TPascalTypeContour;
-  Value16      : Word;
-  MaxProfile   : TPascalTypeMaximumProfileTable;
-  EndPtsOfCont : array of SmallInt;
-  Flag         : Byte;
-  FlagCount    : Byte;
-  Value8       : Byte absolute FlagCount;
-begin
- inherited;
-
- // get maximum profile
- MaxProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableClass(TPascalTypeMaximumProfileTable));
-
- // check if glyph contains any information at all
- if FNumberOfContours = 0
-  then Exit;
-
- with Stream do
-  begin
-   // set end points of contours array size
-   SetLength(EndPtsOfCont, FNumberOfContours);
-
-   // reset point count
-   PointCount := -1;
-
-   // read end points
-   for ContourIndex := 0 to FNumberOfContours - 1 do
-    begin
-     // read number of contours
-     Read(Value16, SizeOf(Word));
-     PointCount := Swap16(Value16);
-     EndPtsOfCont[ContourIndex] := PointCount;
-    end;
-
-   // increase last end point to get the true point count 
-   Inc(PointCount);
-
-   // check if maximum points are exceeded
-   if PointCount > MaxProfile.MaxPoints
-    then raise EPascalTypeError.CreateFmt(RCStrTooManyPoints, [PointCount]);
-
-   // read instructions
-   FInstructions.LoadFromStream(Stream);
-
-   // clear existing contours
-   FContours.Clear;
-
-   for ContourIndex := 0 to FNumberOfContours - 1 do
-    begin
-     // create new contour
-     Contour := TPascalTypeContour.Create;
-
-     // set contour point count
-     if ContourIndex = 0
-      then Contour.PointCount := EndPtsOfCont[ContourIndex] + 1
-      else Contour.PointCount := (EndPtsOfCont[ContourIndex] - EndPtsOfCont[ContourIndex - 1]);
-
-     // add contour to contour list
-     FContours.Add(Contour);
-    end;
-
-   // reset point and contour index
-   PointIndex := 0;
-   ContourIndex := 0;
-   CntrPntIndex := 0;
-
-   // set first contour
-   Contour := TPascalTypeContour(FContours[ContourIndex]);
-
-   while PointIndex < PointCount do
-    begin
-     // eventually increase contour index
-     if PointIndex > EndPtsOfCont[ContourIndex] then
-      begin
-       Inc(ContourIndex);
-       CntrPntIndex := 0;
-
-       // set next contour
-       Contour := TPascalTypeContour(FContours[ContourIndex]);
-      end;
-
-     // read flag value
-     Read(Flag, 1);
-
-     {$IFDEF AmbigiousExceptions}
-     if (Flag and (1 shl 6)) <> 0
-      then raise EPascalTypeError.CreateFmt(RCStrGlyphDataFlagReservedError, [PointIndex, PointCount]);
-
-     if (Flag and (1 shl 7)) <> 0
-      then raise EPascalTypeError.CreateFmt(RCStrGlyphDataFlagReservedError, [PointIndex, PointCount]);
-     {$ENDIF}
-
-     // set flags
-     Contour.FPoints[CntrPntIndex].Flags := Flag;
-
-     // increase point index
-     Inc(PointIndex);
-     Inc(CntrPntIndex);
-
-     // check for 'repeat' flag
-     if (Flag and (1 shl 3)) <> 0 then
-      begin
-       // read repeat count
-       Read(FlagCount, 1);
-
-       if (PointIndex + FlagCount > PointCount)
-        then raise EPascalTypeError.CreateFmt(RCStrGlyphDataFlagRepeatError, [PointIndex + FlagCount, PointCount]);
-
-       while FlagCount > 0 do
-        begin
-         // eventually increase contour index
-         if PointIndex > EndPtsOfCont[ContourIndex] then
-          begin
-           Inc(ContourIndex);
-           CntrPntIndex := 0;
-
-           // set next contour
-           Contour := TPascalTypeContour(FContours[ContourIndex]);
-          end;
-
-         // set flags
-         Contour.FPoints[CntrPntIndex].Flags := Flag;
-
-         Inc(PointIndex);
-         Inc(CntrPntIndex);
-         Dec(FlagCount);
-        end
-      end
-    end;
-
-   // reset contour and point index
-   ContourIndex := 0;
-   CntrPntIndex := 0;
-
-   // set first contour
-   Contour := TPascalTypeContour(FContours[ContourIndex]);
-
-   // reset last point
-   LastPoint := 0;
-
-   // read x-coordinates
-   for PointIndex := 0 to PointCount - 1 do
-    begin
-     // eventually increase contour
-     if PointIndex > EndPtsOfCont[ContourIndex] then
-      begin
-       Inc(ContourIndex);
-       CntrPntIndex := 0;
-
-       // set next contour
-       Contour := TPascalTypeContour(FContours[ContourIndex])
-      end;
-
-     // check for short or long version
-     with Contour, FPoints[CntrPntIndex] do
-      begin
-       if (Flags and (1 shl 1)) > 0 then
-        begin
-         Read(Value8, 1);
-
-         // eventually change sign
-         if (Flags and (1 shl 4)) > 0
-          then XPos := LastPoint + Value8
-          else XPos := LastPoint - Value8;
-        end
-       else
-        begin
-         // eventually use last point
-         if (Flags and (1 shl 4)) > 0
-          then XPos := LastPoint
-          else
-           begin
-            Read(Value16, SizeOf(Word));
-            XPos := LastPoint + SmallInt(Swap16(Value16));
-           end;
-        end;
-       LastPoint := XPos;
-
-       Inc(CntrPntIndex);
-      end;
-    end;
-
-
-   // reset contour and point index
-   ContourIndex := 0;
-   CntrPntIndex := 0;
-
-   // set first contour
-   Contour := TPascalTypeContour(FContours[ContourIndex]);
-
-   // reset last point
-   LastPoint := 0;
-
-   // read y-coordinates
-   for PointIndex := 0 to PointCount - 1 do
-    begin
-     // eventually increase contour
-     if PointIndex > EndPtsOfCont[ContourIndex] then
-      begin
-       Inc(ContourIndex);
-       CntrPntIndex := 0;
-
-       // set next contour
-       Contour := TPascalTypeContour(FContours[ContourIndex])
-      end;
-
-     // check for short or long version
-     with Contour, FPoints[CntrPntIndex] do
-      begin
-       if (Flags and (1 shl 2)) > 0 then
-        begin
-         Read(Value8, 1);
-
-         // eventually change sign
-         if (Flags and (1 shl 5)) > 0
-          then YPos := LastPoint + Value8
-          else YPos := LastPoint - Value8;
-        end
-       else
-        begin
-         // eventually use last point
-         if (Flags and (1 shl 5)) > 0
-          then YPos := LastPoint
-          else
-           begin
-            Read(Value16, SizeOf(Word));
-            YPos := LastPoint + SmallInt(Swap16(Value16));
-           end;
-        end;
-       LastPoint := YPos;
-
-       Inc(CntrPntIndex);
-      end;
-
-    end;
-
-    Read(Value16, SizeOf(Word));
-  end;
-end;
-
-procedure TTrueTypeFontSimpleGlyphData.SaveToStream(Stream: TStream);
-begin
-
-end;
-
-
-{ TPascalTypeCompositeGlyph }
-
-procedure TPascalTypeCompositeGlyph.AssignTo(Dest: TPersistent);
-begin
- if Dest is TTrueTypeFontCompositeGlyphData then
-  with TTrueTypeFontCompositeGlyphData(Dest) do
-   begin
-    FFlags := Self.FFlags;
-    FGlyphIndex := Self.FGlyphIndex;
-    FArgument := Self.FArgument;
-   end
- else inherited;
-end;
-
-procedure TPascalTypeCompositeGlyph.ResetToDefaults;
-begin
- FFlags       := 0;
- FGlyphIndex  := 0;
- FArgument[0] := 0;
- FArgument[1] := 0;
-end;
-
-procedure TPascalTypeCompositeGlyph.LoadFromStream(Stream: TStream);
-var
-  Argument : array [0..1] of SmallInt;
-  Value16  : Word;
-  Value8   : Byte;
-const
-  CFixedPoint2Dot14Scale : Single = 1 / 16384;  
-begin
- inherited;
-
- with Stream do
-  begin
-   // read flags
-   Read(Value16, SizeOf(Word));
-   FFlags := Swap16(Value16);
-
-   {$IFDEF AmbigiousExceptions}
-   // make sure the reserved flag is set to 0
-   //   if (FFlags and (1 shl 4)) <> 0
-   //    then raise EPascalTypeError.Create(RCStrCompositeGlyphFlagError);
-   {$ENDIF}
-
-   // read glyph index
-   Read(Value16, SizeOf(Word));
-   FGlyphIndex := Swap16(Value16);
-
-   // read argument 1
-   if (FFlags and 1) > 0 then
-    begin
-     Read(Value16, SizeOf(Word));
-     Argument[0] := Swap16(Value16);
-    end
-   else
-    begin
-     Read(Value8, 1);
-     Argument[0] := Value8;
-    end;
-
-   // read argument 2
-   if (FFlags and 1) > 0 then
-    begin
-     Read(Value16, SizeOf(Word));
-     Argument[1] := Swap16(Value16);
-    end
-   else
-    begin
-     Read(Value8, 1);
-     Argument[1] := Value8;
-    end;
-
-   if (FFlags and (1 shl 3)) <> 0 then
-    begin
-     // one dimensional scale
-     SetLength(FScale, 1);
-
-     // read scale
-     Read(Value16, SizeOf(Word));
-     FScale[0] := SmallInt(Swap16(Value16)) * CFixedPoint2Dot14Scale;
-
-     {$IFDEF AmbigiousExceptions}
-     // make sure the reserved flag is set to 0
-     if (FFlags and (1 shl 6)) <> 0
-      then raise EPascalTypeError.Create(RCStrCompositeGlyphFlagError);
-     if (FFlags and (1 shl 7)) <> 0
-      then raise EPascalTypeError.Create(RCStrCompositeGlyphFlagError);
-     {$ENDIF}
-    end else
-   if (FFlags and (1 shl 6)) <> 0 then
-    begin
-     // one dimensional scale
-     SetLength(FScale, 2);
-
-     // read x-scale
-     Read(Value16, SizeOf(Word));
-     FScale[0] := SmallInt(Swap16(Value16)) * CFixedPoint2Dot14Scale;
-
-     // read y-scale
-     Read(Value16, SizeOf(Word));
-     FScale[1] := SmallInt(Swap16(Value16)) * CFixedPoint2Dot14Scale;
-
-     {$IFDEF AmbigiousExceptions}
-     // make sure the reserved flag is set to 0
-     if (FFlags and (1 shl 3)) <> 0
-      then raise EPascalTypeError.Create(RCStrCompositeGlyphFlagError);
-     if (FFlags and (1 shl 7)) <> 0
-      then raise EPascalTypeError.Create(RCStrCompositeGlyphFlagError);
-     {$ENDIF}
-    end else
-   if (FFlags and (1 shl 7)) <> 0 then
-    begin
-     // one dimensional scale
-     SetLength(FScale, 4);
-
-     // read x-scale
-     Read(Value16, SizeOf(Word));
-     FScale[0] := SmallInt(Swap16(Value16)) * CFixedPoint2Dot14Scale;
-
-     // read scale01
-     Read(Value16, SizeOf(Word));
-     FScale[1] := SmallInt(Swap16(Value16)) * CFixedPoint2Dot14Scale;
-
-     // read scale10
-     Read(Value16, SizeOf(Word));
-     FScale[2] := SmallInt(Swap16(Value16)) * CFixedPoint2Dot14Scale;
-
-     // read y-scale
-     Read(Value16, SizeOf(Word));
-     FScale[3] := SmallInt(Swap16(Value16)) * CFixedPoint2Dot14Scale;
-
-     {$IFDEF AmbigiousExceptions}
-     // make sure the reserved flag is set to 0
-     if (FFlags and (1 shl 3)) <> 0
-      then raise EPascalTypeError.Create(RCStrCompositeGlyphFlagError);
-     if (FFlags and (1 shl 6)) <> 0
-      then raise EPascalTypeError.Create(RCStrCompositeGlyphFlagError);
-     {$ENDIF}
-    end else
-  end;
-end;
-
-procedure TPascalTypeCompositeGlyph.SaveToStream(Stream: TStream);
-begin
-
-end;
-
-procedure TPascalTypeCompositeGlyph.SetFlags(const Value: Word);
-begin
- if FFlags <> Value then
-  begin
-   FFlags := Value;
-   FlagsChanged;
-  end;
-end;
-
-procedure TPascalTypeCompositeGlyph.SetGlyphIndex(const Value: SmallInt);
-begin
- if FGlyphIndex <> Value then
-  begin
-   FGlyphIndex := Value;
-   GlyphIndexChanged;
-  end;
-end;
-
-procedure TPascalTypeCompositeGlyph.FlagsChanged;
-begin
- Changed;
-end;
-
-procedure TPascalTypeCompositeGlyph.GlyphIndexChanged;
-begin
- Changed;
-end;
-
-
-{ TTrueTypeFontCompositeGlyphData }
-
-constructor TTrueTypeFontCompositeGlyphData.Create;
-begin
- FGlyphs := TObjectList.Create;
- inherited;
-end;
-
-destructor TTrueTypeFontCompositeGlyphData.Destroy;
-begin
- FreeAndNil(FGlyphs);
- inherited;
-end;
-
-function TTrueTypeFontCompositeGlyphData.GetCompositeGlyph(
-  Index: Integer): TPascalTypeCompositeGlyph;
-begin
- if (Index >= 0) and (Index < FGlyphs.Count)
-  then Result := TPascalTypeCompositeGlyph(FGlyphs[Index])
-  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
-end;
-
-function TTrueTypeFontCompositeGlyphData.GetGlyphCount: Integer;
-begin
- Result := FGlyphs.Count;
-end;
-
-procedure TTrueTypeFontCompositeGlyphData.AssignTo(Dest: TPersistent);
-begin
- if Dest is TTrueTypeFontCompositeGlyphData then
-  with TTrueTypeFontCompositeGlyphData(Dest) do
-   begin
-    FGlyphs.Assign(Self.FGlyphs);
-    Self.FGlyphs.OwnsObjects := False;
-   end
- else inherited;
-end;
-
-procedure TTrueTypeFontCompositeGlyphData.ResetToDefaults;
-begin
- FGlyphs.Clear;
-end;
-
-procedure TTrueTypeFontCompositeGlyphData.LoadFromStream(Stream: TStream);
-var
-  Glyph           : TPascalTypeCompositeGlyph;
-  HasInstructions : Boolean;
-begin
- inherited;
-
- // a default glyph does not contain instructions
- HasInstructions := False;
-
- // clear existing glyphs
- FGlyphs.Clear;
-
- with Stream do
-  repeat
-   Glyph := TPascalTypeCompositeGlyph.Create;
-
-   Glyph.LoadFromStream(Stream);
-
-   // add glyph to the glyph list
-   FGlyphs.Add(Glyph);
-
-   // check if glyph has instructions
-   if (Glyph.Flags and (1 shl 8)) <> 1
-    then HasInstructions := True;
-
-  until (Glyph.Flags and (1 shl 5)) = 0;
-
- // eventually read instructions
- if HasInstructions
-  then FInstructions.LoadFromStream(Stream);
-end;
-
-procedure TTrueTypeFontCompositeGlyphData.SaveToStream(Stream: TStream);
-var
-  GlyphIndex : Integer;
-begin
- // save glyphs
- for GlyphIndex := 0 to FGlyphs.Count - 1 do
-  with TPascalTypeCompositeGlyph(FGlyphs[GlyphIndex])
-   do SaveToStream(Stream);
-
- // save instructions to stream
- FInstructions.SaveToStream(Stream);
-end;
-
-
-{ TTrueTypeFontGlyphDataTable }
-
-constructor TTrueTypeFontGlyphDataTable.Create;
-begin
- FGlyphDataList := TObjectList.Create;
- inherited;
-end;
-
-destructor TTrueTypeFontGlyphDataTable.Destroy;
-begin
- FreeAndNil(FGlyphDataList);
- inherited;
-end;
-
-procedure TTrueTypeFontGlyphDataTable.AssignTo(Dest: TPersistent);
-begin
- if Dest is TTrueTypeFontGlyphDataTable then
-  with TTrueTypeFontGlyphDataTable(Dest) do
-   begin
-    FGlyphDataList.Assign(Self.FGlyphDataList);
-    Self.FGlyphDataList.OwnsObjects := False;
-   end
- else inherited;
-end;
-
-function TTrueTypeFontGlyphDataTable.GetGlyphData(
-  Index: Integer): TCustomTrueTypeFontGlyphData;
-begin
- if (Index >= 0) and (Index < FGlyphDataList.Count)
-  then Result := TCustomTrueTypeFontGlyphData(FGlyphDataList[Index])
-  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
-end;
-
-function TTrueTypeFontGlyphDataTable.GetGlyphDataCount: Integer;
-begin
- Result := FGlyphDataList.Count;
-end;
-
-class function TTrueTypeFontGlyphDataTable.GetTableType: TTableType;
-begin
- Result := 'glyf';
-end;
-
-procedure TTrueTypeFontGlyphDataTable.ResetToDefaults;
-begin
- FGlyphDataList.Clear;
-end;
-
-procedure TTrueTypeFontGlyphDataTable.LoadFromStream(Stream: TStream);
-var
-  StartPos  : Int64;
-  GlyphData : TCustomTrueTypeFontGlyphData;
-  Locations : TTrueTypeFontLocationTable;
-  LocIndex  : Integer;
-  Value16   : SmallInt;
-begin
- // get location table
- Locations := TTrueTypeFontLocationTable(FInterpreter.GetTableByTableClass(TTrueTypeFontLocationTable));
-
- with Stream do
-  begin
-   // store initil position
-   StartPos := Position;
-
-   // check for minimal table size
-   if Position + 10 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
-
-   if Assigned(Locations) then
-    for LocIndex := 0 to Locations.LocationCount - 2 do
-     begin
-      Position := StartPos + Locations[LocIndex];
-
-      Read(Value16, SizeOf(SmallInt));
-      Value16 := Swap16(Value16);
-
-      if (Value16 < -1)
-       then raise EPascalTypeError.CreateFmt(RCStrUnknownGlyphDataType, [Value16]);
-
-      // set position before number of contours
-      Seek(-2, soFromCurrent);
-
-      // read number of contours and create glyph data object
-       if Value16 > 0
-        then GlyphData := TTrueTypeFontSimpleGlyphData.Create(FInterpreter)
-        else GlyphData := TTrueTypeFontCompositeGlyphData.Create(FInterpreter);
-
-      try
-       GlyphData.LoadFromStream(Stream);
-       GlyphData.GlyphIndex := LocIndex;
-       FGlyphDataList.Add(GlyphData);
-      except
-//       on e: EPascalTypeError do
-//        raise EPascalTypeError.CreateFmt('Error loading glyph #%d' + #10 + E.Message, [LocIndex]);
-      end;
-
-//      if LocIndex > 4 then Exit;
-     end
-   else
-    while Position + 10 < Size do
-     begin
-      Read(Value16, SizeOf(SmallInt));
-
-      Assert(Value16 >= -1);
-
-      // read number of contours and create glyph data object
-      if Value16 > 0
-       then GlyphData := TTrueTypeFontSimpleGlyphData.Create(FInterpreter)
-       else GlyphData := TTrueTypeFontCompositeGlyphData.Create(FInterpreter);
-
-      // set position before number of contours
-      Seek(-2, soFromCurrent);
-
-      GlyphData.LoadFromStream(Stream);
-
-      FGlyphDataList.Add(GlyphData);
-
-      if FGlyphDataList.Count > 0 then Exit;
-     end;
-  end;
-end;
-
-procedure TTrueTypeFontGlyphDataTable.SaveToStream(Stream: TStream);
-var
-  GlyphDataIndex : Integer;
-begin
- for GlyphDataIndex := 0 to FGlyphDataList.Count - 1 do
-  with TCustomTrueTypeFontGlyphData(FGlyphDataList[GlyphDataIndex])
-   do SaveToStream(Stream);
-end;
-
-
 { TPascalTypeHorizontalHeaderTable }
 
 constructor TPascalTypeHorizontalHeaderTable.Create;
@@ -3813,233 +2549,6 @@ begin
  Result := Length(FHorizontalMetrics);
 end;
 
-{ TTrueTypeFontLocationTable }
-
-procedure TTrueTypeFontLocationTable.ResetToDefaults;
-begin
- SetLength(FLocations, 0);
-end;
-
-procedure TTrueTypeFontLocationTable.AssignTo(Dest: TPersistent);
-begin
- if Dest is TTrueTypeFontLocationTable then
-  with TTrueTypeFontLocationTable(Dest) do
-   begin
-    FLocations := Self.FLocations;
-   end
- else inherited;
-end;
-
-function TTrueTypeFontLocationTable.GetLocation(Index: Integer): Cardinal;
-begin
- if (Index >= 0) and (Index < Length(FLocations))
-  then Result := FLocations[Index]
-  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
-end;
-
-function TTrueTypeFontLocationTable.GetLocationCount: Cardinal;
-begin
- Result := Length(FLocations);
-end;
-
-class function TTrueTypeFontLocationTable.GetTableType: TTableType;
-begin
- Result := 'loca';
-end;
-
-procedure TTrueTypeFontLocationTable.LoadFromStream(Stream: TStream);
-var
-  LocationIndex : Integer;
-  HeaderTable   : TPascalTypeHeaderTable;
-  Value32       : Cardinal;
-  Value16       : Word;
-begin
- with Stream do
-  begin
-   HeaderTable := TPascalTypeHeaderTable(FInterpreter.GetTableByTableClass(TPascalTypeHeaderTable));
-   Assert(Assigned(HeaderTable));
-
-   case HeaderTable.IndexToLocFormat of
-    0 : begin
-         // short format
-         SetLength(FLocations, Size div 2);
-         for LocationIndex := 0 to Length(FLocations) - 1 do
-          begin
-           Read(Value16, SizeOf(Word));
-           FLocations[LocationIndex] := 2 * Swap16(Value16);
-          end;
-        end;
-    1 : begin
-         // long format
-         SetLength(FLocations, Size div 4);
-         for LocationIndex := 0 to Length(FLocations) - 1 do
-          begin
-           Read(Value32, SizeOf(Cardinal));
-           FLocations[LocationIndex] := Swap32(Value32);
-          end;
-        end;
-   end;
-
-  end;
-end;
-
-procedure TTrueTypeFontLocationTable.SaveToStream(Stream: TStream);
-begin
- with Stream do
-  begin
-   Write(FLocations[0], Length(FLocations) * SizeOf(Cardinal));
-  end;
-end;
-
-
-{ TTrueTypeFontControlValueTable }
-
-constructor TTrueTypeFontControlValueTable.Create;
-begin
- // nothing in here yet
- inherited;
-end;
-
-destructor TTrueTypeFontControlValueTable.Destroy;
-begin
- // nothing in here yet
- inherited;
-end;
-
-procedure TTrueTypeFontControlValueTable.AssignTo(Dest: TPersistent);
-begin
- if Dest is TTrueTypeFontControlValueTable then
-  with TTrueTypeFontControlValueTable(Dest) do
-   begin
-    FControlValues := Self.FControlValues;
-   end
- else inherited;
-end;
-
-class function TTrueTypeFontControlValueTable.GetTableType: TTableType;
-begin
- Result := 'cvt ';
-end;
-
-procedure TTrueTypeFontControlValueTable.ResetToDefaults;
-begin
- SetLength(FControlValues, 0);
-end;
-
-function TTrueTypeFontControlValueTable.GetControlValue(
-  Index: Integer): SmallInt;
-begin
- if (Index < Length(FControlValues))
-  then Result := Swap16(FControlValues[Index])
-  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
-end;
-
-function TTrueTypeFontControlValueTable.GetControlValueCount: Integer;
-begin
- Result := Length(FControlValues);
-end;
-
-procedure TTrueTypeFontControlValueTable.LoadFromStream(Stream: TStream);
-begin
- with Stream do
-  begin
-   SetLength(FControlValues, Size div 2);
-
-   // check for minimal table size
-   if Position + Length(FControlValues) * SizeOf(Word) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
-
-   // read control values
-   Read(FControlValues[0], Length(FControlValues) * SizeOf(Word));
-  end;
-end;
-
-procedure TTrueTypeFontControlValueTable.SaveToStream(Stream: TStream);
-begin
- // write control values
- Stream.Write(FControlValues[0], Length(FControlValues) * SizeOf(Word));
-end;
-
-
-
-{ TCustomTrueTypeFontInstructionTable }
-
-constructor TCustomTrueTypeFontInstructionTable.Create;
-begin
- // nothing in here yet
- inherited;
-end;
-
-destructor TCustomTrueTypeFontInstructionTable.Destroy;
-begin
- // nothing in here yet
- inherited;
-end;
-
-procedure TCustomTrueTypeFontInstructionTable.AssignTo(Dest: TPersistent);
-begin
- if Dest is TCustomTrueTypeFontInstructionTable then
-  with TCustomTrueTypeFontInstructionTable(Dest) do
-   begin
-    FInstructions := Self.FInstructions;
-   end
- else inherited;
-end;
-
-procedure TCustomTrueTypeFontInstructionTable.ResetToDefaults;
-begin
- SetLength(FInstructions, 0);
-end;
-
-function TCustomTrueTypeFontInstructionTable.GetInstruction(Index: Integer): Byte;
-begin
- if (Index < Length(FInstructions))
-  then Result := FInstructions[Index]
-  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
-end;
-
-function TCustomTrueTypeFontInstructionTable.GetInstructionCount: Integer;
-begin
- Result := Length(FInstructions);
-end;
-
-procedure TCustomTrueTypeFontInstructionTable.LoadFromStream(Stream: TStream);
-begin
- with Stream do
-  begin
-   SetLength(FInstructions, Size);
-
-   // check for minimal table size
-   if Position + Length(FInstructions) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
-
-   // read control values
-   Read(FInstructions[0], Length(FInstructions) * SizeOf(Word));
-  end;
-end;
-
-procedure TCustomTrueTypeFontInstructionTable.SaveToStream(Stream: TStream);
-begin
- // write instructions
- Stream.Write(FInstructions[0], Length(FInstructions));
-end;
-
-
-{ TTrueTypeFontFontProgramTable }
-
-class function TTrueTypeFontFontProgramTable.GetTableType: TTableType;
-begin
- Result := 'fpgm';
-end;
-
-
-{ TTrueTypeFontControlValueProgramTable }
-
-class function TTrueTypeFontControlValueProgramTable.GetTableType: TTableType;
-begin
- Result := 'prep';
-end;
-
 
 { TCustomTrueTypeFontNamePlatform }
 
@@ -4237,6 +2746,48 @@ begin
 end;
 
 
+{ TTrueTypeFontNamePlatformISO }
+
+function TTrueTypeFontNamePlatformISO.GetPlatformID: TPlatformID;
+begin
+ Result := piISO;
+end;
+
+procedure TTrueTypeFontNamePlatformISO.ReadStringFromStream(Stream: TStream;
+  Length: Word);
+var
+  str       : string;
+  Value16   : Word;
+  StrOffset : Integer;
+begin
+ with Stream do
+  case FEncodingID of
+   0 : begin
+        // reset name string
+        FNameString := '';
+
+        // actually read the string
+        SetLength(str, Length);
+        Read(str[1], Length);
+        FNameString := str;
+       end;
+   1 : begin
+        // reset name string
+        FNameString := '';
+
+        // actually read the string
+        for StrOffset := 0 to Length div 2 - 1 do
+         begin
+          Read(Value16, SizeOf(Word));
+          Value16 := Swap16(Value16);
+          FNameString := FNameString + WideChar(Value16);
+         end;
+       end;
+  else raise EPascalTypeError.Create('Unsupported encoding');
+ end;
+end;
+
+
 { TPascalTypeNameTable }
 
 constructor TPascalTypeNameTable.Create;
@@ -4335,8 +2886,9 @@ begin
      Read(Value16, SizeOf(Word));
      Value16 := Swap16(Value16);
      case TPlatformID(Value16) of
-          piApple : NameRecord := TTrueTypeFontNamePlatformApple.Create;
         piUnicode : NameRecord := TTrueTypeFontNamePlatformUnicode.Create;
+          piApple : NameRecord := TTrueTypeFontNamePlatformApple.Create;
+            piISO : NameRecord := TTrueTypeFontNamePlatformISO.Create;
       piMicrosoft : NameRecord := TTrueTypeFontNamePlatformMicrosoft.Create;
       else raise EPascalTypeError.CreateFmt(RCStrUnsupportedPlatform, [Value16]);
      end;
@@ -4367,7 +2919,7 @@ begin
    if FFormat = 1 then
     begin
      Read(Value16, SizeOf(Word));
-     Position := Position + Swap(Value16);
+     Position := Position + Swap16(Value16);
     end;
   end;
 end;
@@ -4822,21 +3374,21 @@ begin
 end;
 
 
-{ TTrueTypeFontOS2Table }
+{ TPascalTypeOS2Table }
 
-constructor TTrueTypeFontOS2Table.Create;
+constructor TPascalTypeOS2Table.Create;
 begin
  // nothing in here yet
  inherited;
 end;
 
-destructor TTrueTypeFontOS2Table.Destroy;
+destructor TPascalTypeOS2Table.Destroy;
 begin
  // nothing in here yet
  inherited;
 end;
 
-procedure TTrueTypeFontOS2Table.AssignTo(Dest: TPersistent);
+procedure TPascalTypeOS2Table.AssignTo(Dest: TPersistent);
 begin
  if Dest is TPascalTypeNameTable then
   with TPascalTypeNameTable(Dest) do
@@ -4872,12 +3424,12 @@ begin
  else inherited;
 end;
 
-class function TTrueTypeFontOS2Table.GetTableType: TTableType;
+class function TPascalTypeOS2Table.GetTableType: TTableType;
 begin
  Result := 'OS/2';
 end;
 
-procedure TTrueTypeFontOS2Table.ResetToDefaults;
+procedure TPascalTypeOS2Table.ResetToDefaults;
 begin
  FVersion := 0;
  FXAvgCharWidth := 0;
@@ -4908,7 +3460,7 @@ begin
  FUsWinDescent := 0;
 end;
 
-procedure TTrueTypeFontOS2Table.LoadFromStream(Stream: TStream);
+procedure TPascalTypeOS2Table.LoadFromStream(Stream: TStream);
 var
   Value16 : Word;
 begin
@@ -5029,7 +3581,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SaveToStream(Stream: TStream);
+procedure TPascalTypeOS2Table.SaveToStream(Stream: TStream);
 var
   Value16 : Word;
 begin
@@ -5142,7 +3694,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetAchVendID(const Value: TTableType);
+procedure TPascalTypeOS2Table.SetAchVendID(const Value: TTableType);
 begin
  if FAchVendID <> Value then
   begin
@@ -5151,7 +3703,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetFsSelection(const Value: Word);
+procedure TPascalTypeOS2Table.SetFsSelection(const Value: Word);
 begin
  if FFsSelection <> Value then
   begin
@@ -5160,7 +3712,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetFsType(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetFsType(const Value: SmallInt);
 begin
  if FFsType <> Value then
   begin
@@ -5169,7 +3721,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetSFamilyClass(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetSFamilyClass(const Value: SmallInt);
 begin
  if FSFamilyClass <> Value then
   begin
@@ -5178,7 +3730,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetSTypoAscender(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetSTypoAscender(const Value: SmallInt);
 begin
  if FSTypoAscender <> Value then
   begin
@@ -5187,7 +3739,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetSTypoDescender(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetSTypoDescender(const Value: SmallInt);
 begin
  if FSTypoDescender <> Value then
   begin
@@ -5196,7 +3748,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetSTypoLineGap(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetSTypoLineGap(const Value: SmallInt);
 begin
  if FSTypoLineGap <> Value then
   begin
@@ -5205,7 +3757,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetUsFirstCharIndex(const Value: Word);
+procedure TPascalTypeOS2Table.SetUsFirstCharIndex(const Value: Word);
 begin
  if FUsFirstCharIndex <> Value then
   begin
@@ -5214,7 +3766,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetUsLastCharIndex(const Value: Word);
+procedure TPascalTypeOS2Table.SetUsLastCharIndex(const Value: Word);
 begin
  if FUsLastCharIndex <> Value then
   begin
@@ -5223,7 +3775,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetUsWeightClass(const Value: TOS2WeightClass);
+procedure TPascalTypeOS2Table.SetUsWeightClass(const Value: TOS2WeightClass);
 begin
  if FUsWeightClass <> Value then
   begin
@@ -5232,7 +3784,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetUsWidthClass(const Value: TOS2WidthClass);
+procedure TPascalTypeOS2Table.SetUsWidthClass(const Value: TOS2WidthClass);
 begin
  if FUsWidthClass <> Value then
   begin
@@ -5241,7 +3793,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetUsWinAscent(const Value: Word);
+procedure TPascalTypeOS2Table.SetUsWinAscent(const Value: Word);
 begin
  if FUsWinAscent <> Value then
   begin
@@ -5250,7 +3802,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetUsWinDescent(const Value: Word);
+procedure TPascalTypeOS2Table.SetUsWinDescent(const Value: Word);
 begin
  if FUsWinDescent <> Value then
   begin
@@ -5259,7 +3811,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetXAvgCharWidth(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetXAvgCharWidth(const Value: SmallInt);
 begin
  if FXAvgCharWidth <> Value then
   begin
@@ -5268,7 +3820,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetYStrikeoutPosition(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetYStrikeoutPosition(const Value: SmallInt);
 begin
  if FYStrikeoutPosition <> Value then
   begin
@@ -5277,7 +3829,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetYStrikeoutSize(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetYStrikeoutSize(const Value: SmallInt);
 begin
  if FYStrikeoutSize <> Value then
   begin
@@ -5286,7 +3838,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetYSubScriptXOffset(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetYSubScriptXOffset(const Value: SmallInt);
 begin
  if FYSubScriptXOffset <> Value then
   begin
@@ -5295,7 +3847,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetYSubscriptXSize(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetYSubscriptXSize(const Value: SmallInt);
 begin
  if FYSubscriptXSize <> Value then
   begin
@@ -5304,7 +3856,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetYSubscriptYOffset(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetYSubscriptYOffset(const Value: SmallInt);
 begin
  if FYSubscriptYOffset <> Value then
   begin
@@ -5313,7 +3865,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetYSubscriptYSize(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetYSubscriptYSize(const Value: SmallInt);
 begin
  if FYSubscriptYSize <> Value then
   begin
@@ -5322,7 +3874,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetYSuperscriptXOffset(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetYSuperscriptXOffset(const Value: SmallInt);
 begin
  if FYSuperscriptXOffset <> Value then
   begin
@@ -5331,7 +3883,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetYSuperscriptXSize(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetYSuperscriptXSize(const Value: SmallInt);
 begin
  if FYSuperscriptXSize <> Value then
   begin
@@ -5340,7 +3892,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetYSuperscriptYOffset(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetYSuperscriptYOffset(const Value: SmallInt);
 begin
  if FYSuperscriptYOffset <> Value then
   begin
@@ -5349,7 +3901,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetYSuperscriptYSize(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetYSuperscriptYSize(const Value: SmallInt);
 begin
  if FYSuperscriptYSize <> Value then
   begin
@@ -5358,7 +3910,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.SetVersion(const Value: Word);
+procedure TPascalTypeOS2Table.SetVersion(const Value: Word);
 begin
  if FVersion <> Value then
   begin
@@ -5367,127 +3919,127 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontOS2Table.AchVendIDChanged;
+procedure TPascalTypeOS2Table.AchVendIDChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.FsSelectionChanged;
+procedure TPascalTypeOS2Table.FsSelectionChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.FsTypeChanged;
+procedure TPascalTypeOS2Table.FsTypeChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.SFamilyClassChanged;
+procedure TPascalTypeOS2Table.SFamilyClassChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.STypoAscenderChanged;
+procedure TPascalTypeOS2Table.STypoAscenderChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.STypoDescenderChanged;
+procedure TPascalTypeOS2Table.STypoDescenderChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.STypoLineGapChanged;
+procedure TPascalTypeOS2Table.STypoLineGapChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.UsFirstCharIndexChanged;
+procedure TPascalTypeOS2Table.UsFirstCharIndexChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.UsLastCharIndexChanged;
+procedure TPascalTypeOS2Table.UsLastCharIndexChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.UsWeightClassChanged;
+procedure TPascalTypeOS2Table.UsWeightClassChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.UsWidthClassChanged;
+procedure TPascalTypeOS2Table.UsWidthClassChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.UsWinAscentChanged;
+procedure TPascalTypeOS2Table.UsWinAscentChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.UsWinDescentChanged;
+procedure TPascalTypeOS2Table.UsWinDescentChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.VersionChanged;
+procedure TPascalTypeOS2Table.VersionChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.XAvgCharWidthChanged;
+procedure TPascalTypeOS2Table.XAvgCharWidthChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.YStrikeoutPositionChanged;
+procedure TPascalTypeOS2Table.YStrikeoutPositionChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.YStrikeoutSizeChanged;
+procedure TPascalTypeOS2Table.YStrikeoutSizeChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.YSubScriptXOffsetChanged;
+procedure TPascalTypeOS2Table.YSubScriptXOffsetChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.YSubscriptXSizeChanged;
+procedure TPascalTypeOS2Table.YSubscriptXSizeChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.YSubscriptYOffsetChanged;
+procedure TPascalTypeOS2Table.YSubscriptYOffsetChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.YSubscriptYSizeChanged;
+procedure TPascalTypeOS2Table.YSubscriptYSizeChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.YSuperscriptXOffsetChanged;
+procedure TPascalTypeOS2Table.YSuperscriptXOffsetChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.YSuperscriptXSizeChanged;
+procedure TPascalTypeOS2Table.YSuperscriptXSizeChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.YSuperscriptYOffsetChanged;
+procedure TPascalTypeOS2Table.YSuperscriptYOffsetChanged;
 begin
  Changed;
 end;
 
-procedure TTrueTypeFontOS2Table.YSuperscriptYSizeChanged;
+procedure TPascalTypeOS2Table.YSuperscriptYSizeChanged;
 begin
  Changed;
 end;
@@ -5531,7 +4083,7 @@ begin
     if Assigned(Self.FPostscriptV2Table) then
      begin
       if not Assigned(FPostscriptV2Table)
-       then FPostscriptV2Table := TTrueTypeFontPostscriptVersion2Table.Create;
+       then FPostscriptV2Table := TPascalTypePostscriptVersion2Table.Create;
       FPostscriptV2Table.Assign(Self.FPostscriptV2Table);
      end;
    end
@@ -5602,7 +4154,7 @@ begin
    if FVersion.Value = 2 then
     begin
      if not Assigned(FPostscriptV2Table)
-      then FPostscriptV2Table := TTrueTypeFontPostscriptVersion2Table.Create;
+      then FPostscriptV2Table := TPascalTypePostscriptVersion2Table.Create;
      FPostscriptV2Table.LoadFromStream(Stream);
     end;
   end;
@@ -5784,24 +4336,24 @@ begin
 end;
 
 
-{ TTrueTypeFontPostscriptVersion2Table }
+{ TPascalTypePostscriptVersion2Table }
 
-constructor TTrueTypeFontPostscriptVersion2Table.Create;
+constructor TPascalTypePostscriptVersion2Table.Create;
 begin
  inherited;
 end;
 
-destructor TTrueTypeFontPostscriptVersion2Table.Destroy;
+destructor TPascalTypePostscriptVersion2Table.Destroy;
 begin
  inherited;
 end;
 
-function TTrueTypeFontPostscriptVersion2Table.GetGlyphIndexCount: Integer;
+function TPascalTypePostscriptVersion2Table.GetGlyphIndexCount: Integer;
 begin
  Result := Length(FGlyphNameIndex);
 end;
 
-function TTrueTypeFontPostscriptVersion2Table.GlyphIndexToString(
+function TPascalTypePostscriptVersion2Table.GlyphIndexToString(
   GlyphIndex: Integer): string;
 begin
  if FGlyphNameIndex[GlyphIndex] < 258
@@ -5809,23 +4361,23 @@ begin
   else Result := FNames[FGlyphNameIndex[GlyphIndex] - 258];
 end;
 
-procedure TTrueTypeFontPostscriptVersion2Table.AssignTo(Dest: TPersistent);
+procedure TPascalTypePostscriptVersion2Table.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontPostscriptVersion2Table then
-  with TTrueTypeFontPostscriptVersion2Table(Dest) do
+ if Dest is TPascalTypePostscriptVersion2Table then
+  with TPascalTypePostscriptVersion2Table(Dest) do
    begin
     FGlyphNameIndex := Self.FGlyphNameIndex;
     FNames := Self.FNames;
    end else inherited;
 end;
 
-procedure TTrueTypeFontPostscriptVersion2Table.ResetToDefaults;
+procedure TPascalTypePostscriptVersion2Table.ResetToDefaults;
 begin
  SetLength(FGlyphNameIndex, 0);
  SetLength(FNames, 0);
 end;
 
-procedure TTrueTypeFontPostscriptVersion2Table.LoadFromStream(Stream: TStream);
+procedure TPascalTypePostscriptVersion2Table.LoadFromStream(Stream: TStream);
 var
   GlyphIndex : Integer;
   Value16    : Word;
@@ -5857,7 +4409,7 @@ begin
   end;
 end;
 
-procedure TTrueTypeFontPostscriptVersion2Table.SaveToStream(Stream: TStream);
+procedure TPascalTypePostscriptVersion2Table.SaveToStream(Stream: TStream);
 begin
  raise EPascalTypeError.Create('yet todo!')
 end;
@@ -5878,22 +4430,22 @@ begin
    end;
 end;
 
-procedure RegisterTrueTypeFontTable(TableClass: TCustomPascalTypeNamedTableClass);
+procedure RegisterPascalTypeTable(TableClass: TCustomPascalTypeNamedTableClass);
 begin
  Assert(IsTrueTypeFontTableRegistered(TableClass) = False);
  SetLength(GTableClasses, Length(GTableClasses) + 1);
  GTableClasses[Length(GTableClasses) - 1] := TableClass;
 end;
 
-procedure RegisterTrueTypeFontTables(TableClasses: array of TCustomPascalTypeNamedTableClass);
+procedure RegisterPascalTypeTables(TableClasses: array of TCustomPascalTypeNamedTableClass);
 var
   TableClassIndex : Integer;
 begin
  for TableClassIndex := 0 to Length(TableClasses) - 1
-  do RegisterTrueTypeFontTable(TableClasses[TableClassIndex]);
+  do RegisterPascalTypeTable(TableClasses[TableClassIndex]);
 end;
 
-function FindTrueTypeFontTableByType(TableType: TTableType): TCustomPascalTypeNamedTableClass;
+function FindPascalTypeTableByType(TableType: TTableType): TCustomPascalTypeNamedTableClass;
 var
   TableClassIndex : Integer;
 begin
@@ -5909,12 +4461,10 @@ end;
 
 
 initialization
-  RegisterTrueTypeFontTables([TPascalTypeHeaderTable,
+  RegisterPascalTypeTables([TPascalTypeHeaderTable,
     TPascalTypeCharacterMapTable, TPascalTypeHorizontalHeaderTable,
     TPascalTypeHorizontalMetricsTable, TPascalTypeNameTable,
     TPascalTypeMaximumProfileTable, TPascalTypePostscriptTable,
-    TTrueTypeFontGlyphDataTable, TTrueTypeFontLocationTable,
-    TTrueTypeFontControlValueTable, TTrueTypeFontFontProgramTable,
-    TTrueTypeFontControlValueProgramTable, TTrueTypeFontOS2Table]);
+    TPascalTypeOS2Table]);
 
 end.

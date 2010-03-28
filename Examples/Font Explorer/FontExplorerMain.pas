@@ -5,8 +5,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ComCtrls, StdCtrls, ExtCtrls, ToolWin, ActnList, StdActns, AppEvnts,
-  ImgList, PT_Types, PT_Tables, PT_TablesOptional, PT_TablesOpenType,
-  PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames;
+  ImgList, PT_Types, PT_Tables, PT_TablesTrueType, PT_TablesOptional,
+  PT_TablesOpenType, PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames;
 
 {.$DEFINE ShowContours}
 
@@ -81,12 +81,12 @@ type
     procedure DisplayCharacterMapSubTable(CharacterMapSubTable: TCustomCharacterMapDirectoryEntry);
     procedure DisplayCharacterMapTable(CharacterMapTable: TPascalTypeCharacterMapTable);
     procedure DisplayControlValueTable(ControlValueTable: TTrueTypeFontControlValueTable);
-    procedure DisplayDigitalSignatureBlock(DigitalSignatureBlock: TTrueTypeFontDigitalSignatureBlock);
-    procedure DisplayDigitalSignatureTable(DigitalSignatureTable: TTrueTypeFontDigitalSignatureTable);
+    procedure DisplayDigitalSignatureBlock(DigitalSignatureBlock: TPascalTypeDigitalSignatureBlock);
+    procedure DisplayDigitalSignatureTable(DigitalSignatureTable: TPascalTypeDigitalSignatureTable);
     procedure DisplayFontInstructionTable(InstructionTable: TCustomTrueTypeFontInstructionTable);
-    procedure DisplayFontKerningSubTable(KerningSubtable: TTrueTypeFontKerningSubTable);
-    procedure DisplayFontKerningTable(KerningTable: TTrueTypeFontKerningTable);
-    procedure DisplayGaspTable(GaspTable: TTrueTypeFontGridFittingAndScanConversionProcedureTable);
+    procedure DisplayFontKerningSubTable(KerningSubtable: TPascalTypeKerningSubTable);
+    procedure DisplayFontKerningTable(KerningTable: TPascalTypeKerningTable);
+    procedure DisplayGaspTable(GaspTable: TPascalTypeGridFittingAndScanConversionProcedureTable);
     procedure DisplayGlyphData(GlyphData: TCustomTrueTypeFontGlyphData);
     procedure DisplayGlyphDataTable(GlyphDataTable: TTrueTypeFontGlyphDataTable);
     procedure DisplayGlyphDefinitionTable(GlyphDefinitionTable: TOpenTypeGlyphDefinitionTable);
@@ -95,7 +95,7 @@ type
     procedure DisplayHorizontalHeader(HorizontalHeaderTable: TPascalTypeHorizontalHeaderTable);
     procedure DisplayHorizontalMetrics(HorizontalMetricsTable: TPascalTypeHorizontalMetricsTable);
     procedure DisplayJustificationTable(JustificationTable: TOpenTypeJustificationTable);
-    procedure DisplayLinearThresholdTable(LinearThresholdTable: TTrueTypeFontLinearThresholdTable);
+    procedure DisplayLinearThresholdTable(LinearThresholdTable: TPascalTypeLinearThresholdTable);
     procedure DisplayLocationTable(LocationTable: TTrueTypeFontLocationTable);
     procedure DisplayMaximumProfileTable(MaximumProfileTable: TPascalTypeMaximumProfileTable);
     procedure DisplayNameTable(NameTable: TPascalTypeNameTable);
@@ -106,11 +106,11 @@ type
     procedure DisplayOpenTypeScriptListTable(ScriptListTable: TOpenTypeScriptListTable);
     procedure DisplayOpenTypeFeatureListTable(FeatureListTable: TOpenTypeFeatureListTable);
     procedure DisplayOpenTypeLookUpListTable(LookUpListTable: TOpenTypeLookupListTable);
-    procedure DisplayOS2Table(OS2Table: TTrueTypeFontOS2Table);
-    procedure DisplayPCL5Table(PCL5Table: TTrueTypeFontPCL5Table);
+    procedure DisplayOS2Table(OS2Table: TPascalTypeOS2Table);
+    procedure DisplayPCL5Table(PCL5Table: TPascalTypePCL5Table);
     procedure DisplayPostscriptTable(PostscriptTable: TPascalTypePostscriptTable);
-    procedure DisplayPostscriptV2Table(PostscriptTable: TTrueTypeFontPostscriptVersion2Table);
-    procedure DisplayVerticalHeader(VerticalHeaderTable: TTrueTypeFontVerticalHeaderTable);
+    procedure DisplayPostscriptV2Table(PostscriptTable: TPascalTypePostscriptVersion2Table);
+    procedure DisplayVerticalHeader(VerticalHeaderTable: TPascalTypeVerticalHeaderTable);
 
     procedure DisplayCustomOpenTypeScriptTable(ScriptTable: TCustomOpenTypeScriptTable);
     procedure DisplayCustomOpenTypeLanguageSystemTable(LanguageSystemTable: TCustomOpenTypeLanguageSystemTable);
@@ -513,7 +513,7 @@ begin
 end;
 
 procedure TFmTTF.DisplayDigitalSignatureBlock(
-  DigitalSignatureBlock: TTrueTypeFontDigitalSignatureBlock);
+  DigitalSignatureBlock: TPascalTypeDigitalSignatureBlock);
 begin
  with DigitalSignatureBlock do
   begin
@@ -545,7 +545,7 @@ begin
 end;
 
 procedure TFmTTF.DisplayDigitalSignatureTable(
-  DigitalSignatureTable: TTrueTypeFontDigitalSignatureTable);
+  DigitalSignatureTable: TPascalTypeDigitalSignatureTable);
 begin
  with DigitalSignatureTable do
   begin
@@ -597,7 +597,7 @@ begin
 end;
 
 procedure TFmTTF.DisplayFontKerningSubTable(
-  KerningSubtable: TTrueTypeFontKerningSubTable);
+  KerningSubtable: TPascalTypeKerningSubTable);
 var
   GlyphIndex : Integer;
 begin
@@ -609,8 +609,8 @@ begin
    // begin update (lock)
    ListView.Items.BeginUpdate;
 
-   if FormatTable is TTrueTypeFontKerningFormat0SubTable then
-    with TTrueTypeFontKerningFormat0SubTable(FormatTable) do
+   if FormatTable is TPascalTypeKerningFormat0SubTable then
+    with TPascalTypeKerningFormat0SubTable(FormatTable) do
      for GlyphIndex := 0 to PairCount - 1 do
       with ListView.Items.Add do
        begin
@@ -627,7 +627,7 @@ begin
 end;
 
 procedure TFmTTF.DisplayFontKerningTable(
-  KerningTable: TTrueTypeFontKerningTable);
+  KerningTable: TPascalTypeKerningTable);
 begin
  with KerningTable do
   begin
@@ -644,7 +644,7 @@ begin
 end;
 
 procedure TFmTTF.DisplayGaspTable(
-  GaspTable: TTrueTypeFontGridFittingAndScanConversionProcedureTable);
+  GaspTable: TPascalTypeGridFittingAndScanConversionProcedureTable);
 var
   RangeIndex : Integer;
   LastPPEM   : Integer;
@@ -1021,7 +1021,7 @@ begin
 end;
 
 procedure TFmTTF.DisplayLinearThresholdTable(
-  LinearThresholdTable: TTrueTypeFontLinearThresholdTable);
+  LinearThresholdTable: TPascalTypeLinearThresholdTable);
 var
   VerticalPenIndex : Integer;
 begin
@@ -1498,7 +1498,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayOS2Table(OS2Table: TTrueTypeFontOS2Table);
+procedure TFmTTF.DisplayOS2Table(OS2Table: TPascalTypeOS2Table);
 begin
  with OS2Table do
   begin
@@ -1899,7 +1899,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayPCL5Table(PCL5Table: TTrueTypeFontPCL5Table);
+procedure TFmTTF.DisplayPCL5Table(PCL5Table: TPascalTypePCL5Table);
 var
   str : string;
 begin
@@ -2105,7 +2105,7 @@ begin
 end;
 
 procedure TFmTTF.DisplayPostscriptV2Table(
-  PostscriptTable: TTrueTypeFontPostscriptVersion2Table);
+  PostscriptTable: TPascalTypePostscriptVersion2Table);
 var
   GlyphIndex : Integer;
 begin
@@ -2133,7 +2133,7 @@ begin
 end;
 
 procedure TFmTTF.DisplayVerticalHeader(
-  VerticalHeaderTable: TTrueTypeFontVerticalHeaderTable);
+  VerticalHeaderTable: TPascalTypeVerticalHeaderTable);
 begin
  with VerticalHeaderTable do
   begin
@@ -2195,8 +2195,8 @@ begin
     then DisplayHorizontalMetrics(TPascalTypeHorizontalMetricsTable(Node.Data)) else
 
    // 0S/2 Table
-   if TObject(Node.Data) is TTrueTypeFontOS2Table
-    then DisplayOS2Table(TTrueTypeFontOS2Table(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypeOS2Table
+    then DisplayOS2Table(TPascalTypeOS2Table(Node.Data)) else
 
    // Character Map Table
    if TObject(Node.Data) is TPascalTypeCharacterMapTable
@@ -2235,12 +2235,12 @@ begin
     end else
 
    // Postscript Glyph Name Table
-   if TObject(Node.Data) is TTrueTypeFontPostscriptVersion2Table
-    then DisplayPostscriptV2Table(TTrueTypeFontPostscriptVersion2Table(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypePostscriptVersion2Table
+    then DisplayPostscriptV2Table(TPascalTypePostscriptVersion2Table(Node.Data)) else
 
    // Grid Fitting and Scan Conversion Procedure Table
-   if TObject(Node.Data) is TTrueTypeFontGridFittingAndScanConversionProcedureTable
-    then DisplayGaspTable(TTrueTypeFontGridFittingAndScanConversionProcedureTable(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypeGridFittingAndScanConversionProcedureTable
+    then DisplayGaspTable(TPascalTypeGridFittingAndScanConversionProcedureTable(Node.Data)) else
 
    // Glyph Definition Table
    if TObject(Node.Data) is TOpenTypeGlyphDefinitionTable
@@ -2291,20 +2291,20 @@ begin
     then DisplayOpenTypeMarkGlyphSetTable(TOpenTypeMarkGlyphSetTable(Node.Data)) else
 
    // Digital Signature Table
-   if TObject(Node.Data) is TTrueTypeFontDigitalSignatureTable
-    then DisplayDigitalSignatureTable(TTrueTypeFontDigitalSignatureTable(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypeDigitalSignatureTable
+    then DisplayDigitalSignatureTable(TPascalTypeDigitalSignatureTable(Node.Data)) else
 
      // Digital Signature Block
-   if TObject(Node.Data) is TTrueTypeFontDigitalSignatureBlock
-    then DisplayDigitalSignatureBlock(TTrueTypeFontDigitalSignatureBlock(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypeDigitalSignatureBlock
+    then DisplayDigitalSignatureBlock(TPascalTypeDigitalSignatureBlock(Node.Data)) else
 
    // Kerning Table
-   if TObject(Node.Data) is TTrueTypeFontKerningTable
-    then DisplayFontKerningTable(TTrueTypeFontKerningTable(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypeKerningTable
+    then DisplayFontKerningTable(TPascalTypeKerningTable(Node.Data)) else
 
    // Kerning Subtable
-   if TObject(Node.Data) is TTrueTypeFontKerningSubTable
-    then DisplayFontKerningSubTable(TTrueTypeFontKerningSubTable(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypeKerningSubTable
+    then DisplayFontKerningSubTable(TPascalTypeKerningSubTable(Node.Data)) else
 
    // Location Table
    if TObject(Node.Data) is TTrueTypeFontLocationTable
@@ -2341,16 +2341,16 @@ begin
     then DisplayGlyphDataContour(TPascalTypeContour(Node.Data)) else
 
    // Linear Threshold Table
-   if TObject(Node.Data) is TTrueTypeFontLinearThresholdTable
-    then DisplayLinearThresholdTable(TTrueTypeFontLinearThresholdTable(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypeLinearThresholdTable
+    then DisplayLinearThresholdTable(TPascalTypeLinearThresholdTable(Node.Data)) else
 
    // PCL 5 Table
-   if TObject(Node.Data) is TTrueTypeFontPCL5Table
-    then DisplayPCL5Table(TTrueTypeFontPCL5Table(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypePCL5Table
+    then DisplayPCL5Table(TPascalTypePCL5Table(Node.Data)) else
 
    // Vertical Metrics Header Table
-   if TObject(Node.Data) is TTrueTypeFontVerticalHeaderTable
-    then DisplayVerticalHeader(TTrueTypeFontVerticalHeaderTable(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypeVerticalHeaderTable
+    then DisplayVerticalHeader(TPascalTypeVerticalHeaderTable(Node.Data)) else
 
    // other non-required tables
    if TObject(Node.Data) is TCustomPascalTypeNamedTable then
@@ -2441,8 +2441,18 @@ begin
    // begin update
    Items.BeginUpdate;
 
+
    // add font header table
    Items.AddChildObject(Items[0], 'head', HeaderTable);
+
+   // add maximum profile table
+   Items.AddChildObject(Items[0], 'maxp', MaximumProfile);
+
+   // add horizontal header
+   Items.AddChildObject(Items[0], 'hhea', HorizontalHeader);
+
+   // add horizontal metrics
+   Items.AddChildObject(Items[0], 'hmtx', HorizontalMetrics);
 
    // add character mapping
    Node := Items.AddChildObject(Items[0], 'cmap', CharacterMap);
@@ -2455,20 +2465,6 @@ begin
       else Items.AddChildObjectFirst(Node, 'Unknown', CharacterMap.CharacterMapSubtable[SubtableIndex]);
      end;
     end;
-
-   // add horizontal header
-   Items.AddChildObject(Items[0], 'hhea', HorizontalHeader);
-
-   // add horizontal metrics
-   Items.AddChildObject(Items[0], 'hmtx', HorizontalMetrics);
-
-   // add postscript table
-   Node := Items.AddChildObject(Items[0], 'post', PostScriptTable);
-   if Assigned(PostScriptTable.PostscriptV2Table)
-    then Items.AddChildObjectFirst(Node, 'Glyph Names', PostScriptTable.PostscriptV2Table);
-
-   // add maximum profile table
-   Items.AddChildObject(Items[0], 'maxp', MaximumProfile);
 
    // add name table
    Node := Items.AddChildObject(Items[0], 'name', NameTable);
@@ -2497,6 +2493,11 @@ begin
       Break;
      end;
 
+   // add postscript table
+   Node := Items.AddChildObject(Items[0], 'post', PostScriptTable);
+   if Assigned(PostScriptTable.PostscriptV2Table)
+    then Items.AddChildObjectFirst(Node, 'Glyph Names', PostScriptTable.PostscriptV2Table);
+
    // add additional tables
    for OptTableIndex := 0 to OptionalTableCount - 1 do
     with OptionalTable[OptTableIndex] do
@@ -2504,14 +2505,14 @@ begin
       Node := Items.AddChildObject(Items[0], GetTableType, OptionalTable[OptTableIndex]);
 
       // digital signature
-      if OptionalTable[OptTableIndex] is TTrueTypeFontDigitalSignatureTable then
-       with TTrueTypeFontDigitalSignatureTable(OptionalTable[OptTableIndex]) do
+      if OptionalTable[OptTableIndex] is TPascalTypeDigitalSignatureTable then
+       with TPascalTypeDigitalSignatureTable(OptionalTable[OptTableIndex]) do
         for SubtableIndex := 0 to SignatureCount - 1
          do Items.AddChildObject(Node, 'Signature #' + IntToStr(SubtableIndex + 1), SignatureBlock[SubtableIndex]) else
 
       // kerning table
-      if OptionalTable[OptTableIndex] is TTrueTypeFontKerningTable then
-       with TTrueTypeFontKerningTable(OptionalTable[OptTableIndex]) do
+      if OptionalTable[OptTableIndex] is TPascalTypeKerningTable then
+       with TPascalTypeKerningTable(OptionalTable[OptTableIndex]) do
         for SubtableIndex := 0 to KerningSubtableCount - 1 do
          begin
           str := 'Subtable #' + IntToStr(SubtableIndex + 1);

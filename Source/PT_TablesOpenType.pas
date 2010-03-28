@@ -45,6 +45,21 @@ type
     property DisplayName: string read GetDisplayName;
   end;
 
+  TCustomOpenTypeVersionedNamedTable = class(TCustomPascalTypeNamedTable)
+  private
+    FVersion : TFixedPoint; // Version of the GDEF table-initially = 0x00010002
+    procedure SetVersion(const Value: TFixedPoint);
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+    procedure VersionChanged; virtual;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    property Version: TFixedPoint read FVersion write SetVersion;
+  end;
 
   TCustomOpenTypeClassDefinitionTable = class(TCustomPascalTypeTable)
   protected
@@ -124,22 +139,59 @@ type
   end;
 
 
-  // table 'GDEF'
+  // table 'BASE'
 
-  TOpenTypeGlyphDefinitionTable = class(TCustomPascalTypeNamedTable)
+  TOpenTypeBaselineTagListTable = class(TCustomPascalTypeTable)
   private
-    FVersion            : TFixedPoint; // Version of the GDEF table-initially = 0x00010002
-    FGlyphClassDef      : TCustomOpenTypeClassDefinitionTable; // Class definition table for glyph type
-    FAttachList         : Word; // Offset to list of glyphs with attachment points-from beginning of GDEF header (may be NULL)
-    FLigCaretList       : Word; // Offset to list of positioning points for ligature carets-from beginning of GDEF header (may be NULL)
-    FMarkAttachClassDef : TCustomOpenTypeClassDefinitionTable; // Offset to class definition table for mark attachment type-from beginning of GDEF header (may be NULL)
-    FMarkGlyphSetsDef   : TOpenTypeMarkGlyphSetTable; // Offset to the table of mark set definitions - from beginning of GDEF header (may be NULL)
-    procedure SetVersion(const Value: TFixedPoint);
+    FBaseLineTags : array of TTableType;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
-    procedure VersionChanged; virtual;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+  TBaseLineScriptRecord = packed record
+    Tag          : TTableType;
+    ScriptOffset : Word; // still todo see: http://www.microsoft.com/typography/otspec/base.htm
+  end;
+
+  TOpenTypeBaselineScriptListTable = class(TCustomPascalTypeTable)
+  private
+    FBaseLineScript : array of TBaseLineScriptRecord;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+  TOpenTypeAxisTable = class(TCustomPascalTypeTable)
+  private
+    FBaseLineTagList : TOpenTypeBaselineTagListTable;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+    destructor Destroy; override;
+  end;
+
+  TOpenTypeBaselineTable = class(TCustomOpenTypeVersionedNamedTable)
+  private
+    FHorizontalAxis : TOpenTypeAxisTable;
+    FVerticalAxis   : TOpenTypeAxisTable;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
   public
     destructor Destroy; override;
 
@@ -147,8 +199,29 @@ type
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
+  end;
 
-    property Version: TFixedPoint read FVersion write SetVersion;
+
+  // table 'GDEF'
+
+  TOpenTypeGlyphDefinitionTable = class(TCustomOpenTypeVersionedNamedTable)
+  private
+    FGlyphClassDef      : TCustomOpenTypeClassDefinitionTable; // Class definition table for glyph type
+    FAttachList         : Word; // Offset to list of glyphs with attachment points-from beginning of GDEF header (may be NULL)
+    FLigCaretList       : Word; // Offset to list of positioning points for ligature carets-from beginning of GDEF header (may be NULL)
+    FMarkAttachClassDef : TCustomOpenTypeClassDefinitionTable; // Offset to class definition table for mark attachment type-from beginning of GDEF header (may be NULL)
+    FMarkGlyphSetsDef   : TOpenTypeMarkGlyphSetTable; // Offset to the table of mark set definitions - from beginning of GDEF header (may be NULL)
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+    destructor Destroy; override;
+
+    class function GetTableType: TTableType; override;
+
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
 
     property GlyphClassDefinition: TCustomOpenTypeClassDefinitionTable read FGlyphClassDef;
     property MarkAttachmentClassDefinition: TCustomOpenTypeClassDefinitionTable read FMarkAttachClassDef;
@@ -520,6 +593,72 @@ uses
   Math, SysUtils, PT_ResourceStrings, PT_TablesOpenTypeFeatures;
 
 
+{ TCustomOpenTypeVersionedNamedTable }
+
+procedure TCustomOpenTypeVersionedNamedTable.AssignTo(Dest: TPersistent);
+begin
+ inherited;
+ if Dest is Self.ClassType then
+  with TOpenTypeBaselineTable(Dest) do
+   begin
+    FVersion := Self.FVersion;
+   end;
+end;
+
+procedure TCustomOpenTypeVersionedNamedTable.ResetToDefaults;
+begin
+ inherited;
+ FVersion.Fract := 0;
+ FVersion.Value := 1;
+end;
+
+procedure TCustomOpenTypeVersionedNamedTable.LoadFromStream(Stream: TStream);
+var
+  Value32 : Cardinal;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   if Position + 4 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
+   // read version
+   Read(Value32, SizeOf(TFixedPoint));
+   Version := TFixedPoint(Swap32(Value32));
+  end;
+end;
+
+procedure TCustomOpenTypeVersionedNamedTable.SaveToStream(Stream: TStream);
+var
+  Value32 : Cardinal;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // write version
+   Value32 := Swap32(Cardinal(Version));
+   Write(Value32, SizeOf(TFixedPoint));
+  end;
+end;
+
+procedure TCustomOpenTypeVersionedNamedTable.SetVersion(const Value: TFixedPoint);
+begin
+ if (FVersion.Fract <> Value.Fract) or
+    (FVersion.Value <> Value.Value) then
+  begin
+   FVersion := Value;
+   VersionChanged;
+  end;
+end;
+
+procedure TCustomOpenTypeVersionedNamedTable.VersionChanged;
+begin
+ Changed;
+end;
+
+
 { TCustomOpenTypeClassDefinitionTable }
 
 
@@ -816,6 +955,324 @@ begin
 end;
 
 
+{ TOpenTypeBaselineTagListTable }
+
+procedure TOpenTypeBaselineTagListTable.AssignTo(Dest: TPersistent);
+begin
+ inherited;
+ if Dest is Self.ClassType then
+  with TOpenTypeBaselineTagListTable(Dest) do
+   begin
+    FBaseLineTags := Self.FBaseLineTags;
+   end;
+end;
+
+procedure TOpenTypeBaselineTagListTable.ResetToDefaults;
+begin
+ inherited;
+ SetLength(FBaseLineTags, 0);
+end;
+
+procedure TOpenTypeBaselineTagListTable.LoadFromStream(Stream: TStream);
+var
+  Value16  : Word;
+  TagIndex : Word;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check if table is complete
+   if Position + 2 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
+   // read baseline tag list array length
+   Read(Value16, SizeOf(Word));
+   SetLength(FBaseLineTags, Swap16(Value16));
+
+   // check if table is complete
+   if Position + 4 * Length(FBaseLineTags) > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
+   // read baseline array data
+   for TagIndex := 0 to Length(FBaseLineTags) - 1
+    do Read(FBaseLineTags[TagIndex], SizeOf(TTableType));
+  end;
+end;
+
+procedure TOpenTypeBaselineTagListTable.SaveToStream(Stream: TStream);
+var
+  Value16  : Word;
+  TagIndex : Word;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // write baseline tag list array length
+   Value16 := Swap16(Length(FBaseLineTags));
+   Write(Value16, SizeOf(Word));
+
+   // write baseline array data
+   for TagIndex := 0 to Length(FBaseLineTags) - 1
+    do Write(FBaseLineTags[TagIndex], SizeOf(TTableType));
+  end;
+end;
+
+
+{ TOpenTypeBaselineScriptListTable }
+
+procedure TOpenTypeBaselineScriptListTable.AssignTo(Dest: TPersistent);
+begin
+ inherited;
+ if Dest is Self.ClassType then
+  with TOpenTypeBaselineScriptListTable(Dest) do
+   begin
+    FBaseLineScript := Self.FBaseLineScript;
+   end;
+end;
+
+procedure TOpenTypeBaselineScriptListTable.ResetToDefaults;
+begin
+ inherited;
+ SetLength(FBaseLineScript, 0);
+end;
+
+procedure TOpenTypeBaselineScriptListTable.LoadFromStream(Stream: TStream);
+var
+  Value16     : Word;
+  ScriptIndex : Word;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check if table is complete
+   if Position + 2 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
+   // read baseline stript list array length
+   Read(Value16, SizeOf(Word));
+   SetLength(FBaseLineScript, Swap16(Value16));
+
+   // check if table is complete
+   if Position + 6 * Length(FBaseLineScript) > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
+   // read baseline array data
+   for ScriptIndex := 0 to Length(FBaseLineScript) - 1 do
+    begin
+     // read tag
+     Read(FBaseLineScript[ScriptIndex].Tag, SizeOf(TTableType));
+
+     // read script offset
+     Read(Value16, SizeOf(Word));
+     FBaseLineScript[ScriptIndex].ScriptOffset := Swap16(Value16);
+    end;
+  end;
+end;
+
+procedure TOpenTypeBaselineScriptListTable.SaveToStream(Stream: TStream);
+begin
+  inherited;
+
+end;
+
+
+{ TOpenTypeAxisTable }
+
+destructor TOpenTypeAxisTable.Destroy;
+begin
+ FreeAndNil(FBaseLineTagList);
+ inherited;
+end;
+
+procedure TOpenTypeAxisTable.AssignTo(Dest: TPersistent);
+begin
+ inherited;
+ if Dest is Self.ClassType then
+  with TOpenTypeAxisTable(Dest) do
+   begin
+    // check if baseline tag list table needs to be assigned
+    if Assigned(Self.FBaseLineTagList) then
+     begin
+      // eventually create new destination baseline tag list table
+      if not Assigned(FBaseLineTagList)
+       then FBaseLineTagList := TOpenTypeBaselineTagListTable.Create;
+
+      // assign baseline tag list table
+      FBaseLineTagList.Assign(Self.FBaseLineTagList);
+     end else
+    if Assigned(FBaseLineTagList) then FreeAndNil(FBaseLineTagList);
+
+   end;
+end;
+
+procedure TOpenTypeAxisTable.ResetToDefaults;
+begin
+ inherited;
+ if Assigned(FBaseLineTagList)
+  then FreeAndNil(FBaseLineTagList);
+end;
+
+procedure TOpenTypeAxisTable.LoadFromStream(Stream: TStream);
+var
+  StartPos : Int64;
+  Value16  : Word;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // remember start position
+   StartPos := Position;
+
+   // check if table is complete
+   if Position + 4 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
+   // read baseline tag list table offset (maybe 0)
+   Read(Value16, SizeOf(Word));
+   if Value16 > 0 then
+    begin
+     // locate baseline tag list table
+     Position := StartPos + Value16;
+
+     // eventually create baseline tag list table
+     if not Assigned(FBaseLineTagList)
+      then FBaseLineTagList := TOpenTypeBaselineTagListTable.Create;
+
+     // load baseline tag list table from stream
+     FBaseLineTagList.LoadFromStream(Stream);
+    end;
+  end;
+end;
+
+procedure TOpenTypeAxisTable.SaveToStream(Stream: TStream);
+begin
+ inherited;
+ raise Exception.Create('not implemented yet');
+end;
+
+
+{ TOpenTypeBaselineTable }
+
+destructor TOpenTypeBaselineTable.Destroy;
+begin
+ if Assigned(FHorizontalAxis) then FreeAndNil(FHorizontalAxis);
+ if Assigned(FVerticalAxis) then FreeAndNil(FVerticalAxis);
+ inherited;
+end;
+
+procedure TOpenTypeBaselineTable.AssignTo(Dest: TPersistent);
+begin
+ inherited;
+ if Dest is Self.ClassType then
+  with TOpenTypeBaselineTable(Dest) do
+   begin
+    // check if horizontal axis needs to be assigned
+    if Assigned(Self.FHorizontalAxis) then
+     begin
+      // eventually create new destination axis table
+      if not Assigned(FHorizontalAxis)
+       then FHorizontalAxis := TOpenTypeAxisTable.Create;
+
+      // assign horizontal axis table
+      FHorizontalAxis.Assign(Self.FHorizontalAxis);
+     end else
+    if Assigned(FHorizontalAxis) then FreeAndNil(FHorizontalAxis);
+
+    // check if vertical axis needs to be assigned
+    if Assigned(Self.FVerticalAxis) then
+     begin
+      // eventually create new destination axis table
+      if not Assigned(FVerticalAxis)
+       then FVerticalAxis := TOpenTypeAxisTable.Create;
+
+      // assign horizontal axis table
+      FVerticalAxis.Assign(Self.FVerticalAxis);
+     end else
+    if Assigned(FVerticalAxis) then FreeAndNil(FVerticalAxis);
+
+   end;
+end;
+
+class function TOpenTypeBaselineTable.GetTableType: TTableType;
+begin
+ Result := 'BASE';
+end;
+
+procedure TOpenTypeBaselineTable.ResetToDefaults;
+begin
+ inherited;
+ if Assigned(FHorizontalAxis) then FreeAndNil(FHorizontalAxis);
+ if Assigned(FVerticalAxis) then FreeAndNil(FVerticalAxis);
+end;
+
+procedure TOpenTypeBaselineTable.LoadFromStream(Stream: TStream);
+var
+  StartPos : Int64;
+  Value16  : Word;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check version alread read
+   if Version.Value <> 1
+    then raise Exception.Create(RCStrUnsupportedVersion);
+
+   // remember start position as position minus the version already read
+   StartPos := Position - 4;
+
+   // check if table is complete
+   if Position + 4 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
+   // read horizontal axis table offset (maybe 0)
+   Read(Value16, SizeOf(Word));
+   if Value16 > 0 then
+    begin
+     // locate horizontal axis table
+     Position := StartPos + Value16;
+
+     // eventually create horizontal axis table
+     if not Assigned(FHorizontalAxis)
+      then FHorizontalAxis := TOpenTypeAxisTable.Create;
+
+     // load horizontal axis table from stream
+     FHorizontalAxis.LoadFromStream(Stream);
+    end;
+
+   // read vertical axis table offset (maybe 0)
+   Read(Value16, SizeOf(Word));
+   if Value16 > 0 then
+    begin
+     // locate horizontal axis table
+     Position := StartPos + Value16;
+
+     // eventually create horizontal axis table
+     if not Assigned(FVerticalAxis)
+      then FVerticalAxis := TOpenTypeAxisTable.Create;
+
+     // load horizontal axis table from stream
+     FVerticalAxis.LoadFromStream(Stream);
+    end;
+
+  end;
+end;
+
+procedure TOpenTypeBaselineTable.SaveToStream(Stream: TStream);
+begin
+ inherited;
+
+ with Stream do
+  begin
+
+  end;
+end;
+
+
 { TOpenTypeGlyphDefinitionTable }
 
 destructor TOpenTypeGlyphDefinitionTable.Destroy;
@@ -831,10 +1288,9 @@ begin
  if Dest is TOpenTypeGlyphDefinitionTable then
   with TOpenTypeGlyphDefinitionTable(Dest) do
    begin
-    FVersion            := Self.FVersion;
-    FAttachList         := Self.FAttachList;
-    FLigCaretList       := Self.FLigCaretList;
-    FMarkGlyphSetsDef   := Self.FMarkGlyphSetsDef;
+    FAttachList       := Self.FAttachList;
+    FLigCaretList     := Self.FLigCaretList;
+    FMarkGlyphSetsDef := Self.FMarkGlyphSetsDef;
 
     FGlyphClassDef.Assign(Self.FGlyphClassDef);
     FMarkAttachClassDef.Assign(Self.FMarkAttachClassDef);
@@ -860,26 +1316,25 @@ end;
 procedure TOpenTypeGlyphDefinitionTable.LoadFromStream(Stream: TStream);
 var
   StartPos            : Int64;
-  Value32             : Cardinal;
   Value16             : Word;
   GlyphClassDefOffset : Word;
   MarkAttClassDefOffs : Word;
   MarkGlyphSetsDefOff : Word;
 begin
+ inherited;
+
  with Stream do
   begin
-   // remember start position
-   StartPos := Position;
-
-   if Position + 14 > Size
-    then raise Exception.Create(RCStrTableIncomplete);
-
-   // read version
-   Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
-
+   // check version alread read
    if Version.Value <> 1
     then raise Exception.Create(RCStrUnsupportedVersion);
+
+   // remember start position as position minus the version already read
+   StartPos := Position - 4;
+
+   // check if table is complete
+   if Position + 10 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
 
    // read glyph class definition offset
    Read(Value16, SizeOf(Word));
@@ -965,18 +1420,15 @@ end;
 procedure TOpenTypeGlyphDefinitionTable.SaveToStream(Stream: TStream);
 var
   StartPos : Int64;
-  Value32  : Cardinal;
   Value16  : Word;
   Offsets  : array [0..4] of Word;
 begin
+ inherited;
+
  with Stream do
   begin
-   // remember start position
-   StartPos := Position;
-
-   // write version
-   Value32 := Swap32(Cardinal(Version));
-   Write(Value32, SizeOf(TFixedPoint));
+   // remember start position as position minus version aready written
+   StartPos := Position - 4;
 
    // reset offset array to zero
    FillChar(Offsets[0], 5 * SizeOf(Word), 0);
@@ -1046,22 +1498,6 @@ begin
    Value16 := Swap16(Offsets[4]);
    Write(Value16, SizeOf(Word));
   end;
-end;
-
-procedure TOpenTypeGlyphDefinitionTable.SetVersion(
-  const Value: TFixedPoint);
-begin
- if (FVersion.Fract <> Value.Fract) or
-    (FVersion.Value <> Value.Value) then
-  begin
-   FVersion := Value;
-   VersionChanged;
-  end;
-end;
-
-procedure TOpenTypeGlyphDefinitionTable.VersionChanged;
-begin
- Changed;
 end;
 
 
@@ -2714,10 +3150,10 @@ end;
 
 
 initialization
-  RegisterTrueTypeFontTables([TOpenTypeGlyphPositionTable,
-    TOpenTypeGlyphSubstitutionTable,
-    TOpenTypeGlyphDefinitionTable, TOpenTypeJustificationTable]);
+  RegisterPascalTypeTables([TOpenTypeBaselineTable,
+    TOpenTypeGlyphDefinitionTable, TOpenTypeGlyphPositionTable,
+    TOpenTypeGlyphSubstitutionTable, TOpenTypeJustificationTable]);
 
-  RegisterScript(TOpenTypeDefaultLanguageSystemTables);  
+  RegisterScript(TOpenTypeDefaultLanguageSystemTables);
 
 end.
