@@ -17,4 +17,7 @@
   invalid checksums, which will result in an exception. }
 {$DEFINE ChecksumTest}
 
-
+{ Enable this option, if you want to enable using floating points where
+  applicable. If this is disabled you may be able to use this library on
+  processors that do not support floating point operations or run too slow. }
+{$DEFINE UseFloatingPoint}

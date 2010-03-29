@@ -20,7 +20,8 @@ uses
   PT_UnicodeNames in '..\..\Source\PT_UnicodeNames.pas',
   Forms,
   FontExplorerMain in 'FontExplorerMain.pas' {FmTTF},
-  FE_FontHeader in 'FE_FontHeader.pas' {FrameFontHeader: TFrame};
+  FE_FontHeader in 'FE_FontHeader.pas' {FrameFontHeader: TFrame},
+  PT_Rasterizer in '..\..\Source\PT_Rasterizer.pas';
 
 {$R *.res}
 

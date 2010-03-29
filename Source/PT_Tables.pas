@@ -262,6 +262,8 @@ type
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
+    function CharacterToGlyph(CharacterIndex: Integer): Integer; virtual;
+
     property PlatformID: TPlatformID read GetPlatformID;
     property EncodingID: Word read GetEncodingIDAsWord;
     property CharacterMap: TCustomTrueTypeFontCharacterMap read FCharacterMap;
@@ -310,8 +312,7 @@ type
     FSubtableList : TObjectList;
     procedure SetVersion(const Value: Word);
     function GetCharacterMapSubtableCount: Word;
-    function GetCharacterMapSubtable(
-      Index: Integer): TCustomCharacterMapDirectoryEntry;
+    function GetCharacterMapSubtable(Index: Integer): TCustomCharacterMapDirectoryEntry;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -1734,6 +1735,14 @@ end;
 function TCustomCharacterMapDirectoryEntry.GetEncodingIDAsWord: Word;
 begin
  Result := FEncodingID;
+end;
+
+function TCustomCharacterMapDirectoryEntry.CharacterToGlyph(
+  CharacterIndex: Integer): Integer;
+begin
+ if Assigned(FCharacterMap)
+  then Result := FCharacterMap.CharacterToGlyph(CharacterIndex)
+  else raise Exception.Create('Character map not set properly!');
 end;
 
 procedure TCustomCharacterMapDirectoryEntry.LoadFromStream(Stream: TStream);

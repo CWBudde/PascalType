@@ -205,7 +205,10 @@ type
     FFlags      : Word;     // Component flag
     FGlyphIndex : SmallInt; // Glyph index of component
     FArgument   : array [0..1] of Integer;
+    {$IFDEF UseFloatingPoint}
     FScale      : array of Single;
+    {$ELSE}
+    {$ENDIF}
     procedure SetFlags(const Value: Word);
     procedure SetGlyphIndex(const Value: SmallInt);
     procedure FlagsChanged;
@@ -1096,8 +1099,8 @@ begin
 
    {$IFDEF AmbigiousExceptions}
    // make sure the reserved flag is set to 0
-   //   if (FFlags and (1 shl 4)) <> 0
-   //    then raise EPascalTypeError.Create(RCStrCompositeGlyphFlagError);
+   // if (FFlags and (1 shl 4)) <> 0
+   //  then raise EPascalTypeError.Create(RCStrCompositeGlyphFlagError);
    {$ENDIF}
 
    // read glyph index

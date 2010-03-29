@@ -6,7 +6,8 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ComCtrls, StdCtrls, ExtCtrls, ToolWin, ActnList, StdActns, AppEvnts,
   ImgList, PT_Types, PT_Tables, PT_TablesTrueType, PT_TablesOptional,
-  PT_TablesOpenType, PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames;
+  PT_TablesOpenType, PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames,
+  PT_Rasterizer;
 
 {.$DEFINE ShowContours}
 
@@ -67,7 +68,7 @@ type
     procedure PaintBoxPaint(Sender: TObject);
     procedure CbFontSizeChange(Sender: TObject);
   private
-    FInterpreter  : TPascalTypeInterpreter;
+    FRasterizer   : TPascalTypeRasterizer;
     FCurrentGlyph : TBitmap;
     FFontSize     : Integer;
     Fppem         : Integer;
@@ -150,7 +151,7 @@ begin
  GetWindowsDirectory(PWindowsDir, MAX_PATH);
  AcFileOpen.Dialog.InitialDir := StrPas(PWindowsDir) + '\Fonts';
 
- FInterpreter := TPascalTypeInterpreter.Create;
+ FRasterizer := TPascalTypeRasterizer.Create;
 
  FCurrentGlyph := TBitmap.Create;
  FCurrentGlyph.PixelFormat := pf8bit;
@@ -161,13 +162,13 @@ end;
 procedure TFmTTF.FontSizeChanged;
 begin
  Fppem := FFontSize * PixelsPerInch div 72;
- FScaler := Fppem / FInterpreter.HeaderTable.UnitsPerEm;
+ FScaler := Fppem / FRasterizer.Interpreter.HeaderTable.UnitsPerEm;
 end;
 
 procedure TFmTTF.FormDestroy(Sender: TObject);
 begin
  // free pascal type interpreter
- FreeAndNil(FInterpreter);
+ FreeAndNil(FRasterizer);
 
  // free current glyph display bitmap
  FreeAndNil(FCurrentGlyph);
@@ -1810,7 +1811,7 @@ begin
    LineTo(FCurrentGlyph.Width, Center.Y);
 
    if GlyphIndex >= 0 then
-    with FInterpreter.HorizontalMetrics do
+    with FRasterizer.Interpreter.HorizontalMetrics do
      begin
       // use dotted style
       Pen.Style := psDot;
@@ -1891,7 +1892,7 @@ begin
     with TPascalTypeCompositeGlyph(Glyph[CompositeIndex]) do
      begin
       TextOut(Center.X, Center.Y + 8 * CompositeIndex, IntToStr(GlyphIndex));
-      //FInterpreter.
+      //FRasterizer.Interpreter.
      end;
 
    PaintBox.Invalidate;
@@ -2376,7 +2377,7 @@ begin
    QueryPerformanceCounter(Start);
 
    // load font file
-   FInterpreter.LoadFromFile(FileName);
+   FRasterizer.Interpreter.LoadFromFile(FileName);
 
    // query stop
    QueryPerformanceCounter(Stop);
@@ -2431,7 +2432,7 @@ var
   SubSubIndex       : Integer;
   str               : string;
 begin
- with FInterpreter, TreeView do
+ with FRasterizer.Interpreter, TreeView do
   begin
    // set width and height of current glyph bitmap
    FScaler := Fppem / HeaderTable.UnitsPerEm;
