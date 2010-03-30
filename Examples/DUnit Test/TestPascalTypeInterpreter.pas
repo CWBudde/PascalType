@@ -128,9 +128,8 @@ end;
 
 procedure TTestPascalTypeScanner.TestScanLocalFonts;
 var
-  SR          : TSearchRec;
-  Succeed     : Boolean;
-  PWindowsDir : array [0..MAX_PATH] of Char;
+  SR      : TSearchRec;
+  Succeed : Boolean;
 begin
  if FindFirst('*.ttf', faAnyFile, SR) = 0 then
   try

@@ -2,7 +2,7 @@ object FmTTF: TFmTTF
   Left = 309
   Top = 95
   Caption = 'PascalType Font Explorer'
-  ClientHeight = 622
+  ClientHeight = 641
   ClientWidth = 864
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,13 +20,13 @@ object FmTTF: TFmTTF
   object Splitter: TSplitter
     Left = 204
     Top = 24
-    Height = 576
+    Height = 595
   end
   object TreeView: TTreeView
     Left = 0
     Top = 24
     Width = 204
-    Height = 576
+    Height = 595
     Align = alLeft
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -44,7 +44,7 @@ object FmTTF: TFmTTF
     Left = 207
     Top = 24
     Width = 657
-    Height = 576
+    Height = 595
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
@@ -52,7 +52,7 @@ object FmTTF: TFmTTF
       Left = 0
       Top = 0
       Width = 657
-      Height = 576
+      Height = 595
       Align = alClient
       Columns = <>
       ReadOnly = True
@@ -63,7 +63,7 @@ object FmTTF: TFmTTF
       Left = 0
       Top = 0
       Width = 657
-      Height = 576
+      Height = 595
       Align = alClient
       BevelInner = bvLowered
       BevelOuter = bvNone
@@ -73,7 +73,7 @@ object FmTTF: TFmTTF
         Left = 1
         Top = 1
         Width = 655
-        Height = 574
+        Height = 593
         Align = alClient
         Color = clWhite
         ParentColor = False
@@ -127,7 +127,7 @@ object FmTTF: TFmTTF
       Left = 0
       Top = 0
       Width = 657
-      Height = 576
+      Height = 595
       Align = alClient
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -141,7 +141,7 @@ object FmTTF: TFmTTF
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 600
+    Top = 619
     Width = 864
     Height = 22
     Panels = <
@@ -219,6 +219,10 @@ object FmTTF: TFmTTF
       Caption = '&File'
       object MIOpen: TMenuItem
         Action = AcFileOpen
+      end
+      object MIOpenFromInstalled: TMenuItem
+        Caption = 'Open from installed...'
+        OnClick = MIOpenFromInstalledClick
       end
       object N1: TMenuItem
         Caption = '-'
@@ -985,5 +989,14 @@ object FmTTF: TFmTTF
       C007001F8FF1E001C0078FF18FF1E007C00FFFF98FF1F007C01FFF758FF5F003
       C03FFF8F8001F803FFFFFFFFFFFFFFFF00000000000000000000000000000000
       000000000000}
+  end
+  object FontDialog: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    Left = 104
+    Top = 32
   end
 end

@@ -55,6 +55,8 @@ type
     PaintBox: TPaintBox;
     LbFontSize: TLabel;
     CbFontSize: TComboBox;
+    MIOpenFromInstalled: TMenuItem;
+    FontDialog: TFontDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -67,6 +69,7 @@ type
     procedure TreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure PaintBoxPaint(Sender: TObject);
     procedure CbFontSizeChange(Sender: TObject);
+    procedure MIOpenFromInstalledClick(Sender: TObject);
   private
     FRasterizer   : TPascalTypeRasterizer;
     FCurrentGlyph : TBitmap;
@@ -140,7 +143,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Math;
+  ShlObj, ActiveX, Math;
 
 procedure TFmTTF.FormCreate(Sender: TObject);
 var
@@ -2175,6 +2178,88 @@ end;
 procedure TFmTTF.MIExitClick(Sender: TObject);
 begin
  Close;
+end;
+
+procedure StrResetLength(var S: AnsiString);
+begin
+ SetLength(S, StrLen(PChar(S)));
+end;
+
+function PidlToPath(IdList: PItemIdList): string;
+begin
+ SetLength(Result, MAX_PATH);
+ if SHGetPathFromIdList(IdList, PChar(Result))
+  then StrResetLength(Result)
+  else Result := '';
+end;
+
+function PidlFree(var IdList: PItemIdList): Boolean;
+var
+  Malloc: IMalloc;
+begin
+ Result := False;
+ if IdList = nil
+  then Result := True
+  else
+   begin
+    if Succeeded(SHGetMalloc(Malloc)) and (Malloc.DidAlloc(IdList) > 0) then
+     begin
+      Malloc.Free(IdList);
+      IdList := nil;
+      Result := True;
+     end;
+   end;
+end;
+
+function GetFontDirectory: string;
+var
+  lFolderPidl: PItemIdList;
+begin
+  if Succeeded(SHGetSpecialFolderLocation(0, CSIDL_FONTS, lFolderPidl)) then
+  begin
+    Result := PidlToPath(lFolderPidl);
+    PidlFree(lFolderPidl);
+  end
+  else
+    Result := '';
+end;
+
+procedure TFmTTF.MIOpenFromInstalledClick(Sender: TObject);
+var
+  SR          : TSearchRec;
+  Succeed     : Boolean;
+  FontScanner : TPascalTypeScanner;
+begin
+ if FontDialog.Execute then
+  begin
+   SetCurrentDir(GetFontDirectory);
+
+   with TPascalTypeScanner.Create do
+   try
+    // scan installed fonts
+    if FindFirst('*.ttf', faAnyFile, SR) = 0 then
+     try
+      repeat
+       try
+        LoadFromFile(SR.Name);
+        if FontName = FontDialog.Font.Name then
+         begin
+          Self.LoadFromFile(SR.Name);
+          Exit;
+         end;
+
+       except
+        on e: EPascalTypeError do Continue;
+       end;
+      until FindNext(SR) <> 0;
+     finally
+      FindClose(SR);
+     end;
+    // search font...
+   finally
+    Free;
+   end;
+  end;
 end;
 
 procedure TFmTTF.TreeViewChange(Sender: TObject; Node: TTreeNode);

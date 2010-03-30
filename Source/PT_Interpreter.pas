@@ -40,6 +40,14 @@ uses
 type
   TCustomPascalTypeInterpreter = class(TInterfacedPersistent, IStreamPersist,
     IPascalTypeInterpreter)
+  private
+    // required tables
+    FHeaderTable        : TPascalTypeHeaderTable;
+    FHorizontalHeader   : TPascalTypeHorizontalHeaderTable;
+    FMaximumProfile     : TPascalTypeMaximumProfileTable;
+    FNameTable          : TPascalTypeNameTable;
+    FPostScriptTable    : TPascalTypePostscriptTable;
+    function GetFontName: string;
   protected
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; virtual; abstract;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; virtual; abstract;
@@ -53,16 +61,20 @@ type
     procedure SaveToStream(Stream: TStream); virtual;
     procedure LoadFromFile(FileName: TFileName);
     procedure SaveToFile(FileName: TFileName);
+
+    // required tables
+    property HeaderTable: TPascalTypeHeaderTable read FHeaderTable;
+    property HorizontalHeader: TPascalTypeHorizontalHeaderTable read FHorizontalHeader;
+    property MaximumProfile: TPascalTypeMaximumProfileTable read FMaximumProfile;
+    property NameTable: TPascalTypeNameTable read FNameTable;
+    property PostScriptTable: TPascalTypePostscriptTable read FPostScriptTable;
+
+    // basic properties
+    property FontName: string read GetFontName; 
   end;
 
   TPascalTypeScanner = class(TCustomPascalTypeInterpreter)
   private
-    // required tables
-    FHeaderTable        : TPascalTypeHeaderTable;
-    FHorizontalHeader   : TPascalTypeHorizontalHeaderTable;
-    FMaximumProfile     : TPascalTypeMaximumProfileTable;
-    FNameTable          : TPascalTypeNameTable;
-    FPostScriptTable    : TPascalTypePostscriptTable;
   protected
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; override;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
@@ -72,24 +84,18 @@ type
     constructor Create; override;
     destructor Destroy; override;
   published
-    // required tables
-    property HeaderTable: TPascalTypeHeaderTable read FHeaderTable;
-    property HorizontalHeader: TPascalTypeHorizontalHeaderTable read FHorizontalHeader;
-    property MaximumProfile: TPascalTypeMaximumProfileTable read FMaximumProfile;
-    property NameTable: TPascalTypeNameTable read FNameTable;
-    property PostScriptTable: TPascalTypePostscriptTable read FPostScriptTable;
+    property HeaderTable;
+    property HorizontalHeader;
+    property MaximumProfile;
+    property NameTable;
+    property PostScriptTable;
   end;
 
   TPascalTypeInterpreter = class(TCustomPascalTypeInterpreter)
   private
     // required tables
-    FHeaderTable        : TPascalTypeHeaderTable;
-    FHorizontalHeader   : TPascalTypeHorizontalHeaderTable;
     FHorizontalMetrics  : TPascalTypeHorizontalMetricsTable;
     FCharacterMap       : TPascalTypeCharacterMapTable;
-    FMaximumProfile     : TPascalTypeMaximumProfileTable;
-    FNameTable          : TPascalTypeNameTable;
-    FPostScriptTable    : TPascalTypePostscriptTable;
 
     FOptionalTables     : TObjectList;
 
@@ -109,13 +115,13 @@ type
     property OptionalTable[Index: Integer]: TCustomPascalTypeNamedTable read GetOptionalTable;
   published
     // required tables
-    property HeaderTable: TPascalTypeHeaderTable read FHeaderTable;
-    property HorizontalHeader: TPascalTypeHorizontalHeaderTable read FHorizontalHeader;
-    property MaximumProfile: TPascalTypeMaximumProfileTable read FMaximumProfile;
+    property HeaderTable;
+    property HorizontalHeader;
+    property MaximumProfile;
+    property NameTable;
+    property PostScriptTable;
     property HorizontalMetrics: TPascalTypeHorizontalMetricsTable read FHorizontalMetrics;
     property CharacterMap: TPascalTypeCharacterMapTable read FCharacterMap;
-    property NameTable: TPascalTypeNameTable read FNameTable;
-    property PostScriptTable: TPascalTypePostscriptTable read FPostScriptTable;
 
     property TableCount: Integer read GetTableCount;
     property OptionalTableCount: Integer read GetOptionalTableCount;
@@ -194,6 +200,23 @@ procedure TCustomPascalTypeInterpreter.DirectoryTableReaded(DirectoryTable: TPas
 begin
  // optimize table read order
  DirectoryTable.TableList.SortByOffset;
+end;
+
+function TCustomPascalTypeInterpreter.GetFontName: string;
+var
+  NameRecordIndex : Integer;
+begin
+ with FNameTable do
+  for NameRecordIndex := 0 to NameRecordCount - 1 do
+   with NameRecord[NameRecordIndex] do
+    {$IFDEF MSWINDOWS}
+    if PlatformID = piMicrosoft then
+    {$ENDIF}
+      if NameID = niFullName then
+       begin
+        Result := Name;
+        Exit;
+       end;
 end;
 
 procedure TCustomPascalTypeInterpreter.LoadFromFile(FileName: TFileName);
