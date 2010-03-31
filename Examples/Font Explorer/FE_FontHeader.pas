@@ -3,27 +3,34 @@ unit FE_FontHeader;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, 
-  Dialogs, StdCtrls;
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, ComCtrls, JvExComCtrls, JvDateTimePicker;
 
 type
   TFrameFontHeader = class(TFrame)
-    LbFontRevision: TLabel;
-    EdFontRevision: TEdit;
-    LbFontDirection: TLabel;
-    CbFontDirection: TComboBox;
-    GbFlags: TGroupBox;
-    CbBaselineAtZero: TCheckBox;
-    CbLeftSidebearing: TCheckBox;
-    CbPointSizeInstructions: TCheckBox;
-    CbForceppEm: TCheckBox;
     CbAdvancedWidthInstructions: TCheckBox;
-    CbLosslessFontData: TCheckBox;
+    CbBaselineAtZero: TCheckBox;
+    CbBold: TCheckBox;
     CbFontConverted: TCheckBox;
-    LbUnitsPerEm: TLabel;
-    EdUnitsPerEm: TEdit;
-    LbLowestRecPPEM: TLabel;
+    CbForceppEm: TCheckBox;
+    CbItalic: TCheckBox;
+    CbLeftSidebearing: TCheckBox;
+    CbLosslessFontData: TCheckBox;
+    CbPointSizeInstructions: TCheckBox;
+    EdFontRevision: TEdit;
     EdLowestRecPPEM: TEdit;
+    EdUnitsPerEm: TEdit;
+    GbFlags: TGroupBox;
+    GbStyle: TGroupBox;
+    LbCreated: TLabel;
+    LbFontDirection: TLabel;
+    LbFontRevision: TLabel;
+    LbLowestRecPPEM: TLabel;
+    LbModified: TLabel;
+    LbUnitsPerEm: TLabel;
+    CbFontDirection: TComboBox;
+    CbCreated: TDateTimePicker;
+    CbModified: TDateTimePicker;
   private
     { Private-Deklarationen }
   public

@@ -1,7 +1,7 @@
 object FrameFontHeader: TFrameFontHeader
   Left = 0
   Top = 0
-  Width = 515
+  Width = 271
   Height = 382
   TabOrder = 0
   object LbFontRevision: TLabel
@@ -14,9 +14,9 @@ object FrameFontHeader: TFrameFontHeader
   object LbFontDirection: TLabel
     Left = 95
     Top = 7
-    Width = 65
+    Width = 89
     Height = 13
-    Caption = 'Font Revision'
+    Caption = 'Font Direction Hint'
   end
   object LbUnitsPerEm: TLabel
     Left = 7
@@ -32,6 +32,20 @@ object FrameFontHeader: TFrameFontHeader
     Height = 13
     Caption = 'lowestRecPPEM'
   end
+  object LbCreated: TLabel
+    Left = 7
+    Top = 295
+    Width = 39
+    Height = 13
+    Caption = 'Created'
+  end
+  object LbModified: TLabel
+    Left = 7
+    Top = 338
+    Width = 51
+    Height = 13
+    Caption = 'LbModified'
+  end
   object EdFontRevision: TEdit
     Left = 7
     Top = 23
@@ -39,33 +53,16 @@ object FrameFontHeader: TFrameFontHeader
     Height = 21
     TabOrder = 0
   end
-  object CbFontDirection: TComboBox
-    Left = 95
-    Top = 23
-    Width = 170
-    Height = 21
-    Style = csDropDownList
-    ItemHeight = 13
-    ItemIndex = 1
-    TabOrder = 1
-    Text = 'Only strong left to right'
-    Items.Strings = (
-      'Fully mixed directional glyphs'
-      'Only strong left to right'
-      'Only strong left to right, contains neutrals'
-      'Only strong right to left'
-      'Only strong right to left, contains neutrals')
-  end
   object GbFlags: TGroupBox
     Left = 7
     Top = 50
     Width = 258
-    Height = 154
+    Height = 159
     Caption = 'Flags'
     TabOrder = 2
     object CbBaselineAtZero: TCheckBox
       Left = 9
-      Top = 14
+      Top = 18
       Width = 102
       Height = 17
       Caption = 'Baseline at y = 0'
@@ -73,7 +70,7 @@ object FrameFontHeader: TFrameFontHeader
     end
     object CbLeftSidebearing: TCheckBox
       Left = 9
-      Top = 33
+      Top = 37
       Width = 144
       Height = 17
       Caption = 'Left sidebearing at x = 0'
@@ -81,7 +78,7 @@ object FrameFontHeader: TFrameFontHeader
     end
     object CbPointSizeInstructions: TCheckBox
       Left = 9
-      Top = 52
+      Top = 56
       Width = 203
       Height = 17
       Caption = 'Instructions may depend on point size'
@@ -89,7 +86,7 @@ object FrameFontHeader: TFrameFontHeader
     end
     object CbForceppEm: TCheckBox
       Left = 9
-      Top = 71
+      Top = 75
       Width = 168
       Height = 17
       Caption = 'Force ppem to integer values'
@@ -97,7 +94,7 @@ object FrameFontHeader: TFrameFontHeader
     end
     object CbAdvancedWidthInstructions: TCheckBox
       Left = 9
-      Top = 90
+      Top = 94
       Width = 203
       Height = 17
       Caption = 'Instructions may alter advanced width'
@@ -105,7 +102,7 @@ object FrameFontHeader: TFrameFontHeader
     end
     object CbLosslessFontData: TCheckBox
       Left = 9
-      Top = 109
+      Top = 113
       Width = 117
       Height = 17
       Caption = 'Font data is lossless'
@@ -113,7 +110,7 @@ object FrameFontHeader: TFrameFontHeader
     end
     object CbFontConverted: TCheckBox
       Left = 9
-      Top = 128
+      Top = 132
       Width = 242
       Height = 17
       Caption = 'Font converted (produce compatible metrics)'
@@ -125,6 +122,7 @@ object FrameFontHeader: TFrameFontHeader
     Top = 242
     Width = 60
     Height = 21
+    ReadOnly = True
     TabOrder = 3
     Text = '2048'
   end
@@ -133,7 +131,66 @@ object FrameFontHeader: TFrameFontHeader
     Top = 242
     Width = 60
     Height = 21
+    ReadOnly = True
     TabOrder = 4
     Text = '9'
+  end
+  object GbStyle: TGroupBox
+    Left = 168
+    Top = 225
+    Width = 97
+    Height = 64
+    Caption = 'Style'
+    TabOrder = 5
+    object CbBold: TCheckBox
+      Left = 9
+      Top = 18
+      Width = 41
+      Height = 17
+      Caption = 'Bold'
+      TabOrder = 0
+    end
+    object CbItalic: TCheckBox
+      Left = 9
+      Top = 37
+      Width = 48
+      Height = 17
+      Caption = 'Italic'
+      TabOrder = 1
+    end
+  end
+  object CbFontDirection: TComboBox
+    Left = 95
+    Top = 23
+    Width = 170
+    Height = 21
+    ItemHeight = 13
+    TabOrder = 1
+    Text = 'Only strong left to right'
+    Items.Strings = (
+      'Only strong right to left, contains neutrals'
+      'Only strong right to left'
+      'Fully mixed directional glyphs'
+      'Only strong left to right'
+      'Only strong left to right, contains neutrals')
+  end
+  object CbCreated: TDateTimePicker
+    Left = 7
+    Top = 311
+    Width = 258
+    Height = 21
+    Date = 40268.157690150460000000
+    Format = 'dddd-MMMM-yyyy hh:mm'
+    Time = 40268.157690150460000000
+    TabOrder = 6
+  end
+  object CbModified: TDateTimePicker
+    Left = 7
+    Top = 354
+    Width = 258
+    Height = 21
+    Date = 40268.157693298610000000
+    Time = 40268.157693298610000000
+    TabOrder = 7
   end
 end

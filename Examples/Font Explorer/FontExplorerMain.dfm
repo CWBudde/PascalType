@@ -138,6 +138,35 @@ object FmTTF: TFmTTF
       ParentFont = False
       TabOrder = 1
     end
+    inline FrFontHeader: TFrameFontHeader
+      Left = 0
+      Top = 0
+      Width = 657
+      Height = 595
+      Align = alClient
+      TabOrder = 3
+      inherited LbFontDirection: TLabel
+        Width = 88
+      end
+      inherited LbUnitsPerEm: TLabel
+        Width = 59
+      end
+      inherited LbLowestRecPPEM: TLabel
+        Width = 80
+      end
+      inherited LbCreated: TLabel
+        Width = 37
+      end
+      inherited LbModified: TLabel
+        Width = 52
+      end
+      inherited CbCreated: TDateTimePicker
+        Format = 'dd. MMMM yyyy - hh:mm:ss'
+      end
+      inherited CbModified: TDateTimePicker
+        Format = 'dd. MMMM yyyy - hh:mm:ss'
+      end
+    end
   end
   object StatusBar: TStatusBar
     Left = 0

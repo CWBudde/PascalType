@@ -48,6 +48,7 @@ type
     FNameTable          : TPascalTypeNameTable;
     FPostScriptTable    : TPascalTypePostscriptTable;
     function GetFontName: string;
+    function GetFontStyle: TFontStyles;
   protected
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; virtual; abstract;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; virtual; abstract;
@@ -70,7 +71,8 @@ type
     property PostScriptTable: TPascalTypePostscriptTable read FPostScriptTable;
 
     // basic properties
-    property FontName: string read GetFontName; 
+    property FontName: string read GetFontName;
+    property FontStyle: TFontStyles read GetFontStyle;
   end;
 
   TPascalTypeScanner = class(TCustomPascalTypeInterpreter)
@@ -217,6 +219,13 @@ begin
         Result := Name;
         Exit;
        end;
+end;
+
+function TCustomPascalTypeInterpreter.GetFontStyle: TFontStyles;
+begin
+ if msItalic in FHeaderTable.MacStyle then Result := [fsItalic] else Result := [];
+ if msBold in FHeaderTable.MacStyle then Result := Result + [fsBold];
+ if msUnderline in FHeaderTable.MacStyle then Result := Result + [fsUnderline];
 end;
 
 procedure TCustomPascalTypeInterpreter.LoadFromFile(FileName: TFileName);

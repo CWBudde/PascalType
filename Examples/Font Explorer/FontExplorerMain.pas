@@ -6,8 +6,8 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ComCtrls, StdCtrls, ExtCtrls, ToolWin, ActnList, StdActns, AppEvnts,
   ImgList, PT_Types, PT_Tables, PT_TablesTrueType, PT_TablesOptional,
-  PT_TablesOpenType, PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames,
-  PT_Rasterizer;
+  PT_TablesBitmap, PT_TablesOpenType, PT_Interpreter, PT_ByteCodeInterpreter,
+  PT_UnicodeNames, PT_Rasterizer, FE_FontHeader;
 
 {.$DEFINE ShowContours}
 
@@ -19,7 +19,10 @@ type
     AcEditUndo: TEditUndo;
     AcFileOpen: TFileOpen;
     ActionList: TActionList;
+    CbFontSize: TComboBox;
     CoolBar: TCoolBar;
+    FontDialog: TFontDialog;
+    LbFontSize: TLabel;
     ListBox: TListBox;
     ListView: TListView;
     MainMenu: TMainMenu;
@@ -31,6 +34,7 @@ type
     MIFile: TMenuItem;
     MIHelp: TMenuItem;
     MIOpen: TMenuItem;
+    MIOpenFromInstalled: TMenuItem;
     MIPaste: TMenuItem;
     MIStatusBar: TMenuItem;
     MIToolbar: TMenuItem;
@@ -39,7 +43,9 @@ type
     N1: TMenuItem;
     N2: TMenuItem;
     N3: TMenuItem;
+    PaintBox: TPaintBox;
     PnMain: TPanel;
+    PnPaintBox: TPanel;
     Splitter: TSplitter;
     StatusBar: TStatusBar;
     TbCopy: TToolButton;
@@ -51,25 +57,20 @@ type
     ToolBar: TToolBar;
     ToolbarImages: TImageList;
     TreeView: TTreeView;
-    PnPaintBox: TPanel;
-    PaintBox: TPaintBox;
-    LbFontSize: TLabel;
-    CbFontSize: TComboBox;
-    MIOpenFromInstalled: TMenuItem;
-    FontDialog: TFontDialog;
+    FrFontHeader: TFrameFontHeader;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure AcFileOpenAccept(Sender: TObject);
+    procedure CbFontSizeChange(Sender: TObject);
     procedure MIExitClick(Sender: TObject);
+    procedure MIOpenFromInstalledClick(Sender: TObject);
     procedure MIStatusBarClick(Sender: TObject);
     procedure MIToolbarClick(Sender: TObject);
+    procedure PaintBoxPaint(Sender: TObject);
     procedure ShowHint(Sender: TObject);
     procedure TreeViewChange(Sender: TObject; Node: TTreeNode);
     procedure TreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure PaintBoxPaint(Sender: TObject);
-    procedure CbFontSizeChange(Sender: TObject);
-    procedure MIOpenFromInstalledClick(Sender: TObject);
   private
     FRasterizer   : TPascalTypeRasterizer;
     FCurrentGlyph : TBitmap;
@@ -81,12 +82,17 @@ type
     procedure FontChanged;
   protected
     procedure ListViewColumns(Columns: Array of string);
+    procedure ListViewData(Strings: Array of string);
 
+    procedure DisplayBitmapSizeTable(BitmapSizeTable: TPascalTypeBitmapSizeTable);
     procedure DisplayCharacterMapSubTable(CharacterMapSubTable: TCustomCharacterMapDirectoryEntry);
     procedure DisplayCharacterMapTable(CharacterMapTable: TPascalTypeCharacterMapTable);
     procedure DisplayControlValueTable(ControlValueTable: TTrueTypeFontControlValueTable);
     procedure DisplayDigitalSignatureBlock(DigitalSignatureBlock: TPascalTypeDigitalSignatureBlock);
     procedure DisplayDigitalSignatureTable(DigitalSignatureTable: TPascalTypeDigitalSignatureTable);
+    procedure DisplayEmbeddedBitmapDataTable(BitmapDataTable: TPascalTypeEmbeddedBitmapDataTable);
+    procedure DisplayEmbeddedBitmapLocationTable(BitmapLocationTable: TPascalTypeEmbeddedBitmapLocationTable);
+    procedure DisplayEmbeddedBitmapScalingTable(BitmapScalingTable: TPascalTypeEmbeddedBitmapScalingTable);
     procedure DisplayFontInstructionTable(InstructionTable: TCustomTrueTypeFontInstructionTable);
     procedure DisplayFontKerningSubTable(KerningSubtable: TPascalTypeKerningSubTable);
     procedure DisplayFontKerningTable(KerningTable: TPascalTypeKerningTable);
@@ -145,6 +151,50 @@ implementation
 uses
   ShlObj, ActiveX, Math;
 
+procedure StrResetLength(var S: AnsiString);
+begin
+ SetLength(S, StrLen(PChar(S)));
+end;
+
+function PidlToPath(IdList: PItemIdList): string;
+begin
+ SetLength(Result, MAX_PATH);
+ if SHGetPathFromIdList(IdList, PChar(Result))
+  then StrResetLength(Result)
+  else Result := '';
+end;
+
+function PidlFree(var IdList: PItemIdList): Boolean;
+var
+  Malloc: IMalloc;
+begin
+ Result := False;
+ if IdList = nil
+  then Result := True
+  else
+   begin
+    if Succeeded(SHGetMalloc(Malloc)) and (Malloc.DidAlloc(IdList) > 0) then
+     begin
+      Malloc.Free(IdList);
+      IdList := nil;
+      Result := True;
+     end;
+   end;
+end;
+
+function GetFontDirectory: string;
+var
+  lFolderPidl: PItemIdList;
+begin
+  if Succeeded(SHGetSpecialFolderLocation(0, CSIDL_FONTS, lFolderPidl)) then
+  begin
+    Result := PidlToPath(lFolderPidl);
+    PidlFree(lFolderPidl);
+  end
+  else
+    Result := '';
+end;
+
 procedure TFmTTF.FormCreate(Sender: TObject);
 var
   PWindowsDir: array [0..MAX_PATH] of Char;
@@ -152,7 +202,7 @@ begin
  Application.OnHint := ShowHint;
 
  GetWindowsDirectory(PWindowsDir, MAX_PATH);
- AcFileOpen.Dialog.InitialDir := StrPas(PWindowsDir) + '\Fonts';
+ AcFileOpen.Dialog.InitialDir := GetFontDirectory;
 
  FRasterizer := TPascalTypeRasterizer.Create;
 
@@ -179,7 +229,7 @@ end;
 
 procedure TFmTTF.FormShow(Sender: TObject);
 begin
- LoadFromFile('C:\Temp\Arial.ttf');
+ LoadFromFile(GetFontDirectory + '\cour.ttf');
 end;
 
 procedure TFmTTF.InitializeDefaultListView;
@@ -207,6 +257,19 @@ begin
     MinWidth := 64;
     AutoSize := True;
    end;
+end;
+
+procedure TFmTTF.ListViewData(Strings: array of string);
+var
+  ValueIndex : Integer;
+begin
+ // add data
+ with ListView.Items.Add do
+  begin
+   Caption := Strings[0];
+   for ValueIndex := 1 to Length(Strings) - 1
+    do SubItems.Add(Strings[ValueIndex]);
+  end;
 end;
 
 procedure TFmTTF.SetFontSize(const Value: Integer);
@@ -254,6 +317,70 @@ end;
 procedure TFmTTF.CbFontSizeChange(Sender: TObject);
 begin
  FontSize := StrToInt(CbFontSize.Text);
+end;
+
+procedure TFmTTF.DisplayBitmapSizeTable(BitmapSizeTable: TPascalTypeBitmapSizeTable);
+var
+  str : string;
+begin
+ with BitmapSizeTable do
+  begin
+   InitializeDefaultListView;
+
+   ListViewData(['Index Tables Size', IntToStr(IndexTablesSize)]);
+   ListViewData(['Number of Index Subtables', IntToStr(NumberOfIndexSubTables)]);
+   ListViewData(['Color Reference', IntToStr(ColorRef)]);
+
+   with HorizontalMetrics do
+    begin
+     ListViewData(['Ascender', IntToStr(Ascender)]);
+     ListViewData(['Descender', IntToStr(Descender)]);
+     ListViewData(['Maximum width', IntToStr(WidthMax)]);
+     ListViewData(['Caret slope Numerator', IntToStr(CaretSlopeNumerator)]);
+     ListViewData(['Caret slope Denominator', IntToStr(CaretSlopeDenominator)]);
+     ListViewData(['Caret offset', IntToStr(CaretOffset)]);
+     ListViewData(['Minimum origin SB', IntToStr(MinOriginSB)]);
+     ListViewData(['Minimum advance SB', IntToStr(MinAdvanceSB)]);
+     ListViewData(['Maximum before BL', IntToStr(MaxBeforeBL)]);
+     ListViewData(['Minimum after BL', IntToStr(MinAfterBL)]);
+    end;
+
+   with VerticalMetrics do
+    begin
+     ListViewData(['Ascender', IntToStr(Ascender)]);
+     ListViewData(['Descender', IntToStr(Descender)]);
+     ListViewData(['Maximum width', IntToStr(WidthMax)]);
+     ListViewData(['Caret slope numerator', IntToStr(CaretSlopeNumerator)]);
+     ListViewData(['Caret slope denominator', IntToStr(CaretSlopeDenominator)]);
+     ListViewData(['Caret offset', IntToStr(CaretOffset)]);
+     ListViewData(['Minimum origin SB', IntToStr(MinOriginSB)]);
+     ListViewData(['Minimum advance SB', IntToStr(MinAdvanceSB)]);
+     ListViewData(['Maximum before BL', IntToStr(MaxBeforeBL)]);
+     ListViewData(['Minimum after BL', IntToStr(MinAfterBL)]);
+    end;
+
+   ListViewData(['Start glyph index', IntToStr(StartGlyphIndex)]);
+   ListViewData(['End glyph index', IntToStr(EndGlyphIndex)]);
+   ListViewData(['ppem X', IntToStr(PpemX)]);
+   ListViewData(['ppem Y', IntToStr(PpemY)]);
+   case BitDepth of
+    1 : ListViewData(['Bit depth', IntToStr(BitDepth) + ' = black/white']);
+    2 : ListViewData(['Bit depth', IntToStr(BitDepth) + ' = 4 levels of gray']);
+    4 : ListViewData(['Bit depth', IntToStr(BitDepth) + ' = 16 levels of gray']);
+    8 : ListViewData(['Bit depth', IntToStr(BitDepth) + ' = 256 levels of gray']);
+    else ListViewData(['Bit depth', IntToStr(BitDepth)]);
+   end;
+
+   // flags
+   if (Flags and 1) <> 0 then str := 'horizontal' else str := '';
+   if (Flags and 2) <> 0 then
+    if str <> ''
+     then str := str + ', vertical'
+     else str := 'vertical';
+   ListViewData(['Flags', str]);
+
+   ListView.BringToFront;
+  end;
 end;
 
 procedure TFmTTF.DisplayCharacterMapSubTable(
@@ -315,19 +442,11 @@ begin
   begin
    InitializeDefaultListView;
 
-   // add Version
-   with ListView.Items.Add do
-    begin
-     Caption := 'Version';
-     SubItems.Add(IntToStr(Version));
-    end;
+   // add version
+   ListViewData(['Version', IntToStr(Version)]);
 
    // subtable count
-   with ListView.Items.Add do
-    begin
-     Caption := 'Subtable Count';
-     SubItems.Add(IntToStr(CharacterMapSubtableCount));
-    end;
+   ListViewData(['Subtable Count', IntToStr(CharacterMapSubtableCount)]);
 
    ListView.BringToFront;
   end;
@@ -448,18 +567,10 @@ begin
    InitializeDefaultListView;
 
    // add Feature Parameters
-   with ListView.Items.Add do
-    begin
-     Caption := 'Feature Parameters';
-     SubItems.Add(IntToStr(FeatureParams));
-    end;
+   ListViewData(['Feature Parameters', IntToStr(FeatureParams)]);
 
    // add Number of Lookups
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of Lookups';
-     SubItems.Add(IntToStr(LookupListCount));
-    end;
+   ListViewData(['Number of Lookups', IntToStr(LookupListCount)]);
 
    ListView.BringToFront;
   end;
@@ -472,12 +583,8 @@ begin
   begin
    InitializeDefaultListView;
 
-   // add Lookup Order
-   with ListView.Items.Add do
-    begin
-     Caption := 'Lookup Order';
-     SubItems.Add(IntToStr(LookupOrder));
-    end;
+   // add lookup order
+   ListViewData(['Lookup Order', IntToStr(LookupOrder)]);
 
    // eventually add Required Feature Index
    if RequiredFeatureIndex <> $FFFF then
@@ -487,12 +594,8 @@ begin
       SubItems.Add(IntToStr(RequiredFeatureIndex));
      end;
 
-   // add Number of Features
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of Features';
-     SubItems.Add(IntToStr(FeatureIndexCount));
-    end;
+   // add number of features
+   ListViewData(['Number of Features', IntToStr(FeatureIndexCount)]);
 
    ListView.BringToFront;
   end;
@@ -506,11 +609,7 @@ begin
    InitializeDefaultListView;
 
    // add Number of Language Systems
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of (non default) Language Systems';
-     SubItems.Add(IntToStr(LanguageSystemTableCount));
-    end;
+   ListViewData(['Number of (non default) Language Systems', IntToStr(LanguageSystemTableCount)]);
 
    ListView.BringToFront;
   end;
@@ -524,25 +623,13 @@ begin
    InitializeDefaultListView;
 
    // add Reserved 1
-   with ListView.Items.Add do
-    begin
-     Caption := 'Reserved 1';
-     SubItems.Add(IntToStr(Reserved1));
-    end;
+   ListViewData(['Reserved 1', IntToStr(Reserved1)]);
 
    // add Reserved 2
-   with ListView.Items.Add do
-    begin
-     Caption := 'Reserved 2';
-     SubItems.Add(IntToStr(Reserved2));
-    end;
+   ListViewData(['Reserved 2', IntToStr(Reserved2)]);
 
    // add Signature Length
-   with ListView.Items.Add do
-    begin
-     Caption := 'Signature Length';
-     SubItems.Add(IntToStr(SignatureLength) + ' byte');
-    end;
+   ListViewData(['Signature Length', IntToStr(SignatureLength) + ' byte']);
 
    ListView.BringToFront;
   end;
@@ -556,11 +643,7 @@ begin
    InitializeDefaultListView;
 
    // add Version
-   with ListView.Items.Add do
-    begin
-     Caption := 'Version';
-     SubItems.Add(IntToStr(Version));
-    end;
+   ListViewData(['Version', IntToStr(Version)]);
 
    // eventually add flags
    if Flags <> [] then
@@ -569,6 +652,45 @@ begin
       Caption := 'Flags';
       SubItems.Add('cannot be resigned');
      end;
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayEmbeddedBitmapDataTable(
+  BitmapDataTable: TPascalTypeEmbeddedBitmapDataTable);
+begin
+ with BitmapDataTable do
+  begin
+   InitializeDefaultListView;
+
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayEmbeddedBitmapLocationTable(
+  BitmapLocationTable: TPascalTypeEmbeddedBitmapLocationTable);
+begin
+ with BitmapLocationTable do
+  begin
+   InitializeDefaultListView;
+
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayEmbeddedBitmapScalingTable(
+  BitmapScalingTable: TPascalTypeEmbeddedBitmapScalingTable);
+begin
+ with BitmapScalingTable do
+  begin
+   InitializeDefaultListView;
+
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    ListView.BringToFront;
   end;
@@ -637,11 +759,8 @@ begin
   begin
    InitializeDefaultListView;
 
-   with ListView.Items.Add do
-    begin
-     Caption := 'Version';
-     SubItems.Add(IntToStr(Version));
-    end;
+   // show version
+   ListViewData(['Version', IntToStr(Version)]);
 
    ListView.BringToFront;
   end;
@@ -696,35 +815,17 @@ begin
   begin
    InitializeDefaultListView;
 
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number Of Contours';
-     SubItems.Add(IntToStr(NumberOfContours));
-    end;
+   // show number of contours
+   ListViewData(['Number Of Contours', IntToStr(NumberOfContours)]);
 
-   with ListView.Items.Add do
-    begin
-     Caption := 'Minimum x for coordinate data';
-     SubItems.Add(IntToStr(XMin));
-    end;
+   // show Minimum x for coordinate data
+   ListViewData(['Minimum x for coordinate data', IntToStr(XMin)]);
 
-   with ListView.Items.Add do
-    begin
-     Caption := 'Minimum y for coordinate data';
-     SubItems.Add(IntToStr(YMin));
-    end;
+   ListViewData(['Minimum y for coordinate data', IntToStr(YMin)]);
 
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum x for coordinate data';
-     SubItems.Add(IntToStr(XMax));
-    end;
+   ListViewData(['Maximum x for coordinate data', IntToStr(XMax)]);
 
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum y for coordinate data';
-     SubItems.Add(IntToStr(YMax));
-    end;
+   ListViewData(['Maximum y for coordinate data', IntToStr(YMax)]);
 
    ListView.BringToFront;
   end;
@@ -737,11 +838,7 @@ begin
    InitializeDefaultListView;
 
    // add number of glyphs
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of Glyphs';
-     SubItems.Add(IntToStr(GlyphDataCount));
-    end;
+   ListViewData(['Number of Glyphs', IntToStr(GlyphDataCount)]);
 
    ListView.BringToFront;
   end;
@@ -755,11 +852,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   with ListView.Items.Add do
-    begin
-     Caption := 'Version';
-     SubItems.Add(FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4));
-    end;
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    ListView.BringToFront;
   end;
@@ -793,88 +886,30 @@ end;
 
 procedure TFmTTF.DisplayHeaderTable(HeaderTable: TPascalTypeHeaderTable);
 begin
- with HeaderTable do
+ with FrFontHeader, HeaderTable do
   begin
-   InitializeDefaultListView;
+   EdFontRevision.Text := FloatToStrF(FontRevision.Value + FontRevision.Fract / (1 shl 16), ffGeneral, 4, 4);
+   EdUnitsPerEm.Text := IntToStr(UnitsPerEm);
+   EdLowestRecPPEM.Text := IntToStr(LowestRecPPEM);
 
-   // add version
-   with ListView.Items.Add do
-    begin
-     Caption := 'Version';
-     SubItems.Add(FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4));
-    end;
+   CbFontDirection.ItemIndex := Integer(FontDirectionHint) + 2;
 
-   // add font revision
-   with ListView.Items.Add do
-    begin
-     Caption := 'Font Revision';
-     SubItems.Add(FloatToStrF(FontRevision.Value + FontRevision.Fract / (1 shl 16), ffGeneral, 4, 4));
-    end;
+   CbBold.Checked := msBold in MacStyle;
+   CbItalic.Checked := msItalic in MacStyle;
 
-(*
-   with ListView.Items.Add do
-    begin
-     Caption := 'Checksum Adjustment';
-     SubItems.Add(IntToStr(CheckSumAdjustment));
-    end;
+   CbBaselineAtZero.Checked := htfZeroSpecBaseline in Flags;
+   CbAdvancedWidthInstructions.Checked := htfAdvanceWidth in Flags;
+   CbFontConverted.Checked := htfFontConverted in Flags;
+   CbLosslessFontData.Checked := htfLossless in Flags;
+   CbForceppEm.Checked := htfIntegerScaling in Flags;
+   CbLeftSidebearing.Checked := htfXPosLSB in Flags;
+   CbPointSizeInstructions.Checked := htfScaledSizeDiffers in Flags;
 
-   with ListView.Items.Add do
-    begin
-     Caption := 'Flags';
-     SubItems.Add(IntToStr(Flags));
-    end;
-*)
 
-   with ListView.Items.Add do
-    begin
-     Caption := 'Units per em';
-     SubItems.Add(IntToStr(UnitsPerEm));
-    end;
+   CbCreated.DateTime := CreatedDate / 86400 + EncodeDate(1904, 1, 1);
+   CbModified.DateTime := ModifiedDate / 86400 + EncodeDate(1904, 1, 1);
 
-   with ListView.Items.Add do
-    begin
-     Caption := 'Created';
-     SubItems.Add(DateTimeToStr(CreatedDate / 86400 + EncodeDate(1904, 1, 1)));
-    end;
-
-   with ListView.Items.Add do
-    begin
-     Caption := 'Modified';
-     SubItems.Add(DateTimeToStr(ModifiedDate / 86400 + EncodeDate(1904, 1, 1)));
-    end;
-
-   with ListView.Items.Add do
-    begin
-     Caption := 'XMin';
-     SubItems.Add(IntToStr(XMin));
-    end;
-
-   with ListView.Items.Add do
-    begin
-     Caption := 'YMin';
-     SubItems.Add(IntToStr(YMin));
-    end;
-
-   with ListView.Items.Add do
-    begin
-     Caption := 'XMax';
-     SubItems.Add(IntToStr(XMax));
-    end;
-
-   with ListView.Items.Add do
-    begin
-     Caption := 'YMax';
-     SubItems.Add(IntToStr(YMax));
-    end;
-
-   with ListView.Items.Add do
-    begin
-     Caption := 'MacStyle';
-
-     SubItems.Add(MacStylesToString(MacStyle));
-    end;
-
-   ListView.BringToFront;
+   BringToFront;
   end;
 end;
 
@@ -885,88 +920,40 @@ begin
    InitializeDefaultListView;
 
    // add typographic ascent
-   with ListView.Items.Add do
-    begin
-     Caption := 'Typographic Ascent';
-     SubItems.Add(IntToStr(Ascent));
-    end;
+   ListViewData(['Typographic Ascent', IntToStr(Ascent)]);
 
    // add typographic descent
-   with ListView.Items.Add do
-    begin
-     Caption := 'Typographic Descent';
-     SubItems.Add(IntToStr(Descent));
-    end;
+   ListViewData(['Typographic Descent', IntToStr(Descent)]);
 
    // add line gap
-   with ListView.Items.Add do
-    begin
-     Caption := 'Line Gap';
-     SubItems.Add(IntToStr(LineGap));
-    end;
+   ListViewData(['Line Gap', IntToStr(LineGap)]);
 
-   // add Maximum Advance Width
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Advance Width';
-     SubItems.Add(IntToStr(AdvanceWidthMax));
-    end;
+   // add maximum advance width
+   ListViewData(['Maximum Advance Width', IntToStr(AdvanceWidthMax)]);
 
-   // add Minimum Left Sidebearing
-   with ListView.Items.Add do
-    begin
-     Caption := 'Minimum Left Sidebearing';
-     SubItems.Add(IntToStr(MinLeftSideBearing));
-    end;
+   // add minimum left sidebearing
+   ListViewData(['Minimum Left Sidebearing', IntToStr(MinLeftSideBearing)]);
 
    // add Minimum Right Sidebearing
-   with ListView.Items.Add do
-    begin
-     Caption := 'Minimum Right Sidebearing';
-     SubItems.Add(IntToStr(MinRightSideBearing));
-    end;
+   ListViewData(['Minimum Right Sidebearing', IntToStr(MinRightSideBearing)]);
 
    // add Maximum Extend (horizontal)
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Extend (Horizontal)';
-     SubItems.Add(IntToStr(XMaxExtent));
-    end;
+   ListViewData(['Maximum Extend (Horizontal)', IntToStr(XMaxExtent)]);
 
    // add Caret Slope Rise
-   with ListView.Items.Add do
-    begin
-     Caption := 'Caret Slope Rise';
-     SubItems.Add(IntToStr(CaretSlopeRise));
-    end;
+   ListViewData(['Caret Slope Rise', IntToStr(CaretSlopeRise)]);
 
    // add Caret Slope Run
-   with ListView.Items.Add do
-    begin
-     Caption := 'Caret Slope Run';
-     SubItems.Add(IntToStr(CaretSlopeRun));
-    end;
+   ListViewData(['Caret Slope Run', IntToStr(CaretSlopeRun)]);
 
    // add Caret Offset
-   with ListView.Items.Add do
-    begin
-     Caption := 'Caret Offset';
-     SubItems.Add(IntToStr(CaretOffset));
-    end;
+   ListViewData(['Caret Offset', IntToStr(CaretOffset)]);
 
    // add Metric Data Format
-   with ListView.Items.Add do
-    begin
-     Caption := 'Metric Data Format';
-     SubItems.Add(IntToStr(MetricDataFormat));
-    end;
+   ListViewData(['Metric Data Format', IntToStr(MetricDataFormat)]);
 
    // add Num Of Long Hor Metrics
-   with ListView.Items.Add do
-    begin
-     Caption := 'NumOfLongHorMetrics';
-     SubItems.Add(IntToStr(NumOfLongHorMetrics));
-    end;
+   ListViewData(['NumOfLongHorMetrics', IntToStr(NumOfLongHorMetrics)]);
 
    ListView.BringToFront;
   end;
@@ -1007,18 +994,10 @@ begin
    InitializeDefaultListView;
 
    // add version
-   with ListView.Items.Add do
-    begin
-     Caption := 'Version';
-     SubItems.Add(FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4));
-    end;
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    // add script count
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of Scripts';
-     SubItems.Add(IntToStr(ScriptCount));
-    end;
+   ListViewData(['Number of Scripts', IntToStr(ScriptCount)]);
 
    ListView.BringToFront;
   end;
@@ -1082,102 +1061,46 @@ begin
    InitializeDefaultListView;
 
    // add Number of Glyphs
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of Glyphs';
-     SubItems.Add(IntToStr(NumGlyphs));
-    end;
+   ListViewData(['Number of Glyphs', IntToStr(NumGlyphs)]);
 
    // add Maximum Points (non-composite)
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Points (non-composite)';
-     SubItems.Add(IntToStr(MaxPoints));
-    end;
+   ListViewData(['Maximum Points (non-composite)', IntToStr(MaxPoints)]);
 
    // add Maximum Contours (non-composite)
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Contours (non-composite)';
-     SubItems.Add(IntToStr(MaxContours));
-    end;
+   ListViewData(['Maximum Contours (non-composite)', IntToStr(MaxContours)]);
 
    // add Maximum Points (composite)
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Points (composite)';
-     SubItems.Add(IntToStr(MaxCompositePoints));
-    end;
+   ListViewData(['Maximum Points (composite)', IntToStr(MaxCompositePoints)]);
 
    // add Maximum Contours
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Contours (composite)';
-     SubItems.Add(IntToStr(MaxCompositeContours));
-    end;
+   ListViewData(['Maximum Contours (composite)', IntToStr(MaxCompositeContours)]);
 
    // add Maximum Zones
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Zones';
-     SubItems.Add(IntToStr(MaxZones));
-    end;
+   ListViewData(['Maximum Zones', IntToStr(MaxZones)]);
 
    // add Maximum Twilight Points (in Z0)
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Twilight Points';
-     SubItems.Add(IntToStr(MaxTwilightPoints));
-    end;
+   ListViewData(['Maximum Twilight Points', IntToStr(MaxTwilightPoints)]);
 
    // add Maximum Storage Area Locations
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Storage Area Locations';
-     SubItems.Add(IntToStr(MaxStorage));
-    end;
+   ListViewData(['Maximum Storage Area Locations', IntToStr(MaxStorage)]);
 
    // add Maximum Function Definitions (FDEF)
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Function Definitions (FDEF)';
-     SubItems.Add(IntToStr(MaxFunctionDefs));
-    end;
+   ListViewData(['Maximum Function Definitions (FDEF)', IntToStr(MaxFunctionDefs)]);
 
    // add Maximum Instruction Definitions (IDEF)
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Instruction Definitions (IDEF)';
-     SubItems.Add(IntToStr(MaxInstructionDefs));
-    end;
+   ListViewData(['Maximum Instruction Definitions (IDEF)', IntToStr(MaxInstructionDefs)]);
 
    // add Maximum Stack Elements
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Stack Elements';
-     SubItems.Add(IntToStr(MaxStackElements));
-    end;
+   ListViewData(['Maximum Stack Elements', IntToStr(MaxStackElements)]);
 
    // add Maximum Size of Glyph Instruction
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Size of Glyph Instruction';
-     SubItems.Add(IntToStr(MaxSizeOfInstruction));
-    end;
+   ListViewData(['Maximum Size of Glyph Instruction', IntToStr(MaxSizeOfInstruction)]);
 
    // add Maximum Number of Components
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Number of Components';
-     SubItems.Add(IntToStr(MaxComponentElements));
-    end;
+   ListViewData(['Maximum Number of Components', IntToStr(MaxComponentElements)]);
 
    // add Maximum Component Depth
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Component Depth';
-     SubItems.Add(IntToStr(MaxComponentDepth));
-    end;
+   ListViewData(['Maximum Component Depth', IntToStr(MaxComponentDepth)]);
 
    ListView.BringToFront;
   end;
@@ -1193,11 +1116,7 @@ begin
    InitializeDefaultListView;
 
    // add version number
-   with ListView.Items.Add do
-    begin
-     Caption := 'Format';
-     SubItems.Add(IntToStr(Format));
-    end;
+   ListViewData(['Format', IntToStr(Format)]);
 
    for StrIndex := 0 to NameRecordCount - 1 do
     with ListView.Items.Add do
@@ -1403,11 +1322,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   with ListView.Items.Add do
-    begin
-     Caption := 'Version';
-     SubItems.Add(FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4));
-    end;
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    ListView.BringToFront;
   end;
@@ -1420,11 +1335,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of Features';
-     SubItems.Add(IntToStr(FeatureCount));
-    end;
+   ListViewData(['Number of Features', IntToStr(FeatureCount)]);
 
    ListView.BringToFront;
   end;
@@ -1437,11 +1348,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of Lookups';
-     SubItems.Add(IntToStr(LookupTableCount));
-    end;
+   ListViewData(['Number of Lookups', IntToStr(LookupTableCount)]);
 
    ListView.BringToFront;
   end;
@@ -1454,32 +1361,16 @@ begin
    InitializeDefaultListView;
 
    // add lookup type
-   with ListView.Items.Add do
-    begin
-     Caption := 'Lookup Type';
-     SubItems.Add(IntToStr(LookupType));
-    end;
+   ListViewData(['Lookup Type', IntToStr(LookupType)]);
 
    // add lookup flag
-   with ListView.Items.Add do
-    begin
-     Caption := 'Lookup Flag';
-     SubItems.Add(IntToStr(LookupFlag));
-    end;
+   ListViewData(['Lookup Flag', IntToStr(LookupFlag)]);
 
    // add mark filtering set
-   with ListView.Items.Add do
-    begin
-     Caption := 'Mark Filtering Set';
-     SubItems.Add(IntToStr(MarkFilteringSet));
-    end;
+   ListViewData(['Mark Filtering Set', IntToStr(MarkFilteringSet)]);
 
    // add number of lookup sub tables
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of Lookups';
-     SubItems.Add(IntToStr(SubtableCount));
-    end;
+   ListViewData(['Number of Lookups', IntToStr(SubtableCount)]);
 
    ListView.BringToFront;
   end;
@@ -1492,11 +1383,7 @@ begin
    InitializeDefaultListView;
 
    // add number of language systems
-   with ListView.Items.Add do
-    begin
-     Caption := 'Number of Language Systems';
-     SubItems.Add(IntToStr(LanguageSystemCount));
-    end;
+   ListViewData(['Number of Language Systems', IntToStr(LanguageSystemCount)]);
 
    ListView.BringToFront;
   end;
@@ -1509,18 +1396,10 @@ begin
    InitializeDefaultListView;
 
    // add version number
-   with ListView.Items.Add do
-    begin
-     Caption := 'Version';
-     SubItems.Add(IntToStr(OS2Table.Version shr 8));
-    end;
+   ListViewData(['Version', IntToStr(OS2Table.Version shr 8)]);
 
    // add average weighted advanced width of lower case letters and space
-   with ListView.Items.Add do
-    begin
-     Caption := 'Averge weighted escapement';
-     SubItems.Add(IntToStr(XAvgCharWidth));
-    end;
+   ListViewData(['Averge weighted escapement', IntToStr(XAvgCharWidth)]);
 
    // add visual weight (degree of blackness or thickness) of stroke in glyphs
    with ListView.Items.Add do
@@ -1558,88 +1437,40 @@ begin
     end;
 
    // add characteristics and properties of this font (set undefined bits to zero)
-   with ListView.Items.Add do
-    begin
-     Caption := 'Type Flags';
-     SubItems.Add(IntToStr(FsType));
-    end;
+   ListViewData(['Type Flags', IntToStr(FsType)]);
 
    // add recommended horizontal size in pixels for subscripts
-   with ListView.Items.Add do
-    begin
-     Caption := 'Subscript X Size';
-     SubItems.Add(IntToStr(YSubscriptXSize));
-    end;
+   ListViewData(['Subscript X Size', IntToStr(YSubscriptXSize)]);
 
    // add recommended vertical size in pixels for subscripts
-   with ListView.Items.Add do
-    begin
-     Caption := 'Subscript Y Size';
-     SubItems.Add(IntToStr(YSubscriptYSize));
-    end;
+   ListViewData(['Subscript Y Size', IntToStr(YSubscriptYSize)]);
 
    // add recommended horizontal offset for subscripts
-   with ListView.Items.Add do
-    begin
-     Caption := 'SubScript X Offset';
-     SubItems.Add(IntToStr(YSubScriptXOffset));
-    end;
+   ListViewData(['SubScript X Offset', IntToStr(YSubScriptXOffset)]);
 
    // add recommended vertical offset form the baseline for subscripts
-   with ListView.Items.Add do
-    begin
-     Caption := 'Subscript Y Offset';
-     SubItems.Add(IntToStr(YSubscriptYOffset));
-    end;
+   ListViewData(['Subscript Y Offset', IntToStr(YSubscriptYOffset)]);
 
    // add recommended horizontal size in pixels for superscripts
-   with ListView.Items.Add do
-    begin
-     Caption := 'Superscript X Size';
-     SubItems.Add(IntToStr(YSuperscriptXSize));
-    end;
+   ListViewData(['Superscript X Size', IntToStr(YSuperscriptXSize)]);
 
    // add recommended vertical size in pixels for superscripts
-   with ListView.Items.Add do
-    begin
-     Caption := 'Superscript Y Size';
-     SubItems.Add(IntToStr(YSuperscriptYSize));
-    end;
+   ListViewData(['Superscript Y Size', IntToStr(YSuperscriptYSize)]);
 
    // add recommended horizontal offset for superscripts
-   with ListView.Items.Add do
-    begin
-     Caption := 'Superscript X Offset';
-     SubItems.Add(IntToStr(YSuperscriptXOffset));
-    end;
+   ListViewData(['Superscript X Offset', IntToStr(YSuperscriptXOffset)]);
 
    // add recommended vertical offset from the baseline for superscripts
-   with ListView.Items.Add do
-    begin
-     Caption := 'Superscript Y Offset';
-     SubItems.Add(IntToStr(YSuperscriptYOffset));
-    end;
+   ListViewData(['Superscript Y Offset', IntToStr(YSuperscriptYOffset)]);
 
    // add width of the strikeout stroke
-   with ListView.Items.Add do
-    begin
-     Caption := 'Strikeout Size';
-     SubItems.Add(IntToStr(YStrikeoutSize));
-    end;
+   ListViewData(['Strikeout Size', IntToStr(YStrikeoutSize)]);
 
    // add position of the strikeout stroke relative to the baseline
-   with ListView.Items.Add do
-    begin
-     Caption := 'Strikeout Position';
-     SubItems.Add(IntToStr(YStrikeoutPosition));
-    end;
+   ListViewData(['Strikeout Position', IntToStr(YStrikeoutPosition)]);
 
    // add classification of font-family design.
-   with ListView.Items.Add do
-    begin
-     Caption := 'Font Family Class and Subclass';
-     SubItems.Add(IntToStr(SFamilyClass));
-    end;
+   ListViewData(['Font Family Class and Subclass', IntToStr(SFamilyClass)]);
 
 (*
    // add 10 byte series of number used to describe the visual characteristics of a given typeface
@@ -1658,67 +1489,31 @@ begin
 *)
 
    // add four character identifier for the font vendor
-   with ListView.Items.Add do
-    begin
-     Caption := 'Vendor Identification';
-     SubItems.Add(OS2Table.AchVendID);
-    end;
+   ListViewData(['Vendor Identification', OS2Table.AchVendID]);
 
    // add 2-byte bit field containing information concerning the nature of the font patterns
-   with ListView.Items.Add do
-    begin
-     Caption := 'Selection Flags';
-     SubItems.Add(IntToStr(FsSelection));
-    end;
+   ListViewData(['Selection Flags', IntToStr(FsSelection)]);
 
    // add the minimum Unicode index in this font.
-   with ListView.Items.Add do
-    begin
-     Caption := 'Minimum Unicode Index';
-     SubItems.Add('U+' + IntToHex(UsFirstCharIndex, 4));
-    end;
+   ListViewData(['Minimum Unicode Index', 'U+' + IntToHex(UsFirstCharIndex, 4)]);
 
    // add the maximum Unicode index in this font.
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Unicode Index';
-     SubItems.Add('U+' + IntToHex(UsLastCharIndex, 4));
-    end;
+   ListViewData(['Maximum Unicode Index', 'U+' + IntToHex(UsLastCharIndex, 4)]);
 
    // add STypoAscender
-   with ListView.Items.Add do
-    begin
-     Caption := 'Typographic Ascender';
-     SubItems.Add(IntToStr(STypoAscender));
-    end;
+   ListViewData(['Typographic Ascender', IntToStr(STypoAscender)]);
 
    // add STypoDescender
-   with ListView.Items.Add do
-    begin
-     Caption := 'Typographic Descender';
-     SubItems.Add(IntToStr(STypoDescender));
-    end;
+   ListViewData(['Typographic Descender', IntToStr(STypoDescender)]);
 
    // add STypoLineGap
-   with ListView.Items.Add do
-    begin
-     Caption := 'Typographic Line Gap';
-     SubItems.Add(IntToStr(STypoLineGap));
-    end;
+   ListViewData(['Typographic Line Gap', IntToStr(STypoLineGap)]);
 
    // add UsWinAscent
-   with ListView.Items.Add do
-    begin
-     Caption := 'Ascender for Windows';
-     SubItems.Add(IntToStr(UsWinAscent));
-    end;
+   ListViewData(['Ascender for Windows', IntToStr(UsWinAscent)]);
 
    // add UsWinDescent
-   with ListView.Items.Add do
-    begin
-     Caption := 'Descender for Windows';
-     SubItems.Add(IntToStr(OS2Table.UsWinDescent));
-    end;
+   ListViewData(['Descender for Windows', IntToStr(OS2Table.UsWinDescent)]);
 
    ListView.BringToFront;
   end;
@@ -1912,11 +1707,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   with ListView.Items.Add do
-    begin
-     Caption := 'Version';
-     SubItems.Add(FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4));
-    end;
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    // add font number
    with ListView.Items.Add do
@@ -1930,25 +1721,13 @@ begin
     end;
 
    // add pitch
-   with ListView.Items.Add do
-    begin
-     Caption := 'Pitch';
-     SubItems.Add(IntToStr(Pitch));
-    end;
+   ListViewData(['Pitch', IntToStr(Pitch)]);
 
    // add x-height
-   with ListView.Items.Add do
-    begin
-     Caption := 'X-Height';
-     SubItems.Add(IntToStr(XHeight));
-    end;
+   ListViewData(['X-Height', IntToStr(XHeight)]);
 
    // add style
-   with ListView.Items.Add do
-    begin
-     Caption := 'Style';
-     SubItems.Add(IntToStr(Style));
-    end;
+   ListViewData(['Style', IntToStr(Style)]);
 
    // add type family
    with ListView.Items.Add do
@@ -1968,67 +1747,31 @@ begin
     end;
 
    // add cap height
-   with ListView.Items.Add do
-    begin
-     Caption := 'Caption Height';
-     SubItems.Add(IntToStr(CapHeight));
-    end;
+   ListViewData(['Caption Height', IntToStr(CapHeight)]);
 
    // add symbol set
-   with ListView.Items.Add do
-    begin
-     Caption := 'Symbol Set';
-     SubItems.Add(IntToStr(SymbolSet));
-    end;
+   ListViewData(['Symbol Set', IntToStr(SymbolSet)]);
 
    // add typeface
-   with ListView.Items.Add do
-    begin
-     Caption := 'Typeface';
-     SubItems.Add(Typeface);
-    end;
+   ListViewData(['Typeface', Typeface]);
 
    // add character complement
-   with ListView.Items.Add do
-    begin
-     Caption := 'Character Complement';
-     SubItems.Add(CharacterComplement);
-    end;
+   ListViewData(['Character Complement', CharacterComplement]);
 
    // add filename
-   with ListView.Items.Add do
-    begin
-     Caption := 'FileName';
-     SubItems.Add(FileName);
-    end;
+   ListViewData(['FileName', FileName]);
 
    // add stroke weight
-   with ListView.Items.Add do
-    begin
-     Caption := 'Stroke Weight';
-     SubItems.Add(StrokeWeight);
-    end;
+   ListViewData(['Stroke Weight', StrokeWeight]);
 
    // add width type
-   with ListView.Items.Add do
-    begin
-     Caption := 'Width Type';
-     SubItems.Add(WidthType);
-    end;
+   ListViewData(['Width Type', WidthType]);
 
    // add serif style
-   with ListView.Items.Add do
-    begin
-     Caption := 'Serif Style';
-     SubItems.Add(IntToStr(SerifStyle));
-    end;
+   ListViewData(['Serif Style', IntToStr(SerifStyle)]);
 
    // add padding
-   with ListView.Items.Add do
-    begin
-     Caption := 'Padding';
-     SubItems.Add(IntToStr(Padding));
-    end;
+   ListViewData(['Padding', IntToStr(Padding)]);
 
    ListView.BringToFront;
   end;
@@ -2042,67 +1785,31 @@ begin
    InitializeDefaultListView;
 
    // add  Format Type
-   with ListView.Items.Add do
-    begin
-     Caption := 'Format Type';
-     SubItems.Add(FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4));
-    end;
+   ListViewData(['Format Type', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    // add Italic Angle
-   with ListView.Items.Add do
-    begin
-     Caption := 'Italic Angle';
-     SubItems.Add(FloatToStrF(ItalicAngle.Value + ItalicAngle.Fract / (1 shl 16), ffGeneral, 4, 4));
-    end;
+   ListViewData(['Italic Angle', FloatToStrF(ItalicAngle.Value + ItalicAngle.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    // add Underline Position
-   with ListView.Items.Add do
-    begin
-     Caption := 'Underline Position';
-     SubItems.Add(IntToStr(UnderlinePosition));
-    end;
+   ListViewData(['Underline Position', IntToStr(UnderlinePosition)]);
 
    // add Underline Thickness
-   with ListView.Items.Add do
-    begin
-     Caption := 'Underline Thickness';
-     SubItems.Add(IntToStr(UnderlineThickness));
-    end;
+   ListViewData(['Underline Thickness', IntToStr(UnderlineThickness)]);
 
    // add IsFixedPitch
-   with ListView.Items.Add do
-    begin
-     Caption := 'Is Fixed Pitch';
-     SubItems.Add(IntToStr(IsFixedPitch));
-    end;
+   ListViewData(['Is Fixed Pitch', IntToStr(IsFixedPitch)]);
 
    // add MinMemType42
-   with ListView.Items.Add do
-    begin
-     Caption := 'Minimum Memory Usage (TrueType)';
-     SubItems.Add(IntToStr(MinMemType42));
-    end;
+   ListViewData(['Minimum Memory Usage (TrueType)', IntToStr(MinMemType42)]);
 
    // add MaxMemType42
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Memory Usage (TrueType)';
-     SubItems.Add(IntToStr(MaxMemType42));
-    end;
+   ListViewData(['Maximum Memory Usage (TrueType)', IntToStr(MaxMemType42)]);
 
    // add MinMemType1
-   with ListView.Items.Add do
-    begin
-     Caption := 'Minimum Memory Usage (Type 1)';
-     SubItems.Add(IntToStr(MinMemType1));
-    end;
+   ListViewData(['Minimum Memory Usage (Type 1)', IntToStr(MinMemType1)]);
 
    // add MaxMemType1
-   with ListView.Items.Add do
-    begin
-     Caption := 'Maximum Memory Usage (Type 1)';
-     SubItems.Add(IntToStr(MaxMemType1));
-    end;
+   ListViewData(['Maximum Memory Usage (Type 1)', IntToStr(MaxMemType1)]);
 
    ListView.BringToFront;
   end;
@@ -2180,55 +1887,9 @@ begin
  Close;
 end;
 
-procedure StrResetLength(var S: AnsiString);
-begin
- SetLength(S, StrLen(PChar(S)));
-end;
-
-function PidlToPath(IdList: PItemIdList): string;
-begin
- SetLength(Result, MAX_PATH);
- if SHGetPathFromIdList(IdList, PChar(Result))
-  then StrResetLength(Result)
-  else Result := '';
-end;
-
-function PidlFree(var IdList: PItemIdList): Boolean;
-var
-  Malloc: IMalloc;
-begin
- Result := False;
- if IdList = nil
-  then Result := True
-  else
-   begin
-    if Succeeded(SHGetMalloc(Malloc)) and (Malloc.DidAlloc(IdList) > 0) then
-     begin
-      Malloc.Free(IdList);
-      IdList := nil;
-      Result := True;
-     end;
-   end;
-end;
-
-function GetFontDirectory: string;
-var
-  lFolderPidl: PItemIdList;
-begin
-  if Succeeded(SHGetSpecialFolderLocation(0, CSIDL_FONTS, lFolderPidl)) then
-  begin
-    Result := PidlToPath(lFolderPidl);
-    PidlFree(lFolderPidl);
-  end
-  else
-    Result := '';
-end;
-
 procedure TFmTTF.MIOpenFromInstalledClick(Sender: TObject);
 var
-  SR          : TSearchRec;
-  Succeed     : Boolean;
-  FontScanner : TPascalTypeScanner;
+  SR : TSearchRec;
 begin
  if FontDialog.Execute then
   begin
@@ -2242,12 +1903,18 @@ begin
       repeat
        try
         LoadFromFile(SR.Name);
-        if FontName = FontDialog.Font.Name then
+        if (FontName = FontDialog.Font.Name) and
+         ((Graphics.fsItalic in FontDialog.Font.Style) =
+          (fsItalic in FontStyle)) and
+         ((Graphics.fsBold in FontDialog.Font.Style) =
+          (fsBold in FontStyle)) and
+         ((Graphics.fsUnderline in FontDialog.Font.Style) =
+          (fsUnderline in FontStyle))
+         then
          begin
           Self.LoadFromFile(SR.Name);
           Exit;
          end;
-
        except
         on e: EPascalTypeError do Continue;
        end;
@@ -2300,7 +1967,23 @@ begin
    if TObject(Node.Data) is TTrueTypeFontControlValueTable
     then DisplayControlValueTable(TTrueTypeFontControlValueTable(Node.Data)) else
 
-   // Control Value Table
+   // Embedded Bitmap Data Table
+   if TObject(Node.Data) is TPascalTypeEmbeddedBitmapDataTable
+    then DisplayEmbeddedBitmapDataTable(TPascalTypeEmbeddedBitmapDataTable(Node.Data)) else
+
+   // Embedded Bitmap Location Table
+   if TObject(Node.Data) is TPascalTypeEmbeddedBitmapLocationTable
+    then DisplayEmbeddedBitmapLocationTable(TPascalTypeEmbeddedBitmapLocationTable(Node.Data)) else
+
+   // Embedded Bitmap Scaling Table
+   if TObject(Node.Data) is TPascalTypeEmbeddedBitmapScalingTable
+    then DisplayEmbeddedBitmapScalingTable(TPascalTypeEmbeddedBitmapScalingTable(Node.Data)) else
+
+   // Bitmap Size Table
+   if TObject(Node.Data) is TPascalTypeBitmapSizeTable
+    then DisplayBitmapSizeTable(TPascalTypeBitmapSizeTable(Node.Data)) else
+
+   // Font Instruction Table
    if TObject(Node.Data) is TCustomTrueTypeFontInstructionTable
     then DisplayFontInstructionTable(TCustomTrueTypeFontInstructionTable(Node.Data)) else
 
@@ -2474,11 +2157,7 @@ begin
    InitializeDefaultListView;
 
    // add loading time
-   with ListView.Items.Add do
-    begin
-     Caption := 'loading time';
-     SubItems.Add(FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms');
-    end;
+   ListViewData(['loading time', FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms']);
 
    // clear existing items on treeview
    TreeView.Items.Clear;
@@ -2495,11 +2174,7 @@ begin
    QueryPerformanceCounter(Stop);
 
    // add building tree time
-   with ListView.Items.Add do
-    begin
-     Caption := 'building tree time';
-     SubItems.Add(FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms');
-    end;
+   ListViewData(['building tree time', FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms']);
 
    ListView.BringToFront;
 
@@ -2621,6 +2296,12 @@ begin
          Items.AddChildObject(Node, 'Mark Attachment Class Definition', MarkAttachmentClassDefinition);
 //           Items.AddChildObject(Node, 'Mark Set', MarkGlyphSet);
         end else
+
+      // bitmap location table
+      if OptionalTable[OptTableIndex] is TPascalTypeEmbeddedBitmapLocationTable then
+       with TPascalTypeEmbeddedBitmapLocationTable(OptionalTable[OptTableIndex]) do
+        for SubtableIndex := 0 to BitmapSizeTableCount - 1
+         do Items.AddChildObject(Node, 'Table #' + IntToStr(SubtableIndex + 1), BitmapSizeTable[SubtableIndex]);
 
       // open type common table
       if OptionalTable[OptTableIndex] is TCustomOpenTypeCommonTable then

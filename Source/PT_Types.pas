@@ -82,6 +82,9 @@ type
   TMacStyles = set of TMacStyle;
   PMacStyles = ^TMacStyles;
 
+  TFontStyle = (fsBold, fsItalic, fsUnderline, fsStrikeOut);
+  TFontStyles = set of TFontStyle;
+
   TOS2WeightClass = (
     wcThin = 100,
     wcExtraLight = 200,
