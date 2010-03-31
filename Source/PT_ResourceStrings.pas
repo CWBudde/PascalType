@@ -70,6 +70,9 @@ resourcestring
   RCStrWrongRangeShift = 'Wrong range shift!';
   RCStrWrongSearchRange = 'Wrong search range!';
 
+  RCStrTooFewMetamorphosisChains = 'At least one chain expected';
+  RCStrWrongFormat = 'Wrong Format';
+
 implementation
 
 end.

@@ -58,12 +58,33 @@ type
     ToolbarImages: TImageList;
     TreeView: TTreeView;
     FrFontHeader: TFrameFontHeader;
+    MiOpenDefaultFonts: TMenuItem;
+    MIArial: TMenuItem;
+    MIArialBold: TMenuItem;
+    MIArialItalic: TMenuItem;
+    MIArialBoldItalic: TMenuItem;
+    MICourierNew: TMenuItem;
+    MICourierNewBold: TMenuItem;
+    MICourierNewItalic: TMenuItem;
+    MICourierNewBoldItalic: TMenuItem;
+    MIArialRegular: TMenuItem;
+    MICourierRegular: TMenuItem;
+    MITimesNewRoman: TMenuItem;
+    MITimesNewRomanRegular: TMenuItem;
+    MITimesNewRomanBold: TMenuItem;
+    MITimesNewRomanItalic: TMenuItem;
+    MITimesNewRomanBoldItalic: TMenuItem;
+    MIWingdings: TMenuItem;
+    AcFileSaveAs: TFileSaveAs;
+    AcFileExit: TFileExit;
+    MISaveAs: TMenuItem;
+    MINew: TMenuItem;
+    MISave: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure AcFileOpenAccept(Sender: TObject);
     procedure CbFontSizeChange(Sender: TObject);
-    procedure MIExitClick(Sender: TObject);
     procedure MIOpenFromInstalledClick(Sender: TObject);
     procedure MIStatusBarClick(Sender: TObject);
     procedure MIToolbarClick(Sender: TObject);
@@ -71,6 +92,19 @@ type
     procedure ShowHint(Sender: TObject);
     procedure TreeViewChange(Sender: TObject; Node: TTreeNode);
     procedure TreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure MIWingdingsClick(Sender: TObject);
+    procedure MITimesNewRomanRegularClick(Sender: TObject);
+    procedure MITimesNewRomanBoldClick(Sender: TObject);
+    procedure MITimesNewRomanItalicClick(Sender: TObject);
+    procedure MITimesNewRomanBoldItalicClick(Sender: TObject);
+    procedure MIArialRegularClick(Sender: TObject);
+    procedure MIArialBoldClick(Sender: TObject);
+    procedure MIArialItalicClick(Sender: TObject);
+    procedure MIArialBoldItalicClick(Sender: TObject);
+    procedure MICourierRegularClick(Sender: TObject);
+    procedure MICourierNewBoldClick(Sender: TObject);
+    procedure MICourierNewItalicClick(Sender: TObject);
+    procedure MICourierNewBoldItalicClick(Sender: TObject);
   private
     FRasterizer   : TPascalTypeRasterizer;
     FCurrentGlyph : TBitmap;
@@ -306,6 +340,71 @@ procedure TFmTTF.MIToolbarClick(Sender: TObject);
 begin
  MIToolbar.Checked := not MIToolbar.Checked;
  CoolBar.Visible := MIToolbar.Checked;
+end;
+
+procedure TFmTTF.MIArialRegularClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\Arial.ttf');
+end;
+
+procedure TFmTTF.MIArialBoldClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\arialbd.ttf');
+end;
+
+procedure TFmTTF.MIArialBoldItalicClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\arialbi.ttf');
+end;
+
+procedure TFmTTF.MIArialItalicClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\ariali.ttf');
+end;
+
+procedure TFmTTF.MICourierRegularClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\cour.ttf');
+end;
+
+procedure TFmTTF.MICourierNewBoldClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\courbd.ttf');
+end;
+
+procedure TFmTTF.MICourierNewBoldItalicClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\courbi.ttf');
+end;
+
+procedure TFmTTF.MICourierNewItalicClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\couri.ttf');
+end;
+
+procedure TFmTTF.MITimesNewRomanRegularClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\times.ttf');
+end;
+
+procedure TFmTTF.MITimesNewRomanBoldClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\timesbd.ttf');
+end;
+
+procedure TFmTTF.MITimesNewRomanItalicClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\timesbi.ttf');
+end;
+
+procedure TFmTTF.MITimesNewRomanBoldItalicClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\timesi.ttf');
+end;
+
+procedure TFmTTF.MIWingdingsClick(Sender: TObject);
+begin
+ LoadFromFile(GetFontDirectory + '\wingding.ttf');
 end;
 
 procedure TFmTTF.PaintBoxPaint(Sender: TObject);
@@ -818,13 +917,16 @@ begin
    // show number of contours
    ListViewData(['Number Of Contours', IntToStr(NumberOfContours)]);
 
-   // show Minimum x for coordinate data
+   // show minimum x for coordinate data
    ListViewData(['Minimum x for coordinate data', IntToStr(XMin)]);
 
+   // show minimum y for coordinate data
    ListViewData(['Minimum y for coordinate data', IntToStr(YMin)]);
 
+   // show maximum x for coordinate data
    ListViewData(['Maximum x for coordinate data', IntToStr(XMax)]);
 
+   // show maximum y for coordinate data
    ListViewData(['Maximum y for coordinate data', IntToStr(YMax)]);
 
    ListView.BringToFront;
@@ -910,7 +1012,6 @@ begin
    CbPointSizeInstructions.Checked := htfScaledSizeDiffers in Flags;
    CbVerticalFont.Checked := htfVertical in Flags;
    CbLinguisticRendering.Checked := htfLinguistic in Flags;
-
 
    CbCreated.DateTime := CreatedDate / 86400 + EncodeDate(1904, 1, 1);
    CbModified.DateTime := ModifiedDate / 86400 + EncodeDate(1904, 1, 1);
@@ -1886,11 +1987,6 @@ begin
       StatusBar.SimpleText := 'Table ID: ' + GetTableType;
      end;
   end;
-end;
-
-procedure TFmTTF.MIExitClick(Sender: TObject);
-begin
- Close;
 end;
 
 procedure TFmTTF.MIOpenFromInstalledClick(Sender: TObject);
