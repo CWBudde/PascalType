@@ -2,8 +2,8 @@ object FmTTF: TFmTTF
   Left = 309
   Top = 95
   Caption = 'PascalType Font Explorer'
-  ClientHeight = 641
-  ClientWidth = 864
+  ClientHeight = 409
+  ClientWidth = 584
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,13 +20,13 @@ object FmTTF: TFmTTF
   object Splitter: TSplitter
     Left = 204
     Top = 24
-    Height = 595
+    Height = 363
   end
   object TreeView: TTreeView
     Left = 0
     Top = 24
     Width = 204
-    Height = 595
+    Height = 363
     Align = alLeft
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -43,16 +43,16 @@ object FmTTF: TFmTTF
   object PnMain: TPanel
     Left = 207
     Top = 24
-    Width = 657
-    Height = 595
+    Width = 377
+    Height = 363
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
     object ListView: TListView
       Left = 0
       Top = 0
-      Width = 657
-      Height = 595
+      Width = 377
+      Height = 363
       Align = alClient
       Columns = <>
       ReadOnly = True
@@ -62,8 +62,8 @@ object FmTTF: TFmTTF
     object PnPaintBox: TPanel
       Left = 0
       Top = 0
-      Width = 657
-      Height = 595
+      Width = 377
+      Height = 363
       Align = alClient
       BevelInner = bvLowered
       BevelOuter = bvNone
@@ -72,8 +72,8 @@ object FmTTF: TFmTTF
       object PaintBox: TPaintBox
         Left = 1
         Top = 1
-        Width = 655
-        Height = 593
+        Width = 375
+        Height = 361
         Align = alClient
         Color = clWhite
         ParentColor = False
@@ -126,8 +126,8 @@ object FmTTF: TFmTTF
     object ListBox: TListBox
       Left = 0
       Top = 0
-      Width = 657
-      Height = 595
+      Width = 377
+      Height = 363
       Align = alClient
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -141,9 +141,11 @@ object FmTTF: TFmTTF
     inline FrFontHeader: TFrameFontHeader
       Left = 0
       Top = 0
-      Width = 657
-      Height = 595
+      Width = 377
+      Height = 363
       Align = alClient
+      Constraints.MinHeight = 360
+      Constraints.MinWidth = 370
       TabOrder = 3
       inherited LbFontDirection: TLabel
         Width = 88
@@ -152,26 +154,17 @@ object FmTTF: TFmTTF
         Width = 59
       end
       inherited LbLowestRecPPEM: TLabel
-        Width = 80
+        Width = 104
       end
       inherited LbCreated: TLabel
         Width = 37
-      end
-      inherited LbModified: TLabel
-        Width = 52
-      end
-      inherited CbCreated: TDateTimePicker
-        Format = 'dd. MMMM yyyy - hh:mm:ss'
-      end
-      inherited CbModified: TDateTimePicker
-        Format = 'dd. MMMM yyyy - hh:mm:ss'
       end
     end
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 619
-    Width = 864
+    Top = 387
+    Width = 584
     Height = 22
     Panels = <
       item
@@ -181,7 +174,7 @@ object FmTTF: TFmTTF
   object CoolBar: TCoolBar
     Left = 0
     Top = 0
-    Width = 864
+    Width = 584
     Height = 24
     Bands = <
       item
@@ -189,13 +182,13 @@ object FmTTF: TFmTTF
         Control = ToolBar
         ImageIndex = -1
         MinHeight = 22
-        Width = 864
+        Width = 584
       end>
     EdgeBorders = [ebTop]
     object ToolBar: TToolBar
       Left = 9
       Top = 0
-      Width = 851
+      Width = 571
       Height = 22
       Caption = 'ToolBar'
       EdgeInner = esNone

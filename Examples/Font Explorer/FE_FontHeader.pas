@@ -11,12 +11,22 @@ type
     CbAdvancedWidthInstructions: TCheckBox;
     CbBaselineAtZero: TCheckBox;
     CbBold: TCheckBox;
+    CbCondensed: TCheckBox;
+    CbCreated: TDateTimePicker;
+    CbExtended: TCheckBox;
     CbFontConverted: TCheckBox;
+    CbFontDirection: TComboBox;
+    CbFontOptimizedFotCleartype: TCheckBox;
     CbForceppEm: TCheckBox;
     CbItalic: TCheckBox;
     CbLeftSidebearing: TCheckBox;
+    CbLinguisticRendering: TCheckBox;
     CbLosslessFontData: TCheckBox;
+    CbModified: TDateTimePicker;
     CbPointSizeInstructions: TCheckBox;
+    CbShadow: TCheckBox;
+    CbUnderline: TCheckBox;
+    CbVerticalFont: TCheckBox;
     EdFontRevision: TEdit;
     EdLowestRecPPEM: TEdit;
     EdUnitsPerEm: TEdit;
@@ -28,13 +38,6 @@ type
     LbLowestRecPPEM: TLabel;
     LbModified: TLabel;
     LbUnitsPerEm: TLabel;
-    CbFontDirection: TComboBox;
-    CbCreated: TDateTimePicker;
-    CbModified: TDateTimePicker;
-  private
-    { Private-Deklarationen }
-  public
-    { Public-Deklarationen }
   end;
 
 implementation

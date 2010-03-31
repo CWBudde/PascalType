@@ -1,8 +1,10 @@
 object FrameFontHeader: TFrameFontHeader
   Left = 0
   Top = 0
-  Width = 271
-  Height = 382
+  Width = 371
+  Height = 360
+  Constraints.MinHeight = 360
+  Constraints.MinWidth = 370
   TabOrder = 0
   object LbFontRevision: TLabel
     Left = 7
@@ -12,39 +14,39 @@ object FrameFontHeader: TFrameFontHeader
     Caption = 'Font Revision'
   end
   object LbFontDirection: TLabel
-    Left = 95
+    Left = 87
     Top = 7
     Width = 89
     Height = 13
     Caption = 'Font Direction Hint'
   end
   object LbUnitsPerEm: TLabel
-    Left = 7
-    Top = 225
+    Left = 263
+    Top = 195
     Width = 60
     Height = 13
     Caption = 'Units per em'
   end
   object LbLowestRecPPEM: TLabel
-    Left = 87
-    Top = 225
-    Width = 75
+    Left = 263
+    Top = 7
+    Width = 105
     Height = 13
-    Caption = 'lowestRecPPEM'
+    Caption = 'Smallest readable size'
   end
   object LbCreated: TLabel
     Left = 7
-    Top = 295
+    Top = 271
     Width = 39
     Height = 13
     Caption = 'Created'
   end
   object LbModified: TLabel
     Left = 7
-    Top = 338
-    Width = 51
+    Top = 314
+    Width = 40
     Height = 13
-    Caption = 'LbModified'
+    Caption = 'Modified'
   end
   object EdFontRevision: TEdit
     Left = 7
@@ -52,12 +54,13 @@ object FrameFontHeader: TFrameFontHeader
     Width = 74
     Height = 21
     TabOrder = 0
+    Text = '1'
   end
   object GbFlags: TGroupBox
     Left = 7
     Top = 50
-    Width = 258
-    Height = 159
+    Width = 250
+    Height = 215
     Caption = 'Flags'
     TabOrder = 2
     object CbBaselineAtZero: TCheckBox
@@ -102,7 +105,7 @@ object FrameFontHeader: TFrameFontHeader
     end
     object CbLosslessFontData: TCheckBox
       Left = 9
-      Top = 113
+      Top = 151
       Width = 117
       Height = 17
       Caption = 'Font data is lossless'
@@ -110,16 +113,40 @@ object FrameFontHeader: TFrameFontHeader
     end
     object CbFontConverted: TCheckBox
       Left = 9
-      Top = 132
-      Width = 242
+      Top = 170
+      Width = 235
       Height = 17
       Caption = 'Font converted (produce compatible metrics)'
       TabOrder = 6
     end
+    object CbFontOptimizedFotCleartype: TCheckBox
+      Left = 9
+      Top = 189
+      Width = 168
+      Height = 17
+      Caption = 'Font optimized for ClearType'
+      TabOrder = 7
+    end
+    object CbVerticalFont: TCheckBox
+      Left = 9
+      Top = 113
+      Width = 80
+      Height = 17
+      Caption = 'Vertical Font'
+      TabOrder = 8
+    end
+    object CbLinguisticRendering: TCheckBox
+      Left = 9
+      Top = 132
+      Width = 152
+      Height = 17
+      Caption = 'Linguistic rendering required'
+      TabOrder = 9
+    end
   end
   object EdUnitsPerEm: TEdit
-    Left = 7
-    Top = 242
+    Left = 263
+    Top = 211
     Width = 60
     Height = 21
     ReadOnly = True
@@ -127,19 +154,19 @@ object FrameFontHeader: TFrameFontHeader
     Text = '2048'
   end
   object EdLowestRecPPEM: TEdit
-    Left = 87
-    Top = 242
-    Width = 60
+    Left = 263
+    Top = 23
+    Width = 105
     Height = 21
     ReadOnly = True
     TabOrder = 4
     Text = '9'
   end
   object GbStyle: TGroupBox
-    Left = 168
-    Top = 225
-    Width = 97
-    Height = 64
+    Left = 263
+    Top = 50
+    Width = 105
+    Height = 139
     Caption = 'Style'
     TabOrder = 5
     object CbBold: TCheckBox
@@ -147,7 +174,7 @@ object FrameFontHeader: TFrameFontHeader
       Top = 18
       Width = 41
       Height = 17
-      Caption = 'Bold'
+      Caption = '&Bold'
       TabOrder = 0
     end
     object CbItalic: TCheckBox
@@ -155,12 +182,44 @@ object FrameFontHeader: TFrameFontHeader
       Top = 37
       Width = 48
       Height = 17
-      Caption = 'Italic'
+      Caption = '&Italic'
       TabOrder = 1
+    end
+    object CbUnderline: TCheckBox
+      Left = 9
+      Top = 56
+      Width = 66
+      Height = 17
+      Caption = '&Underline'
+      TabOrder = 2
+    end
+    object CbShadow: TCheckBox
+      Left = 9
+      Top = 75
+      Width = 66
+      Height = 17
+      Caption = '&Shadow'
+      TabOrder = 3
+    end
+    object CbCondensed: TCheckBox
+      Left = 9
+      Top = 94
+      Width = 75
+      Height = 17
+      Caption = '&Condensed'
+      TabOrder = 4
+    end
+    object CbExtended: TCheckBox
+      Left = 9
+      Top = 113
+      Width = 67
+      Height = 17
+      Caption = 'E&xtended'
+      TabOrder = 5
     end
   end
   object CbFontDirection: TComboBox
-    Left = 95
+    Left = 87
     Top = 23
     Width = 170
     Height = 21
@@ -176,20 +235,21 @@ object FrameFontHeader: TFrameFontHeader
   end
   object CbCreated: TDateTimePicker
     Left = 7
-    Top = 311
+    Top = 287
     Width = 258
     Height = 21
     Date = 40268.157690150460000000
-    Format = 'dddd-MMMM-yyyy hh:mm'
+    Format = 'dd. MMMM yyyy - hh:mm:ss'
     Time = 40268.157690150460000000
     TabOrder = 6
   end
   object CbModified: TDateTimePicker
     Left = 7
-    Top = 354
+    Top = 330
     Width = 258
     Height = 21
     Date = 40268.157693298610000000
+    Format = 'dd. MMMM yyyy - hh:mm:ss'
     Time = 40268.157693298610000000
     TabOrder = 7
   end

@@ -896,6 +896,10 @@ begin
 
    CbBold.Checked := msBold in MacStyle;
    CbItalic.Checked := msItalic in MacStyle;
+   CbUnderline.Checked := msUnderline in MacStyle;
+   CbShadow.Checked := msShadow in MacStyle;
+   CbCondensed.Checked := msCondensed in MacStyle;
+   CbExtended.Checked := msExtended in MacStyle;
 
    CbBaselineAtZero.Checked := htfZeroSpecBaseline in Flags;
    CbAdvancedWidthInstructions.Checked := htfAdvanceWidth in Flags;
@@ -904,6 +908,8 @@ begin
    CbForceppEm.Checked := htfIntegerScaling in Flags;
    CbLeftSidebearing.Checked := htfXPosLSB in Flags;
    CbPointSizeInstructions.Checked := htfScaledSizeDiffers in Flags;
+   CbVerticalFont.Checked := htfVertical in Flags;
+   CbLinguisticRendering.Checked := htfLinguistic in Flags;
 
 
    CbCreated.DateTime := CreatedDate / 86400 + EncodeDate(1904, 1, 1);

@@ -56,8 +56,8 @@ type
     procedure FontHeightChanged; virtual;
     procedure PixelPerInchChanged; virtual;
 
-    procedure RasterizeText(Text: string);
-    procedure RasterizeCharacter(Character: AnsiChar);
+    procedure RenderText(Text: string);
+    procedure RenderCharacter(Character: AnsiChar);
 
     property Interpreter: TPascalTypeInterpreter read FInterpreter;
   public
@@ -116,17 +116,17 @@ begin
  FInterpreter.SaveToStream(Stream);
 end;
 
-procedure TCustomPascalTypeRasterizer.RasterizeText(Text: string);
+procedure TCustomPascalTypeRasterizer.RenderText(Text: string);
 var
   CharIndex : Integer;
 begin
  for CharIndex := 1 to Length(Text) do
   begin
-   RasterizeCharacter(Text[CharIndex]);
+   RenderCharacter(Text[CharIndex]);
   end;
 end;
 
-procedure TCustomPascalTypeRasterizer.RasterizeCharacter(Character: AnsiChar);
+procedure TCustomPascalTypeRasterizer.RenderCharacter(Character: AnsiChar);
 begin
 end;
 
