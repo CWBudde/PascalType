@@ -155,6 +155,9 @@ function TCustomPascalTypeRasterizer.GetGlyphByCharacter(
 var
   CharMapIndex : Integer;
 begin
+ // direct translate character to glyph (will most probably fail!!!
+ Result := Integer(Character);
+
  with FInterpreter.CharacterMap do
   for CharMapIndex := 0 to CharacterMapSubtableCount - 1 do
    {$IFDEF MSWINDOWS}

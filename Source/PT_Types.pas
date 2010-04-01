@@ -45,6 +45,8 @@ type
     Value: SmallInt;
   end;
 
+  TShortFrac = type SmallInt;
+
   {$Z2}
   TFontHeaderTableFlag = (
     htfZeroSpecBaseline,  // bit 0 - y value of 0 specifies baseline
@@ -378,6 +380,15 @@ type
     gsReverseChainingContextSingle = 8  // Applied in reverse order, replace single glyph in chaining context
   );
 
+  TNonAlphabeticCode = (
+    nacAlphabetic = 0,
+    nacDingbats = 1,
+    nacPiCharacters = 2,
+    nacFleurons = 3,
+    nacDecorativeBorders = 4,
+    nacInternationalSymbols = 5,
+    nacMathSymbols = 6
+  );
 
   {$Z2}
   TDigitalSignatureFlag = (dsfResigningProhibited);
@@ -513,6 +524,8 @@ function MacStylesToString(Value: TMacStyles): String;
 
 function InstructionByteToString(Value: Byte): string;
 function DefaultGlyphName(Value: Word): string;
+function FixedPointToNonAlphabeticCode(Value: TFixedPoint): TNonAlphabeticCode;
+function NonAlphabeticCodeToFixedPoint(Value: TNonAlphabeticCode): TFixedPoint;
 
 implementation
 
@@ -957,6 +970,26 @@ begin
    256 : Result := 'ccaron';
    257 : Result := 'dcroat';
   end
+end;
+
+function FixedPointToNonAlphabeticCode(Value: TFixedPoint): TNonAlphabeticCode;
+begin
+ case Value.Fract of
+   0: Result := nacAlphabetic;
+   1: Result := nacDingbats;
+   2: Result := nacPiCharacters;
+   3: Result := nacFleurons;
+   4: Result := nacDecorativeBorders;
+   5: Result := nacInternationalSymbols;
+   6: Result := nacMathSymbols;
+   else raise EPascalTypeError.Create('Undefined code');
+ end;
+end;
+
+function NonAlphabeticCodeToFixedPoint(Value: TNonAlphabeticCode): TFixedPoint;
+begin
+ Result.Value := 0;
+ Result.Fract := Word(Value);
 end;
 
 end.

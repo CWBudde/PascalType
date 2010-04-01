@@ -2,7 +2,7 @@ object FmTTF: TFmTTF
   Left = 309
   Top = 95
   Caption = 'PascalType Font Explorer'
-  ClientHeight = 409
+  ClientHeight = 470
   ClientWidth = 584
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,13 +20,13 @@ object FmTTF: TFmTTF
   object Splitter: TSplitter
     Left = 204
     Top = 24
-    Height = 363
+    Height = 424
   end
   object TreeView: TTreeView
     Left = 0
     Top = 24
     Width = 204
-    Height = 363
+    Height = 424
     Align = alLeft
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -44,7 +44,7 @@ object FmTTF: TFmTTF
     Left = 207
     Top = 24
     Width = 377
-    Height = 363
+    Height = 424
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
@@ -52,7 +52,7 @@ object FmTTF: TFmTTF
       Left = 0
       Top = 0
       Width = 377
-      Height = 363
+      Height = 424
       Align = alClient
       Columns = <>
       ReadOnly = True
@@ -63,7 +63,7 @@ object FmTTF: TFmTTF
       Left = 0
       Top = 0
       Width = 377
-      Height = 363
+      Height = 424
       Align = alClient
       BevelInner = bvLowered
       BevelOuter = bvNone
@@ -73,7 +73,7 @@ object FmTTF: TFmTTF
         Left = 1
         Top = 1
         Width = 375
-        Height = 361
+        Height = 422
         Align = alClient
         Color = clWhite
         ParentColor = False
@@ -127,7 +127,7 @@ object FmTTF: TFmTTF
       Left = 0
       Top = 0
       Width = 377
-      Height = 363
+      Height = 424
       Align = alClient
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -142,7 +142,7 @@ object FmTTF: TFmTTF
       Left = 0
       Top = 0
       Width = 377
-      Height = 363
+      Height = 424
       Align = alClient
       Constraints.MinHeight = 360
       Constraints.MinWidth = 370
@@ -163,7 +163,7 @@ object FmTTF: TFmTTF
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 387
+    Top = 448
     Width = 584
     Height = 22
     Panels = <
@@ -254,6 +254,13 @@ object FmTTF: TFmTTF
       end
       object MiOpenDefaultFonts: TMenuItem
         Caption = 'Open Default Fonts'
+        object MIInternal: TMenuItem
+          Caption = '(internal)'
+          OnClick = MIInternalClick
+        end
+        object N4: TMenuItem
+          Caption = '-'
+        end
         object MIArial: TMenuItem
           Caption = 'Arial'
           object MIArialRegular: TMenuItem

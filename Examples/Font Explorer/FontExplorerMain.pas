@@ -6,8 +6,9 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ComCtrls, StdCtrls, ExtCtrls, ToolWin, ActnList, StdActns, AppEvnts,
   ImgList, PT_Types, PT_Tables, PT_TablesTrueType, PT_TablesOptional,
-  PT_TablesBitmap, PT_TablesOpenType, PT_Interpreter, PT_ByteCodeInterpreter,
-  PT_UnicodeNames, PT_Rasterizer, FE_FontHeader;
+  PT_TablesBitmap, PT_TablesOpenType, PT_TablesApple, PT_TablesShared,
+  PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames, PT_Rasterizer,
+  FE_FontHeader;
 
 {.$DEFINE ShowContours}
 
@@ -80,6 +81,8 @@ type
     MISaveAs: TMenuItem;
     MINew: TMenuItem;
     MISave: TMenuItem;
+    MIInternal: TMenuItem;
+    N4: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -105,6 +108,7 @@ type
     procedure MICourierNewBoldClick(Sender: TObject);
     procedure MICourierNewItalicClick(Sender: TObject);
     procedure MICourierNewBoldItalicClick(Sender: TObject);
+    procedure MIInternalClick(Sender: TObject);
   private
     FRasterizer   : TPascalTypeRasterizer;
     FCurrentGlyph : TBitmap;
@@ -119,6 +123,7 @@ type
     procedure ListViewData(Strings: Array of string);
 
     procedure DisplayBitmapSizeTable(BitmapSizeTable: TPascalTypeBitmapSizeTable);
+    procedure DisplayBitmapLocationTable(BitmapLocationTable: TPascalTypeBitmapLocationTable);
     procedure DisplayCharacterMapSubTable(CharacterMapSubTable: TCustomCharacterMapDirectoryEntry);
     procedure DisplayCharacterMapTable(CharacterMapTable: TPascalTypeCharacterMapTable);
     procedure DisplayControlValueTable(ControlValueTable: TTrueTypeFontControlValueTable);
@@ -171,6 +176,7 @@ type
     procedure FontSizeChanged;
   public
     procedure LoadFromFile(Filename: TFileName);
+    procedure LoadFromStream(Stream: TStream);
 
     property FontSize: Integer read FFontSize write SetFontSize;
   end;
@@ -367,6 +373,18 @@ begin
  LoadFromFile(GetFontDirectory + '\cour.ttf');
 end;
 
+procedure TFmTTF.MIInternalClick(Sender: TObject);
+var
+  ResourceStream : TResourceStream;
+begin
+ ResourceStream := TResourceStream.Create(HInstance, 'Default', 'TTFFONT');
+ try
+  LoadFromStream(ResourceStream);
+ finally
+  FreeAndNil(ResourceStream);
+ end;
+end;
+
 procedure TFmTTF.MICourierNewBoldClick(Sender: TObject);
 begin
  LoadFromFile(GetFontDirectory + '\courbd.ttf');
@@ -409,13 +427,26 @@ end;
 
 procedure TFmTTF.PaintBoxPaint(Sender: TObject);
 begin
- PaintBox.Canvas.Draw((Width - FCurrentGlyph.Width) div 2,
-   (Height - FCurrentGlyph.Height) div 2, FCurrentGlyph);
+ PaintBox.Canvas.Draw((PaintBox.Width - FCurrentGlyph.Width) div 2,
+   (PaintBox.Height - FCurrentGlyph.Height) div 2, FCurrentGlyph);
 end;
 
 procedure TFmTTF.CbFontSizeChange(Sender: TObject);
 begin
  FontSize := StrToInt(CbFontSize.Text);
+end;
+
+procedure TFmTTF.DisplayBitmapLocationTable(
+  BitmapLocationTable: TPascalTypeBitmapLocationTable);
+begin
+ with BitmapLocationTable do
+  begin
+   InitializeDefaultListView;
+
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+
+   ListView.BringToFront;
+  end;
 end;
 
 procedure TFmTTF.DisplayBitmapSizeTable(BitmapSizeTable: TPascalTypeBitmapSizeTable);
@@ -2069,6 +2100,10 @@ begin
    if TObject(Node.Data) is TTrueTypeFontControlValueTable
     then DisplayControlValueTable(TTrueTypeFontControlValueTable(Node.Data)) else
 
+   // Bitmap Location Table
+   if TObject(Node.Data) is TPascalTypeBitmapLocationTable
+    then DisplayBitmapLocationTable(TPascalTypeBitmapLocationTable(Node.Data)) else
+
    // Embedded Bitmap Data Table
    if TObject(Node.Data) is TPascalTypeEmbeddedBitmapDataTable
     then DisplayEmbeddedBitmapDataTable(TPascalTypeEmbeddedBitmapDataTable(Node.Data)) else
@@ -2285,6 +2320,54 @@ begin
  else raise Exception.Create('File does not exists');
 end;
 
+procedure TFmTTF.LoadFromStream(Stream: TStream);
+var
+  Start, Stop, Freq : Int64;
+begin
+ // reset stream position
+ Stream.Position := 0;
+
+ // query start
+ QueryPerformanceCounter(Start);
+
+ // load font file
+ FRasterizer.Interpreter.LoadFromStream(Stream);
+
+ // query stop
+ QueryPerformanceCounter(Stop);
+
+ // query performance frequency
+ QueryPerformanceFrequency(Freq);
+
+ // initialize listview
+ InitializeDefaultListView;
+
+ // add loading time
+ ListViewData(['loading time', FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms']);
+
+ // clear existing items on treeview
+ TreeView.Items.Clear;
+
+ // add root item on treeview
+ TreeView.Items.AddChild(nil, '(internal font)');
+
+ // query start
+ QueryPerformanceCounter(Start);
+
+ FontChanged;
+
+ // query stop
+ QueryPerformanceCounter(Stop);
+
+ // add building tree time
+ ListViewData(['building tree time', FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms']);
+
+ ListView.BringToFront;
+
+ // change caption
+ Caption := 'PascalType Font Explorer';
+end;
+
 procedure TFmTTF.FontChanged;
 var
   OptTableIndex     : Integer;
@@ -2399,9 +2482,15 @@ begin
 //           Items.AddChildObject(Node, 'Mark Set', MarkGlyphSet);
         end else
 
-      // bitmap location table
+      // embedded bitmap location table
       if OptionalTable[OptTableIndex] is TPascalTypeEmbeddedBitmapLocationTable then
        with TPascalTypeEmbeddedBitmapLocationTable(OptionalTable[OptTableIndex]) do
+        for SubtableIndex := 0 to BitmapSizeTableCount - 1
+         do Items.AddChildObject(Node, 'Table #' + IntToStr(SubtableIndex + 1), BitmapSizeTable[SubtableIndex]);
+
+      // bitmap location table
+      if OptionalTable[OptTableIndex] is TPascalTypeBitmapLocationTable then
+       with TPascalTypeBitmapLocationTable(OptionalTable[OptTableIndex]) do
         for SubtableIndex := 0 to BitmapSizeTableCount - 1
          do Items.AddChildObject(Node, 'Table #' + IntToStr(SubtableIndex + 1), BitmapSizeTable[SubtableIndex]);
 

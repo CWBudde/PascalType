@@ -826,9 +826,18 @@ type
   end;
 
 
+// various swap functions for converting big-endian data  
 function Swap16(Value: Word): Word;
 function Swap32(Value: Cardinal): Cardinal;
 function Swap64(Value: Int64): Int64;
+
+// big-endian stream I/O
+function ReadSwappedWord(Stream: TStream): Word;
+function ReadSwappedCardinal(Stream: TStream): Cardinal;
+function ReadSwappedInt64(Stream: TStream): Int64;
+procedure WriteSwappedWord(Stream: TStream; Value : Word);
+procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal);
+procedure WriteSwappedInt64(Stream: TStream; Value: Int64);
 
 procedure RegisterPascalTypeTable(TableClass: TCustomPascalTypeNamedTableClass);
 procedure RegisterPascalTypeTables(TableClasses: array of TCustomPascalTypeNamedTableClass);
@@ -863,6 +872,42 @@ begin
  TFourWords(Result)[2] := Swap(TFourWords(Value)[1]);;
  TFourWords(Result)[1] := Swap(TFourWords(Value)[2]);
  TFourWords(Result)[0] := Swap(TFourWords(Value)[3]);;
+end;
+
+function ReadSwappedWord(Stream: TStream): Word;
+begin
+ Stream.Read(Result, SizeOf(Word));
+ Result := Swap16(Result);
+end;
+
+function ReadSwappedCardinal(Stream: TStream): Cardinal;
+begin
+ Stream.Read(Result, SizeOf(Cardinal));
+ Result := Swap32(Result);
+end;
+
+function ReadSwappedInt64(Stream: TStream): Int64;
+begin
+ Stream.Read(Result, SizeOf(Int64));
+ Result := Swap64(Result);
+end;
+
+procedure WriteSwappedWord(Stream: TStream; Value : Word);
+begin
+ Value := Swap16(Value);
+ Stream.Write(Value, SizeOf(Word));
+end;
+
+procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal);
+begin
+ Value := Swap32(Value);
+ Stream.Write(Value, SizeOf(Cardinal));
+end;
+
+procedure WriteSwappedInt64(Stream: TStream; Value: Int64);
+begin
+ Value := Swap64(Value);
+ Stream.Write(Value, SizeOf(Int64));
 end;
 
 
@@ -954,6 +999,7 @@ var
 begin
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 54 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -982,9 +1028,7 @@ begin
     then raise EPascalTypeError.Create(RCStrNoMagic);
 
    // read flags
-   Read(Value16, SizeOf(Word));
-   Value16 := Swap16(Value16);
-   FFlags := WordToFontHeaderTableFlags(Value16);
+   FFlags := WordToFontHeaderTableFlags(ReadSwappedWord(Stream));
 
    {$IFDEF AmbigiousExceptions}
    if (Value16 shr 14) <> 0
@@ -992,8 +1036,7 @@ begin
    {$ENDIF}
 
    // read UnitsPerEm
-   Read(Value16, SizeOf(Word));
-   FUnitsPerEm := Swap16(Value16);
+   FUnitsPerEm := ReadSwappedWord(Stream);
 
    // read CreatedDate
    Read(Value64, SizeOf(Int64));
@@ -1020,12 +1063,10 @@ begin
    FyMax := Swap16(Value16);
 
    // read MacStyle
-   Read(Value16, SizeOf(Word));
-   FMacStyle := WordToMacStyles(Swap16(Value16));
+   FMacStyle := WordToMacStyles(ReadSwappedWord(Stream));
 
    // read LowestRecPPEM
-   Read(Value16, SizeOf(Word));
-   FLowestRecPPEM := Swap16(Value16);
+   FLowestRecPPEM := ReadSwappedWord(Stream);
 
    // read FontDirectionHint
    Read(Value16, SizeOf(SmallInt));
@@ -1375,18 +1416,18 @@ begin
 end;
 
 procedure TTrueTypeFontFormat0CharacterMap.LoadFromStream(Stream: TStream);
-var
-  Value16   : Word;
 begin
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 4 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
    // read length
-   Read(Value16, SizeOf(Word));
-   FLength := Swap16(Value16);
+   FLength := ReadSwappedWord(Stream);
 
    // read language
-   Read(Value16, SizeOf(Word));
-   FLanguage := Swap16(Value16);
+   FLanguage := ReadSwappedWord(Stream);
 
    Read(FGlyphIdArray[0], 256);
   end;
@@ -1459,18 +1500,18 @@ begin
 end;
 
 procedure TTrueTypeFontFormat2CharacterMap.LoadFromStream(Stream: TStream);
-var
-  Value16   : Word;
 begin
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 4 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
    // read length
-   Read(Value16, SizeOf(Word));
-   FLength := Swap16(Value16);
+   FLength := ReadSwappedWord(Stream);
 
    // read language
-   Read(Value16, SizeOf(Word));
-   FLanguage := Swap16(Value16);
+   FLanguage := ReadSwappedWord(Stream);
   end;
 end;
 
@@ -1570,40 +1611,39 @@ begin
   begin
    StartPos := Position;
 
-   // read length
-   Read(Value16, SizeOf(Word));
-   FLength := Swap16(Value16);
+   // check (minimum) table size
+   if StartPos + 4 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
+   // read length
+   FLength := ReadSwappedWord(Stream);
+
+   // check (minimum) table size
    if StartPos + FLength - 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read language
-   Read(Value16, SizeOf(Word));
-   FLanguage := Swap16(Value16);
+   FLanguage := ReadSwappedWord(Stream);
 
    // read segCountX2
-   Read(Value16, SizeOf(Word));
-   FSegCountX2 := Swap16(Value16);
+   FSegCountX2 := ReadSwappedWord(Stream);
 
    // read search range
-   Read(Value16, SizeOf(Word));
-   FSearchRange := Swap16(Value16);
+   FSearchRange := ReadSwappedWord(Stream);
 
    // confirm search range has a valid value
    if FSearchRange <> 2 * (Power(2, Floor(Log2(0.5 * FSegCountX2))))
     then raise EPascalTypeError.Create(RCStrCharMapError + ': ' + 'wrong search range!');
 
    // read entry selector
-   Read(Value16, SizeOf(Word));
-   FEntrySelector := Swap16(Value16);
+   FEntrySelector := ReadSwappedWord(Stream);
 
    // confirm entry selector has a valid value
    if FEntrySelector <> Log2(FSearchRange * 0.5)
     then raise EPascalTypeError.Create(RCStrCharMapError + ': ' + 'wrong entry selector!');
 
    // read range shift
-   Read(Value16, SizeOf(Word));
-   FRangeShift := Swap16(Value16);
+   FRangeShift := ReadSwappedWord(Stream);
 
    // confirm range shift has a valid value
    if FRangeShift <> FSegCountX2 - FSearchRange
@@ -1617,28 +1657,29 @@ begin
    // read end count
    for SegIndex := 0 to Length(FEndCount) - 1 do
     begin
-     Read(Value16, SizeOf(Word));
-     FEndCount[SegIndex] := Swap16(Value16);
+     FEndCount[SegIndex] := ReadSwappedWord(Stream);
     end;
 
    // confirm end count is valid
    if FEndCount[Length(FEndCount) - 1] <> $FFFF
     then raise EPascalTypeError.CreateFmt(RCStrCharMapErrorEndCount, [FEndCount[Length(FEndCount) - 1]]);
 
+   {$IFDEF AmbigiousExceptions}
    // read reserved
    Read(Value16, SizeOf(Word));
 
-   {$IFDEF AmbigiousExceptions}
    // confirm reserved value is valid
    if Value16 <> 0
     then raise EPascalTypeError.CreateFmt(RCStrCharMapErrorReserved, [Value16]);
+   {$ELSE}
+   // skip reserved
+   Seek(2, soFromCurrent);
    {$ENDIF}
 
    // read start count
    for SegIndex := 0 to Length(FStartCount) - 1 do
     begin
-     Read(Value16, SizeOf(Word));
-     FStartCount[SegIndex] := Swap16(Value16);
+     FStartCount[SegIndex] := ReadSwappedWord(Stream);
 
      {$IFDEF AmbigiousExceptions}
      // confirm start count is valid
@@ -1648,31 +1689,22 @@ begin
     end;
 
    // read ID delta
-   for SegIndex := 0 to Length(FIdDelta) - 1 do
-    begin
-     Read(Value16, SizeOf(Word));
-     FIdDelta[SegIndex] := Swap16(Value16);
-    end;
+   for SegIndex := 0 to Length(FIdDelta) - 1
+    do FIdDelta[SegIndex] := ReadSwappedWord(Stream);
 
    // confirm ID delta is valid
    if FIdDelta[Length(FIdDelta) - 1] <> 1
     then raise EPascalTypeError.CreateFmt(RCStrCharMapErrorIdDelta, [FIdDelta[Length(FIdDelta) - 1]]);
 
    // read ID range offset
-   for SegIndex := 0 to Length(FIdRangeOffset) - 1 do
-    begin
-     Read(Value16, SizeOf(Word));
-     FIdRangeOffset[SegIndex] := Swap16(Value16);
-    end;
+   for SegIndex := 0 to Length(FIdRangeOffset) - 1
+    do FIdRangeOffset[SegIndex] := ReadSwappedWord(Stream);
 
    SetLength(FGlyphIdArray, (FLength - (Position - StartPos)) div 2);
 
-   for SegIndex := 0 to Length(FGlyphIdArray) - 1 do
-    begin
-     Read(Value16, SizeOf(Word));
-     FGlyphIdArray[SegIndex] := Swap16(Value16);
-    end;
-
+   // read glyph ID array
+   for SegIndex := 0 to Length(FGlyphIdArray) - 1
+    do FGlyphIdArray[SegIndex] := ReadSwappedWord(Stream);
   end;
 end;
 
@@ -1747,14 +1779,16 @@ end;
 
 procedure TCustomCharacterMapDirectoryEntry.LoadFromStream(Stream: TStream);
 var
-  Value16 : Word;
   OldMap  : TCustomTrueTypeFontCharacterMap;
 begin
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
    // read format
-   Read(Value16, SizeOf(Word));
-   case Swap16(Value16) of
+   case ReadSwappedWord(Stream) of
     0 : begin
          OldMap := FCharacterMap;
          FCharacterMap := TTrueTypeFontFormat0CharacterMap.Create;
@@ -1931,12 +1965,12 @@ var
   SubtableIndex   : Integer;
   CharMapDirEntry : TCustomCharacterMapDirectoryEntry;
   Value32         : Cardinal;
-  Value16         : Word;
   PlatformID      : Word;
   EncodingID      : Word;
 begin
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 8 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -1945,8 +1979,7 @@ begin
    Assert(StartPos = 0); // assert this for the damn hack used in this table!!!
 
    // read Version
-   Read(Value16, SizeOf(Word));
-   FVersion := Swap16(Value16);
+   FVersion := ReadSwappedWord(Stream);
 
    // check version
    if not (FVersion = 0)
@@ -1956,8 +1989,7 @@ begin
    FSubtableList.Clear;
 
    // read subtable count
-   Read(Value16, SizeOf(Word));
-   SubtableCount := Swap16(Value16);
+   SubtableCount := ReadSwappedWord(Stream);
 
    // check if table is complete
    if Position + SubtableCount * 8 > Size
@@ -1969,12 +2001,10 @@ begin
      Position := StartPos + 4 + SubtableIndex * 8;
 
      // read Platform ID
-     Read(Value16, SizeOf(Word));
-     PlatformID := Swap16(Value16);
+     PlatformID := ReadSwappedWord(Stream);
 
      // read encoding ID
-     Read(Value16, SizeOf(Word));
-     EncodingID := Swap16(Value16);
+     EncodingID := ReadSwappedWord(Stream);
 
      // create character map based on encoding
      case PlatformID of
@@ -2133,6 +2163,7 @@ var
 begin
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 32 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -2157,8 +2188,7 @@ begin
    LineGap := Swap16(Value16);
 
    // read AdvanceWidthMax
-   Read(Value16, SizeOf(Word));
-   AdvanceWidthMax := Swap16(Value16);
+   AdvanceWidthMax := ReadSwappedWord(Stream);
 
    // read MinLeftSideBearing
    Read(Value16, SizeOf(SmallInt));
@@ -2202,8 +2232,7 @@ begin
    MetricDataFormat := Swap16(Value16);
 
    // read NumOfLongHorMetrics
-   Read(Value16, SizeOf(Word));
-   NumOfLongHorMetrics := Swap16(Value16);
+   NumOfLongHorMetrics := ReadSwappedWord(Stream);;
   end;
 end;
 
@@ -2584,17 +2613,19 @@ end;
 
 procedure TCustomTrueTypeFontNamePlatform.LoadFromStream(Stream: TStream);
 var
-  Value16  : Word;
+  Value16 : Word;
 begin
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 6 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
    // read encoding ID
-   Read(Value16, SizeOf(Word));
-   FEncodingID := Swap16(Value16);
+   FEncodingID := ReadSwappedWord(Stream);
 
    // read language ID
-   Read(Value16, SizeOf(Word));
-   FLanguageID := Swap16(Value16);
+   FLanguageID := ReadSwappedWord(Stream);
 
    // read name ID
    Read(Value16, SizeOf(Word));
@@ -2648,7 +2679,6 @@ end;
 procedure TTrueTypeFontNamePlatformUnicode.ReadStringFromStream(Stream: TStream;
   Length: Word);
 var
-  Value16    : Word;
   StrOffset  : Integer;
 begin
  with Stream do
@@ -2657,12 +2687,8 @@ begin
    FNameString := '';
 
    // actually read the string
-   for StrOffset := 0 to Length div 2 - 1 do
-    begin
-     Read(Value16, SizeOf(Word));
-     Value16 := Swap16(Value16);
-     FNameString := FNameString + WideChar(Value16);
-    end;
+   for StrOffset := 0 to Length div 2 - 1
+    do FNameString := FNameString + WideChar(ReadSwappedWord(Stream));
   end;
 end;
 
@@ -2725,7 +2751,6 @@ end;
 procedure TTrueTypeFontNamePlatformMicrosoft.ReadStringFromStream(
   Stream: TStream; Length: Word);
 var
-  Value16    : Word;
   StrOffset  : Integer;
 begin
  with Stream do
@@ -2734,12 +2759,8 @@ begin
    FNameString := '';
 
    // actually read the string
-   for StrOffset := 0 to Length div 2 - 1 do
-    begin
-     Read(Value16, SizeOf(Word));
-     Value16 := Swap16(Value16);
-     FNameString := FNameString + WideChar(Value16);
-    end;
+   for StrOffset := 0 to Length div 2 - 1
+    do FNameString := FNameString + WideChar(ReadSwappedWord(Stream));
   end;
 end;
 
@@ -2766,7 +2787,6 @@ procedure TTrueTypeFontNamePlatformISO.ReadStringFromStream(Stream: TStream;
   Length: Word);
 var
   str       : string;
-  Value16   : Word;
   StrOffset : Integer;
 begin
  with Stream do
@@ -2785,12 +2805,8 @@ begin
         FNameString := '';
 
         // actually read the string
-        for StrOffset := 0 to Length div 2 - 1 do
-         begin
-          Read(Value16, SizeOf(Word));
-          Value16 := Swap16(Value16);
-          FNameString := FNameString + WideChar(Value16);
-         end;
+        for StrOffset := 0 to Length div 2 - 1
+         do FNameString := FNameString + WideChar(ReadSwappedWord(Stream));
        end;
   else raise EPascalTypeError.Create('Unsupported encoding');
  end;
@@ -2868,19 +2884,16 @@ begin
    StoragePos := Position;
 
    // read format
-   Read(Value16, SizeOf(Word));
-   FFormat := Swap16(Value16);
+   FFormat := ReadSwappedWord(Stream);
 
    if not (FFormat in [0..1])
     then raise EPascalTypeError.Create(RCStrUnknownFormat);
 
    // internally store number of records
-   Read(Value16, SizeOf(Word));
-   NumRecords := Swap16(Value16);
+   NumRecords := ReadSwappedWord(Stream);
 
    // read storage offset and add to preliminary storage position
-   Read(Value16, SizeOf(Word));
-   StoragePos := StoragePos + Swap16(Value16);
+   StoragePos := StoragePos + ReadSwappedWord(Stream);
 
    // check for minimum table size
    if Position + NumRecords * 12 > Size
@@ -2892,8 +2905,7 @@ begin
    for NameIndex := 0 to NumRecords - 1 do
     begin
      // read platform ID
-     Read(Value16, SizeOf(Word));
-     Value16 := Swap16(Value16);
+     Value16 := ReadSwappedWord(Stream);
      case TPlatformID(Value16) of
         piUnicode : NameRecord := TTrueTypeFontNamePlatformUnicode.Create;
           piApple : NameRecord := TTrueTypeFontNamePlatformApple.Create;
@@ -2905,12 +2917,10 @@ begin
      NameRecord.LoadFromStream(Stream);
 
      // read length
-     Read(Value16, SizeOf(Word));
-     StrLength := Swap16(Value16);
+     StrLength := ReadSwappedWord(Stream);
 
      // read offset
-     Read(Value16, SizeOf(Word));
-     StrOffset := Swap16(Value16);
+     StrOffset := ReadSwappedWord(Stream);
 
      // store current position and jump to string definition
      OldPosition := Position;
@@ -2925,11 +2935,8 @@ begin
     end;
 
    // ignore format 1 addition
-   if FFormat = 1 then
-    begin
-     Read(Value16, SizeOf(Word));
-     Position := Position + Swap16(Value16);
-    end;
+   if FFormat = 1
+    then Position := Position + ReadSwappedWord(Stream);
   end;
 end;
 
@@ -3021,10 +3028,10 @@ end;
 procedure TPascalTypeMaximumProfileTable.LoadFromStream(Stream: TStream);
 var
   Value32 : Cardinal;
-  Value16 : Word;
 begin
  with Stream do
   begin
+   // check (minimum) table size
    if Position + $20 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -3036,60 +3043,46 @@ begin
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read glyphs count
-   Read(Value16, SizeOf(Word));
-   FNumGlyphs := Swap16(Value16);
+   FNumGlyphs := ReadSwappedWord(Stream);
 
    // read max points
-   Read(Value16, SizeOf(Word));
-   FMaxPoints := Swap16(Value16);
+   FMaxPoints := ReadSwappedWord(Stream);
 
    // read max contours
-   Read(Value16, SizeOf(Word));
-   FMaxContours := Swap16(Value16);
+   FMaxContours := ReadSwappedWord(Stream);
 
    // read max composite points
-   Read(Value16, SizeOf(Word));
-   FMaxCompositePoints := Swap16(Value16);
+   FMaxCompositePoints := ReadSwappedWord(Stream);
 
    // read max composite contours
-   Read(Value16, SizeOf(Word));
-   FMaxCompositeContours := Swap16(Value16);
+   FMaxCompositeContours := ReadSwappedWord(Stream);
 
    // read max zones
-   Read(Value16, SizeOf(Word));
-   FMaxZones := Swap16(Value16);
+   FMaxZones := ReadSwappedWord(Stream);
 
    // read max twilight points
-   Read(Value16, SizeOf(Word));
-   FMaxTwilightPoints := Swap16(Value16);
+   FMaxTwilightPoints := ReadSwappedWord(Stream);
 
    // read max storage
-   Read(Value16, SizeOf(Word));
-   FMaxStorage := Swap16(Value16);
+   FMaxStorage := ReadSwappedWord(Stream);
 
    // read max function defs
-   Read(Value16, SizeOf(Word));
-   FMaxFunctionDefs := Swap16(Value16);
+   FMaxFunctionDefs := ReadSwappedWord(Stream);
 
    // read max instruction defs
-   Read(Value16, SizeOf(Word));
-   FMaxInstructionDefs := Swap16(Value16);
+   FMaxInstructionDefs := ReadSwappedWord(Stream);
 
    // read max stack elements
-   Read(Value16, SizeOf(Word));
-   FMaxStackElements := Swap16(Value16);
+   FMaxStackElements := ReadSwappedWord(Stream);
 
    // read max size of instructions
-   Read(Value16, SizeOf(Word));
-   FMaxSizeOfInstructions := Swap16(Value16);
+   FMaxSizeOfInstructions := ReadSwappedWord(Stream);
 
    // read max component elements
-   Read(Value16, SizeOf(Word));
-   FMaxComponentElements := Swap16(Value16);
+   FMaxComponentElements := ReadSwappedWord(Stream);
 
    // read max component depth
-   Read(Value16, SizeOf(Word));
-   FMaxComponentDepth := Swap16(Value16);
+   FMaxComponentDepth := ReadSwappedWord(Stream);
   end;
 end;
 
@@ -3475,12 +3468,12 @@ var
 begin
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 68 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value16, SizeOf(Word));
-   FVersion := Swap16(Value16);
+   FVersion := ReadSwappedWord(Stream);
 
    // check version
    if not (Version in [0..3])
@@ -3488,8 +3481,7 @@ begin
 
 
    // read XAvgCharWidth
-   Read(Value16, SizeOf(Word));
-   FXAvgCharWidth := Swap16(Value16);
+   FXAvgCharWidth := ReadSwappedWord(Stream);
 
    // read UsWeightClass
    Read(Value16, SizeOf(Word));
@@ -3500,52 +3492,40 @@ begin
 //   FUsWidthClass := Swap16(Value16);
 
    // read FsType
-   Read(Value16, SizeOf(Word));
-   FFsType := Swap16(Value16);
+   FFsType := ReadSwappedWord(Stream);
 
    // read YSubscriptXSize
-   Read(Value16, SizeOf(Word));
-   FYSubscriptXSize := Swap16(Value16);
+   FYSubscriptXSize := ReadSwappedWord(Stream);
 
    // read YSubscriptYSize
-   Read(Value16, SizeOf(Word));
-   FYSubscriptYSize := Swap16(Value16);
+   FYSubscriptYSize := ReadSwappedWord(Stream);
 
    // read YSubScriptXOffset
-   Read(Value16, SizeOf(Word));
-   FYSubScriptXOffset := Swap16(Value16);
+   FYSubScriptXOffset := ReadSwappedWord(Stream);
 
    // read YSubscriptYOffset
-   Read(Value16, SizeOf(Word));
-   FYSubscriptYOffset := Swap16(Value16);
+   FYSubscriptYOffset := ReadSwappedWord(Stream);
 
    // read YSuperscriptXSize
-   Read(Value16, SizeOf(Word));
-   FYSuperscriptXSize := Swap16(Value16);
+   FYSuperscriptXSize := ReadSwappedWord(Stream);
 
    // read YSuperscriptYSize
-   Read(Value16, SizeOf(Word));
-   FYSuperscriptYSize := Swap16(Value16);
+   FYSuperscriptYSize := ReadSwappedWord(Stream);
 
    // read YSuperscriptXOffset
-   Read(Value16, SizeOf(Word));
-   FYSuperscriptXOffset := Swap16(Value16);
+   FYSuperscriptXOffset := ReadSwappedWord(Stream);
 
    // read YSuperscriptYOffset
-   Read(Value16, SizeOf(Word));
-   FYSuperscriptYOffset := Swap16(Value16);
+   FYSuperscriptYOffset := ReadSwappedWord(Stream);
 
    // read YStrikeoutSize
-   Read(Value16, SizeOf(Word));
-   FYStrikeoutSize := Swap16(Value16);
+   FYStrikeoutSize := ReadSwappedWord(Stream);
 
    // read YStrikeoutPosition
-   Read(Value16, SizeOf(Word));
-   FYStrikeoutPosition := Swap16(Value16);
+   FYStrikeoutPosition := ReadSwappedWord(Stream);
 
    // read SFamilyClass
-   Read(Value16, SizeOf(Word));
-   FSFamilyClass := Swap16(Value16);
+   FSFamilyClass := ReadSwappedWord(Stream);
 
    // read Panose
    Read(FPanose, 10);
@@ -3557,36 +3537,28 @@ begin
    Read(FAchVendID, 4);
 
    // read FsSelection
-   Read(Value16, SizeOf(Word));
-   FFsSelection := Swap16(Value16);
+   FFsSelection := ReadSwappedWord(Stream);
 
    // read UsFirstCharIndex
-   Read(Value16, SizeOf(Word));
-   FUsFirstCharIndex := Swap16(Value16);
+   FUsFirstCharIndex := ReadSwappedWord(Stream);
 
    // read UsLastCharIndex
-   Read(Value16, SizeOf(Word));
-   FUsLastCharIndex := Swap16(Value16);
+   FUsLastCharIndex := ReadSwappedWord(Stream);
 
    // read STypoAscender
-   Read(Value16, SizeOf(Word));
-   FSTypoAscender := Swap16(Value16);
+   FSTypoAscender := ReadSwappedWord(Stream);
 
    // read STypoDescender
-   Read(Value16, SizeOf(Word));
-   FSTypoDescender := Swap16(Value16);
+   FSTypoDescender := ReadSwappedWord(Stream);
 
    // read STypoLineGap
-   Read(Value16, SizeOf(Word));
-   FSTypoLineGap := Swap16(Value16);
+   FSTypoLineGap := ReadSwappedWord(Stream);
 
    // read UsWinAscent
-   Read(Value16, SizeOf(Word));
-   FUsWinAscent := Swap16(Value16);
+   FUsWinAscent := ReadSwappedWord(Stream);
 
    // read UsWinDescent
-   Read(Value16, SizeOf(Word));
-   FUsWinDescent := Swap16(Value16);
+   FUsWinDescent := ReadSwappedWord(Stream);
   end;
 end;
 
@@ -4121,6 +4093,7 @@ var
 begin
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 32 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -4133,12 +4106,10 @@ begin
    FItalicAngle := TFixedPoint(Swap32(Value32));
 
    // read underline position
-   Read(Value16, SizeOf(Word));
-   FUnderlinePosition := Swap16(Value16);
+   FUnderlinePosition := ReadSwappedWord(Stream);
 
    // read underline thickness
-   Read(Value16, SizeOf(Word));
-   FUnderlineThickness := Swap16(Value16);
+   FUnderlineThickness := ReadSwappedWord(Stream);
 
    // read is fixed pitch
    Read(Value32, SizeOf(Cardinal));
@@ -4394,19 +4365,16 @@ var
 begin
  with Stream do
   begin
-   // check for minimum size
+   // check (minimum) table size
    if Position + 2 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // load number of glyphs
-   Read(Value16, SizeOf(Word));
-   SetLength(FGlyphNameIndex, Swap16(Value16));
+   SetLength(FGlyphNameIndex, ReadSwappedWord(Stream));
 
-   for GlyphIndex := 0 to Length(FGlyphNameIndex) - 1 do
-    begin
-     Read(Value16, SizeOf(Word));
-     FGlyphNameIndex[GlyphIndex] := Swap16(Value16);
-    end;
+   // read glyph name index array
+   for GlyphIndex := 0 to Length(FGlyphNameIndex) - 1
+    do FGlyphNameIndex[GlyphIndex] := ReadSwappedWord(Stream);
 
    while Position < Size do
     begin
@@ -4426,7 +4394,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function IsTrueTypeFontTableRegistered(TableClass: TCustomPascalTypeNamedTableClass): Boolean;
+function IsPascalTypeTableRegistered(TableClass: TCustomPascalTypeNamedTableClass): Boolean;
 var
   TableClassIndex : Integer;
 begin
@@ -4441,7 +4409,7 @@ end;
 
 procedure RegisterPascalTypeTable(TableClass: TCustomPascalTypeNamedTableClass);
 begin
- Assert(IsTrueTypeFontTableRegistered(TableClass) = False);
+ Assert(IsPascalTypeTableRegistered(TableClass) = False);
  SetLength(GTableClasses, Length(GTableClasses) + 1);
  GTableClasses[Length(GTableClasses) - 1] := TableClass;
 end;

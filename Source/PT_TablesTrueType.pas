@@ -449,7 +449,7 @@ end;
 
 procedure TTrueTypeFontGlyphInstructionTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontGlyphInstructionTable then
+ if Dest is Self.ClassType then
   with TTrueTypeFontGlyphInstructionTable(Dest) do
    begin
     FInstructions := Self.FInstructions;
