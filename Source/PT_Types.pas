@@ -87,6 +87,8 @@ type
   TFontStyle = (fsBold, fsItalic, fsUnderline, fsStrikeOut);
   TFontStyles = set of TFontStyle;
 
+  TIndexToLocationFormat = (ilShort = 0, ilLong = 1);
+
   TOS2WeightClass = (
     wcThin = 100,
     wcExtraLight = 200,

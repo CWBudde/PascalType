@@ -32,6 +32,8 @@ unit PT_ResourceStrings;
 
 interface
 
+{$I PT_Compiler.inc}
+
 resourcestring
   RCStrCharMapError = 'Error in character map';
   RCStrCharMapErrorEndCount = 'Error in Character Map: wrong end count (%d)';
@@ -47,13 +49,26 @@ resourcestring
   RCStrHorizontalHeaderReserved = 'Horizontal Header Reserved Value <> 0';
   RCStrIndexOutOfBounds = 'Index out of bounds (%d)';
   RCStrInvalidInstruction = 'Invalid Instruction';
+  RCStrLocationOffsetError = 'Location offsets must be in ascending order!';
+  RCStrNoCharacterMapTable = 'Character map table not found!';
+  RCStrNoGlyphDataTable = 'Glyph data table not found!';
+  RCStrNoHeaderTable = 'Header table not found!';
   RCStrNoHorizontalHeader = 'Horizontal header not found';
+  RCStrNoHorizontalHeaderTable = 'Horizontal header table not found!';
+  RCStrNoHorizontalMetricsTable = 'Horizontal metrics table not found!';
+  RCStrNoIndexToLocationTable = 'Index to Location table not found!';
   RCStrNoMagic = 'There is no magic in it!';
+  RCStrNoMaximumProfileTable = 'Maximum profile table not found!';
+  RCStrNoNameTable = 'Name table not found!';
+  RCStrNoOS2Table = 'OS/2 table not found!';
+  RCStrNoPostscriptTable = 'Postscript table not found!';
   RCStrNotImplemented = 'not implemented';
   RCStrNoVerticalHeader = 'Vertical header not found';
   RCStrPaddingByteError = 'Padding Byte <> 0!';
+  RCStrReservedValueError = 'Wrong reserved value (%d)';
   RCStrTableIncomplete = 'Could not load the table entirely!';
   RCStrTablesMissing = 'Not all required tables are present!';
+  RCStrTooFewMetamorphosisChains = 'At least one chain expected';
   RCStrTooManyContours = 'Too many contours (%d / %d)';
   RCStrTooManyInstructions = 'Too many instructions (%d)';
   RCStrTooManyPoints = 'Too many points (%d)';
@@ -67,12 +82,14 @@ resourcestring
   RCStrWrongCharacterIndex = 'Wrong character index!';
   RCStrWrongEntrySelector = 'Wrong entry selector!';
   RCStrWrongFilesize = 'Wrong file size!';
+  RCStrWrongFormat = 'Wrong Format';
+  RCStrWrongIndexToLocFormat = 'Wrong IndexToLocFormat (%d)';
   RCStrWrongRangeShift = 'Wrong range shift!';
   RCStrWrongSearchRange = 'Wrong search range!';
+  {$IFDEF ValidateEveryReadOperation}
+  RCStrStreamReadError = 'Stream read error!';
+  {$ENDIF}
 
-  RCStrReservedValueError = 'Wrong reserved value (%d)';
-  RCStrTooFewMetamorphosisChains = 'At least one chain expected';
-  RCStrWrongFormat = 'Wrong Format';
 
 implementation
 

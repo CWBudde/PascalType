@@ -1228,3 +1228,7 @@
 
 // for Delphi/BCB trial versions remove the point from the line below
 {.$UNDEF SUPPORTS_WEAKPACKAGEUNIT}
+
+{$IFNDEF SUPPORTS_INLINE}
+{$UNDEF UseInline}
+{$ENDIF}

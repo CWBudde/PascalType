@@ -91,14 +91,8 @@ type
     FyMax               : SmallInt;   // for all glyph bounding boxes
     FMacStyle           : TMacStyles; // see TMacStyles
     FLowestRecPPEM      : Word;       // smallest readable size in pixels
-    FFontDirectionHint  : TFontDirectionHint; //0 Mixed directional glyphs
-       {
-          1 Only strongly left to right glyphs
-          2 Like 1 but also contains neutrals
-          -1 Only strongly right to left glyphs
-          -2 Like -1 but also contains neutrals
-       }
-    FIndexToLocFormat   : Word; // 0 for short offsets, 1 for long
+    FFontDirectionHint  : TFontDirectionHint; 
+    FIndexToLocFormat   : TIndexToLocationFormat;
     FGlyphDataFormat    : Word; // 0 for current format
     procedure SetCheckSumAdjustment(const Value: Longint);
     procedure SetCreatedDate(const Value: Int64);
@@ -106,7 +100,7 @@ type
     procedure SetFontDirectionHint(const Value: TFontDirectionHint);
     procedure SetFontRevision(const Value: TFixedPoint);
     procedure SetGlyphDataFormat(const Value: Word);
-    procedure SetIndexToLocFormat(const Value: Word);
+    procedure SetIndexToLocFormat(const Value: TIndexToLocationFormat);
     procedure SetLowestRecPPEM(const Value: Word);
     procedure SetMacStyle(const Value: TMacStyles);
     procedure SetModifiedDate(const Value: Int64);
@@ -160,7 +154,7 @@ type
     property MacStyle: TMacStyles read FMacStyle write SetMacStyle;
     property LowestRecPPEM: Word read FLowestRecPPEM write SetLowestRecPPEM; //smallest readable size in pixels
     property FontDirectionHint: TFontDirectionHint read FFontDirectionHint write SetFontDirectionHint; //0 Mixed directional glyphs
-    property IndexToLocFormat: Word read FIndexToLocFormat write SetIndexToLocFormat; // 0 for short offsets, 1 for long
+    property IndexToLocationFormat: TIndexToLocationFormat read FIndexToLocFormat write SetIndexToLocFormat; // 0 for short offsets, 1 for long
     property GlyphDataFormat: Word read FGlyphDataFormat write SetGlyphDataFormat; // 0 for current format
   end;
 
@@ -832,12 +826,14 @@ function Swap32(Value: Cardinal): Cardinal;
 function Swap64(Value: Int64): Int64;
 
 // big-endian stream I/O
-function ReadSwappedWord(Stream: TStream): Word;
-function ReadSwappedCardinal(Stream: TStream): Cardinal;
-function ReadSwappedInt64(Stream: TStream): Int64;
-procedure WriteSwappedWord(Stream: TStream; Value : Word);
-procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal);
-procedure WriteSwappedInt64(Stream: TStream; Value: Int64);
+function ReadSwappedWord(Stream: TStream): Word; {$IFDEF UseInline} inline; {$ENDIF}
+function ReadSwappedSmallInt(Stream: TStream): SmallInt; {$IFDEF UseInline} inline; {$ENDIF}
+function ReadSwappedCardinal(Stream: TStream): Cardinal; {$IFDEF UseInline} inline; {$ENDIF}
+function ReadSwappedInt64(Stream: TStream): Int64; {$IFDEF UseInline} inline; {$ENDIF}
+procedure WriteSwappedWord(Stream: TStream; Value : Word); {$IFDEF UseInline} inline; {$ENDIF}
+procedure WriteSwappedSmallInt(Stream: TStream; Value : SmallInt); {$IFDEF UseInline} inline; {$ENDIF}
+procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal); {$IFDEF UseInline} inline; {$ENDIF}
+procedure WriteSwappedInt64(Stream: TStream; Value: Int64); {$IFDEF UseInline} inline; {$ENDIF}
 
 procedure RegisterPascalTypeTable(TableClass: TCustomPascalTypeNamedTableClass);
 procedure RegisterPascalTypeTables(TableClasses: array of TCustomPascalTypeNamedTableClass);
@@ -847,6 +843,7 @@ implementation
 
 uses
   Math, PT_ResourceStrings;
+
 
 var
   GTableClasses : array of TCustomPascalTypeNamedTableClass;
@@ -876,26 +873,58 @@ end;
 
 function ReadSwappedWord(Stream: TStream): Word;
 begin
+ {$IFDEF ValidateEveryReadOperation}
+ if Stream.Read(Result, SizeOf(Word)) <> SizeOf(Word)
+  then raise EPascalTypeError.Create(RCStrStreamReadError);
+ {$ELSE}
  Stream.Read(Result, SizeOf(Word));
+ {$ENDIF}
+ Result := Swap16(Result);
+end;
+
+function ReadSwappedSmallInt(Stream: TStream): SmallInt;
+begin
+ {$IFDEF ValidateEveryReadOperation}
+ if Stream.Read(Result, SizeOf(SmallInt)) <> SizeOf(SmallInt)
+  then raise EPascalTypeError.Create(RCStrStreamReadError);
+ {$ELSE}
+ Stream.Read(Result, SizeOf(SmallInt));
+ {$ENDIF}
  Result := Swap16(Result);
 end;
 
 function ReadSwappedCardinal(Stream: TStream): Cardinal;
 begin
+ {$IFDEF ValidateEveryReadOperation}
+ if Stream.Read(Result, SizeOf(Cardinal)) <> SizeOf(Cardinal)
+  then raise EPascalTypeError.Create(RCStrStreamReadError);
+ {$ELSE}
  Stream.Read(Result, SizeOf(Cardinal));
+ {$ENDIF}
  Result := Swap32(Result);
 end;
 
 function ReadSwappedInt64(Stream: TStream): Int64;
 begin
+ {$IFDEF ValidateEveryReadOperation}
+ if Stream.Read(Result, SizeOf(Int64)) <> SizeOf(Int64)
+  then raise EPascalTypeError.Create(RCStrStreamReadError);
+ {$ELSE}
  Stream.Read(Result, SizeOf(Int64));
+ {$ENDIF}
  Result := Swap64(Result);
 end;
 
-procedure WriteSwappedWord(Stream: TStream; Value : Word);
+procedure WriteSwappedWord(Stream: TStream; Value: Word);
 begin
  Value := Swap16(Value);
  Stream.Write(Value, SizeOf(Word));
+end;
+
+procedure WriteSwappedSmallInt(Stream: TStream; Value: SmallInt);
+begin
+ Value := Swap16(Value);
+ Stream.Write(Value, SizeOf(SmallInt));
 end;
 
 procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal);
@@ -1047,20 +1076,16 @@ begin
    FModifiedDate := Swap64(Value64);
 
    // read xMin
-   Read(Value16, SizeOf(SmallInt));
-   FxMin := Swap16(Value16);
+   FxMin := ReadSwappedSmallInt(Stream);
 
    // read yMin
-   Read(Value16, SizeOf(SmallInt));
-   FyMin := Swap16(Value16);
+   FyMin := ReadSwappedSmallInt(Stream);
 
    // read xMax
-   Read(Value16, SizeOf(SmallInt));
-   FxMax := Swap16(Value16);
+   FxMax := ReadSwappedSmallInt(Stream);
 
    // read xMax
-   Read(Value16, SizeOf(SmallInt));
-   FyMax := Swap16(Value16);
+   FyMax := ReadSwappedSmallInt(Stream);
 
    // read MacStyle
    FMacStyle := WordToMacStyles(ReadSwappedWord(Stream));
@@ -1069,16 +1094,18 @@ begin
    FLowestRecPPEM := ReadSwappedWord(Stream);
 
    // read FontDirectionHint
-   Read(Value16, SizeOf(SmallInt));
-   FFontDirectionHint := TFontDirectionHint(Swap16(Value16));
+   FFontDirectionHint := TFontDirectionHint(ReadSwappedSmallInt(Stream));
 
    // read IndexToLocFormat
-   Read(Value16, SizeOf(SmallInt));
-   FIndexToLocFormat := Swap16(Value16);
+   Value16 := ReadSwappedSmallInt(Stream);
+   case Value16 of
+    0 : FIndexToLocFormat := ilShort;
+    1 : FIndexToLocFormat := ilLong;
+    else raise EPascalTypeError.CreateFmt(RCStrWrongIndexToLocFormat, [Value16]);
+   end;
 
    // read GlyphDataFormat
-   Read(Value16, SizeOf(SmallInt));
-   FGlyphDataFormat := Swap16(Value16);
+   FGlyphDataFormat := ReadSwappedSmallInt(Stream);
   end;
 end;
 
@@ -1151,8 +1178,11 @@ begin
    Write(Value16, SizeOf(Word));
 
    // write IndexToLocFormat
-   Value16 := Swap16(FIndexToLocFormat);
-   Write(Value16, SizeOf(Word));
+   case FIndexToLocFormat of
+    ilShort: WriteSwappedWord(Stream, 0);
+    ilLong: WriteSwappedWord(Stream, 1);
+    else raise EPascalTypeError.CreateFmt(RCStrWrongIndexToLocFormat, [Value16]);
+   end;
 
    // write GlyphDataFormat
    Value16 := Swap16(FGlyphDataFormat);
@@ -1216,7 +1246,7 @@ begin
   end;
 end;
 
-procedure TPascalTypeHeaderTable.SetIndexToLocFormat(const Value: Word);
+procedure TPascalTypeHeaderTable.SetIndexToLocFormat(const Value: TIndexToLocationFormat);
 begin
  if FIndexToLocFormat <> Value then
   begin
@@ -1666,7 +1696,7 @@ begin
 
    {$IFDEF AmbigiousExceptions}
    // read reserved
-   Read(Value16, SizeOf(Word));
+   Value16 := ReadSwappedWord(Stream);
 
    // confirm reserved value is valid
    if Value16 <> 0
@@ -1700,7 +1730,7 @@ begin
    for SegIndex := 0 to Length(FIdRangeOffset) - 1
     do FIdRangeOffset[SegIndex] := ReadSwappedWord(Stream);
 
-   SetLength(FGlyphIdArray, (FLength - (Position - StartPos)) div 2);
+   SetLength(FGlyphIdArray, (FLength - 2 - (Position - StartPos)) div 2);
 
    // read glyph ID array
    for SegIndex := 0 to Length(FGlyphIdArray) - 1
@@ -2169,50 +2199,41 @@ begin
 
    // read version
    Read(Value32, SizeOf(TFixedPoint));
-   Version := TFixedPoint(Swap32(Value32));
+   FVersion := TFixedPoint(Swap32(Value32));
 
    // check version
    if not (Version.Value = 1)
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read Ascent
-   Read(Value16, SizeOf(SmallInt));
-   Ascent := Swap16(Value16);
+   FAscent := ReadSwappedSmallInt(Stream);
 
    // read Descent
-   Read(Value16, SizeOf(SmallInt));
-   Descent := Swap16(Value16);
+   FDescent := ReadSwappedSmallInt(Stream);
 
    // read LineGap
-   Read(Value16, SizeOf(SmallInt));
-   LineGap := Swap16(Value16);
+   FLineGap := ReadSwappedSmallInt(Stream);
 
    // read AdvanceWidthMax
-   AdvanceWidthMax := ReadSwappedWord(Stream);
+   FAdvanceWidthMax := ReadSwappedWord(Stream);
 
    // read MinLeftSideBearing
-   Read(Value16, SizeOf(SmallInt));
-   MinLeftSideBearing := Swap16(Value16);
+   FMinLeftSideBearing := ReadSwappedSmallInt(Stream);
 
    // read MinRightSideBearing
-   Read(Value16, SizeOf(SmallInt));
-   MinRightSideBearing := Swap16(Value16);
+   FMinRightSideBearing := ReadSwappedSmallInt(Stream);
 
    // read XMaxExtent
-   Read(Value16, SizeOf(SmallInt));
-   XMaxExtent := Swap16(Value16);
+   FXMaxExtent := ReadSwappedSmallInt(Stream);
 
    // read CaretSlopeRise
-   Read(Value16, SizeOf(SmallInt));
-   CaretSlopeRise := Swap16(Value16);
+   FCaretSlopeRise := ReadSwappedSmallInt(Stream);
 
    // read CaretSlopeRun
-   Read(Value16, SizeOf(SmallInt));
-   CaretSlopeRun := Swap16(Value16);
+   FCaretSlopeRun := ReadSwappedSmallInt(Stream);
 
    // read CaretOffset
-   Read(Value16, SizeOf(SmallInt));
-   CaretOffset := Swap16(Value16);
+   FCaretOffset := ReadSwappedSmallInt(Stream);
 
    {$IFDEF AmbigiousExceptions}
    Read(Value32, SizeOf(Cardinal));
@@ -2228,11 +2249,10 @@ begin
    {$ENDIF}
 
    // read MetricDataFormat
-   Read(Value16, SizeOf(SmallInt));
-   MetricDataFormat := Swap16(Value16);
+   FMetricDataFormat := ReadSwappedSmallInt(Stream);
 
    // read NumOfLongHorMetrics
-   NumOfLongHorMetrics := ReadSwappedWord(Stream);;
+   FNumOfLongHorMetrics := ReadSwappedWord(Stream);
   end;
 end;
 
@@ -2252,43 +2272,43 @@ begin
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // write Ascent
-   Value16 := Swap16(Ascent);
+   Value16 := Swap16(FAscent);
    Write(Value16, SizeOf(SmallInt));
 
    // write Descent
-   Value16 := Swap16(Descent);
+   Value16 := Swap16(FDescent);
    Write(Value16, SizeOf(SmallInt));
 
    // write LineGap
-   Value16 := Swap16(LineGap);
+   Value16 := Swap16(FLineGap);
    Write(Value16, SizeOf(SmallInt));
 
    // write AdvanceWidthMax
-   Value16 := Swap16(AdvanceWidthMax);
+   Value16 := Swap16(FAdvanceWidthMax);
    Write(Value16, SizeOf(Word));
 
    // write MinLeftSideBearing
-   Value16 := Swap16(MinLeftSideBearing);
+   Value16 := Swap16(FMinLeftSideBearing);
    Write(Value16, SizeOf(SmallInt));
 
    // write MinRightSideBearing
-   Value16 := Swap16(MinRightSideBearing);
+   Value16 := Swap16(FMinRightSideBearing);
    Write(Value16, SizeOf(SmallInt));
 
    // write XMaxExtent
-   Value16 := Swap16(XMaxExtent);
+   Value16 := Swap16(FXMaxExtent);
    Write(Value16, SizeOf(SmallInt));
 
    // write CaretSlopeRise
-   Value16 := Swap16(CaretSlopeRise);
+   Value16 := Swap16(FCaretSlopeRise);
    Write(Value16, SizeOf(SmallInt));
 
    // write CaretSlopeRun
-   Value16 := Swap16(CaretSlopeRun);
+   Value16 := Swap16(FCaretSlopeRun);
    Write(Value16, SizeOf(SmallInt));
 
    // write CaretOffset
-   Value16 := Swap16(CaretOffset);
+   Value16 := Swap16(FCaretOffset);
    Write(Value16, SizeOf(SmallInt));
 
    // reserved, set to zero!
@@ -2297,11 +2317,11 @@ begin
    Write(Value32, SizeOf(Cardinal));
 
    // write MetricDataFormat
-   Value16 := Swap16(MetricDataFormat);
+   Value16 := Swap16(FMetricDataFormat);
    Write(Value16, SizeOf(SmallInt));
 
    // write NumOfLongHorMetrics
-   Value16 := Swap16(NumOfLongHorMetrics);
+   Value16 := Swap16(FNumOfLongHorMetrics);
    Write(Value16, SizeOf(Word));
   end;
 end;
@@ -2541,21 +2561,18 @@ begin
     with FHorizontalMetrics[MtxIndex] do
      begin
       // read advance width
-      Read(Value16, SizeOf(SmallInt));
-      AdvanceWidth := SmallInt(Swap16(Value16));
+      AdvanceWidth := ReadSwappedSmallInt(Stream);
 
       // read left side bearing
-      Read(Value16, SizeOf(SmallInt));
-      Bearing := Swap16(Value16);
+      Bearing := ReadSwappedSmallInt(Stream);
      end;
 
    for MtxIndex := HorHead.NumOfLongHorMetrics to Length(FHorizontalMetrics)  - 1 do
     with FHorizontalMetrics[MtxIndex] do
      begin
       // read advance width / left side bearing at once
-      Read(Value16, SizeOf(SmallInt));
-      AdvanceWidth := Swap16(Value16);
-      Bearing := Swap16(Value16);
+      AdvanceWidth := ReadSwappedSmallInt(Stream);
+      Bearing := AdvanceWidth;
      end;
   end;
 end;
@@ -2612,8 +2629,6 @@ begin
 end;
 
 procedure TCustomTrueTypeFontNamePlatform.LoadFromStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
  with Stream do
   begin
@@ -2628,8 +2643,7 @@ begin
    FLanguageID := ReadSwappedWord(Stream);
 
    // read name ID
-   Read(Value16, SizeOf(Word));
-   FNameID := TNameID(Swap16(Value16));
+   FNameID := TNameID(ReadSwappedWord(Stream));
   end;
 end;
 

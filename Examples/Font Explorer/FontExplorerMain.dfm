@@ -2,8 +2,8 @@ object FmTTF: TFmTTF
   Left = 309
   Top = 95
   Caption = 'PascalType Font Explorer'
-  ClientHeight = 470
-  ClientWidth = 584
+  ClientHeight = 486
+  ClientWidth = 691
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,13 +20,13 @@ object FmTTF: TFmTTF
   object Splitter: TSplitter
     Left = 204
     Top = 24
-    Height = 424
+    Height = 440
   end
   object TreeView: TTreeView
     Left = 0
     Top = 24
     Width = 204
-    Height = 424
+    Height = 440
     Align = alLeft
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -43,16 +43,16 @@ object FmTTF: TFmTTF
   object PnMain: TPanel
     Left = 207
     Top = 24
-    Width = 377
-    Height = 424
+    Width = 484
+    Height = 440
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
     object ListView: TListView
       Left = 0
       Top = 0
-      Width = 377
-      Height = 424
+      Width = 484
+      Height = 440
       Align = alClient
       Columns = <>
       ReadOnly = True
@@ -62,8 +62,8 @@ object FmTTF: TFmTTF
     object PnPaintBox: TPanel
       Left = 0
       Top = 0
-      Width = 377
-      Height = 424
+      Width = 484
+      Height = 440
       Align = alClient
       BevelInner = bvLowered
       BevelOuter = bvNone
@@ -72,8 +72,8 @@ object FmTTF: TFmTTF
       object PaintBox: TPaintBox
         Left = 1
         Top = 1
-        Width = 375
-        Height = 422
+        Width = 482
+        Height = 438
         Align = alClient
         Color = clWhite
         ParentColor = False
@@ -126,8 +126,8 @@ object FmTTF: TFmTTF
     object ListBox: TListBox
       Left = 0
       Top = 0
-      Width = 377
-      Height = 424
+      Width = 484
+      Height = 440
       Align = alClient
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -141,8 +141,8 @@ object FmTTF: TFmTTF
     inline FrFontHeader: TFrameFontHeader
       Left = 0
       Top = 0
-      Width = 377
-      Height = 424
+      Width = 484
+      Height = 440
       Align = alClient
       Constraints.MinHeight = 360
       Constraints.MinWidth = 370
@@ -163,8 +163,8 @@ object FmTTF: TFmTTF
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 448
-    Width = 584
+    Top = 464
+    Width = 691
     Height = 22
     Panels = <
       item
@@ -174,7 +174,7 @@ object FmTTF: TFmTTF
   object CoolBar: TCoolBar
     Left = 0
     Top = 0
-    Width = 584
+    Width = 691
     Height = 24
     Bands = <
       item
@@ -182,13 +182,13 @@ object FmTTF: TFmTTF
         Control = ToolBar
         ImageIndex = -1
         MinHeight = 22
-        Width = 584
+        Width = 691
       end>
     EdgeBorders = [ebTop]
     object ToolBar: TToolBar
       Left = 9
       Top = 0
-      Width = 571
+      Width = 678
       Height = 22
       Caption = 'ToolBar'
       EdgeInner = esNone

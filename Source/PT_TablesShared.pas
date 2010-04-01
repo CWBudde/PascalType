@@ -204,7 +204,7 @@ begin
 
  with Stream do
   begin
-   // check if table is complete
+   // check (minimum) table size
    if Position + 12 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -501,6 +501,10 @@ begin
 
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 24 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
    // read index subtable array offset
    Read(Value32, SizeOf(Cardinal));
    FIndexSubTableArrayOffset := Swap32(Value32);

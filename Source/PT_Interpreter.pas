@@ -255,57 +255,57 @@ begin
 
    // read header table
    if not Assigned(HeaderTable)
-    then raise EPascalTypeError.Create('Header table not found!');
+    then raise EPascalTypeError.Create(RCStrNoHeaderTable);
    LoadTableFromStream(Stream, HeaderTable);
 
    // read maximum profile table
    if not Assigned(MaximumProfileDataEntry)
-    then raise EPascalTypeError.Create('Maximum profile table not found!');
+    then raise EPascalTypeError.Create(RCStrNoMaximumProfileTable);
    LoadTableFromStream(Stream, MaximumProfileDataEntry);
 
    // read horizontal header table
    if not Assigned(HorizontalHeaderDataEntry)
-    then raise EPascalTypeError.Create('Horizontal header table not found!');
+    then raise EPascalTypeError.Create(RCStrNoHorizontalHeaderTable);
    LoadTableFromStream(Stream, HorizontalHeaderDataEntry);
 
    // read horizontal metrics table
    if not Assigned(HorizontalMetricsDataEntry)
-    then raise EPascalTypeError.Create('Horizontal metrics table not found!');
+    then raise EPascalTypeError.Create(RCStrNoHorizontalMetricsTable);
    LoadTableFromStream(Stream, HorizontalMetricsDataEntry);
 
    // read character map table
    if not Assigned(CharacterMapDataEntry)
-    then raise EPascalTypeError.Create('Character map table not found!');
+    then raise EPascalTypeError.Create(RCStrNoCharacterMapTable);
    LoadTableFromStream(Stream, CharacterMapDataEntry);
 
    // read name table
    if not Assigned(NameDataEntry)
-    then raise EPascalTypeError.Create('Name table not found!');
+    then raise EPascalTypeError.Create(RCStrNoNameTable);
    LoadTableFromStream(Stream, NameDataEntry);
 
    // read postscript table
    if not Assigned(PostscriptDataEntry)
-    then raise EPascalTypeError.Create('Postscript table not found!');
+    then raise EPascalTypeError.Create(RCStrNoPostscriptTable);
    LoadTableFromStream(Stream, PostscriptDataEntry);
 
    // eventually read OS/2 table or eventually raise an exception
    if Assigned(OS2TableEntry)
     then LoadTableFromStream(Stream, OS2TableEntry) else
    if (Version = $00010000)
-    then raise EPascalTypeError.Create('OS/2 table not found!');
+    then raise EPascalTypeError.Create(RCStrNoOS2Table);
 
    // TODO check if these are required by tables already read!!!
    // read index to location table
    if Assigned(LocationDataEntry)
     then LoadTableFromStream(Stream, LocationDataEntry) else
    if (Version = $74727565)
-    then raise EPascalTypeError.Create('Glyph data table not found!');
+    then raise EPascalTypeError.Create(RCStrNoIndexToLocationTable);
 
    // read glyph data table
    if Assigned(GlyphDataEntry)
     then LoadTableFromStream(Stream, GlyphDataEntry) else
    if (Version = $74727565)
-    then raise EPascalTypeError.Create('Index to Location table not found!');
+    then raise EPascalTypeError.Create(RCStrNoGlyphDataTable);
 
    // read other table entries from stream
    for TableIndex := 0 to TableList.Count - 1

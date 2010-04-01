@@ -191,6 +191,10 @@ begin
 
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 4 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
    // read version
    Read(Value32, SizeOf(Cardinal));
    FVersion := TFixedPoint(Swap32(Value32));
@@ -342,7 +346,7 @@ begin
 
  with Stream do
   begin
-   // check if table is complete
+   // check (minimum) table size
    if Position + 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -444,7 +448,7 @@ begin
    // load vertical metrics from stream
    FVerticalMetrics.LoadFromStream(Stream);
 
-   // check if table is complete
+   // check (minimum) table size
    if Position + 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -605,7 +609,7 @@ begin
 
  with Stream do
   begin
-   // check if table is complete
+   // check (minimum) table size
    if Position + 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 

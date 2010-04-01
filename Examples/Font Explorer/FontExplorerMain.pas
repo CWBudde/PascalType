@@ -7,8 +7,8 @@ uses
   Menus, ComCtrls, StdCtrls, ExtCtrls, ToolWin, ActnList, StdActns, AppEvnts,
   ImgList, PT_Types, PT_Tables, PT_TablesTrueType, PT_TablesOptional,
   PT_TablesBitmap, PT_TablesOpenType, PT_TablesApple, PT_TablesShared,
-  PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames, PT_Rasterizer,
-  FE_FontHeader;
+  PT_TablesFontForge, PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames,
+  PT_Rasterizer, FE_FontHeader;
 
 {.$DEFINE ShowContours}
 
@@ -143,6 +143,8 @@ type
     procedure DisplayHeaderTable(HeaderTable: TPascalTypeHeaderTable);
     procedure DisplayHorizontalHeader(HorizontalHeaderTable: TPascalTypeHorizontalHeaderTable);
     procedure DisplayHorizontalMetrics(HorizontalMetricsTable: TPascalTypeHorizontalMetricsTable);
+    procedure DisplayHorizontalDeviceMetricsTable(HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsTable);
+    procedure DisplayHorizontalDeviceMetricsSubTable(HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsSubTable);
     procedure DisplayJustificationTable(JustificationTable: TOpenTypeJustificationTable);
     procedure DisplayLinearThresholdTable(LinearThresholdTable: TPascalTypeLinearThresholdTable);
     procedure DisplayLocationTable(LocationTable: TTrueTypeFontLocationTable);
@@ -159,7 +161,9 @@ type
     procedure DisplayPCL5Table(PCL5Table: TPascalTypePCL5Table);
     procedure DisplayPostscriptTable(PostscriptTable: TPascalTypePostscriptTable);
     procedure DisplayPostscriptV2Table(PostscriptTable: TPascalTypePostscriptVersion2Table);
+    procedure DisplayVerticalDeviceMetricsTable(VerticalDeviceMetricsTable: TPascalTypeVerticalDeviceMetricsTable);
     procedure DisplayVerticalHeader(VerticalHeaderTable: TPascalTypeVerticalHeaderTable);
+
 
     procedure DisplayCustomOpenTypeScriptTable(ScriptTable: TCustomOpenTypeScriptTable);
     procedure DisplayCustomOpenTypeLanguageSystemTable(LanguageSystemTable: TCustomOpenTypeLanguageSystemTable);
@@ -172,6 +176,9 @@ type
     procedure DisplayGlyphDataSimpleOutline(SimpleGlyphData: TTrueTypeFontSimpleGlyphData);
     procedure DisplayGlyphDataCompositeOutline(CompositeGlyphData: TTrueTypeFontCompositeGlyphData);
     procedure DisplayGlyphDataContour(Contour: TPascalTypeContour);
+
+    procedure DisplayFontForgeTimeStampTable(FontForgeTimeStampTable: TPascalTypeFontForgeTimeStampTable);
+    procedure DisplayFontForgeExtensionTable(FontForgeExtensionTable: TPascalTypeFontForgeExtensionTable);
 
     procedure FontSizeChanged;
   public
@@ -826,6 +833,43 @@ begin
   end;
 end;
 
+procedure TFmTTF.DisplayFontForgeTimeStampTable(
+  FontForgeTimeStampTable: TPascalTypeFontForgeTimeStampTable);
+begin
+ with FontForgeTimeStampTable do
+  begin
+   InitializeDefaultListView;
+
+   // show version
+   ListViewData(['Version', IntToStr(Version)]);
+
+   // show time stamp date
+   ListViewData(['Time Stamp', DateTimeToStr(TimeStamp / 86400 + EncodeDate(1904, 1, 1))]);
+
+   // show creation date
+   ListViewData(['Font Created', DateTimeToStr(CreationDate / 86400 + EncodeDate(1904, 1, 1))]);
+
+   // show modification date
+   ListViewData(['Font Modified', DateTimeToStr(ModifiedDate / 86400 + EncodeDate(1904, 1, 1))]);
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayFontForgeExtensionTable(
+  FontForgeExtensionTable: TPascalTypeFontForgeExtensionTable);
+begin
+ with FontForgeExtensionTable do
+  begin
+   InitializeDefaultListView;
+
+   // show version
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+
+   ListView.BringToFront;
+  end;
+end;
+
 procedure TFmTTF.DisplayFontInstructionTable(
   InstructionTable: TCustomTrueTypeFontInstructionTable);
 var
@@ -1119,6 +1163,46 @@ begin
 
    // end update (unlock)
    ListView.Items.EndUpdate;
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayHorizontalDeviceMetricsTable(
+  HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsTable);
+begin
+ with HorDevMetricsTable do
+  begin
+   InitializeDefaultListView;
+
+   // add version
+   ListViewData(['Version', IntToStr(Version)]);
+
+   // add number of device record count
+   ListViewData(['Number of Device Records', IntToStr(DeviceRecordCount)]);
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayHorizontalDeviceMetricsSubTable(
+  HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsSubTable);
+var
+  WidthIndex : Integer;
+begin
+ with HorDevMetricsTable do
+  begin
+   InitializeDefaultListView;
+
+   // add ppem
+   ListViewData(['Pixels per Em', IntToStr(ppem)]);
+
+   // add maximum width
+   ListViewData(['Maximum Width', IntToStr(MaxWidth)]);
+
+   // list widths
+   for WidthIndex := 0 to WidthCount - 1
+    do ListViewData(['Width #' + IntToStr(WidthIndex), IntToStr(Width[WidthIndex])]);
 
    ListView.BringToFront;
   end;
@@ -1922,8 +2006,8 @@ begin
   begin
    InitializeDefaultListView;
 
-   // add  Format Type
-   ListViewData(['Format Type', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   // add Version
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    // add Italic Angle
    ListViewData(['Italic Angle', FloatToStrF(ItalicAngle.Value + ItalicAngle.Fract / (1 shl 16), ffGeneral, 4, 4)]);
@@ -1963,6 +2047,9 @@ begin
    // add columns
    ListViewColumns(['Glyph #', 'Name']);
 
+   // set width of glyph number comumn
+   ListView.Columns[0].Width := 96;
+
    // begin update (lock)
    ListView.Items.BeginUpdate;
 
@@ -1981,12 +2068,35 @@ begin
   end;
 end;
 
+procedure TFmTTF.DisplayVerticalDeviceMetricsTable(
+  VerticalDeviceMetricsTable: TPascalTypeVerticalDeviceMetricsTable);
+begin
+ with VerticalDeviceMetricsTable do
+  begin
+   InitializeDefaultListView;
+
+   // add version
+   ListViewData(['Version', IntToStr(Version)]);
+
+   // add number of ratios
+   ListViewData(['Number of Ratios', IntToStr(RatioCount)]);
+
+   // add number of groups
+   ListViewData(['Number of Groups', IntToStr(GroupCount)]);
+
+   ListView.BringToFront;
+  end;
+end;
+
 procedure TFmTTF.DisplayVerticalHeader(
   VerticalHeaderTable: TPascalTypeVerticalHeaderTable);
 begin
  with VerticalHeaderTable do
   begin
    InitializeDefaultListView;
+
+   // add version
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    ListView.BringToFront;
   end;
@@ -2079,6 +2189,14 @@ begin
    // Horizontal Metrics Table
    if TObject(Node.Data) is TPascalTypeHorizontalMetricsTable
     then DisplayHorizontalMetrics(TPascalTypeHorizontalMetricsTable(Node.Data)) else
+
+   // Horizontal Device Metrics
+   if TObject(Node.Data) is TPascalTypeHorizontalDeviceMetricsTable
+    then DisplayHorizontalDeviceMetricsTable(TPascalTypeHorizontalDeviceMetricsTable(Node.Data)) else
+
+   // Horizontal Device Metrics Record
+   if TObject(Node.Data) is TPascalTypeHorizontalDeviceMetricsSubTable
+    then DisplayHorizontalDeviceMetricsSubTable(TPascalTypeHorizontalDeviceMetricsSubTable(Node.Data)) else
 
    // 0S/2 Table
    if TObject(Node.Data) is TPascalTypeOS2Table
@@ -2200,9 +2318,17 @@ begin
    if TObject(Node.Data) is TPascalTypeDigitalSignatureTable
     then DisplayDigitalSignatureTable(TPascalTypeDigitalSignatureTable(Node.Data)) else
 
-     // Digital Signature Block
+   // Digital Signature Block
    if TObject(Node.Data) is TPascalTypeDigitalSignatureBlock
     then DisplayDigitalSignatureBlock(TPascalTypeDigitalSignatureBlock(Node.Data)) else
+
+   // Font Forge Time Stamp Table
+   if TObject(Node.Data) is TPascalTypeFontForgeTimeStampTable
+    then DisplayFontForgeTimeStampTable(TPascalTypeFontForgeTimeStampTable(Node.Data)) else
+
+   // Font Forge Extension Table
+   if TObject(Node.Data) is TPascalTypeFontForgeExtensionTable
+    then DisplayFontForgeExtensionTable(TPascalTypeFontForgeExtensionTable(Node.Data)) else
 
    // Kerning Table
    if TObject(Node.Data) is TPascalTypeKerningTable
@@ -2257,6 +2383,10 @@ begin
    // Vertical Metrics Header Table
    if TObject(Node.Data) is TPascalTypeVerticalHeaderTable
     then DisplayVerticalHeader(TPascalTypeVerticalHeaderTable(Node.Data)) else
+
+   // Vertical Device Metrics Header Table
+   if TObject(Node.Data) is TPascalTypeVerticalDeviceMetricsTable
+    then DisplayVerticalDeviceMetricsTable(TPascalTypeVerticalDeviceMetricsTable(Node.Data)) else
 
    // other non-required tables
    if TObject(Node.Data) is TCustomPascalTypeNamedTable then
@@ -2414,30 +2544,30 @@ begin
 
    // add name table
    Node := Items.AddChildObject(Items[0], 'name', NameTable);
-
-   // check for Unicode
-   for SubtableIndex := 0 to NameTable.NameRecordCount- 1 do
-    if NameTable.NameRecord[SubtableIndex].PlatformID = piUnicode then
-     begin
-      Items.AddChildObject(Node, 'Unicode', NameTable);
-      Break;
-     end;
-
-   // check for Apple
-   for SubtableIndex := 0 to NameTable.NameRecordCount- 1 do
-    if NameTable.NameRecord[SubtableIndex].PlatformID = piApple then
-     begin
-      Items.AddChildObject(Node, 'Apple', NameTable);
-      Break;
-     end;
-
-   // check for Microsoft
-   for SubtableIndex := 0 to NameTable.NameRecordCount- 1 do
-    if NameTable.NameRecord[SubtableIndex].PlatformID = piMicrosoft then
-     begin
-      Items.AddChildObject(Node, 'Microsoft', NameTable);
-      Break;
-     end;
+   with NameTable do
+    begin
+     // check for Unicode
+     for SubtableIndex := 0 to NameRecordCount - 1 do
+      if NameRecord[SubtableIndex].PlatformID = piUnicode then
+       begin
+        Items.AddChildObject(Node, 'Unicode', NameTable);
+        Break;
+       end;
+     // check for Apple
+     for SubtableIndex := 0 to NameRecordCount - 1 do
+      if NameRecord[SubtableIndex].PlatformID = piApple then
+       begin
+        Items.AddChildObject(Node, 'Apple', NameTable);
+        Break;
+       end;
+     // check for Microsoft
+     for SubtableIndex := 0 to NameRecordCount - 1 do
+      if NameRecord[SubtableIndex].PlatformID = piMicrosoft then
+       begin
+        Items.AddChildObject(Node, 'Microsoft', NameTable);
+        Break;
+       end;
+    end;
 
    // add postscript table
    Node := Items.AddChildObject(Items[0], 'post', PostScriptTable);
@@ -2472,6 +2602,14 @@ begin
 
           Items.AddChildObject(Node, str, KerningSubtable[SubtableIndex]);
          end else
+
+      // horizontal device metrics
+      if OptionalTable[OptTableIndex] is TPascalTypeHorizontalDeviceMetricsTable then
+       with TPascalTypeHorizontalDeviceMetricsTable(OptionalTable[OptTableIndex]) do
+        begin
+         for SubtableIndex := 0 to DeviceRecordCount - 1
+          do Items.AddChildObject(Node, 'Device Record #' + IntToStr(SubtableIndex), DeviceRecord[SubtableIndex]);
+        end else
 
       // open type common table
       if OptionalTable[OptTableIndex] is TOpenTypeGlyphDefinitionTable then

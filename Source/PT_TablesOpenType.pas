@@ -516,7 +516,10 @@ type
   
   // table 'JSTF'
 
-  TCustomOpenTypeJustificationScriptTable = class(TCustomPascalTypeNamedTable)
+  // not entirely implemented, for more information see
+  // http://www.microsoft.com/typography/otspec/jstf.htm
+
+  TCustomOpenTypeJustificationLanguageSystemTable = class(TCustomOpenTypeNamedTable)
   private
   protected
     procedure AssignTo(Dest: TPersistent); override;
@@ -526,18 +529,64 @@ type
     constructor Create(Interpreter: IPascalTypeInterpreter); override;
     destructor Destroy; override;
 
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+  TOpenTypeJustificationLanguageSystemTableClass = class of TCustomOpenTypeJustificationLanguageSystemTable;
+
+  TOpenTypeJustificationLanguageSystemTable = class(TCustomOpenTypeJustificationLanguageSystemTable)
+  protected
+    class function GetDisplayName: string; override;
+  public
     class function GetTableType: TTableType; override;
+  end;
+
+  TOpenTypeExtenderGlyphTable = class(TCustomPascalTypeTable)
+  private
+    FGlyphID : array of Word; // GlyphIDs-in increasing numerical order
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+  TCustomOpenTypeJustificationScriptTable = class(TCustomOpenTypeNamedTable)
+  private
+    FExtenderGlyphTable   : TOpenTypeExtenderGlyphTable;
+    FDefaultLangSys       : TCustomOpenTypeJustificationLanguageSystemTable;
+    FLanguageSystemTables : TObjectList;
+    function GetLanguageSystemTable(Index: Integer): TCustomOpenTypeJustificationLanguageSystemTable;
+    function GetLanguageSystemTableCount: Integer;
+    procedure SetDefaultLangSys(const Value: TCustomOpenTypeJustificationLanguageSystemTable);
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
+
+    property DefaultLangSys: TCustomOpenTypeJustificationLanguageSystemTable read FDefaultLangSys write SetDefaultLangSys;
+    property LanguageSystemTableCount: Integer read GetLanguageSystemTableCount;
+    property LanguageSystemTable[Index: Integer]: TCustomOpenTypeJustificationLanguageSystemTable read GetLanguageSystemTable;
+  end;
+
+  TOpenTypeJustificationScriptTable = class(TCustomOpenTypeJustificationScriptTable)
+  protected
+    class function GetDisplayName: string; override;
+  public
+    class function GetTableType: TTableType; override;
   end;
 
   TJustificationScriptDirectoryEntry = packed record
     Tag            : TTableType;
     Offset         : Word;
-
-    ExtenderGlyph  : Word; // Offset to ExtenderGlyph table-from beginning of JstfScript table-may be NULL
-    DefJstfLangSys : Word; // Offset to Default JstfLangSys table-from beginning of JstfScript table-may be NULL
   end;
 
   TOpenTypeJustificationTable = class(TCustomPascalTypeNamedTable)
@@ -582,10 +631,16 @@ procedure RegisterFeature(FeatureClass: TOpenTypeFeatureTableClass);
 procedure RegisterFeatures(FeaturesClasses: array of TOpenTypeFeatureTableClass);
 function FindFeatureByType(TableType: TTableType): TOpenTypeFeatureTableClass;
 
+// justification language system
+procedure RegisterJustificationLanguageSystem(LanguageSystemClass: TOpenTypeJustificationLanguageSystemTableClass);
+procedure RegisterJustificationLanguageSystems(LanguageSystemClasses: array of TOpenTypeJustificationLanguageSystemTableClass);
+function FindJustificationLanguageSystemByType(TableType: TTableType): TOpenTypeJustificationLanguageSystemTableClass;
+
 var
   GFeatureClasses : array of TOpenTypeFeatureTableClass;
   GLanguageSystemClasses : array of TOpenTypeLanguageSystemTableClass;
   GScriptClasses : array of TOpenTypeScriptTableClass;
+  GJustificationLanguageSystemClasses : array of TOpenTypeJustificationLanguageSystemTableClass;
 
 implementation
 
@@ -620,12 +675,13 @@ begin
 
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 4 > Size
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read version
    Read(Value32, SizeOf(TFixedPoint));
-   Version := TFixedPoint(Swap32(Value32));
+   FVersion := TFixedPoint(Swap32(Value32));
   end;
 end;
 
@@ -709,6 +765,10 @@ begin
 
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 4 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
    // read start glyph
    Read(Value16, SizeOf(Word));
    FStartGlyph := Swap16(Value16);
@@ -812,6 +872,10 @@ begin
 
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
    // read ClassRangeRecords length
    Read(Value16, SizeOf(Word));
    SetLength(FClassRangeRecords, Swap16(Value16));
@@ -894,6 +958,10 @@ begin
 
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 4 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
    // read version
    Read(Value16, SizeOf(Word));
    FTableFormat := Swap16(Value16);
@@ -982,7 +1050,7 @@ begin
 
  with Stream do
   begin
-   // check if table is complete
+   // check (minimum) table size
    if Position + 2 > Size
     then raise Exception.Create(RCStrTableIncomplete);
 
@@ -1047,7 +1115,7 @@ begin
 
  with Stream do
   begin
-   // check if table is complete
+   // check (minimum) table size
    if Position + 2 > Size
     then raise Exception.Create(RCStrTableIncomplete);
 
@@ -1127,7 +1195,7 @@ begin
    // remember start position
    StartPos := Position;
 
-   // check if table is complete
+   // check (minimum) table size
    if Position + 4 > Size
     then raise Exception.Create(RCStrTableIncomplete);
 
@@ -1225,7 +1293,7 @@ begin
    // remember start position as position minus the version already read
    StartPos := Position - 4;
 
-   // check if table is complete
+   // check (minimum) table size
    if Position + 4 > Size
     then raise Exception.Create(RCStrTableIncomplete);
 
@@ -1551,6 +1619,10 @@ var
 begin
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 6 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
    // read default language system
    Read(Value16, SizeOf(Word));
    FLookupOrder := Swap16(Value16);
@@ -1726,14 +1798,18 @@ var
   StartPos       : Int64;
   LangSysIndex   : Integer;
   LangSysRecords : array of TTagOffsetRecord;
-  LangTable      : TCustomOpenTypeLanguageSystemTable;
-  LangTableClass : TOpenTypeLanguageSystemTableClass;
+  LangTable      : TCustomOpenTypeJustificationLanguageSystemTable;
+  LangTableClass : TOpenTypeJustificationLanguageSystemTableClass;
   DefaultLangSys : Word;
   Value16        : Word;
 begin
  with Stream do
   begin
    StartPos := Position;
+
+   // check (minimum) table size
+   if Position + 4 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
 
    // read default language system offset
    Read(Value16, SizeOf(Word));
@@ -1771,7 +1847,7 @@ begin
 
    for LangSysIndex := 0 to Length(LangSysRecords) - 1 do
     begin
-     LangTableClass := FindLanguageSystemByType(LangSysRecords[LangSysIndex].Tag);
+     LangTableClass := FindJustificationLanguageSystemByType(LangSysRecords[LangSysIndex].Tag);
 
      if Assigned(LangTableClass) then
       begin
@@ -1912,6 +1988,10 @@ begin
   begin
    StartPos := Position;
 
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
    // read script list count
    Read(Value16, SizeOf(Word));
    SetLength(ScriptList, Swap16(Value16));
@@ -2006,6 +2086,10 @@ var
 begin
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 4 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
    // read feature parameter offset
    Read(Value16, SizeOf(Word));
    FFeatureParams := Swap16(Value16);
@@ -2115,6 +2199,10 @@ begin
  with Stream do
   begin
    StartPos := Position;
+
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
 
    // read feature list count
    Read(Value16, SizeOf(Word));
@@ -2246,6 +2334,10 @@ var
 begin
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
    // read glyph array count
    Read(Value16, SizeOf(Word));
    SetLength(FGlyphArray, Swap16(Value16));
@@ -2324,6 +2416,10 @@ var
 begin
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
    // read glyph array count
    Read(Value16, SizeOf(Word));
    SetLength(FRangeArray, Swap16(Value16));
@@ -2434,6 +2530,10 @@ begin
  with Stream do
   begin
    StartPos := Position;
+
+   // check (minimum) table size
+   if Position + 6 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
 
    // read lookup type
    Read(Value16, SizeOf(Word));
@@ -2592,6 +2692,10 @@ begin
   begin
    StartPos := Position;
 
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
    // read lookup list count
    Read(Value16, SizeOf(Word));
    SetLength(LookupList, Swap16(Value16));
@@ -2678,6 +2782,7 @@ var
 begin
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 10 > Size
     then raise Exception.Create(RCStrTableIncomplete);
 
@@ -2786,6 +2891,527 @@ end;
 class function TOpenTypeGlyphSubstitutionTable.GetTableType: TTableType;
 begin
  Result := 'GSUB';
+end;
+
+
+{ TOpenTypeExtenderGlyphTable }
+
+procedure TOpenTypeExtenderGlyphTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is TCustomOpenTypeLanguageSystemTable then
+  with TCustomOpenTypeLanguageSystemTable(Dest) do
+   begin
+    FGlyphID := Self.FGlyphID;
+   end
+ else inherited;
+end;
+
+procedure TOpenTypeExtenderGlyphTable.ResetToDefaults;
+begin
+ SetLength(FGlyphID, 0);
+ inherited;
+end;
+
+procedure TOpenTypeExtenderGlyphTable.LoadFromStream(Stream: TStream);
+var
+  GlyphIdIndex : Integer;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
+   // set length of glyphID array
+   SetLength(FGlyphID, ReadSwappedWord(Stream));
+
+   // read glyph IDs from stream
+   for GlyphIdIndex := 0 to Length(FGlyphID) - 1
+    do FGlyphID[GlyphIdIndex] := ReadSwappedWord(Stream)
+  end;
+end;
+
+procedure TOpenTypeExtenderGlyphTable.SaveToStream(Stream: TStream);
+var
+  GlyphIdIndex: Integer;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // write length of glyphID array to stream
+   WriteSwappedWord(Stream, Length(FGlyphID));
+
+   // write glyph IDs to stream
+   for GlyphIdIndex := 0 to Length(FGlyphID) - 1
+    do WriteSwappedWord(Stream, FGlyphID[GlyphIdIndex]);
+  end;
+end;
+
+
+{ TCustomOpenTypeJustificationLanguageSystemTable }
+
+constructor TCustomOpenTypeJustificationLanguageSystemTable.Create(
+  Interpreter: IPascalTypeInterpreter);
+begin
+ inherited Create(Interpreter);
+end;
+
+destructor TCustomOpenTypeJustificationLanguageSystemTable.Destroy;
+begin
+ inherited;
+end;
+
+procedure TCustomOpenTypeJustificationLanguageSystemTable.AssignTo(
+  Dest: TPersistent);
+begin
+ if Dest is TCustomOpenTypeLanguageSystemTable then
+  with TCustomOpenTypeLanguageSystemTable(Dest) do
+   begin
+   end
+ else inherited;
+end;
+
+procedure TCustomOpenTypeJustificationLanguageSystemTable.ResetToDefaults;
+begin
+  inherited;
+
+end;
+
+procedure TCustomOpenTypeJustificationLanguageSystemTable.LoadFromStream(
+  Stream: TStream);
+begin
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+  end;
+end;
+
+procedure TCustomOpenTypeJustificationLanguageSystemTable.SaveToStream(
+  Stream: TStream);
+begin
+  inherited;
+
+end;
+
+
+{ TOpenTypeJustificationLanguageSystemTable }
+
+class function TOpenTypeJustificationLanguageSystemTable.GetDisplayName: string;
+begin
+ Result := 'Default';
+end;
+
+class function TOpenTypeJustificationLanguageSystemTable.GetTableType: TTableType;
+begin
+ Result := 'DFLT';
+end;
+
+
+{ TCustomOpenTypeJustificationScriptTable }
+
+constructor TCustomOpenTypeJustificationScriptTable.Create(Interpreter: IPascalTypeInterpreter);
+begin
+ FLanguageSystemTables := TObjectList.Create;
+ inherited Create(Interpreter);
+end;
+
+destructor TCustomOpenTypeJustificationScriptTable.Destroy;
+begin
+ if Assigned(FDefaultLangSys)
+  then FreeAndNil(FDefaultLangSys);
+
+ if Assigned(FExtenderGlyphTable)
+  then FreeAndNil(FExtenderGlyphTable);
+
+ FreeAndNil(FLanguageSystemTables);
+
+ inherited;
+end;
+
+procedure TCustomOpenTypeJustificationScriptTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TCustomOpenTypeJustificationScriptTable(Dest) do
+   begin
+   end
+ else inherited;
+end;
+
+procedure TCustomOpenTypeJustificationScriptTable.ResetToDefaults;
+begin
+ inherited;
+end;
+
+function TCustomOpenTypeJustificationScriptTable.GetLanguageSystemTable(
+  Index: Integer): TCustomOpenTypeJustificationLanguageSystemTable;
+begin
+ if (Index >= 0) and (Index < FLanguageSystemTables.Count)
+  then Result := TCustomOpenTypeJustificationLanguageSystemTable(FLanguageSystemTables[Index])
+  else raise Exception.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+end;
+
+procedure TCustomOpenTypeJustificationScriptTable.SetDefaultLangSys(
+  const Value: TCustomOpenTypeJustificationLanguageSystemTable);
+begin
+ FDefaultLangSys.Assign(Value);
+ Changed;
+end;
+
+function TCustomOpenTypeJustificationScriptTable.GetLanguageSystemTableCount: Integer;
+begin
+ Result := FLanguageSystemTables.Count;
+end;
+
+procedure TCustomOpenTypeJustificationScriptTable.LoadFromStream(Stream: TStream);
+var
+  StartPos       : Int64;
+  LangSysIndex   : Integer;
+  LangSysRecords : array of TTagOffsetRecord;
+  LangTable      : TCustomOpenTypeJustificationLanguageSystemTable;
+  LangTableClass : TOpenTypeJustificationLanguageSystemTableClass;
+  ExtenderGlyph  : Word;
+  DefaultLangSys : Word;
+begin
+ with Stream do
+  begin
+   StartPos := Position;
+
+   // check (minimum) table size
+   if Position + 6 > Size
+    then raise Exception.Create(RCStrTableIncomplete);
+
+   // read extender glyph offset
+   ExtenderGlyph := ReadSwappedWord(Stream);
+
+   // read default language system offset
+   DefaultLangSys := ReadSwappedWord(Stream);
+
+   // read language system record count
+   SetLength(LangSysRecords, ReadSwappedWord(Stream));
+
+   for LangSysIndex := 0 to Length(LangSysRecords) - 1 do
+    begin
+     // read table type
+     Read(LangSysRecords[LangSysIndex].Tag, SizeOf(TTableType));
+
+     // read offset
+     LangSysRecords[LangSysIndex].Offset := ReadSwappedWord(Stream);
+    end;
+
+   // load default language system
+   if ExtenderGlyph <> 0 then
+    begin
+     Position := StartPos + ExtenderGlyph;
+
+     if not Assigned(FExtenderGlyphTable)
+      then FExtenderGlyphTable := TOpenTypeExtenderGlyphTable.Create;
+
+     FExtenderGlyphTable.LoadFromStream(Stream);
+    end else
+   if Assigned(FExtenderGlyphTable)
+    then FreeAndNil(FExtenderGlyphTable);
+
+   // load default language system
+   if DefaultLangSys <> 0 then
+    begin
+     Position := StartPos + DefaultLangSys;
+
+     if not Assigned(FDefaultLangSys)
+      then FDefaultLangSys := TOpenTypeJustificationLanguageSystemTable.Create(FInterpreter);
+
+     FDefaultLangSys.LoadFromStream(Stream);
+    end else
+   if Assigned(FDefaultLangSys)
+    then FreeAndNil(FDefaultLangSys);
+
+   // clear existing language tables
+   FLanguageSystemTables.Clear;
+
+   for LangSysIndex := 0 to Length(LangSysRecords) - 1 do
+    begin
+     LangTableClass := FindJustificationLanguageSystemByType(LangSysRecords[LangSysIndex].Tag);
+
+     if Assigned(LangTableClass) then
+      begin
+       // create language table entry
+       LangTable := LangTableClass.Create(FInterpreter);
+
+       // set position
+       Position := StartPos + LangSysRecords[LangSysIndex].Offset;
+
+       // read language system table entry from stream
+       LangTable.LoadFromStream(Stream);
+
+       // add to language system tables
+       FLanguageSystemTables.Add(LangTable);
+      end;
+    end;
+  end;
+end;
+
+procedure TCustomOpenTypeJustificationScriptTable.SaveToStream(Stream: TStream);
+var
+  StartPos       : Int64;
+  LangSysIndex   : Integer;
+  LangSysRecords : array of TTagOffsetRecord;
+  Value16        : Word;
+  DefLangSysOff  : Word;
+  ExtGlyphOff    : Word;
+begin
+ with Stream do
+  begin
+   // remember start position of the stream
+   StartPos := Position;
+
+   // find offset for data
+   if Assigned(FDefaultLangSys)
+    then Value16 := 2 + 4 * FLanguageSystemTables.Count
+    else Value16 := 0;
+   if Assigned(FExtenderGlyphTable)
+    then Value16 := Value16 + 2;
+
+   Position := StartPos + Value16;
+
+   // write extender glyph table
+   if Assigned(FExtenderGlyphTable) then
+    begin
+     ExtGlyphOff := Word(Position - StartPos);
+     FExtenderGlyphTable.SaveToStream(Stream);
+    end else ExtGlyphOff := 0;
+
+   // write default language system table
+   if Assigned(FDefaultLangSys) then
+    begin
+     DefLangSysOff := Word(Position - StartPos);
+     FDefaultLangSys.SaveToStream(Stream);
+    end else DefLangSysOff := 0;
+
+   // build directory (to be written later) and write data
+   SetLength(LangSysRecords, FLanguageSystemTables.Count);
+   for LangSysIndex := 0 to Length(LangSysRecords) - 1 do
+    with TCustomOpenTypeJustificationLanguageSystemTable(FLanguageSystemTables[LangSysIndex]) do
+     begin
+      // get table type
+      LangSysRecords[LangSysIndex].Tag := TableType;
+      LangSysRecords[LangSysIndex].Offset := Position;
+
+      // write feature to stream
+      SaveToStream(Stream);
+     end;
+
+   // write extender glyph offset
+   WriteSwappedWord(Stream, ExtGlyphOff);
+
+   // write default language system offset
+   WriteSwappedWord(Stream, DefLangSysOff);
+
+   // write directory
+   Position := StartPos;
+
+   for LangSysIndex := 0 to Length(LangSysRecords) - 1 do
+    with LangSysRecords[LangSysIndex] do
+     begin
+      // write tag
+      Write(Tag, SizeOf(TTableType));
+
+      // write offset
+      Value16 := Swap16(Offset);
+      Write(Value16, SizeOf(Word));
+     end;
+  end;
+end;
+
+
+{ TOpenTypeJustificationScriptTable }
+
+class function TOpenTypeJustificationScriptTable.GetDisplayName: string;
+begin
+ Result := 'Default';
+end;
+
+class function TOpenTypeJustificationScriptTable.GetTableType: TTableType;
+begin
+ Result := 'DFLT';
+end;
+
+
+{ TOpenTypeJustificationTable }
+
+constructor TOpenTypeJustificationTable.Create;
+begin
+ FScripts := TObjectList.Create(True);
+ inherited;
+end;
+
+destructor TOpenTypeJustificationTable.Destroy;
+begin
+ FreeAndNil(FScripts);
+ inherited;
+end;
+
+class function TOpenTypeJustificationTable.GetTableType: TTableType;
+begin
+ Result := 'JSTF';
+end;
+
+procedure TOpenTypeJustificationTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is TOpenTypeJustificationTable then
+  with TOpenTypeJustificationTable(Dest) do
+   begin
+    FVersion := Self.FVersion;
+    FScripts.Assign(Self.FScripts);
+   end
+ else inherited;
+end;
+
+function TOpenTypeJustificationTable.GetScriptCount: Cardinal;
+begin
+ Result := FScripts.Count;
+end;
+
+procedure TOpenTypeJustificationTable.ResetToDefaults;
+begin
+ FVersion.Value := 1;
+ FScripts.Clear;
+end;
+
+procedure TOpenTypeJustificationTable.LoadFromStream(Stream: TStream);
+var
+  StartPos  : Int64;
+  DirIndex  : Integer;
+  Directory : array of TJustificationScriptDirectoryEntry;
+  Script    : TCustomOpenTypeJustificationScriptTable;
+  Value32   : Cardinal;
+  Value16   : Word;
+begin
+ with Stream do
+  begin
+   StartPos := Position;
+
+   if Position + 6 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // read version
+   Read(Value32, SizeOf(TFixedPoint));
+   FVersion := TFixedPoint(Swap32(Value32));
+
+   if Version.Value <> 1
+    then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
+
+   // read Justification Script Count
+   Read(Value16, SizeOf(Word));
+   SetLength(Directory, Swap16(Value16));
+
+   // check if table is complete
+   if Position + Length(Directory) * SizeOf(TJustificationScriptDirectoryEntry) > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // read directory entry
+   for DirIndex := 0 to Length(Directory) - 1 do
+    with Directory[DirIndex] do
+     begin
+      // read tag
+      Read(Tag, SizeOf(Cardinal));
+
+      // read offset
+      Read(Value16, SizeOf(Word));
+      Offset := Swap16(Value16);
+     end;
+
+   // clear existing scripts
+   FScripts.Clear;
+
+   // read digital scripts
+   for DirIndex := 0 to Length(Directory) - 1 do
+    with Directory[DirIndex] do
+     begin
+      // TODO: Find matching justification script by tag!!!
+      Script := TOpenTypeJustificationScriptTable.Create(FInterpreter);
+
+      // jump to the right position
+      Position := StartPos + Offset;
+
+      // load digital signature from stream
+      Script.LoadFromStream(Stream);
+
+      FScripts.Add(Script);
+     end;
+  end;
+end;
+
+procedure TOpenTypeJustificationTable.SaveToStream(Stream: TStream);
+var
+  StartPos  : Int64;
+  DirIndex  : Integer;
+  Directory : array of TJustificationScriptDirectoryEntry;
+  Value32   : Cardinal;
+  Value16   : Word;
+begin
+ with Stream do
+  begin
+   // store stream start position
+   StartPos := Position;
+
+   // write version
+   Value32 :=  Swap32(Cardinal(FVersion));
+   Read(Value32, SizeOf(TFixedPoint));
+
+   // write Justification Script Count
+   Value16 := Swap16(Length(Directory));
+   Write(Value16, SizeOf(Word));
+
+   // set directory length
+   SetLength(Directory, FScripts.Count);
+
+   // offset directory
+   Seek(soFromCurrent, FScripts.Count * 3 * SizeOf(Word));
+
+   // build directory and store signature
+   for DirIndex := 0 to FScripts.Count - 1 do
+    with TOpenTypeJustificationTable(FScripts[DirIndex]) do
+     begin
+      Directory[DirIndex].Offset := Position - StartPos;
+      Directory[DirIndex].Tag := GetTableType;
+      SaveToStream(Stream);
+     end;
+
+   // locate directory
+   Position := StartPos + 3 * SizeOf(Word);
+
+   // write directory entries
+   for DirIndex := 0 to Length(Directory) - 1 do
+    with Directory[DirIndex], TCustomOpenTypeJustificationScriptTable(FScripts[DirIndex]) do
+     begin
+      // write tag
+      Write(Tag, SizeOf(Cardinal));
+
+      // write offset
+      Value16 := Swap16(Offset);
+      Write(Value16, SizeOf(Word));
+     end;
+  end;
+end;
+
+procedure TOpenTypeJustificationTable.SetVersion(
+  const Value: TFixedPoint);
+begin
+ if (FVersion.Fract <> Value.Fract) or
+    (FVersion.Value <> Value.Value) then
+  begin
+   FVersion := Value;
+   VersionChanged;
+  end;
+end;
+
+procedure TOpenTypeJustificationTable.VersionChanged;
+begin
+ Changed;
 end;
 
 
@@ -2924,228 +3550,48 @@ begin
 end;
 
 
-{ TCustomOpenTypeJustificationScriptTable }
+////////////////////////////////////////////////////////////////////////////////
 
-constructor TCustomOpenTypeJustificationScriptTable.Create;
-begin
- // nothing in here yet
- inherited;
-end;
-
-destructor TCustomOpenTypeJustificationScriptTable.Destroy;
-begin
- // nothing in here yet
- inherited;
-end;
-
-procedure TCustomOpenTypeJustificationScriptTable.AssignTo(Dest: TPersistent);
-begin
- if Dest is TCustomOpenTypeJustificationScriptTable then
-  with TCustomOpenTypeJustificationScriptTable(Dest) do
-   begin
-   end
- else inherited;
-end;
-
-class function TCustomOpenTypeJustificationScriptTable.GetTableType: TTableType;
-begin
- Result := #0#0#0#0;
-end;
-
-procedure TCustomOpenTypeJustificationScriptTable.ResetToDefaults;
-begin
-
-end;
-
-procedure TCustomOpenTypeJustificationScriptTable.LoadFromStream(Stream: TStream);
-begin
-
-end;
-
-procedure TCustomOpenTypeJustificationScriptTable.SaveToStream(Stream: TStream);
-begin
-
-end;
-
-
-{ TOpenTypeJustificationTable }
-
-constructor TOpenTypeJustificationTable.Create;
-begin
- FScripts := TObjectList.Create(True);
- inherited;
-end;
-
-destructor TOpenTypeJustificationTable.Destroy;
-begin
- FreeAndNil(FScripts);
- inherited;
-end;
-
-class function TOpenTypeJustificationTable.GetTableType: TTableType;
-begin
- Result := 'JSTF';
-end;
-
-procedure TOpenTypeJustificationTable.AssignTo(Dest: TPersistent);
-begin
- if Dest is TOpenTypeJustificationTable then
-  with TOpenTypeJustificationTable(Dest) do
-   begin
-    FVersion := Self.FVersion;
-    FScripts.Assign(Self.FScripts);
-   end
- else inherited;
-end;
-
-function TOpenTypeJustificationTable.GetScriptCount: Cardinal;
-begin
- Result := FScripts.Count;
-end;
-
-procedure TOpenTypeJustificationTable.ResetToDefaults;
-begin
- FVersion.Value := 1;
- FScripts.Clear;
-end;
-
-procedure TOpenTypeJustificationTable.LoadFromStream(Stream: TStream);
+function IsJustificationLanguageSystemClassRegistered(LanguageSystemClass: TOpenTypeJustificationLanguageSystemTableClass): Boolean;
 var
-  StartPos  : Int64;
-  DirIndex  : Integer;
-  Directory : array of TJustificationScriptDirectoryEntry;
-  Script    : TCustomOpenTypeJustificationScriptTable;
-  Value32   : Cardinal;
-  Value16   : Word;
+  TableClassIndex : Integer;
 begin
- with Stream do
-  begin
-   StartPos := Position;
-
-   if Position + 6 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
-
-   // read version
-   Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
-
-   if Version.Value <> 1
-    then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
-
-   // read Justification Script Count
-   Read(Value16, SizeOf(Word));
-   SetLength(Directory, Swap16(Value16));
-
-   // check if table is complete
-   if Position + Length(Directory) * SizeOf(TJustificationScriptDirectoryEntry) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
-
-   // read directory entry
-   for DirIndex := 0 to Length(Directory) - 1 do
-    with Directory[DirIndex] do
-     begin
-      // read tag
-      Read(Tag, SizeOf(Cardinal));
-
-      // read offset
-      Read(Value16, SizeOf(Word));
-      Offset := Swap16(Value16);
-     end;
-
-   // clear existing scripts
-   FScripts.Clear;
-
-   // read digital scripts
-   for DirIndex := 0 to Length(Directory) - 1 do
-    with Directory[DirIndex] do
-     begin
-      Script := TCustomOpenTypeJustificationScriptTable.Create(FInterpreter);
-
-      Position := StartPos + Offset;
-
-      // read extender glyph offset
-      Read(Value16, SizeOf(Word));
-      ExtenderGlyph := Swap16(Value16);
-
-      // read default JstfLangSys table
-      Read(Value16, SizeOf(Word));
-      DefJstfLangSys := Swap16(Value16);
-
-      // load digital signature from stream
-      Script.LoadFromStream(Stream);
-
-      FScripts.Add(Script);
-     end;
-  end;
+ Result := False;
+ for TableClassIndex := 0 to Length(GJustificationLanguageSystemClasses) - 1 do
+  if GJustificationLanguageSystemClasses[TableClassIndex] = LanguageSystemClass then
+   begin
+    Result := True;
+    Exit;
+   end;
 end;
 
-procedure TOpenTypeJustificationTable.SaveToStream(Stream: TStream);
+procedure RegisterJustificationLanguageSystem(LanguageSystemClass: TOpenTypeJustificationLanguageSystemTableClass);
+begin
+ Assert(IsJustificationLanguageSystemClassRegistered(LanguageSystemClass) = False);
+ SetLength(GJustificationLanguageSystemClasses, Length(GJustificationLanguageSystemClasses) + 1);
+ GJustificationLanguageSystemClasses[Length(GJustificationLanguageSystemClasses) - 1] := LanguageSystemClass;
+end;
+
+procedure RegisterJustificationLanguageSystems(LanguageSystemClasses: array of TOpenTypeJustificationLanguageSystemTableClass);
 var
-  StartPos  : Int64;
-  DirIndex  : Integer;
-  Directory : array of TJustificationScriptDirectoryEntry;
-  Value32   : Cardinal;
-  Value16   : Word;
+  LangSysIndex : Integer;
 begin
- with Stream do
-  begin
-   // store stream start position
-   StartPos := Position;
-
-   // write version
-   Value32 :=  Swap32(Cardinal(FVersion));
-   Read(Value32, SizeOf(TFixedPoint));
-
-   // write Justification Script Count
-   Value16 := Swap16(Length(Directory));
-   Write(Value16, SizeOf(Word));
-
-   // set directory length
-   SetLength(Directory, FScripts.Count);
-
-   // offset directory
-   Seek(soFromCurrent, FScripts.Count * 3 * SizeOf(Word));
-
-   // build directory and store signature
-   for DirIndex := 0 to FScripts.Count - 1 do
-    with TOpenTypeJustificationTable(FScripts[DirIndex]) do
-     begin
-      Directory[DirIndex].Offset := Position - StartPos;
-      Directory[DirIndex].Tag := GetTableType;
-      SaveToStream(Stream);
-     end;
-
-   // locate directory
-   Position := StartPos + 3 * SizeOf(Word);
-
-   // write directory entries
-   for DirIndex := 0 to Length(Directory) - 1 do
-    with Directory[DirIndex], TCustomOpenTypeJustificationScriptTable(FScripts[DirIndex]) do
-     begin
-      // write tag
-      Write(Tag, SizeOf(Cardinal));
-
-      // write offset
-      Value16 := Swap16(Offset);
-      Write(Value16, SizeOf(Word));
-     end;
-  end;
+ for LangSysIndex := 0 to Length(LanguageSystemClasses) - 1
+  do RegisterJustificationLanguageSystem(LanguageSystemClasses[LangSysIndex]);
 end;
 
-procedure TOpenTypeJustificationTable.SetVersion(
-  const Value: TFixedPoint);
+function FindJustificationLanguageSystemByType(TableType: TTableType): TOpenTypeJustificationLanguageSystemTableClass;
+var
+  LangSysIndex : Integer;
 begin
- if (FVersion.Fract <> Value.Fract) or
-    (FVersion.Value <> Value.Value) then
-  begin
-   FVersion := Value;
-   VersionChanged;
-  end;
-end;
-
-procedure TOpenTypeJustificationTable.VersionChanged;
-begin
- Changed;
+ Result := nil;
+ for LangSysIndex := 0 to Length(GJustificationLanguageSystemClasses) - 1 do
+  if GJustificationLanguageSystemClasses[LangSysIndex].GetTableType = TableType then
+   begin
+    Result := GJustificationLanguageSystemClasses[LangSysIndex];
+    Exit;
+   end;
+// raise EPascalTypeError.Create('Unknown Table Class: ' + TableType);
 end;
 
 

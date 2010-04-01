@@ -91,8 +91,8 @@ type
 
     property Version: Cardinal read FVersion write SetVersion;
     property TimeStamp: Int64 read FTimeStamp write SetTimeStamp;
-    property Creation: Int64 read FCreation write SetCreation;
-    property Last: Int64 read FLastMod write SetLast;
+    property CreationDate: Int64 read FCreation write SetCreation;
+    property ModifiedDate: Int64 read FLastMod write SetLast;
   end;
 
 

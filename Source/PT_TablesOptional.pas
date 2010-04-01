@@ -115,14 +115,9 @@ type
     GaspFlag : Byte;
   end;
 
-  TGaspHeader = record
-    Version    : Word;
-    NumRanges  : Word;
-  end;
-
   TPascalTypeGridFittingAndScanConversionProcedureTable = class(TCustomPascalTypeNamedTable)
   private
-    FGaspHeader : TGaspHeader;
+    FVersion    : Word;
     FGaspRanges : array of TGaspRange;
     procedure SetVersion(const Value: Word);
     function GetRangeCount: Integer;
@@ -138,20 +133,13 @@ type
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
-    property Version: Word read FGaspHeader.Version write SetVersion;
+    property Version: Word read FVersion write SetVersion;
     property RangeCount: Integer read GetRangeCount;
     property Range[Index: Integer]: TGaspRange read GetRange;
   end;
 
 
   // table 'hdmx'
-
-(*
-  PHdmx_Record = ^THdmx_Record;
-  THdmx_Record = record
-    widths    : PByte;
-  end;
-*)
 
   TPascalTypeHorizontalDeviceMetricsSubTable = class(TCustomPascalTypeInterfaceTable)
   private
@@ -163,6 +151,7 @@ type
     procedure Setppem(const Value: Byte);
     procedure MaxWidthChanged;
     procedure ppemChanged;
+    function GetWidthCount: Integer;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -174,13 +163,17 @@ type
     property ppem: Byte read Fppem write Setppem;
     property MaxWidth: Byte read FMaxWidth write SetMaxWidth;
     property Width[Index: Integer]: Byte read GetWidth;
+    property WidthCount: Integer read GetWidthCount;
   end;
 
   TPascalTypeHorizontalDeviceMetricsTable = class(TCustomPascalTypeNamedTable)
   private
-    FVersion   : Word;           // Table version number (0)
+    FVersion   : Word;         // Table version number (0)
     FSubtables : TObjectList;
     procedure SetVersion(const Value: Word);
+    function GetDeviceRecordCount: Word;
+    function GetDeviceRecord(Index: Word): TPascalTypeHorizontalDeviceMetricsSubTable;
+    procedure SetDeviceRecord(Index: Word; const Value: TPascalTypeHorizontalDeviceMetricsSubTable);
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -196,6 +189,8 @@ type
     procedure SaveToStream(Stream: TStream); override;
 
     property Version: Word read FVersion write SetVersion;
+    property DeviceRecordCount: Word read GetDeviceRecordCount;
+    property DeviceRecord[Index: Word]: TPascalTypeHorizontalDeviceMetricsSubTable read GetDeviceRecord write SetDeviceRecord;
   end;
 
 
@@ -421,20 +416,58 @@ type
 
   // table 'VDMX'
 
-  TPascalTypeVerticalDeviceMetricsTable = class(TCustomPascalTypeNamedTable)
+  TVDMXHeightRecord = packed record
+    yPelHeight : Word; // yPelHeight to which values apply.
+    yMax : SmallInt; // Maximum value (in pels) for this yPelHeight.
+    yMin : SmallInt; // Minimum value (in pels) for this yPelHeight.
+  end;
+
+  TPascalTypeVDMXGroupTable = class(TCustomPascalTypeTable)
   private
-    FVersion   : Word; // Version number (0 or 1).
-    FNumRecs   : Word; // Number of VDMX groups present
-    FNumRatios : Word; // Number of aspect ratio groupings
+    FStartsz : Byte; // Starting yPelHeight
+    FEndsz   : Byte; // Ending yPelHeight
+    FEntry   : array of TVDMXHeightRecord; // The VDMX records
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
   public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+  TVDMXRatioRecord = packed record
+    bCharSet    : Byte; // Character set (see below).
+    xRatio      : Byte; // Value to use for x-Ratio
+    yStartRatio : Byte; // Starting y-Ratio value.
+    yEndRatio   : Byte; // Ending y-Ratio value.
+  end;
+
+  TPascalTypeVerticalDeviceMetricsTable = class(TCustomPascalTypeNamedTable)
+  private
+    FVersion : Word; // Version number (0 or 1).
+    FRatios  : array of TVDMXRatioRecord;
+    FGroups  : TObjectList;
+    procedure SetVersion(const Value: Word);
+    function GetRatioCount: Word;
+    function GetGroupCount: Word;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+    procedure VersionChanged; virtual;
+  public
+    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    destructor Destroy; override;
+
     class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
+
+    property Version: Word read FVersion write SetVersion;
+    property RatioCount: Word read GetRatioCount;
+    property GroupCount: Word read GetGroupCount;
   end;
 
 
@@ -585,6 +618,10 @@ begin
  
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 8 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
    // read reserved 1
    Read(Value16, SizeOf(Word));
    FReserved[0] := Swap16(Value16);
@@ -726,6 +763,7 @@ begin
  
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 8 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -891,7 +929,8 @@ begin
  if Dest is Self.ClassType then
   with TPascalTypeGridFittingAndScanConversionProcedureTable(Dest) do
    begin
-    FGaspHeader := Self.FGaspHeader;
+    FVersion := Self.FVersion;
+    FGaspRanges := Self.FGaspRanges;
    end
  else inherited;
 end;
@@ -903,11 +942,8 @@ end;
 
 procedure TPascalTypeGridFittingAndScanConversionProcedureTable.ResetToDefaults;
 begin
- with FGaspHeader do
-  begin
-   Version := 0;
-   NumRanges := 0;
-  end;
+ FVersion := 0;
+ SetLength(FGaspRanges, 0);
 end;
 
 function TPascalTypeGridFittingAndScanConversionProcedureTable.GetRange(
@@ -926,38 +962,37 @@ end;
 procedure TPascalTypeGridFittingAndScanConversionProcedureTable.LoadFromStream(
   Stream: TStream);
 var
-  Value16    : Word;
   RangeIndex : Integer;
 begin
  inherited;
- 
- with Stream, FGaspHeader do
+
+ with Stream do
   begin
-   if Position + SizeOf(TGaspHeader) > Size
+   // check (minimum) table size
+   if Position + 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value16, SizeOf(Word));
-   Version := Swap16(Value16);
+   FVersion := ReadSwappedWord(Stream);
 
    // check version
    if not (Version in [0..1])
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read version
-   Read(Value16, SizeOf(Word));
-   NumRanges := Swap16(Value16);
+   SetLength(FGaspRanges, ReadSwappedWord(Stream));
 
-   SetLength(FGaspRanges, NumRanges);
-   for RangeIndex := 0 to NumRanges - 1 do
+   // check (minimum) table size
+   if Position + 4 * Length(FGaspRanges) > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   for RangeIndex := 0 to Length(FGaspRanges) - 1 do
     begin
      // read MaxPPEM
-     Read(Value16, SizeOf(Word));
-     FGaspRanges[RangeIndex].MaxPPEM := Swap16(Value16);
+     FGaspRanges[RangeIndex].MaxPPEM := ReadSwappedWord(Stream);
 
      // read GaspFlag
-     Read(Value16, SizeOf(Word));
-     FGaspRanges[RangeIndex].GaspFlag := Swap16(Value16);
+     FGaspRanges[RangeIndex].GaspFlag := ReadSwappedWord(Stream);
     end;
   end;
 end;
@@ -965,29 +1000,23 @@ end;
 procedure TPascalTypeGridFittingAndScanConversionProcedureTable.SaveToStream(
   Stream: TStream);
 var
-  Value16    : Word;
   RangeIndex : Integer;
 begin
- with Stream, FGaspHeader do
+ with Stream do
   begin
    // write version
-   Value16 := Swap16(Version);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FVersion);
 
    // write numRanges
-   NumRanges := Length(FGaspRanges);
-   Value16 := Swap16(NumRanges);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, Length(FGaspRanges));
 
    for RangeIndex := 0 to Length(FGaspRanges) - 1 do
     begin
      // write MaxPPEM
-     Value16 := Swap16(FGaspRanges[RangeIndex].MaxPPEM);
-     Write(Value16, SizeOf(Word));
+     WriteSwappedWord(Stream, FGaspRanges[RangeIndex].MaxPPEM);
 
      // write GaspFlag
-     Value16 := Swap16(FGaspRanges[RangeIndex].GaspFlag);
-     Write(Value16, SizeOf(Word));
+     WriteSwappedWord(Stream, FGaspRanges[RangeIndex].GaspFlag);
     end;
   end;
 end;
@@ -995,9 +1024,9 @@ end;
 procedure TPascalTypeGridFittingAndScanConversionProcedureTable.SetVersion(
   const Value: Word);
 begin
- if FGaspHeader.Version <> Value then
+ if FVersion <> Value then
   begin
-   FGaspHeader.Version := Value;
+   FVersion := Value;
    VersionChanged;
   end;
 end;
@@ -1039,6 +1068,11 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
+function TPascalTypeHorizontalDeviceMetricsSubTable.GetWidthCount: Integer;
+begin
+ Result := Length(FWidths);
+end;
+
 procedure TPascalTypeHorizontalDeviceMetricsSubTable.LoadFromStream(
   Stream: TStream);
 var
@@ -1050,17 +1084,22 @@ begin
 
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 2 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read ppem
-   Read(Fppem, SizeOf(Word));
+   Read(Fppem, 1);
 
    // read max width
-   Read(FMaxWidth, SizeOf(Word));
+   Read(FMaxWidth, 1);
 
    // set length of widths to number of glyphs
    SetLength(FWidths, MaxProfile.NumGlyphs);
+
+   // check (minimum) table size
+   if Position + Length(FWidths) > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read widths
    Read(FWidths[0], Length(FWidths));
@@ -1142,6 +1181,19 @@ begin
  else inherited;
 end;
 
+function TPascalTypeHorizontalDeviceMetricsTable.GetDeviceRecord(
+  Index: Word): TPascalTypeHorizontalDeviceMetricsSubTable;
+begin
+ if (Index >= 0) and (Index < FSubtables.Count)
+  then Result := TPascalTypeHorizontalDeviceMetricsSubTable(FSubtables[Index])
+  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+end;
+
+function TPascalTypeHorizontalDeviceMetricsTable.GetDeviceRecordCount: Word;
+begin
+ Result := FSubtables.Count;
+end;
+
 class function TPascalTypeHorizontalDeviceMetricsTable.GetTableType: TTableType;
 begin
  Result := 'hdmx';
@@ -1167,24 +1219,23 @@ begin
 
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 8 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read format type
-   Read(Value16, SizeOf(Word));
-   FVersion := Swap16(Value16);
+   FVersion := ReadSwappedWord(Stream);
 
    if Version <> 0
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read num records
-   Read(Value16, SizeOf(Word));
-   NumRecords := Swap16(Value16);
+   NumRecords := ReadSwappedSmallInt(Stream);
 
    // read device record size
-   Read(Value16, SizeOf(Word));
-   SizeDeviceRecord := Swap16(Value16);
+   SizeDeviceRecord := ReadSwappedCardinal(Stream);
 
+   // store offset position
    OffsetPosition := Position;
 
    for RecordIndex := 0 to NumRecords - 1 do
@@ -1226,6 +1277,12 @@ begin
    Write(Value16, SizeOf(Word));
 *)   
   end;
+end;
+
+procedure TPascalTypeHorizontalDeviceMetricsTable.SetDeviceRecord(Index: Word;
+  const Value: TPascalTypeHorizontalDeviceMetricsSubTable);
+begin
+
 end;
 
 procedure TPascalTypeHorizontalDeviceMetricsTable.SetVersion(
@@ -1293,7 +1350,7 @@ begin
 
  with Stream do
   begin
-   // check minimum size
+   // check (minimum) table size
    if Position + 8 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -1458,7 +1515,7 @@ begin
 
  with Stream do
   begin
-   // check minimum size
+   // check (minimum) table size
    if Position + 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -1708,10 +1765,10 @@ var
   SubTable      : TPascalTypeKerningSubTable;
 begin
  inherited;
- 
+
  with Stream do
   begin
-   // check minimum size
+   // check (minimum) table size
    if Position + 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -1818,10 +1875,10 @@ var
   Value16 : Word;
 begin
  inherited;
- 
+
  with Stream do
   begin
-   // check minimum size
+   // check (minimum) table size
    if Position + 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -1952,9 +2009,10 @@ var
   Value16 : Word;
 begin
  inherited;
- 
+
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 54 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -2274,7 +2332,110 @@ begin
 end;
 
 
+{ TPascalTypeVDMXGroupTable }
+
+procedure TPascalTypeVDMXGroupTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TPascalTypeVDMXGroupTable(Dest) do
+   begin
+    FStartsz := Self.FStartsz;
+    FEndsz   := Self.FEndsz;
+    FEntry   := Self.FEntry;
+   end
+ else inherited;
+end;
+
+procedure TPascalTypeVDMXGroupTable.ResetToDefaults;
+begin
+ inherited;
+ FStartsz := 0;
+ FEndsz   := 0;
+ SetLength(FEntry, 0);
+end;
+
+procedure TPascalTypeVDMXGroupTable.LoadFromStream(Stream: TStream);
+var
+  EntryIndex : Integer;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 4 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // read number of height records
+   SetLength(FEntry, ReadSwappedWord(Stream));
+
+   // read starting yPelHeight
+   Read(FStartsz, 1);
+
+   // read ending yPelHeight
+   Read(FEndsz, 1);
+
+   for EntryIndex := 0 to Length(FEntry) - 1 do
+    with FEntry[EntryIndex] do
+     begin
+      // read yPelHeight to which values apply.
+      yPelHeight := ReadSwappedWord(Stream);
+
+      // read Maximum value (in pels) for this yPelHeight.
+      yMax := ReadSwappedSmallInt(Stream);
+
+      // read Minimum value (in pels) for this yPelHeight.
+      yMin := ReadSwappedSmallInt(Stream);
+     end;
+  end;
+end;
+
+procedure TPascalTypeVDMXGroupTable.SaveToStream(Stream: TStream);
+var
+  EntryIndex : Integer;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // write number of height records
+   WriteSwappedWord(Stream, Length(FEntry));
+
+   // write starting yPelHeight
+   Write(FStartsz, 1);
+
+   // write ending yPelHeight
+   Write(FEndsz, 1);
+
+   for EntryIndex := 0 to Length(FEntry) - 1 do
+    with FEntry[EntryIndex] do
+     begin
+      // write yPelHeight to which values apply.
+      WriteSwappedWord(Stream, yPelHeight);
+
+      // write Maximum value (in pels) for this yPelHeight.
+      WriteSwappedSmallInt(Stream, yMax);
+
+      // write Minimum value (in pels) for this yPelHeight.
+      WriteSwappedSmallInt(Stream, yMin);
+     end;
+  end;
+end;
+
+
 { TPascalTypeVerticalDeviceMetricsTable }
+
+constructor TPascalTypeVerticalDeviceMetricsTable.Create(Interpreter: IPascalTypeInterpreter);
+begin
+ FGroups := TObjectList.Create;
+ inherited;
+end;
+
+destructor TPascalTypeVerticalDeviceMetricsTable.Destroy;
+begin
+ FreeAndNil(FGroups);
+ inherited;
+end;
 
 procedure TPascalTypeVerticalDeviceMetricsTable.AssignTo(Dest: TPersistent);
 begin
@@ -2282,10 +2443,20 @@ begin
   with TPascalTypeVerticalDeviceMetricsTable(Dest) do
    begin
     FVersion := Self.FVersion;
-    FNumRecs := Self.FNumRecs;
-    FNumRatios := Self.FNumRatios;
+    FRatios := Self.FRatios;
+    FGroups.Assign(Self.FGroups);
    end
  else inherited;
+end;
+
+function TPascalTypeVerticalDeviceMetricsTable.GetGroupCount: Word;
+begin
+ Result := FGroups.Count;
+end;
+
+function TPascalTypeVerticalDeviceMetricsTable.GetRatioCount: Word;
+begin
+ Result := Length(FRatios);
 end;
 
 class function TPascalTypeVerticalDeviceMetricsTable.GetTableType: TTableType;
@@ -2295,37 +2466,71 @@ end;
 
 procedure TPascalTypeVerticalDeviceMetricsTable.ResetToDefaults;
 begin
- FVersion   := 0;
- FNumRecs   := 0;
- FNumRatios := 0;
+ FVersion := 0;
+ SetLength(FRatios, 0);
+ FGroups.Clear;
 end;
 
 procedure TPascalTypeVerticalDeviceMetricsTable.LoadFromStream(
   Stream: TStream);
 var
-  Value16 : Word;
+  RatioIndex : Integer;
+  Offsets    : array of Word;
+  NumRecs    : Word;
+  Group      : TPascalTypeVDMXGroupTable;
 begin
  inherited;
- 
+
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 6 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value16, SizeOf(Word));
-   FVersion := Swap16(Value16);
+   FVersion := ReadSwappedWord(Stream);
 
+   // check version in 0..1
    if not (FVersion in [0..1])
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read number of VDMX groups present
-   Read(Value16, SizeOf(Word));
-   FNumRecs := Swap16(Value16);
+   NumRecs := ReadSwappedWord(Stream);
 
    // read number of aspect ratio groupings
-   Read(Value16, SizeOf(Word));
-   FNumRatios := Swap16(Value16);
+   SetLength(FRatios, ReadSwappedWord(Stream));
+   SetLength(Offsets, Length(FRatios));
+
+   // check (minimum) table size
+   if Position + 6 * Length(FRatios) > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // read ratios
+   for RatioIndex := 0 to Length(FRatios) - 1 do
+    with FRatios[RatioIndex] do
+     begin
+      Read(bCharSet, 1);
+      Read(xRatio, 1);
+      Read(yStartRatio, 1);
+      Read(yEndRatio, 1);
+     end;
+
+   // read offsets
+   for RatioIndex := 0 to Length(FRatios) - 1
+    do Offsets[RatioIndex] := ReadSwappedWord(Stream);
+
+   // read groups
+   for RatioIndex := 0 to NumRecs - 1 do
+    begin
+     // create new group
+     Group := TPascalTypeVDMXGroupTable.Create;
+
+     // load gropu from stream
+     Group.LoadFromStream(Stream);
+
+     // add group to list
+     FGroups.Add(Group);
+    end;
   end;
 end;
 
@@ -2340,13 +2545,26 @@ begin
    Write(Value16, SizeOf(Word));
 
    // write number of VDMX groups present
-   Value16 := Swap16(FNumRecs);
+   Value16 := Swap16(FGroups.Count);
    Write(Value16, SizeOf(Word));
 
    // write number of aspect ratio groupings
-   Value16 := Swap16(FNumRatios);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, Length(FRatios));
   end;
+end;
+
+procedure TPascalTypeVerticalDeviceMetricsTable.SetVersion(const Value: Word);
+begin
+ if FVersion <> Value then
+  begin
+   FVersion := Value;
+   VersionChanged;
+  end;
+end;
+
+procedure TPascalTypeVerticalDeviceMetricsTable.VersionChanged;
+begin
+ Changed;
 end;
 
 
@@ -2411,6 +2629,7 @@ begin
 
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 54 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -2778,7 +2997,7 @@ end;
 
 procedure TPascalTypeVerticalMetricsTable.LoadFromStream(Stream: TStream);
 var
-  MtxIndex       : Integer;                                                  
+  MtxIndex       : Integer;
   VerticalHeader : TPascalTypeVerticalHeaderTable;
   MaximumProfile : TPascalTypeMaximumProfileTable;
   Value16        : Word;
