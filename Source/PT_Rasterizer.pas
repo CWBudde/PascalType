@@ -122,7 +122,7 @@ var
 begin
  for CharIndex := 1 to Length(Text) do
   begin
-   RenderCharacter(Text[CharIndex]);
+//   RenderCharacter(Text[CharIndex]);
   end;
 end;
 

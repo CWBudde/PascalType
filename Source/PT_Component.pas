@@ -257,7 +257,7 @@ procedure TCustomPascalType.LoadFromResource(ID: Integer; ResType: string);
 var
   ResourceStream   : TResourceStream;
 begin
- ResourceStream := TResourceStream.CreateFromID(hInstance, ID, PAnsiChar(ResType));
+ ResourceStream := TResourceStream.CreateFromID(hInstance, ID, PChar(ResType));
  try
   FInterpreter.LoadFromStream(ResourceStream);
  finally

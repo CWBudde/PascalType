@@ -1358,24 +1358,21 @@ begin
    SetLength(FPairs, Swap16(Value16));
 
    // read search range
-   Read(Value16, SizeOf(Word));
-   SearchRange := Swap16(Value16);
+   SearchRange := ReadSwappedWord(Stream);
 
    // confirm search range has a valid value
    if SearchRange > Round(6 * (Power(2, Floor(Log2(Length(FPairs))))))
     then raise EPascalTypeError.Create(RCStrErrorInKerningSubTable + ': ' + RCStrWrongSearchRange);
 
    // read entry selector
-   Read(Value16, SizeOf(Word));
-   EntrySelector := Swap16(Value16);
+   EntrySelector := ReadSwappedWord(Stream);
 
    // confirm entry selector has a valid value
    if EntrySelector < Round(Log2(SearchRange / 6))
     then raise EPascalTypeError.Create(RCStrErrorInKerningSubTable + ': ' + RCStrWrongEntrySelector);
 
    // read range shift
-   Read(Value16, SizeOf(Word));
-   RangeShift := Swap16(Value16);
+   RangeShift := ReadSwappedWord(Stream);
 
    {$IFDEF AmbigiousExceptions}
    // confirm range shift has a valid value
@@ -1387,16 +1384,13 @@ begin
     with FPairs[PairIndex] do
      begin
       // read left
-      Read(Value16, SizeOf(Word));
-      Left := Swap16(Value16);
+      Left := ReadSwappedWord(Stream);
 
       // read right
-      Read(Value16, SizeOf(Word));
-      Right := Swap16(Value16);
+      Right := ReadSwappedWord(Stream);
 
       // read value
-      Read(Value16, SizeOf(Word));
-      Value := SmallInt(Swap16(Value16));
+      Value := ReadSwappedSmallInt(Stream);
      end;
   end;
 end;
@@ -1966,17 +1960,17 @@ end;
 
 function TPascalTypePCL5Table.GetCharacterComplement: string;
 begin
- Result := FTypeface;
+ Result := string(FTypeface);
 end;
 
 function TPascalTypePCL5Table.GetFileName: string;
 begin
- Result := FFileName;
+ Result := string(FFileName);
 end;
 
 function TPascalTypePCL5Table.GetTypeface: string;
 begin
- Result := FTypeface;
+ Result := string(FTypeface);
 end;
 
 procedure TPascalTypePCL5Table.ResetToDefaults;
