@@ -122,8 +122,9 @@ type
     procedure ListViewColumns(Columns: Array of string);
     procedure ListViewData(Strings: Array of string);
 
-    procedure DisplayBitmapSizeTable(BitmapSizeTable: TPascalTypeBitmapSizeTable);
+    procedure DisplayAppleFeatureTable(FeatureTable: TPascalTypeFeatureTable);
     procedure DisplayBitmapLocationTable(BitmapLocationTable: TPascalTypeBitmapLocationTable);
+    procedure DisplayBitmapSizeTable(BitmapSizeTable: TPascalTypeBitmapSizeTable);
     procedure DisplayCharacterMapSubTable(CharacterMapSubTable: TCustomCharacterMapDirectoryEntry);
     procedure DisplayCharacterMapTable(CharacterMapTable: TPascalTypeCharacterMapTable);
     procedure DisplayControlValueTable(ControlValueTable: TTrueTypeFontControlValueTable);
@@ -132,6 +133,9 @@ type
     procedure DisplayEmbeddedBitmapDataTable(BitmapDataTable: TPascalTypeEmbeddedBitmapDataTable);
     procedure DisplayEmbeddedBitmapLocationTable(BitmapLocationTable: TPascalTypeEmbeddedBitmapLocationTable);
     procedure DisplayEmbeddedBitmapScalingTable(BitmapScalingTable: TPascalTypeEmbeddedBitmapScalingTable);
+    procedure DisplayExtendedGlyphMetamorphosisTable(ExtendedGlyphMetamorphosisTable: TPascalTypeExtendedGlyphMetamorphosisTable);
+    procedure DisplayFontForgeExtensionTable(FontForgeExtensionTable: TPascalTypeFontForgeExtensionTable);
+    procedure DisplayFontForgeTimeStampTable(FontForgeTimeStampTable: TPascalTypeFontForgeTimeStampTable);
     procedure DisplayFontInstructionTable(InstructionTable: TCustomTrueTypeFontInstructionTable);
     procedure DisplayFontKerningSubTable(KerningSubtable: TPascalTypeKerningSubTable);
     procedure DisplayFontKerningTable(KerningTable: TPascalTypeKerningTable);
@@ -141,29 +145,28 @@ type
     procedure DisplayGlyphDefinitionTable(GlyphDefinitionTable: TOpenTypeGlyphDefinitionTable);
     procedure DisplayGlyphInstructionTable(GlyphInstructionTable: TTrueTypeFontGlyphInstructionTable);
     procedure DisplayHeaderTable(HeaderTable: TPascalTypeHeaderTable);
+    procedure DisplayHorizontalDeviceMetricsSubTable(HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsSubTable);
+    procedure DisplayHorizontalDeviceMetricsTable(HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsTable);
     procedure DisplayHorizontalHeader(HorizontalHeaderTable: TPascalTypeHorizontalHeaderTable);
     procedure DisplayHorizontalMetrics(HorizontalMetricsTable: TPascalTypeHorizontalMetricsTable);
-    procedure DisplayHorizontalDeviceMetricsTable(HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsTable);
-    procedure DisplayHorizontalDeviceMetricsSubTable(HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsSubTable);
     procedure DisplayJustificationTable(JustificationTable: TOpenTypeJustificationTable);
     procedure DisplayLinearThresholdTable(LinearThresholdTable: TPascalTypeLinearThresholdTable);
     procedure DisplayLocationTable(LocationTable: TTrueTypeFontLocationTable);
     procedure DisplayMaximumProfileTable(MaximumProfileTable: TPascalTypeMaximumProfileTable);
-    procedure DisplayNameTable(NameTable: TPascalTypeNameTable);
-    procedure DisplayNameUnicodeTable(NameTable: TPascalTypeNameTable);
     procedure DisplayNameAppleTable(NameTable: TPascalTypeNameTable);
     procedure DisplayNameMicrosoftTable(NameTable: TPascalTypeNameTable);
+    procedure DisplayNameTable(NameTable: TPascalTypeNameTable);
+    procedure DisplayNameUnicodeTable(NameTable: TPascalTypeNameTable);
     procedure DisplayOpenTypeCommonTable(OpenTypeCommonTable: TCustomOpenTypeCommonTable);
-    procedure DisplayOpenTypeScriptListTable(ScriptListTable: TOpenTypeScriptListTable);
     procedure DisplayOpenTypeFeatureListTable(FeatureListTable: TOpenTypeFeatureListTable);
     procedure DisplayOpenTypeLookUpListTable(LookUpListTable: TOpenTypeLookupListTable);
+    procedure DisplayOpenTypeScriptListTable(ScriptListTable: TOpenTypeScriptListTable);
     procedure DisplayOS2Table(OS2Table: TPascalTypeOS2Table);
     procedure DisplayPCL5Table(PCL5Table: TPascalTypePCL5Table);
     procedure DisplayPostscriptTable(PostscriptTable: TPascalTypePostscriptTable);
     procedure DisplayPostscriptV2Table(PostscriptTable: TPascalTypePostscriptVersion2Table);
     procedure DisplayVerticalDeviceMetricsTable(VerticalDeviceMetricsTable: TPascalTypeVerticalDeviceMetricsTable);
     procedure DisplayVerticalHeader(VerticalHeaderTable: TPascalTypeVerticalHeaderTable);
-
 
     procedure DisplayCustomOpenTypeScriptTable(ScriptTable: TCustomOpenTypeScriptTable);
     procedure DisplayCustomOpenTypeLanguageSystemTable(LanguageSystemTable: TCustomOpenTypeLanguageSystemTable);
@@ -176,9 +179,6 @@ type
     procedure DisplayGlyphDataSimpleOutline(SimpleGlyphData: TTrueTypeFontSimpleGlyphData);
     procedure DisplayGlyphDataCompositeOutline(CompositeGlyphData: TTrueTypeFontCompositeGlyphData);
     procedure DisplayGlyphDataContour(Contour: TPascalTypeContour);
-
-    procedure DisplayFontForgeTimeStampTable(FontForgeTimeStampTable: TPascalTypeFontForgeTimeStampTable);
-    procedure DisplayFontForgeExtensionTable(FontForgeExtensionTable: TPascalTypeFontForgeExtensionTable);
 
     procedure FontSizeChanged;
   public
@@ -196,7 +196,7 @@ implementation
 {$R *.dfm}
 
 uses
-  ShlObj, ActiveX, Math;
+  ShlObj, ActiveX, Inifiles, Math;
 
 procedure StrResetLength(var S: AnsiString);
 begin
@@ -259,12 +259,6 @@ begin
  FontSizeChanged;
 end;
 
-procedure TFmTTF.FontSizeChanged;
-begin
- Fppem := FFontSize * PixelsPerInch div 72;
- FScaler := Fppem / FRasterizer.Interpreter.HeaderTable.UnitsPerEm;
-end;
-
 procedure TFmTTF.FormDestroy(Sender: TObject);
 begin
  // free pascal type interpreter
@@ -276,7 +270,15 @@ end;
 
 procedure TFmTTF.FormShow(Sender: TObject);
 begin
- LoadFromFile(GetFontDirectory + '\cour.ttf');
+ if FileExists(ParamStr(1))
+  then LoadFromFile(ParamStr(1))
+  else LoadFromFile(GetFontDirectory + '\cour.ttf');
+end;
+
+procedure TFmTTF.FontSizeChanged;
+begin
+ Fppem := FFontSize * PixelsPerInch div 72;
+ FScaler := Fppem / FRasterizer.Interpreter.HeaderTable.UnitsPerEm;
 end;
 
 procedure TFmTTF.InitializeDefaultListView;
@@ -812,6 +814,36 @@ begin
   end;
 end;
 
+procedure TFmTTF.DisplayAppleFeatureTable(FeatureTable: TPascalTypeFeatureTable);
+begin
+ with FeatureTable do
+  begin
+   InitializeDefaultListView;
+
+   // add Version
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayExtendedGlyphMetamorphosisTable(
+  ExtendedGlyphMetamorphosisTable: TPascalTypeExtendedGlyphMetamorphosisTable);
+begin
+ with ExtendedGlyphMetamorphosisTable do
+  begin
+   InitializeDefaultListView;
+
+   // add version
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+
+   // add chain count
+   ListViewData(['Subchains', IntToStr(ChainCount)]);
+
+   ListView.BringToFront;
+  end;
+end;
+
 procedure TFmTTF.DisplayEmbeddedBitmapDataTable(
   BitmapDataTable: TPascalTypeEmbeddedBitmapDataTable);
 begin
@@ -819,6 +851,7 @@ begin
   begin
    InitializeDefaultListView;
 
+   // add version
    ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    ListView.BringToFront;
@@ -2252,6 +2285,10 @@ begin
    if TObject(Node.Data) is TPascalTypeEmbeddedBitmapScalingTable
     then DisplayEmbeddedBitmapScalingTable(TPascalTypeEmbeddedBitmapScalingTable(Node.Data)) else
 
+   // Extended Glyph Metamorphosis
+   if TObject(Node.Data) is TPascalTypeExtendedGlyphMetamorphosisTable
+    then DisplayExtendedGlyphMetamorphosisTable(TPascalTypeExtendedGlyphMetamorphosisTable(Node.Data)) else
+
    // Bitmap Size Table
    if TObject(Node.Data) is TPascalTypeBitmapSizeTable
     then DisplayBitmapSizeTable(TPascalTypeBitmapSizeTable(Node.Data)) else
@@ -2340,6 +2377,10 @@ begin
    if TObject(Node.Data) is TPascalTypeDigitalSignatureBlock
     then DisplayDigitalSignatureBlock(TPascalTypeDigitalSignatureBlock(Node.Data)) else
 
+   // Apple Features
+   if TObject(Node.Data) is TPascalTypeFeatureTable
+    then DisplayAppleFeatureTable(TPascalTypeFeatureTable(Node.Data)) else
+
    // Font Forge Time Stamp Table
    if TObject(Node.Data) is TPascalTypeFontForgeTimeStampTable
     then DisplayFontForgeTimeStampTable(TPascalTypeFontForgeTimeStampTable(Node.Data)) else
@@ -2410,12 +2451,11 @@ begin
    if TObject(Node.Data) is TCustomPascalTypeNamedTable then
     with TCustomPascalTypeNamedTable(Node.Data) do
      begin
-      ListView.Clear;
+      InitializeDefaultListView;
 
-      with ListView.Items.Add do
-       begin
-        Caption := GetTableType;
-       end;
+      ListViewData(['Table Type', GetTableType]);
+
+      ListView.BringToFront;
      end;
   end;
 end;

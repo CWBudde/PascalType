@@ -335,14 +335,45 @@ type
 
   // table 'mort'
 
-  // not entirely implemented, for more details see
-  // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6mort.html
-  TPascalTypeGlyphMetamorphosisTable = class(TCustomPascalTypeNamedVersionTable)
+  TCustomPascalTypeGlyphMetamorphosisTable = class(TCustomPascalTypeNamedVersionTable)
   private
+    function GetChainCount: Cardinal;
+  protected
+    FChains : TObjectList;
+
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  published
+  public
+    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    destructor Destroy; override;
+
+    property ChainCount: Cardinal read GetChainCount;
+  end;
+
+  TFeatureSubtableRecord = packed record
+    FeatureType    : Word; // The feature type.
+    FeatureSetting : Word; // The feature selector.
+    EnableFlags    : Cardinal; // The OR’ed enable flags.
+    DisableFlags   : Cardinal; // The AND’ed disable flags.
+  end;
+
+  TPascalTypeGlyphMetamorphosisChainTable = class(TCustomPascalTypeTable)
+  private
+    FDefaultFlags    : Cardinal; // The default sub-feature flags for this chain.
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+  // not entirely implemented, for more details see
+  // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6mort.html
+  TPascalTypeGlyphMetamorphosisTable = class(TCustomPascalTypeGlyphMetamorphosisTable)
   public
     class function GetTableType: TTableType; override;
 
@@ -353,13 +384,30 @@ type
 
   // table 'morx'
 
-  // not entirely implemented, for more details see
-  // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6morx.html
-  TPascalTypeExtendedGlyphMetamorphosisTable = class(TCustomPascalTypeNamedVersionTable)
+  TPascalTypeExtendedGlyphMetamorphosisChainTable = class(TCustomPascalTypeTable)
+  private
+    FDefaultFlags : Cardinal; // The default sub-feature flags for this chain.
+    FFeatureArray : array of TFeatureSubtableRecord;
+    procedure SetDefaultFlags(const Value: Cardinal);
+    function GetFeatureCount: Cardinal;
+    function GetFeature(Index: Cardinal): TFeatureSubtableRecord;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
+    procedure DefaultFlagsChanged; virtual;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    property DefaultFlags: Cardinal read FDefaultFlags write SetDefaultFlags;
+    property FeatureCount: Cardinal read GetFeatureCount;
+    property Feature[Index: Cardinal]: TFeatureSubtableRecord read GetFeature;
+  end;
+
+  // not entirely implemented, for more details see
+  // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6morx.html
+  TPascalTypeExtendedGlyphMetamorphosisTable = class(TCustomPascalTypeGlyphMetamorphosisTable)
   public
     class function GetTableType: TTableType; override;
 
@@ -471,6 +519,7 @@ implementation
 
 uses
   SysUtils, PT_ResourceStrings;
+
 
 var
   GDescriptionTagClasses : array of TPascalTypeTaggedValueTableClass;
@@ -1479,48 +1528,38 @@ begin
 end;
 
 procedure TPascalTypeHorizontalStyleTable.LoadFromStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
  inherited;
 
  with Stream do
   begin
-   // check if table is complete
+   // check (minimum) table size
    if Position + 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read extra plain
-   Read(Value16, SizeOf(Word));
-   FExtraPlain := Swap16(Value16);
+   FExtraPlain := ReadSwappedWord(Stream);
 
    // read extra bold
-   Read(Value16, SizeOf(Word));
-   FExtraBold := Swap16(Value16);
+   FExtraBold := ReadSwappedWord(Stream);
 
    // read extra italic
-   Read(Value16, SizeOf(Word));
-   FExtraItalic := Swap16(Value16);
+   FExtraItalic := ReadSwappedWord(Stream);
 
    // read extra underline
-   Read(Value16, SizeOf(Word));
-   FExtraUnderline := Swap16(Value16);
+   FExtraUnderline := ReadSwappedWord(Stream);
 
    // read extra outline
-   Read(Value16, SizeOf(Word));
-   FExtraOutline := Swap16(Value16);
+   FExtraOutline := ReadSwappedWord(Stream);
 
    // read extra shadow
-   Read(Value16, SizeOf(Word));
-   FExtraShadow := Swap16(Value16);
+   FExtraShadow := ReadSwappedWord(Stream);
 
    // read extra condensed
-   Read(Value16, SizeOf(Word));
-   FExtraCondensed := Swap16(Value16);
+   FExtraCondensed := ReadSwappedWord(Stream);
 
    // read extra extended
-   Read(Value16, SizeOf(Word));
-   FExtraExtended := Swap16(Value16);
+   FExtraExtended := ReadSwappedWord(Stream);
   end;
 end;
 
@@ -1528,43 +1567,154 @@ procedure TPascalTypeHorizontalStyleTable.SaveToStream(Stream: TStream);
 begin
  inherited;
 
+ // write extra plain
+ WriteSwappedWord(Stream, FExtraPlain);
+
+ // write extra bold
+ WriteSwappedWord(Stream, FExtraBold);
+
+ // write extra italic
+ WriteSwappedWord(Stream, FExtraItalic);
+
+ // write extra underline
+ WriteSwappedWord(Stream, FExtraUnderline);
+
+ // write extra outline
+ WriteSwappedWord(Stream, FExtraOutline);
+
+ // write extra shadow
+ WriteSwappedWord(Stream, FExtraShadow);
+
+ // write extra condensed
+ WriteSwappedWord(Stream, FExtraCondensed);
+
+ // write extra extended
+ WriteSwappedWord(Stream, FExtraExtended);
 end;
 
 
-{ TPascalTypeGlyphMetamorphosisTable }
+{ TCustomPascalTypeGlyphMetamorphosisTable }
 
-procedure TPascalTypeGlyphMetamorphosisTable.AssignTo(Dest: TPersistent);
+constructor TCustomPascalTypeGlyphMetamorphosisTable.Create(
+  Interpreter: IPascalTypeInterpreter);
+begin
+ FChains := TObjectList.Create;
+ inherited;
+end;
+
+destructor TCustomPascalTypeGlyphMetamorphosisTable.Destroy;
+begin
+ FreeAndNil(FChains);
+ inherited;
+end;
+
+function TCustomPascalTypeGlyphMetamorphosisTable.GetChainCount: Cardinal;
+begin
+ Result := FChains.Count;
+end;
+
+procedure TCustomPascalTypeGlyphMetamorphosisTable.AssignTo(Dest: TPersistent);
 begin
  inherited;
 
  if Dest is Self.ClassType then
-  with TPascalTypeGlyphMetamorphosisTable(Dest) do
-   begin
+  with TCustomPascalTypeGlyphMetamorphosisTable(Dest)
+   do FChains.Assign(FChains);
+end;
 
+procedure TCustomPascalTypeGlyphMetamorphosisTable.ResetToDefaults;
+begin
+ inherited;
+ FChains.Clear;
+end;
+
+
+{ TPascalTypeGlyphMetamorphosisChainTable }
+
+procedure TPascalTypeGlyphMetamorphosisChainTable.AssignTo(Dest: TPersistent);
+begin
+ inherited;
+
+ if Dest is Self.ClassType then
+  with TPascalTypeGlyphMetamorphosisChainTable(Dest) do
+   begin
+    FDefaultFlags := Self.FDefaultFlags;
    end;
 end;
+
+procedure TPascalTypeGlyphMetamorphosisChainTable.ResetToDefaults;
+begin
+ inherited;
+ FDefaultFlags := 0;
+end;
+
+procedure TPascalTypeGlyphMetamorphosisChainTable.LoadFromStream(
+  Stream: TStream);
+var
+  StartPosition     : Int64;
+  ChainLength       : Cardinal; // The length of the chain in bytes, including this header.
+  FeatureEntryCount : Word;     // The number of entries in the chain's feature subtable.
+  SubtableCount     : Word;     // The number of subtables in the chain.
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 12 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // remember start position
+   StartPosition := Position;
+
+   // read default flags
+   FDefaultFlags := ReadSwappedCardinal(Stream);
+
+   // read chain length
+   ChainLength := ReadSwappedCardinal(Stream);
+
+   // read feature entry count
+   FeatureEntryCount := ReadSwappedWord(Stream);
+
+   // read subtable count
+   SubtableCount := ReadSwappedWord(Stream);
+
+   // jump to end of this table
+   Position := StartPosition + ChainLength;
+  end;
+end;
+
+procedure TPascalTypeGlyphMetamorphosisChainTable.SaveToStream(Stream: TStream);
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // write default flags
+   WriteSwappedCardinal(Stream, FDefaultFlags);
+  end;
+end;
+
+
+{ TPascalTypeGlyphMetamorphosisTable }
 
 class function TPascalTypeGlyphMetamorphosisTable.GetTableType: TTableType;
 begin
  Result := 'mort';
 end;
 
-procedure TPascalTypeGlyphMetamorphosisTable.ResetToDefaults;
-begin
- inherited;
- FVersion.Value := 1;
- FVersion.Fract := 0;
-end;
-
 procedure TPascalTypeGlyphMetamorphosisTable.LoadFromStream(Stream: TStream);
 var
-  Value32  : Cardinal;
-  NumChain : Cardinal;
+  Value32    : Cardinal;
+  ChainIndex : Cardinal;
+  NumChain   : Cardinal;
+  ChainTable : TPascalTypeGlyphMetamorphosisChainTable;
 begin
  inherited;
 
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
@@ -1576,49 +1726,183 @@ begin
    if NumChain <= 0
     then raise EPascalTypeError.Create(RCStrTooFewMetamorphosisChains);
    {$ENDIF}
+
+   for ChainIndex := 0 to NumChain - 1 do
+    begin
+     // create chain table
+     ChainTable := TPascalTypeGlyphMetamorphosisChainTable.Create;
+
+     // load chain table from stream
+     ChainTable.LoadFromStream(Stream);
+
+     // add chain table to lists
+     FChains.Add(ChainTable);
+    end;
   end;
 end;
 
 procedure TPascalTypeGlyphMetamorphosisTable.SaveToStream(Stream: TStream);
+var
+  Value32    : Cardinal;
+  ChainIndex : Cardinal;
+  ChainTable : TPascalTypeGlyphMetamorphosisChainTable;
 begin
  inherited;
+
+ with Stream do
+  begin
+   // write number of chains
+   WriteSwappedCardinal(Stream, FChains.Count);
+
+   // save chain tables to stream
+   for ChainIndex := 0 to FChains.Count - 1 do
+    with TPascalTypeGlyphMetamorphosisChainTable(FChains[ChainIndex])
+     do SaveToStream(Stream);
+  end;
 end;
 
 
-{ TPascalTypeExtendedGlyphMetamorphosisTable }
+{ TPascalTypeExtendedGlyphMetamorphosisChainTable }
 
-procedure TPascalTypeExtendedGlyphMetamorphosisTable.AssignTo(Dest: TPersistent);
+procedure TPascalTypeExtendedGlyphMetamorphosisChainTable.AssignTo(
+  Dest: TPersistent);
 begin
  inherited;
 
  if Dest is Self.ClassType then
-  with TPascalTypeExtendedGlyphMetamorphosisTable(Dest) do
+  with TPascalTypeExtendedGlyphMetamorphosisChainTable(Dest) do
    begin
-
+    FDefaultFlags := Self.FDefaultFlags;
+    FFeatureArray := Self.FFeatureArray;
    end;
 end;
+
+procedure TPascalTypeExtendedGlyphMetamorphosisChainTable.ResetToDefaults;
+begin
+ inherited;
+ FDefaultFlags := 0;
+ SetLength(FFeatureArray, 0);
+end;
+
+function TPascalTypeExtendedGlyphMetamorphosisChainTable.GetFeature(
+  Index: Cardinal): TFeatureSubtableRecord;
+begin
+ if (Index >= 0) and (Index < Length(FFeatureArray))
+  then Result := FFeatureArray[Index]
+  else raise Exception.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+end;
+
+function TPascalTypeExtendedGlyphMetamorphosisChainTable.GetFeatureCount: Cardinal;
+begin
+ Result := Length(FFeatureArray);
+end;
+
+procedure TPascalTypeExtendedGlyphMetamorphosisChainTable.LoadFromStream(
+  Stream: TStream);
+var
+  StartPosition     : Int64;
+  ChainLength       : Cardinal; // The length of the chain in bytes, including this header.
+  SubtableCount     : Cardinal; // The number of subtables in the chain.
+  FeatureIndex      : Cardinal;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 12 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // remember start position
+   StartPosition := Position;
+
+   // read default flags
+   FDefaultFlags := ReadSwappedCardinal(Stream);
+
+   // read chain length
+   ChainLength := ReadSwappedCardinal(Stream);
+
+   {$IFDEF AmbigiousExceptions}
+   // check if chain length is a multiple of 4
+   if (ChainLength mod 4) <> 0
+    then raise EPascalTypeError.Create(RCStrWrongChainLength);
+   {$ENDIF}
+
+   // read feature entry count
+   SetLength(FFeatureArray, ReadSwappedCardinal(Stream));
+
+   // read subtable count
+   SubtableCount := ReadSwappedCardinal(Stream);
+
+   for FeatureIndex := 0 to Length(FFeatureArray) - 1 do
+    with FFeatureArray[FeatureIndex] do
+     begin
+      // read feature type
+      FeatureType := ReadSwappedWord(Stream);
+
+      // read feature setting
+      FeatureSetting := ReadSwappedWord(Stream);
+
+      // read enable flags
+      EnableFlags := ReadSwappedCardinal(Stream);
+
+      // read disable flags
+      DisableFlags := ReadSwappedCardinal(Stream);
+     end;
+
+   // jump to end of this table
+   Position := StartPosition + ChainLength;
+  end;
+end;
+
+procedure TPascalTypeExtendedGlyphMetamorphosisChainTable.SaveToStream(
+  Stream: TStream);
+begin
+ inherited;
+
+end;
+
+procedure TPascalTypeExtendedGlyphMetamorphosisChainTable.SetDefaultFlags(
+  const Value: Cardinal);
+begin
+ if FDefaultFlags <> Value then
+  begin
+   FDefaultFlags := Value;
+   DefaultFlagsChanged;
+  end;
+end;
+
+procedure TPascalTypeExtendedGlyphMetamorphosisChainTable.DefaultFlagsChanged;
+begin
+ Changed;
+end;
+
+
+{ TPascalTypeExtendedGlyphMetamorphosisTable }
 
 class function TPascalTypeExtendedGlyphMetamorphosisTable.GetTableType: TTableType;
 begin
  Result := 'morx';
 end;
 
-procedure TPascalTypeExtendedGlyphMetamorphosisTable.ResetToDefaults;
-begin
- inherited;
-end;
-
 procedure TPascalTypeExtendedGlyphMetamorphosisTable.LoadFromStream(Stream: TStream);
 var
-  Value32  : Cardinal;
-  NumChain : Cardinal;
+  Value32    : Cardinal;
+  ChainIndex : Cardinal;
+  NumChain   : Cardinal;
+  ChainTable : TPascalTypeExtendedGlyphMetamorphosisChainTable;
 begin
  inherited;
 
  with Stream do
   begin
+   // check (minimum) table size
    if Position + 4 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // check version (should be >= 2.0)
+   if Version.Value < 2
+    then raise EPascalTypeError.CreateFmt(RCStrWrongMajorVersion, [Version.Value]);
 
    // read number of chains
    Read(Value32, SizeOf(Cardinal));
@@ -1628,6 +1912,18 @@ begin
    if NumChain <= 0
     then raise EPascalTypeError.Create(RCStrTooFewMetamorphosisChains);
    {$ENDIF}
+
+   for ChainIndex := 0 to NumChain - 1 do
+    begin
+     // create chain table
+     ChainTable := TPascalTypeExtendedGlyphMetamorphosisChainTable.Create;
+
+     // load chain table from stream
+     ChainTable.LoadFromStream(Stream);
+
+     // add chain table to lists
+     FChains.Add(ChainTable);
+    end;
   end;
 end;
 
