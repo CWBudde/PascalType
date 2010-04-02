@@ -166,7 +166,6 @@ type
     function GetFormat: Word; virtual; abstract;
   public
     function CharacterToGlyph(CharacterIndex: Integer): Integer; virtual; abstract;
-    function CharacterToGlyphId(CharacterIndex: Integer): Integer; virtual; abstract;
 
     property Format: Word read GetFormat;
   end;
@@ -187,7 +186,6 @@ type
     procedure SaveToStream(Stream: TStream); override;
 
     function CharacterToGlyph(CharacterIndex: Integer): Integer; override;
-    function CharacterToGlyphId(CharacterIndex: Integer): Integer; override;
   end;
 
   TTrueTypeFontFormat2CharacterMap = class(TCustomTrueTypeFontCharacterMap)
@@ -205,7 +203,6 @@ type
     procedure SaveToStream(Stream: TStream); override;
 
     function CharacterToGlyph(CharacterIndex: Integer): Integer; override;
-    function CharacterToGlyphId(CharacterIndex: Integer): Integer; override;
   end;
 
   TTrueTypeFontFormat4CharacterMap = class(TCustomTrueTypeFontCharacterMap)
@@ -225,14 +222,48 @@ type
     function GetFormat: Word; override;
     procedure ResetToDefaults; override;
   public
-    constructor Create; override;
-    destructor Destroy; override;
-
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
     function CharacterToGlyph(CharacterIndex: Integer): Integer; override;
-    function CharacterToGlyphId(CharacterIndex: Integer): Integer; override;
+  end;
+
+  TTrueTypeFontFormat6CharacterMap = class(TCustomTrueTypeFontCharacterMap)
+  private
+    FLanguage     : Word; // Please see “Note on the language field in 'cmap' subtables“ in this document.
+    FFirstCode    : Word; // First character code of subrange.
+    FGlyphIdArray : array of Word;
+    function GetEntryCount: Word; // Array of glyph index values for character codes in the range.
+  protected
+    function GetFormat: Word; override;
+    procedure ResetToDefaults; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    function CharacterToGlyph(CharacterIndex: Integer): Integer; override;
+
+    property EntryCount: Word read GetEntryCount;
+  end;
+
+  TCharMapSegmentedCoverageRecord = packed record
+    StartCharCode : Cardinal; // First character code in this group
+    EndCharCode   : Cardinal; // Last character code in this group
+    StartGlyphID  : Cardinal; // Glyph index corresponding to the starting character code
+  end;  
+
+  TTrueTypeFontFormat12CharacterMap = class(TCustomTrueTypeFontCharacterMap)
+  private
+    FLanguage      : Cardinal; // Please see “Note on the language field in 'cmap' subtables“ in this document.
+    FCoverageArray : array of TCharMapSegmentedCoverageRecord;
+  protected
+    function GetFormat: Word; override;
+    procedure ResetToDefaults; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    function CharacterToGlyph(CharacterIndex: Integer): Integer; override;
   end;
 
   TCustomCharacterMapDirectoryEntry = class(TCustomPascalTypeTable)
@@ -1057,7 +1088,8 @@ begin
     then raise EPascalTypeError.Create(RCStrNoMagic);
 
    // read flags
-   FFlags := WordToFontHeaderTableFlags(ReadSwappedWord(Stream));
+   Value16 := ReadSwappedWord(Stream);
+   FFlags := WordToFontHeaderTableFlags(Value16);
 
    {$IFDEF AmbigiousExceptions}
    if (Value16 shr 14) <> 0
@@ -1487,12 +1519,6 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [CharacterIndex]);
 end;
 
-function TTrueTypeFontFormat0CharacterMap.CharacterToGlyphId(
-  CharacterIndex: Integer): Integer;
-begin
- Result := CharacterToGlyph(CharacterIndex);
-end;
-
 
 { TTrueTypeFontFormat2CharacterMap }
 
@@ -1518,12 +1544,6 @@ begin
 end;
 
 function TTrueTypeFontFormat2CharacterMap.CharacterToGlyph(
-  CharacterIndex: Integer): Integer;
-begin
- Result := CharacterIndex;
-end;
-
-function TTrueTypeFontFormat2CharacterMap.CharacterToGlyphId(
   CharacterIndex: Integer): Integer;
 begin
  Result := CharacterIndex;
@@ -1563,16 +1583,6 @@ end;
 
 
 { TTrueTypeFontFormat4CharacterMap }
-
-constructor TTrueTypeFontFormat4CharacterMap.Create;
-begin
- inherited;
-end;
-
-destructor TTrueTypeFontFormat4CharacterMap.Destroy;
-begin
- inherited;
-end;
 
 function TTrueTypeFontFormat4CharacterMap.GetFormat: Word;
 begin
@@ -1621,21 +1631,13 @@ begin
 
 end;
 
-function TTrueTypeFontFormat4CharacterMap.CharacterToGlyphId(
-  CharacterIndex: Integer): Integer;
-begin
- Result := CharacterToGlyph(CharacterIndex);
-
- if (Result >= 0) and (Result < Length(FGlyphIdArray))
-  then Result := FGlyphIdArray[Result]
-  else raise EPascalTypeError.Create(RCStrWrongCharacterIndex);
-end;
-
 procedure TTrueTypeFontFormat4CharacterMap.LoadFromStream(Stream: TStream);
 var
   StartPos : Int64;
   SegIndex : Integer;
+  {$IFDEF AmbigiousExceptions}
   Value16  : Word;
+  {$ENDIF}
 begin
  with Stream do
   begin
@@ -1675,9 +1677,11 @@ begin
    // read range shift
    FRangeShift := ReadSwappedWord(Stream);
 
+   {$IFDEF AmbigiousExceptions}
    // confirm range shift has a valid value
    if FRangeShift <> FSegCountX2 - FSearchRange
     then raise EPascalTypeError.Create(RCStrCharMapError + ': ' + 'wrong range shift!');
+   {$ENDIF}
 
    SetLength(FEndCount, FSegCountX2 div 2);
    SetLength(FStartCount, FSegCountX2 div 2);
@@ -1685,10 +1689,8 @@ begin
    SetLength(FIdRangeOffset, FSegCountX2 div 2);
 
    // read end count
-   for SegIndex := 0 to Length(FEndCount) - 1 do
-    begin
-     FEndCount[SegIndex] := ReadSwappedWord(Stream);
-    end;
+   for SegIndex := 0 to Length(FEndCount) - 1
+    do FEndCount[SegIndex] := ReadSwappedWord(Stream);
 
    // confirm end count is valid
    if FEndCount[Length(FEndCount) - 1] <> $FFFF
@@ -1722,9 +1724,11 @@ begin
    for SegIndex := 0 to Length(FIdDelta) - 1
     do FIdDelta[SegIndex] := ReadSwappedWord(Stream);
 
+   {$IFDEF AmbigiousExceptions}
    // confirm ID delta is valid
    if FIdDelta[Length(FIdDelta) - 1] <> 1
     then raise EPascalTypeError.CreateFmt(RCStrCharMapErrorIdDelta, [FIdDelta[Length(FIdDelta) - 1]]);
+   {$ENDIF}
 
    // read ID range offset
    for SegIndex := 0 to Length(FIdRangeOffset) - 1
@@ -1752,6 +1756,184 @@ begin
    Value16 := Swap16(FLanguage);
    Write(Value16, SizeOf(Word));
   end;
+end;
+
+
+{ TTrueTypeFontFormat6CharacterMap }
+
+function TTrueTypeFontFormat6CharacterMap.CharacterToGlyph(
+  CharacterIndex: Integer): Integer;
+begin
+ Result := 0;
+ if CharacterIndex >= FFirstCode then
+  if CharacterIndex < FFirstCode + Length(FGlyphIdArray)
+   then Result := FGlyphIdArray[CharacterIndex - FFirstCode];
+end;
+
+function TTrueTypeFontFormat6CharacterMap.GetEntryCount: Word;
+begin
+ Result := Length(FGlyphIdArray);
+end;
+
+function TTrueTypeFontFormat6CharacterMap.GetFormat: Word;
+begin
+ Result := 6
+end;
+
+procedure TTrueTypeFontFormat6CharacterMap.ResetToDefaults;
+begin
+ FLanguage := 0;
+ FFirstCode := 0;
+ SetLength(FGlyphIdArray, 0);
+end;
+
+procedure TTrueTypeFontFormat6CharacterMap.LoadFromStream(Stream: TStream);
+var
+  StartPos    : Int64;
+  EntryIndex  : Integer;
+  TableLength : Word;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // remember start position
+   StartPos := Position;
+
+   // read table size
+   TableLength := ReadSwappedWord(Stream);
+
+   // read language
+   FLanguage := ReadSwappedWord(Stream);
+
+   // read first code
+   FFirstCode := ReadSwappedWord(Stream);
+
+   // read number of character codes in subrange
+   SetLength(FGlyphIdArray, ReadSwappedWord(Stream));
+
+   for EntryIndex := 0 to Length(FGlyphIdArray) - 1
+    do FGlyphIdArray[EntryIndex] := ReadSwappedWord(Stream);
+
+   {$IFDEF AmbigiousExceptions}
+   if Position <> StartPos + TableLength
+    then raise EPascalTypeError.Create('Character map error: Wrong length of subtable!');
+   {$ENDIF}
+
+   // seek end of table
+   Position := StartPos + TableLength;
+  end;
+end;
+
+procedure TTrueTypeFontFormat6CharacterMap.SaveToStream(Stream: TStream);
+var
+  EntryIndex : Integer;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // write table size
+   WriteSwappedWord(Stream, 8 + 2 * Length(FGlyphIdArray));
+
+   // write language
+   WriteSwappedWord(Stream, FLanguage);
+
+   // write first code
+   WriteSwappedWord(Stream, FFirstCode);
+
+   // write number of character codes in subrange
+   WriteSwappedWord(Stream, Length(FGlyphIdArray));
+
+   // write glyph indices
+   for EntryIndex := 0 to Length(FGlyphIdArray) - 1
+    do WriteSwappedWord(Stream, FGlyphIdArray[EntryIndex]);
+  end;
+end;
+
+
+{ TTrueTypeFontFormat12CharacterMap }
+
+function TTrueTypeFontFormat12CharacterMap.CharacterToGlyph(
+  CharacterIndex: Integer): Integer;
+var
+  GroupIndex : Integer;
+begin
+ Result := 0;
+ GroupIndex := 0;
+
+ while GroupIndex < Length(FCoverageArray) do
+  with FCoverageArray[GroupIndex] do
+   begin
+    if CharacterIndex >= Integer(StartCharCode) then
+     begin
+      if CharacterIndex < Integer(EndCharCode)
+       then Result := Integer(StartGlyphID) + (CharacterIndex - Integer(StartCharCode));
+
+      Exit;
+     end;
+    Inc(GroupIndex);
+   end;
+end;
+
+function TTrueTypeFontFormat12CharacterMap.GetFormat: Word;
+begin
+ Result := 12;
+end;
+
+procedure TTrueTypeFontFormat12CharacterMap.ResetToDefaults;
+begin
+ FLanguage := 0;
+ SetLength(FCoverageArray, 0);
+end;
+
+procedure TTrueTypeFontFormat12CharacterMap.LoadFromStream(Stream: TStream);
+var
+  StartPos    : Int64;
+  TableLength : Cardinal;
+  GroupIndex  : Cardinal;
+begin
+ with Stream do
+  begin
+   StartPos := Position;
+
+   {$IFDEF AmbigiousExceptions}
+   if ReadSwappedWord(Stream) <> 0
+    then raise EPascalTypeError.Create(RCStrReservedValueError);
+   {$ELSE}
+   Seek(2, soFromCurrent);
+   {$ENDIF}
+
+   // read table length
+   TableLength := ReadSwappedCardinal(Stream);
+
+   // read language
+   FLanguage := ReadSwappedCardinal(Stream);
+
+   // read group count
+   SetLength(FCoverageArray, ReadSwappedCardinal(Stream));
+
+   for GroupIndex := 0 to Length(FCoverageArray) - 1 do
+    with FCoverageArray[GroupIndex] do
+     begin
+      // read start character code
+      StartCharCode := ReadSwappedCardinal(Stream);
+
+      // read end character code
+      EndCharCode := ReadSwappedCardinal(Stream);
+
+      // read start glyph ID
+      StartGlyphID := ReadSwappedCardinal(Stream);
+     end;
+
+   // seek end of this table
+   Position := StartPos + TableLength - 2;
+  end;
+end;
+
+procedure TTrueTypeFontFormat12CharacterMap.SaveToStream(Stream: TStream);
+begin
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -1809,6 +1991,7 @@ end;
 
 procedure TCustomCharacterMapDirectoryEntry.LoadFromStream(Stream: TStream);
 var
+  Value16 : Word;
   OldMap  : TCustomTrueTypeFontCharacterMap;
 begin
  with Stream do
@@ -1818,25 +2001,39 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read format
-   case ReadSwappedWord(Stream) of
-    0 : begin
+   Value16 := ReadSwappedWord(Stream);
+   case Value16 of
+     0 : begin
+          OldMap := FCharacterMap;
+          FCharacterMap := TTrueTypeFontFormat0CharacterMap.Create;
+          if Assigned(OldMap)
+           then FreeAndNil(OldMap);
+         end;
+     2 : begin
+          OldMap := FCharacterMap;
+          FCharacterMap := TTrueTypeFontFormat2CharacterMap.Create;
+          if Assigned(OldMap)
+           then FreeAndNil(OldMap);
+         end;
+     4 : begin
+          OldMap := FCharacterMap;
+          FCharacterMap := TTrueTypeFontFormat4CharacterMap.Create;
+          if Assigned(OldMap)
+           then FreeAndNil(OldMap);
+         end;
+     6 : begin
+          OldMap := FCharacterMap;
+          FCharacterMap := TTrueTypeFontFormat6CharacterMap.Create;
+          if Assigned(OldMap)
+           then FreeAndNil(OldMap);
+         end;
+    12 : begin
          OldMap := FCharacterMap;
-         FCharacterMap := TTrueTypeFontFormat0CharacterMap.Create;
+         FCharacterMap := TTrueTypeFontFormat12CharacterMap.Create;
          if Assigned(OldMap)
           then FreeAndNil(OldMap);
         end;
-    2 : begin
-         OldMap := FCharacterMap;
-         FCharacterMap := TTrueTypeFontFormat2CharacterMap.Create;
-         if Assigned(OldMap)
-          then FreeAndNil(OldMap);
-        end;
-    4 : begin
-         OldMap := FCharacterMap;
-         FCharacterMap := TTrueTypeFontFormat4CharacterMap.Create;
-         if Assigned(OldMap)
-          then FreeAndNil(OldMap);
-        end;
+    else raise EPascalTypeError.CreateFmt('Unknown character map (%d)', [Value16]);
    end;
 
    if Assigned(FCharacterMap)
@@ -2188,7 +2385,6 @@ end;
 
 procedure TPascalTypeHorizontalHeaderTable.LoadFromStream(Stream: TStream);
 var
-  Value16 : Word;
   Value32 : Cardinal;
 begin
  with Stream do
@@ -2541,7 +2737,6 @@ var
   HorHead  : TPascalTypeHorizontalHeaderTable;
   MaxProf  : TPascalTypeMaximumProfileTable;
   MtxIndex : Integer;
-  Value16  : Word;
 begin
  inherited;
 
@@ -4103,7 +4298,6 @@ end;
 procedure TPascalTypePostscriptTable.LoadFromStream(Stream: TStream);
 var
   Value32 : Cardinal;
-  Value16 : Word;
 begin
  with Stream do
   begin
@@ -4374,7 +4568,6 @@ end;
 procedure TPascalTypePostscriptVersion2Table.LoadFromStream(Stream: TStream);
 var
   GlyphIndex : Integer;
-  Value16    : Word;
   Value8     : Byte;
 begin
  with Stream do

@@ -1270,8 +1270,7 @@ end;
 
 procedure TPascalTypeFeatureTable.LoadFromStream(Stream: TStream);
 var
-  Value32   : Cardinal;
-  Value16   : Cardinal;
+  Value16 : Cardinal;
 begin
  inherited;
 

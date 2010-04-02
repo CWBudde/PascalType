@@ -197,8 +197,6 @@ begin
 end;
 
 procedure TPascalTypeBitmapLineMetrics.LoadFromStream(Stream: TStream);
-var
-  Value8  : Byte;
 begin
  inherited;
 

@@ -564,6 +564,24 @@ begin
            SubItems.Add(GlyphName);
           end;
        end;
+     end else
+   if CharacterMap is TTrueTypeFontFormat12CharacterMap then
+    for CharIndex := $20 to $FFFF do
+     begin
+      // get glyph index
+      GlyphIndex := CharacterMap.CharacterToGlyph(CharIndex);
+
+      if GlyphIndex > 0 then
+       begin
+        GlyphName := GetUnicodeName(CharIndex);
+        if GlyphName <> '' then
+         with ListView.Items.Add do
+          begin
+           Caption := 'U+' + IntToHex(CharIndex, 4);
+           SubItems.Add(IntToStr(CharacterMap.CharacterToGlyph(CharIndex)));
+           SubItems.Add(GlyphName);
+          end;
+       end;
      end;
 
    // end update (unlock)
@@ -2502,10 +2520,10 @@ procedure TFmTTF.FontChanged;
 var
   OptTableIndex     : Integer;
   SubtableIndex     : Integer;
-  Node, SubNode     : TTreeNode;
-  SubSubNode        : TTreeNode;
   SubSubIndex       : Integer;
   str               : string;
+  Node, SubNode     : TTreeNode;
+  SubSubNode        : TTreeNode;
 begin
  with FRasterizer.Interpreter, TreeView do
   begin
@@ -2711,11 +2729,13 @@ begin
             Items.AddChildObject(SubNode, 'Outline', GlyphData[SubtableIndex]);
             if GlyphData[SubtableIndex] is TTrueTypeFontSimpleGlyphData then
              begin
-              SubSubNode := Items.AddChildObject(SubNode, 'Points', GlyphData[SubtableIndex]);
               {$IFDEF ShowContours}
+              SubSubNode := Items.AddChildObject(SubNode, 'Points', GlyphData[SubtableIndex]);
               with TTrueTypeFontSimpleGlyphData(GlyphData[SubtableIndex]) do
                for SubSubIndex := 0 to ContourCount - 1
                 do Items.AddChildObject(SubSubNode, 'Contour #' + IntToStr(SubSubIndex + 1), Contour[SubSubIndex]);
+              {$ELSE}
+              Items.AddChildObject(SubNode, 'Points', GlyphData[SubtableIndex]);
               {$ENDIF}
              end;
             Items.AddChildObject(SubNode, 'Instructions', GlyphData[SubtableIndex].Instructions)

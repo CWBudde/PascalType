@@ -479,7 +479,7 @@ type
     FDescent              : SmallInt; // Distance in FUnits from the centerline to the next line’s ascent.
     FLineGap              : SmallInt; // Reserved; set to 0
     FAdvanceHeightMax     : SmallInt; // The maximum advance height measurement -in FUnits found in the font. This value must be consistent with the entries in the vertical metrics table.
-    FMinToSideBearing     : SmallInt; // The minimum top sidebearing measurement found in the font, in FUnits. This value must be consistent with the entries in the vertical metrics table.
+    FMinTopSideBearing    : SmallInt; // The minimum top sidebearing measurement found in the font, in FUnits. This value must be consistent with the entries in the vertical metrics table.
     FMinBottomSideBearing : SmallInt; // The minimum bottom sidebearing measurement found in the font, in FUnits. This value must be consistent with the entries in the vertical metrics table.
     FYMaxExtent           : SmallInt; // Defined as yMaxExtent= minTopSideBearing+(yMax-yMin)
     FCaretSlopeRise       : SmallInt; // The value of the caretSlopeRise field divided by the value of the caretSlopeRun Field determines the slope of the caret. A value of 0 for the rise and a value of 1 for the run specifies a horizontal caret. A value of 1 for the rise and a value of 0 for the run specifies a vertical caret. Intermediate values are desirable for fonts whose glyphs are oblique or italic. For a vertical font, a horizontal caret is best.
@@ -499,7 +499,7 @@ type
     procedure SetLineGap(const Value: SmallInt);
     procedure SetMetricDataFormat(const Value: SmallInt);
     procedure SetMinBottomSideBearing(const Value: SmallInt);
-    procedure SetMinToSideBearing(const Value: SmallInt);
+    procedure SetMinTopSideBearing(const Value: SmallInt);
     procedure SetNumOfLongVerMetrics(const Value: Word);
     procedure SetYMaxExtent(const Value: SmallInt);
   protected
@@ -516,7 +516,7 @@ type
     procedure LineGapChanged; virtual;
     procedure MetricDataFormatChanged; virtual;
     procedure MinBottomSideBearingChanged; virtual;
-    procedure MinToSideBearingChanged; virtual;
+    procedure MinTopSideBearingChanged; virtual;
     procedure NumOfLongVerMetricsChanged; virtual;
     procedure VersionChanged; virtual;
     procedure YMaxExtentChanged; virtual;
@@ -531,7 +531,7 @@ type
     property Descent: SmallInt read FDescent write SetDescent;
     property LineGap: SmallInt read FLineGap write SetLineGap;
     property AdvanceHeightMax: SmallInt read FAdvanceHeightMax write SetAdvanceHeightMax;
-    property MinToSideBearing: SmallInt read FMinToSideBearing write SetMinToSideBearing;
+    property MinTopSideBearing: SmallInt read FMinTopSideBearing write SetMinTopSideBearing;
     property MinBottomSideBearing: SmallInt read FMinBottomSideBearing write SetMinBottomSideBearing;
     property YMaxExtent: SmallInt read FYMaxExtent write SetYMaxExtent;
     property CaretSlopeRise: SmallInt read FCaretSlopeRise write SetCaretSlopeRise;
@@ -1184,7 +1184,7 @@ end;
 function TPascalTypeHorizontalDeviceMetricsTable.GetDeviceRecord(
   Index: Word): TPascalTypeHorizontalDeviceMetricsSubTable;
 begin
- if (Index >= 0) and (Index < FSubtables.Count)
+ if (Index < FSubtables.Count)
   then Result := TPascalTypeHorizontalDeviceMetricsSubTable(FSubtables[Index])
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
@@ -1210,7 +1210,6 @@ procedure TPascalTypeHorizontalDeviceMetricsTable.LoadFromStream(
 var
   OffsetPosition   : Int64;
   SizeDeviceRecord : Cardinal;
-  Value16          : Word;
   NumRecords       : SmallInt;
   RecordIndex      : Integer;
   SubTableRecord   : TPascalTypeHorizontalDeviceMetricsSubTable;
@@ -1378,9 +1377,11 @@ begin
    Read(Value16, SizeOf(Word));
    RangeShift := Swap16(Value16);
 
+   {$IFDEF AmbigiousExceptions}
    // confirm range shift has a valid value
    if RangeShift <> (6 * Length(FPairs) - SearchRange)
     then raise EPascalTypeError.Create(RCStrErrorInKerningSubTable + ': ' + RCStrWrongRangeShift);
+   {$ENDIF}
 
    for PairIndex := 0 to Length(FPairs) - 1 do
     with FPairs[PairIndex] do
@@ -2580,7 +2581,7 @@ begin
     FDescent              := Self.FDescent;
     FLineGap              := Self.FLineGap;
     FAdvanceHeightMax     := Self.FAdvanceHeightMax;
-    FMinToSideBearing     := Self.FMinToSideBearing;
+    FMinTopSideBearing    := Self.FMinTopSideBearing;
     FMinBottomSideBearing := Self.FMinBottomSideBearing;
     FYMaxExtent           := Self.FYMaxExtent;
     FCaretSlopeRise       := Self.FCaretSlopeRise;
@@ -2606,7 +2607,7 @@ begin
  FDescent := 0;
  FLineGap := 0;
  FAdvanceHeightMax := 0;
- FMinToSideBearing := 0;
+ FMinTopSideBearing := 0;
  FMinBottomSideBearing := 0;
  FYMaxExtent := 0;
  FCaretSlopeRise := 0;
@@ -2630,7 +2631,7 @@ begin
  with Stream do
   begin
    // check (minimum) table size
-   if Position + 54 > Size
+   if Position + 36 > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
@@ -2639,6 +2640,9 @@ begin
 
    if Version.Value <> 1
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
+
+//   if Version.Fract <> 0
+//    then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read ascent
    Read(Value16, SizeOf(SmallInt));
@@ -2658,7 +2662,7 @@ begin
 
    // read minimum side bearing
    Read(Value16, SizeOf(SmallInt));
-   FMinToSideBearing := Swap16(Value16);
+   FMinTopSideBearing := Swap16(Value16);
 
    // read minimum bottom bearing
    Read(Value16, SizeOf(SmallInt));
@@ -2724,7 +2728,7 @@ begin
    Write(Value16, SizeOf(SmallInt));
 
    // write minimum side bearing
-   Value16 := Swap16(FMinToSideBearing);
+   Value16 := Swap16(FMinTopSideBearing);
    Write(Value16, SizeOf(SmallInt));
 
    // write minimum bottom bearing
@@ -2755,7 +2759,7 @@ begin
    Value16 := Swap16(FMetricDataFormat);
    Write(Value16, SizeOf(Word));
 
-   // write metric data format
+   // write number of long vertical metrics
    Value16 := Swap16(Word(FNumOfLongVerMetrics));
    Write(Value16, SizeOf(Word));
   end;
@@ -2851,13 +2855,13 @@ begin
   end;
 end;
 
-procedure TPascalTypeVerticalHeaderTable.SetMinToSideBearing(
+procedure TPascalTypeVerticalHeaderTable.SetMinTopSideBearing(
   const Value: SmallInt);
 begin
- if MinToSideBearing <> Value then
+ if MinTopSideBearing <> Value then
   begin
-   FMinToSideBearing := Value;
-   MinToSideBearingChanged;
+   FMinTopSideBearing := Value;
+   MinTopSideBearingChanged;
   end;
 end;
 
@@ -2942,7 +2946,7 @@ begin
  Changed;
 end;
 
-procedure TPascalTypeVerticalHeaderTable.MinToSideBearingChanged;
+procedure TPascalTypeVerticalHeaderTable.MinTopSideBearingChanged;
 begin
  Changed;
 end;

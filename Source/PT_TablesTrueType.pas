@@ -569,7 +569,6 @@ end;
 procedure TCustomTrueTypeFontGlyphData.LoadFromStream(Stream: TStream);
 var
   MaxProfile : TPascalTypeMaximumProfileTable;
-  Value16    : SmallInt;
 begin
  // get maximum profile
  MaxProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableClass(TPascalTypeMaximumProfileTable));
@@ -583,7 +582,7 @@ begin
    FNumberOfContours := ReadSwappedSmallInt(Stream);
 
    // check if maximum number of contours are exceeded
-   if FNumberOfContours > MaxProfile.MaxContours
+   if (FNumberOfContours > 0) and (Word(FNumberOfContours) > MaxProfile.MaxContours)
     then raise EPascalTypeError.CreateFmt(RCStrTooManyContours, [FNumberOfContours, MaxProfile.MaxContours]);
 
    // check if glyph contains any information at all
@@ -811,7 +810,6 @@ var
   PointCount   : Integer;
   LastPoint    : Integer;
   Contour      : TPascalTypeContour;
-  Value16      : Word;
   MaxProfile   : TPascalTypeMaximumProfileTable;
   EndPtsOfCont : array of SmallInt;
   Flag         : Byte;
@@ -1070,7 +1068,6 @@ end;
 procedure TPascalTypeCompositeGlyph.LoadFromStream(Stream: TStream);
 var
   Argument : array [0..1] of SmallInt;
-  Value16  : Word;
 const
   CFixedPoint2Dot14Scale : Single = 1 / 16384;  
 begin
