@@ -604,8 +604,8 @@ begin
    // read YMax
    FYMax := ReadSwappedSmallInt(Stream);
 
-   Assert(FXMin <= FXMax);
-   Assert(FYMin <= FYMax);
+//   Assert(FXMin <= FXMax);
+//   Assert(FYMin <= FYMax);
   end;
 end;
 

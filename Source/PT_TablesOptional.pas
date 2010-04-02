@@ -1760,10 +1760,9 @@ end;
 
 procedure TPascalTypeKerningTable.LoadFromStream(Stream: TStream);
 var
-  Value16       : Word;
-  SubTableCount : Word;
   SubTableIndex : Integer;
   SubTable      : TPascalTypeKerningSubTable;
+  SubTableCount : Word;
 begin
  inherited;
 
@@ -1774,15 +1773,13 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value16, SizeOf(Word));
-   FVersion := Swap16(Value16);
+   FVersion := ReadSwappedWord(Stream);
 
    if FVersion <> 0
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read number of glyphs
-   Read(Value16, SizeOf(Word));
-   SubTableCount := Swap16(Value16);
+   SubTableCount := ReadSwappedWord(Stream);
 
    // clear eventually existing tables
    FKerningSubtableList.Clear;

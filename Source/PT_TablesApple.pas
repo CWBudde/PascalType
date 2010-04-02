@@ -409,11 +409,31 @@ type
 
   // table 'trak'
 
+(*
+  TPascalTypeTrackingTable = class(TCustomPascalTypeTable)
+  private
+    nTracks         : uint16; // Number of separate tracks included in this table.
+    nSizes          : uint16; // Number of point sizes included in this table.
+    sizeTableOffset : uint32; // Offset from start of the tracking table to the start of the size subtable.
+    trackTable[]    : trackTableEntry; // Array[nTracks] of TrackTableEntry records.
+    sizeTable[]     : fixed32; // Array[nSizes] of size values.
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+    class function GetTableType: TTableType; override;
+
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+*)
+
   // not entirely implemented, for more details see
   // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6trak.html
   TPascalTypeTrackingTable = class(TCustomPascalTypeNamedVersionTable)
   private
-    FFormat      : Word; // Format of the tracking table (set to 0).
+    FFormat : Word; // Format of the tracking table (set to 0).
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -1140,8 +1160,8 @@ end;
 constructor TPascalTypeFontDescriptionTable.Create(
   Interpreter: IPascalTypeInterpreter);
 begin
- inherited;
  FDescritors := TObjectList.Create;
+ inherited;
 end;
 
 destructor TPascalTypeFontDescriptionTable.Destroy;
@@ -1697,6 +1717,30 @@ var
 begin
  inherited;
 
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 8 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // read format
+   FFormat := ReadSwappedWord(Stream);
+
+   // read horizontal offset
+   HorizOffset := ReadSwappedWord(Stream);
+
+   // read vertical offset
+   VertOffset := ReadSwappedWord(Stream);
+
+   {$IFDEF AmbigiousException}
+   // read reserved
+   if ReadSwappedWord(Stream) <> 0
+    then raise EPascalTypeError.Create(RCStrReservedValueError);
+   {$ELSE}
+   // skip reserved
+   Seek(2, soFromCurrent);
+   {$ENDIF}
+  end;
 end;
 
 procedure TPascalTypeTrackingTable.SaveToStream(Stream: TStream);
