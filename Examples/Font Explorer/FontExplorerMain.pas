@@ -134,6 +134,7 @@ type
     procedure DisplayEmbeddedBitmapLocationTable(BitmapLocationTable: TPascalTypeEmbeddedBitmapLocationTable);
     procedure DisplayEmbeddedBitmapScalingTable(BitmapScalingTable: TPascalTypeEmbeddedBitmapScalingTable);
     procedure DisplayExtendedGlyphMetamorphosisTable(ExtendedGlyphMetamorphosisTable: TPascalTypeExtendedGlyphMetamorphosisTable);
+    procedure DisplayFontDescriptionTable(FontDescription: TPascalTypeFontDescriptionTable);
     procedure DisplayFontForgeExtensionTable(FontForgeExtensionTable: TPascalTypeFontForgeExtensionTable);
     procedure DisplayFontForgeTimeStampTable(FontForgeTimeStampTable: TPascalTypeFontForgeTimeStampTable);
     procedure DisplayFontInstructionTable(InstructionTable: TCustomTrueTypeFontInstructionTable);
@@ -144,6 +145,7 @@ type
     procedure DisplayGlyphDataTable(GlyphDataTable: TTrueTypeFontGlyphDataTable);
     procedure DisplayGlyphDefinitionTable(GlyphDefinitionTable: TOpenTypeGlyphDefinitionTable);
     procedure DisplayGlyphInstructionTable(GlyphInstructionTable: TTrueTypeFontGlyphInstructionTable);
+    procedure DisplayGlyphPropertiesTable(GlyphProperties: TPascalTypeGlyphPropertiesTable);
     procedure DisplayHeaderTable(HeaderTable: TPascalTypeHeaderTable);
     procedure DisplayHorizontalDeviceMetricsSubTable(HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsSubTable);
     procedure DisplayHorizontalDeviceMetricsTable(HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsTable);
@@ -178,7 +180,7 @@ type
     procedure DisplayGlyphDataPoints(SimpleGlyphData: TTrueTypeFontSimpleGlyphData);
     procedure DisplayGlyphDataSimpleOutline(SimpleGlyphData: TTrueTypeFontSimpleGlyphData);
     procedure DisplayGlyphDataCompositeOutline(CompositeGlyphData: TTrueTypeFontCompositeGlyphData);
-    procedure DisplayGlyphDataContour(Contour: TPascalTypeContour);
+    procedure DisplayGlyphDataContour(Contour: TPascalTypeTrueTypeContour);
 
     procedure FontSizeChanged;
   public
@@ -196,7 +198,7 @@ implementation
 {$R *.dfm}
 
 uses
-  ShlObj, ActiveX, Inifiles, Math;
+  ShlObj, ActiveX, Inifiles, Math, Types;
 
 procedure StrResetLength(var S: AnsiString);
 begin
@@ -902,6 +904,33 @@ begin
 
    // show modification date
    ListViewData(['Font Modified', DateTimeToStr(ModifiedDate / 86400 + EncodeDate(1904, 1, 1))]);
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayFontDescriptionTable(
+  FontDescription: TPascalTypeFontDescriptionTable);
+begin
+ with FontDescription do
+  begin
+   InitializeDefaultListView;
+
+   // show version
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayGlyphPropertiesTable(GlyphProperties: TPascalTypeGlyphPropertiesTable);
+begin
+ with GlyphProperties do
+  begin
+   InitializeDefaultListView;
+
+   // show version
+   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
 
    ListView.BringToFront;
   end;
@@ -1826,7 +1855,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayGlyphDataContour(Contour: TPascalTypeContour);
+procedure TFmTTF.DisplayGlyphDataContour(Contour: TPascalTypeTrueTypeContour);
 var
   PointIndex : Integer;
 begin
@@ -1858,9 +1887,15 @@ end;
 procedure TFmTTF.DisplayGlyphDataSimpleOutline(
   SimpleGlyphData: TTrueTypeFontSimpleGlyphData);
 var
-  ContourIndex : Integer;
-  PointIndex   : Integer;
-  Center       : TPoint;
+  ContourIndex  : Integer;
+  PointIndex    : Integer;
+  Center        : TPoint;
+  CurrentPoint  : TPoint;
+  LastPoint     : TPoint;
+  MidPoint      : TPoint;
+  ControlPoint  : TPoint;
+  WasOnCurve    : Boolean;
+  IsOnCurve     : Boolean;
 begin
  with FCurrentGlyph.Canvas, SimpleGlyphData do
   begin
@@ -1896,7 +1931,6 @@ begin
       Pen.Color := clLime;
       MoveTo(Center.X + Round(HorizontalMetric[GlyphIndex].AdvanceWidth * FScaler), 0);
       LineTo(Center.X + Round(HorizontalMetric[GlyphIndex].AdvanceWidth * FScaler), FCurrentGlyph.Height);
-
      end;
 
    // set pen to solid black
@@ -1906,15 +1940,74 @@ begin
    for ContourIndex := 0 to ContourCount - 1 do
     with Contour[ContourIndex] do
      begin
-      MoveTo(Center.X + Round(Point[0].XPos * FScaler),
-        Center.Y - Round(Point[0].YPos * FScaler));
-      for PointIndex := 1 to PointCount - 1 do
+      WasOnCurve := (Point[0].Flags and 1) <> 0;
+
+      // store last point
+      if WasOnCurve then
        begin
-        LineTo(Center.X + Round(Point[PointIndex].XPos * FScaler),
-          Center.Y - Round(Point[PointIndex].YPos * FScaler));
+        LastPoint.X := Center.X + Round(Point[0].XPos * FScaler);
+        LastPoint.Y := Center.Y - Round(Point[0].YPos * FScaler);
+       end
+      else
+       begin
+        IsOnCurve := (Point[PointCount - 1].Flags and 1) <> 0;
+        // check if last point is on curve
+        if IsOnCurve then
+         begin
+          LastPoint.X := Center.X + Round(Point[PointCount - 1].XPos * FScaler);
+          LastPoint.Y := Center.Y - Round(Point[PointCount - 1].YPos * FScaler);
+         end
+        else
+         begin
+          // in case it is not start at a temporary point in between both
+          LastPoint.X := Center.X + Round((Point[0].XPos + Point[PointCount - 1].XPos) * 0.5 * FScaler);
+          LastPoint.Y := Center.Y - Round((Point[0].YPos + Point[PointCount - 1].YPos) * 0.5 * FScaler);
+         end;
        end;
-      LineTo(Center.X + Round(Point[0].XPos * FScaler),
-        Center.Y - Round(Point[0].YPos * FScaler));
+
+      // move to last point
+      MoveTo(LastPoint.X, LastPoint.Y);
+
+      PointIndex := 1;
+
+      while PointIndex <= PointCount do
+       begin
+        // set current point
+        CurrentPoint.X := Center.X + Round(Point[PointIndex].XPos * FScaler);
+        CurrentPoint.Y := Center.Y - Round(Point[PointIndex].YPos * FScaler);
+
+        IsOnCurve := (Point[PointIndex].Flags and 1) <> 0;
+
+        if IsOnCurve then
+         if WasOnCurve then
+          begin
+           // simple line
+           MoveTo(LastPoint.X, LastPoint.Y);
+           LineTo(CurrentPoint.X, CurrentPoint.Y);
+           LastPoint := CurrentPoint;
+          end
+         else
+          begin
+           PolyBezier([LastPoint, ControlPoint, CurrentPoint, CurrentPoint]);
+           LastPoint := CurrentPoint;
+          end
+        else
+         if WasOnCurve then
+          begin
+           ControlPoint := CurrentPoint;
+          end
+         else
+          begin
+           MidPoint.X := (CurrentPoint.X + ControlPoint.X) div 2;
+           MidPoint.Y := (CurrentPoint.Y + ControlPoint.Y) div 2;
+           PolyBezier([LastPoint, ControlPoint, MidPoint, MidPoint]);
+           ControlPoint := CurrentPoint;
+           LastPoint := MidPoint;
+          end;
+
+        Inc(PointIndex);
+        WasOnCurve := IsOnCurve;
+       end;
      end;
 
    Brush.Color := clGray;
@@ -2389,6 +2482,14 @@ begin
    if TObject(Node.Data) is TPascalTypeFontForgeExtensionTable
     then DisplayFontForgeExtensionTable(TPascalTypeFontForgeExtensionTable(Node.Data)) else
 
+   // Font Description Table
+   if TObject(Node.Data) is TPascalTypeFontDescriptionTable
+    then DisplayFontDescriptionTable(TPascalTypeFontDescriptionTable(Node.Data)) else
+
+   // Gylph Property Table
+   if TObject(Node.Data) is TPascalTypeGlyphPropertiesTable
+    then DisplayGlyphPropertiesTable(TPascalTypeGlyphPropertiesTable(Node.Data)) else
+
    // Kerning Table
    if TObject(Node.Data) is TPascalTypeKerningTable
     then DisplayFontKerningTable(TPascalTypeKerningTable(Node.Data)) else
@@ -2428,8 +2529,8 @@ begin
     else DisplayGlyphData(TCustomTrueTypeFontGlyphData(Node.Data)) else
 
    // Glyph Data Contour
-   if TObject(Node.Data) is TPascalTypeContour
-    then DisplayGlyphDataContour(TPascalTypeContour(Node.Data)) else
+   if TObject(Node.Data) is TPascalTypeTrueTypeContour
+    then DisplayGlyphDataContour(TPascalTypeTrueTypeContour(Node.Data)) else
 
    // Linear Threshold Table
    if TObject(Node.Data) is TPascalTypeLinearThresholdTable

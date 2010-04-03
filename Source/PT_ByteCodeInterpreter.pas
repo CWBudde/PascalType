@@ -32,6 +32,8 @@ unit PT_ByteCodeInterpreter;
 
 interface
 
+{$I PT_Compiler.inc}
+
 uses
   Classes, SysUtils, PT_Types, PT_Tables;
 

@@ -120,14 +120,14 @@ begin
  with Stream do
   begin
    // read count
-   Read(Value16, 2); // eventually swap data!!!
+   Value16 := ReadSwappedWord(Stream);
 
    // check if index file is empty
    if Value16 = 0
     then Exit;
 
    // set length of offsets
-   SetLength(Offsets, Swap16(Value16) + 1);
+   SetLength(Offsets, Value16 + 1);
 
    // read offset size
    Read(OffSize, 1);
@@ -361,78 +361,64 @@ end;
 
 procedure TPascalTypeVerticalOriginTable.LoadFromStream(Stream: TStream);
 var
-  Index   : Integer;
-  Value16 : Word;
+  Index: Integer;
 begin
  inherited;
 
  with Stream do
   begin
    // read major version
-   Read(Value16, SizeOf(Word));
-   FMajorVersion := Swap16(Value16);
+   FMajorVersion := ReadSwappedWord(Stream);
 
    // read minor version
-   Read(Value16, SizeOf(Word));
-   FMinorVersion := Swap16(Value16);
+   FMinorVersion := ReadSwappedWord(Stream);
 
    // read default vertical origin
-   Read(Value16, SizeOf(SmallInt));
-   FDefaultVertOriginY := Swap16(Value16);
+   FDefaultVertOriginY := ReadSwappedWord(Stream);
 
    // read vertical origin y-metrics
-   Read(Value16, SizeOf(SmallInt));
-   SetLength(FVertOriginYMetrics, Swap16(Value16));
+   SetLength(FVertOriginYMetrics, ReadSwappedWord(Stream));
 
    for Index := 0 to Length(FVertOriginYMetrics) - 1 do
     with FVertOriginYMetrics[Index] do
      begin
       // read glyph index
-      Read(Value16, SizeOf(Word));
-      GlyphIndex := Swap16(Value16);
+      GlyphIndex := ReadSwappedWord(Stream);
 
       // read vertical y origin
-      Read(Value16, SizeOf(SmallInt));
-      VertOriginY := Swap16(Value16);
+      VertOriginY := ReadSwappedWord(Stream);
      end;
   end;
 end;
 
 procedure TPascalTypeVerticalOriginTable.SaveToStream(Stream: TStream);
 var
-  Index   : Integer;
-  Value16 : Word;
+  Index : Integer;
 begin
  inherited;
 
  with Stream do
   begin
    // write major version
-   Value16 := Swap16(FMajorVersion);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FMajorVersion);
 
    // write minor version
-   Value16 := Swap16(FMinorVersion);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FMinorVersion);
 
    // write default vertical origin
-   Value16 := Swap16(FDefaultVertOriginY);
-   Write(Value16, SizeOf(SmallInt));
+   WriteSwappedWord(Stream, FDefaultVertOriginY);
 
    // write vertical origin y-metrics
-   Value16 := Swap16(Length(FVertOriginYMetrics));
-   Write(Value16, SizeOf(SmallInt));
+   WriteSwappedWord(Stream, Length(FVertOriginYMetrics));
 
    for Index := 0 to Length(FVertOriginYMetrics) - 1 do
     with FVertOriginYMetrics[Index] do
      begin
       // write glyph index
-      Value16 := Swap16(GlyphIndex);
-      Write(Value16, SizeOf(Word));
+      WriteSwappedWord(Stream, GlyphIndex);
 
       // write vertical y origin
-      Value16 := Swap16(VertOriginY);
-      Write(Value16, SizeOf(SmallInt));
+      WriteSwappedWord(Stream, VertOriginY);
      end;
   end;
 end;

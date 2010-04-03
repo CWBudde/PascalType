@@ -197,6 +197,10 @@ begin
 end;
 
 procedure TPascalTypeBitmapLineMetrics.LoadFromStream(Stream: TStream);
+{$IFDEF AmbigiousExceptions}
+var
+  Value8 : Byte;
+{$ENDIF}
 begin
  inherited;
 
@@ -490,10 +494,6 @@ begin
 end;
 
 procedure TPascalTypeBitmapSizeTable.LoadFromStream(Stream: TStream);
-var
-  Value32 : Cardinal;
-  Value16 : Word;
-  Value8  : array [0..1] of Byte absolute Value16;
 begin
  inherited;
 
@@ -504,20 +504,16 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read index subtable array offset
-   Read(Value32, SizeOf(Cardinal));
-   FIndexSubTableArrayOffset := Swap32(Value32);
+   FIndexSubTableArrayOffset := ReadSwappedCardinal(Stream);
 
    // read index tables size
-   Read(Value32, SizeOf(Cardinal));
-   FIndexTablesSize := Swap32(Value32);
+   FIndexTablesSize := ReadSwappedCardinal(Stream);
 
    // read number of index subtables
-   Read(Value32, SizeOf(Cardinal));
-   FNumberOfIndexSubTables := Swap32(Value32);
+   FNumberOfIndexSubTables := ReadSwappedCardinal(Stream);
 
    // read color reference
-   Read(Value32, SizeOf(Cardinal));
-   FColorRef := Swap32(Value32);
+   FColorRef := ReadSwappedCardinal(Stream);
 
    // load horizontal metrics from stream
    FHorizontalMetrics.LoadFromStream(Stream);
@@ -526,12 +522,10 @@ begin
    FVerticalMetrics.LoadFromStream(Stream);
 
    // read start glyph index
-   Read(Value16, SizeOf(Word));
-   FStartGlyphIndex := Swap16(Value16);
+   FStartGlyphIndex := ReadSwappedWord(Stream);
 
    // read end glyph index
-   Read(Value16, SizeOf(Word));
-   FEndGlyphIndex := Swap16(Value16);
+   FEndGlyphIndex := ReadSwappedWord(Stream);
 
    // read horizontal pixels per Em
    Read(FPpemX, 1);
@@ -548,57 +542,42 @@ begin
 end;
 
 procedure TPascalTypeBitmapSizeTable.SaveToStream(Stream: TStream);
-var
-  Value32 : Cardinal;
-  Value16 : Word;
-  Value8  : array [0..1] of Byte absolute Value16;
 begin
- inherited;
+ // write index subtable array offset
+ WriteSwappedCardinal(Stream, FIndexSubTableArrayOffset);
 
- with Stream do
-  begin
-   // write index subtable array offset
-   Value32 := Swap32(FIndexSubTableArrayOffset);
-   Write(Value32, SizeOf(Cardinal));
+ // write index tables size
+ WriteSwappedCardinal(Stream, FIndexTablesSize);
 
-   // write index tables size
-   Value32 := Swap32(FIndexTablesSize);
-   Write(Value32, SizeOf(Cardinal));
+ // write number of index subtables
+ WriteSwappedCardinal(Stream, FNumberOfIndexSubTables);
 
-   // write number of index subtables
-   Value32 := Swap32(FNumberOfIndexSubTables);
-   Write(Value32, SizeOf(Cardinal));
+ // write color reference
+ WriteSwappedCardinal(Stream, FColorRef);
 
-   // write color reference
-   Value32 := Swap32(FColorRef);
-   Write(Value32, SizeOf(Cardinal));
+ // save horizontal metrics to stream
+ FHorizontalMetrics.SaveToStream(Stream);
 
-   // save horizontal metrics to stream
-   FHorizontalMetrics.SaveToStream(Stream);
+ // save vertical metrics to stream
+ FVerticalMetrics.SaveToStream(Stream);
 
-   // save vertical metrics to stream
-   FVerticalMetrics.SaveToStream(Stream);
+ // write start glyph index
+ WriteSwappedWord(Stream, FStartGlyphIndex);
 
-   // write start glyph index
-   Value16 := Swap16(FStartGlyphIndex);
-   Write(Value16, SizeOf(Word));
+ // write end glyph index
+ WriteSwappedWord(Stream, FEndGlyphIndex);
 
-   // write end glyph index
-   Value16 := Swap16(FEndGlyphIndex);
-   Write(Value16, SizeOf(Word));
+ // write horizontal pixels per Em
+ Write(FPpemX, 1);
 
-   // write horizontal pixels per Em
-   Write(FPpemX, 1);
+ // write vertical pixels per Em
+ Write(FPpemY, 1);
 
-   // write vertical pixels per Em
-   Write(FPpemY, 1);
+ // write bit depth
+ Write(FBitDepth, 1);
 
-   // write bit depth
-   Write(FBitDepth, 1);
-
-   // write flags
-   Write(FFlags, 1);
-  end;
+ // write flags
+ Write(FFlags, 1);
 end;
 
 procedure TPascalTypeBitmapSizeTable.SetBitDepth(const Value: Byte);

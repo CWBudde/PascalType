@@ -167,7 +167,7 @@ type
     Flags : Byte;
   end;
 
-  TPascalTypeContour = class(TPersistent)
+  TPascalTypeTrueTypeContour = class(TPersistent)
   private
     FPoints : array of TContourPointRecord;
     function GetPoint(Index: Integer): TContourPointRecord;
@@ -185,7 +185,7 @@ type
   TTrueTypeFontSimpleGlyphData = class(TCustomTrueTypeFontGlyphData)
   private
     FContours : TObjectList;
-    function GetContour(Index: Integer): TPascalTypeContour;
+    function GetContour(Index: Integer): TPascalTypeTrueTypeContour;
     function GetContourCount: Integer;
   protected
     procedure ResetToDefaults; override;
@@ -196,7 +196,7 @@ type
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
-    property Contour[Index : Integer]: TPascalTypeContour read GetContour;
+    property Contour[Index : Integer]: TPascalTypeTrueTypeContour read GetContour;
     property ContourCount: Integer read GetContourCount; 
   end;
 
@@ -506,18 +506,12 @@ begin
 end;
 
 procedure TTrueTypeFontGlyphInstructionTable.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
- with Stream do
-  begin
-   // write instruction size
-   Value16 := Swap16(Length(FInstructions));
-   Write(Value16, SizeOf(Word));
+ // write instruction size
+ WriteSwappedWord(Stream, Length(FInstructions));
 
-   // write instructions
-   Write(FInstructions[0], Length(FInstructions));
-  end;
+ // write instructions
+ Stream.Write(FInstructions[0], Length(FInstructions));
 end;
 
 
@@ -610,31 +604,21 @@ begin
 end;
 
 procedure TCustomTrueTypeFontGlyphData.SaveToStream(Stream: TStream);
-var
-  Value16 : SmallInt;
 begin
- with Stream do
-  begin
-   // write number of contours
-   Value16 := Swap16(FNumberOfContours);
-   Write(Value16, SizeOf(SmallInt));
+ // write number of contours
+ WriteSwappedWord(Stream, FNumberOfContours);
 
-   // write XMin
-   Value16 := Swap16(FXMin);
-   Write(Value16, SizeOf(SmallInt));
+ // write XMin
+ WriteSwappedWord(Stream, FXMin);
 
-   // write YMin
-   Value16 := Swap16(FYMin);
-   Write(Value16, SizeOf(SmallInt));
+ // write YMin
+ WriteSwappedWord(Stream, FYMin);
 
-   // write XMax
-   Value16 := Swap16(FXMax);
-   Write(Value16, SizeOf(SmallInt));
+ // write XMax
+ WriteSwappedWord(Stream, FXMax);
 
-   // write YMax
-   Value16 := Swap16(FYMax);
-   Write(Value16, SizeOf(SmallInt));
-  end;
+ // write YMax
+ WriteSwappedWord(Stream, FYMax);
 end;
 
 procedure TCustomTrueTypeFontGlyphData.SetGlyphIndex(const Value: Integer);
@@ -718,26 +702,27 @@ begin
 end;
 
 
-{ TPascalTypeContour }
+{ TPascalTypeTrueTypeContour }
 
-procedure TPascalTypeContour.AssignTo(Dest: TPersistent);
+procedure TPascalTypeTrueTypeContour.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypeContour then
-  with TPascalTypeContour(Dest) do
+ if Dest is TPascalTypeTrueTypeContour then
+  with TPascalTypeTrueTypeContour(Dest) do
    begin
 
    end
   else inherited;
 end;
 
-function TPascalTypeContour.GetPoint(Index: Integer): TContourPointRecord;
+function TPascalTypeTrueTypeContour.GetPoint(Index: Integer): TContourPointRecord;
 begin
+ if (Index = Length(FPoints)) then Result := FPoints[0] else
  if (Index >= 0) and (Index < Length(FPoints))
   then Result := FPoints[Index]
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-procedure TPascalTypeContour.SetPoint(Index: Integer;
+procedure TPascalTypeTrueTypeContour.SetPoint(Index: Integer;
   const Value: TContourPointRecord);
 begin
  if (Index >= 0) and (Index < Length(FPoints))
@@ -745,12 +730,12 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TPascalTypeContour.GetPointCount: Integer;
+function TPascalTypeTrueTypeContour.GetPointCount: Integer;
 begin
- Result := Length(FPoints)
+ Result := Length(FPoints);
 end;
 
-procedure TPascalTypeContour.SetPointCount(const Value: Integer);
+procedure TPascalTypeTrueTypeContour.SetPointCount(const Value: Integer);
 begin
  if Value <> Length(FPoints) then
   begin
@@ -759,7 +744,7 @@ begin
   end;
 end;
 
-procedure TPascalTypeContour.PointCountChanged;
+procedure TPascalTypeTrueTypeContour.PointCountChanged;
 begin
  // yet todo
 end;
@@ -790,10 +775,10 @@ begin
 end;
 
 function TTrueTypeFontSimpleGlyphData.GetContour(
-  Index: Integer): TPascalTypeContour;
+  Index: Integer): TPascalTypeTrueTypeContour;
 begin
  if (Index >= 0) and (Index < FContours.Count)
-  then Result := TPascalTypeContour(FContours[Index])
+  then Result := TPascalTypeTrueTypeContour(FContours[Index])
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
@@ -809,7 +794,7 @@ var
   CntrPntIndex : Integer;
   PointCount   : Integer;
   LastPoint    : Integer;
-  Contour      : TPascalTypeContour;
+  Contour      : TPascalTypeTrueTypeContour;
   MaxProfile   : TPascalTypeMaximumProfileTable;
   EndPtsOfCont : array of SmallInt;
   Flag         : Byte;
@@ -857,7 +842,7 @@ begin
    for ContourIndex := 0 to FNumberOfContours - 1 do
     begin
      // create new contour
-     Contour := TPascalTypeContour.Create;
+     Contour := TPascalTypeTrueTypeContour.Create;
 
      // set contour point count
      if ContourIndex = 0
@@ -874,7 +859,7 @@ begin
    CntrPntIndex := 0;
 
    // set first contour
-   Contour := TPascalTypeContour(FContours[ContourIndex]);
+   Contour := TPascalTypeTrueTypeContour(FContours[ContourIndex]);
 
    while PointIndex < PointCount do
     begin
@@ -885,7 +870,7 @@ begin
        CntrPntIndex := 0;
 
        // set next contour
-       Contour := TPascalTypeContour(FContours[ContourIndex]);
+       Contour := TPascalTypeTrueTypeContour(FContours[ContourIndex]);
       end;
 
      // read flag value
@@ -924,7 +909,7 @@ begin
            CntrPntIndex := 0;
 
            // set next contour
-           Contour := TPascalTypeContour(FContours[ContourIndex]);
+           Contour := TPascalTypeTrueTypeContour(FContours[ContourIndex]);
           end;
 
          // set flags
@@ -942,7 +927,7 @@ begin
    CntrPntIndex := 0;
 
    // set first contour
-   Contour := TPascalTypeContour(FContours[ContourIndex]);
+   Contour := TPascalTypeTrueTypeContour(FContours[ContourIndex]);
 
    // reset last point
    LastPoint := 0;
@@ -957,7 +942,7 @@ begin
        CntrPntIndex := 0;
 
        // set next contour
-       Contour := TPascalTypeContour(FContours[ContourIndex])
+       Contour := TPascalTypeTrueTypeContour(FContours[ContourIndex])
       end;
 
      // check for short or long version
@@ -991,7 +976,7 @@ begin
    CntrPntIndex := 0;
 
    // set first contour
-   Contour := TPascalTypeContour(FContours[ContourIndex]);
+   Contour := TPascalTypeTrueTypeContour(FContours[ContourIndex]);
 
    // reset last point
    LastPoint := 0;
@@ -1006,7 +991,7 @@ begin
        CntrPntIndex := 0;
 
        // set next contour
-       Contour := TPascalTypeContour(FContours[ContourIndex])
+       Contour := TPascalTypeTrueTypeContour(FContours[ContourIndex])
       end;
 
      // check for short or long version

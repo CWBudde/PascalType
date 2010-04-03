@@ -668,8 +668,6 @@ begin
 end;
 
 procedure TCustomOpenTypeVersionedNamedTable.LoadFromStream(Stream: TStream);
-var
-  Value32 : Cardinal;
 begin
  inherited;
 
@@ -680,23 +678,16 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
   end;
 end;
 
 procedure TCustomOpenTypeVersionedNamedTable.SaveToStream(Stream: TStream);
-var
-  Value32 : Cardinal;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write version
-   Value32 := Swap32(Cardinal(Version));
-   Write(Value32, SizeOf(TFixedPoint));
-  end;
+ // write version
+ WriteSwappedCardinal(Stream, Cardinal(Version));
 end;
 
 procedure TCustomOpenTypeVersionedNamedTable.SetVersion(const Value: TFixedPoint);
@@ -759,7 +750,6 @@ end;
 procedure TOpenTypeClassDefinitionFormat1Table.LoadFromStream(Stream: TStream);
 var
   ArrayIndex : Integer;
-  Value16    : Word;
 begin
  inherited;
 
@@ -770,46 +760,32 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read start glyph
-   Read(Value16, SizeOf(Word));
-   FStartGlyph := Swap16(Value16);
+   FStartGlyph := ReadSwappedWord(Stream);
 
    // read ClassValueArray length
-   Read(Value16, SizeOf(Word));
-   SetLength(FClassValueArray, Swap16(Value16));
+   SetLength(FClassValueArray, ReadSwappedWord(Stream));
 
    // read ClassValueArray
-   for ArrayIndex := 0 to Length(FClassValueArray) - 1 do
-    begin
-     Read(Value16, SizeOf(Word));
-     FClassValueArray[ArrayIndex] := Swap16(Value16);
-    end;
+   for ArrayIndex := 0 to Length(FClassValueArray) - 1
+    do FClassValueArray[ArrayIndex] := ReadSwappedWord(Stream);
   end;
 end;
 
 procedure TOpenTypeClassDefinitionFormat1Table.SaveToStream(Stream: TStream);
 var
   ArrayIndex : Integer;
-  Value16    : Word;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write start glyph
-   Value16 := Swap16(FStartGlyph);
-   Write(Value16, SizeOf(Word));
+ // write start glyph
+ WriteSwappedWord(Stream, FStartGlyph);
 
-   // write ClassValueArray length
-   Value16 := Swap16(Length(FClassValueArray));
-   Write(Value16, SizeOf(Word));
+ // write ClassValueArray length
+ WriteSwappedWord(Stream, Length(FClassValueArray));
 
-   // write ClassValueArray
-   for ArrayIndex := 0 to Length(FClassValueArray) - 1 do
-    begin
-     Value16 := Swap16(FClassValueArray[ArrayIndex]);
-     Write(Value16, SizeOf(Word));
-    end;
-  end;
+ // write ClassValueArray
+ for ArrayIndex := 0 to Length(FClassValueArray) - 1
+  do WriteSwappedWord(Stream, FClassValueArray[ArrayIndex]);
 end;
 
 procedure TOpenTypeClassDefinitionFormat1Table.SetStartGlyph(const Value: Word);
@@ -866,7 +842,6 @@ end;
 procedure TOpenTypeClassDefinitionFormat2Table.LoadFromStream(Stream: TStream);
 var
   ArrayIndex : Integer;
-  Value16    : Word;
 begin
  inherited;
 
@@ -877,39 +852,30 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read ClassRangeRecords length
-   Read(Value16, SizeOf(Word));
-   SetLength(FClassRangeRecords, Swap16(Value16));
+   SetLength(FClassRangeRecords, ReadSwappedWord(Stream));
 
    // read ClassRangeRecords
    for ArrayIndex := 0 to Length(FClassRangeRecords) - 1 do
-    begin
-     // read start glyph
-     Read(Value16, SizeOf(Word));
-     FClassRangeRecords[ArrayIndex].StartGlyph := Swap16(Value16);
+    with FClassRangeRecords[ArrayIndex] do
+     begin
+      // read start glyph
+      StartGlyph := ReadSwappedWord(Stream);
 
-     // read end glyph
-     Read(Value16, SizeOf(Word));
-     FClassRangeRecords[ArrayIndex].EndGlyph := Swap16(Value16);
+      // read end glyph
+      EndGlyph := ReadSwappedWord(Stream);
 
-     // read glyph class
-     Read(Value16, SizeOf(Word));
-     FClassRangeRecords[ArrayIndex].GlyphClass := Swap16(Value16);
-    end;
+      // read glyph class
+      GlyphClass := ReadSwappedWord(Stream);
+     end;
   end;
 end;
 
 procedure TOpenTypeClassDefinitionFormat2Table.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write ClassRangeRecords length
-   Value16 := Swap16(Length(FClassRangeRecords));
-   Write(Value16, SizeOf(Word));
-  end;
+ // write ClassRangeRecords length
+ WriteSwappedWord(Stream, Length(FClassRangeRecords));
 end;
 
 
@@ -951,8 +917,6 @@ procedure TOpenTypeMarkGlyphSetTable.LoadFromStream(
   Stream: TStream);
 var
   CoverageIndex : Integer;
-  Value32       : Cardinal;
-  Value16       : Word;
 begin
  inherited;
 
@@ -963,19 +927,14 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value16, SizeOf(Word));
-   FTableFormat := Swap16(Value16);
+   FTableFormat := ReadSwappedWord(Stream);
 
    // read coverage length
-   Read(Value16, SizeOf(Word));
-   SetLength(FCoverage, Swap16(Value16));
+   SetLength(FCoverage, ReadSwappedWord(Stream));
 
    // read coverage data
-   for CoverageIndex := 0 to Length(FCoverage) - 1 do
-    begin
-     Read(Value32, SizeOf(Cardinal));
-     FCoverage[CoverageIndex] := Swap32(Value32);
-    end;
+   for CoverageIndex := 0 to Length(FCoverage) - 1
+    do FCoverage[CoverageIndex] := ReadSwappedCardinal(Stream);
   end;
 end;
 
@@ -983,28 +942,18 @@ procedure TOpenTypeMarkGlyphSetTable.SaveToStream(
   Stream: TStream);
 var
   CoverageIndex : Integer;
-  Value32       : Cardinal;
-  Value16       : Word;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write version
-   Value16 := Swap16(FTableFormat);
-   Write(Value16, SizeOf(Word));
+ // write table format
+ WriteSwappedWord(Stream, FTableFormat);
 
-   // read coverage length
-   Value16 := Swap16(Length(FCoverage));
-   Write(Value16, SizeOf(Word));
+ // write coverage length
+ WriteSwappedWord(Stream, Length(FCoverage));
 
-   // write coverage data
-   for CoverageIndex := 0 to Length(FCoverage) - 1 do
-    begin
-     Value32 := Swap32(FCoverage[CoverageIndex]);
-     Write(Value32, SizeOf(Cardinal));
-    end;
-  end;
+ // write coverage data
+ for CoverageIndex := 0 to Length(FCoverage) - 1
+  do WriteSwappedCardinal(Stream, FCoverage[CoverageIndex]);
 end;
 
 procedure TOpenTypeMarkGlyphSetTable.SetTableFormat(
@@ -1043,7 +992,6 @@ end;
 
 procedure TOpenTypeBaselineTagListTable.LoadFromStream(Stream: TStream);
 var
-  Value16  : Word;
   TagIndex : Word;
 begin
  inherited;
@@ -1055,8 +1003,7 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read baseline tag list array length
-   Read(Value16, SizeOf(Word));
-   SetLength(FBaseLineTags, Swap16(Value16));
+   SetLength(FBaseLineTags, ReadSwappedWord(Stream));
 
    // check if table is complete
    if Position + 4 * Length(FBaseLineTags) > Size
@@ -1070,7 +1017,6 @@ end;
 
 procedure TOpenTypeBaselineTagListTable.SaveToStream(Stream: TStream);
 var
-  Value16  : Word;
   TagIndex : Word;
 begin
  inherited;
@@ -1078,8 +1024,7 @@ begin
  with Stream do
   begin
    // write baseline tag list array length
-   Value16 := Swap16(Length(FBaseLineTags));
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, Length(FBaseLineTags));
 
    // write baseline array data
    for TagIndex := 0 to Length(FBaseLineTags) - 1
@@ -1108,7 +1053,6 @@ end;
 
 procedure TOpenTypeBaselineScriptListTable.LoadFromStream(Stream: TStream);
 var
-  Value16     : Word;
   ScriptIndex : Word;
 begin
  inherited;
@@ -1120,8 +1064,7 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read baseline stript list array length
-   Read(Value16, SizeOf(Word));
-   SetLength(FBaseLineScript, Swap16(Value16));
+   SetLength(FBaseLineScript, ReadSwappedWord(Stream));
 
    // check if table is complete
    if Position + 6 * Length(FBaseLineScript) > Size
@@ -1134,8 +1077,7 @@ begin
      Read(FBaseLineScript[ScriptIndex].Tag, SizeOf(TTableType));
 
      // read script offset
-     Read(Value16, SizeOf(Word));
-     FBaseLineScript[ScriptIndex].ScriptOffset := Swap16(Value16);
+     FBaseLineScript[ScriptIndex].ScriptOffset := ReadSwappedWord(Stream);
     end;
   end;
 end;
@@ -1219,7 +1161,8 @@ end;
 procedure TOpenTypeAxisTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise Exception.Create('not implemented yet');
+
+ raise Exception.Create(RCStrNotImplemented);
 end;
 
 
@@ -1405,24 +1348,19 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read glyph class definition offset
-   Read(Value16, SizeOf(Word));
-   GlyphClassDefOffset := Swap16(Value16);
+   GlyphClassDefOffset := ReadSwappedWord(Stream);
 
    // read attach list
-   Read(Value16, SizeOf(Word));
-   FAttachList := Swap16(Value16);
+   FAttachList := ReadSwappedWord(Stream);
 
    // read ligature caret list
-   Read(Value16, SizeOf(Word));
-   FLigCaretList := Swap16(Value16);
+   FLigCaretList := ReadSwappedWord(Stream);
 
    // read mark attach class definition offset
-   Read(Value16, SizeOf(Word));
-   MarkAttClassDefOffs := Swap16(Value16);
+   MarkAttClassDefOffs := ReadSwappedWord(Stream);
 
    // read mark glyph set offset
-   Read(Value16, SizeOf(Word));
-   MarkGlyphSetsDefOff := Swap16(Value16);
+   MarkGlyphSetsDefOff := ReadSwappedWord(Stream);
 
    // eventually free existing class definition
    if Assigned(FGlyphClassDef)
@@ -1488,7 +1426,6 @@ end;
 procedure TOpenTypeGlyphDefinitionTable.SaveToStream(Stream: TStream);
 var
   StartPos : Int64;
-  Value16  : Word;
   Offsets  : array [0..4] of Word;
 begin
  inherited;
@@ -1547,24 +1484,19 @@ begin
    // write directory
 
    // write glyph class definition
-   Value16 := Swap16(Offsets[0]);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, Offsets[0]);
 
    // write attach list
-   Value16 := Swap16(Offsets[1]);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, Offsets[1]);
 
    // write ligature caret list
-   Value16 := Swap16(Offsets[2]);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, Offsets[2]);
 
    // write mark attach class definition
-   Value16 := Swap16(Offsets[3]);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, Offsets[3]);
 
    // write mark glyph set
-   Value16 := Swap16(Offsets[4]);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, Offsets[4]);
   end;
 end;
 
@@ -1615,8 +1547,9 @@ end;
 procedure TCustomOpenTypeLanguageSystemTable.LoadFromStream(Stream: TStream);
 var
   FeatureIndex : Integer;
-  Value16      : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    // check (minimum) table size
@@ -1624,52 +1557,38 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read default language system
-   Read(Value16, SizeOf(Word));
-   FLookupOrder := Swap16(Value16);
+   FLookupOrder := ReadSwappedWord(Stream);
 
    // read index of a feature required for this language system
-   Read(Value16, SizeOf(Word));
-   FReqFeatureIndex := Swap16(Value16);
+   FReqFeatureIndex := ReadSwappedWord(Stream);
 
    // read default language system
-   Read(Value16, SizeOf(Word));
-   SetLength(FFeatureIndices, Swap16(Value16));
+   SetLength(FFeatureIndices, ReadSwappedWord(Stream));
 
-   for FeatureIndex := 0 to Length(FFeatureIndices) - 1 do
-    begin
-     // read default language system
-     Read(Value16, SizeOf(Word));
-     FFeatureIndices[FeatureIndex] := Swap16(Value16);
-    end;
+   // read default language system
+   for FeatureIndex := 0 to Length(FFeatureIndices) - 1
+    do FFeatureIndices[FeatureIndex] := ReadSwappedWord(Stream);
   end;
 end;
 
 procedure TCustomOpenTypeLanguageSystemTable.SaveToStream(Stream: TStream);
 var
   FeatureIndex : Integer;
-  Value16      : Word;
 begin
- with Stream do
-  begin
-   // write default language system
-   Value16 := Swap16(FLookupOrder);
-   Write(Value16, SizeOf(Word));
+ inherited;
 
-   // write index of a feature required for this language system
-   Value16 := Swap16(FReqFeatureIndex);
-   Write(Value16, SizeOf(Word));
+ // write default language system
+ WriteSwappedWord(Stream, FLookupOrder);
 
-   // write default language system
-   Value16 := Swap16(Length(FFeatureIndices));
-   Write(Value16, SizeOf(Word));
+ // write index of a feature required for this language system
+ WriteSwappedWord(Stream, FReqFeatureIndex);
 
-   for FeatureIndex := 0 to Length(FFeatureIndices) - 1 do
-    begin
-     // write default language system
-     Value16 := Swap16(FFeatureIndices[FeatureIndex]);
-     Write(Value16, SizeOf(Word));
-    end;
-  end;
+ // write default language system
+ WriteSwappedWord(Stream, Length(FFeatureIndices));
+
+ // write default language systems
+ for FeatureIndex := 0 to Length(FFeatureIndices) - 1
+  do WriteSwappedWord(Stream, FFeatureIndices[FeatureIndex]);
 end;
 
 procedure TCustomOpenTypeLanguageSystemTable.SetLookupOrder(const Value: Word);
@@ -1801,8 +1720,9 @@ var
   LangTable      : TCustomOpenTypeJustificationLanguageSystemTable;
   LangTableClass : TOpenTypeJustificationLanguageSystemTableClass;
   DefaultLangSys : Word;
-  Value16        : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    StartPos := Position;
@@ -1812,12 +1732,10 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read default language system offset
-   Read(Value16, SizeOf(Word));
-   DefaultLangSys := Swap16(Value16);
+   DefaultLangSys := ReadSwappedWord(Stream);
 
    // read language system record count
-   Read(Value16, SizeOf(Word));
-   SetLength(LangSysRecords, Swap16(Value16));
+   SetLength(LangSysRecords, ReadSwappedWord(Stream));
 
    for LangSysIndex := 0 to Length(LangSysRecords) - 1 do
     begin
@@ -1825,8 +1743,7 @@ begin
      Read(LangSysRecords[LangSysIndex].Tag, SizeOf(TTableType));
 
      // read offset
-     Read(Value16, SizeOf(Word));
-     LangSysRecords[LangSysIndex].Offset := Swap16(Value16);
+     LangSysRecords[LangSysIndex].Offset := ReadSwappedWord(Stream);
     end;
 
    // load default language system
@@ -1874,6 +1791,8 @@ var
   LangSysRecords : array of TTagOffsetRecord;
   Value16        : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    // remember start position of the stream
@@ -1886,8 +1805,7 @@ begin
    Write(Value16, SizeOf(Word));
 
    // write feature list count
-   Value16 := Swap16(FLanguageSystemTables.Count);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FLanguageSystemTables.Count);
 
    // leave space for feature directory
    Seek(6 * FLanguageSystemTables.Count, soCurrent);
@@ -1919,8 +1837,7 @@ begin
       Write(Tag, SizeOf(TTableType));
 
       // write offset
-      Value16 := Swap16(Offset);
-      Write(Value16, SizeOf(Word));
+      WriteSwappedWord(Stream, Offset);
      end;
   end;
 end;
@@ -1982,8 +1899,9 @@ var
   ScriptList       : array of TTagOffsetRecord;
   ScriptTable      : TCustomOpenTypeScriptTable;
   ScriptTableClass : TOpenTypeScriptTableClass;
-  Value16          : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    StartPos := Position;
@@ -1993,8 +1911,7 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read script list count
-   Read(Value16, SizeOf(Word));
-   SetLength(ScriptList, Swap16(Value16));
+   SetLength(ScriptList, ReadSwappedWord(Stream));
 
    for ScriptIndex := 0 to Length(ScriptList) - 1 do
     begin
@@ -2002,8 +1919,7 @@ begin
      Read(ScriptList[ScriptIndex].Tag, SizeOf(TTableType));
 
      // read offset
-     Read(Value16, SizeOf(Word));
-     ScriptList[ScriptIndex].Offset := Swap16(Value16);
+     ScriptList[ScriptIndex].Offset := ReadSwappedWord(Stream);
     end;
 
    // clear language system list
@@ -2034,6 +1950,7 @@ end;
 
 procedure TOpenTypeScriptListTable.SaveToStream(Stream: TStream);
 begin
+ inherited;
 
 end;
 
@@ -2082,8 +1999,9 @@ end;
 procedure TCustomOpenTypeFeatureTable.LoadFromStream(Stream: TStream);
 var
   LookupIndex : Word;
-  Value16     : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    // check (minimum) table size
@@ -2091,43 +2009,34 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read feature parameter offset
-   Read(Value16, SizeOf(Word));
-   FFeatureParams := Swap16(Value16);
+   FFeatureParams := ReadSwappedWord(Stream);
 
    // read lookup count
-   Read(Value16, SizeOf(Word));
-   SetLength(FLookupListIndex, Swap16(Value16));
+   SetLength(FLookupListIndex, ReadSwappedWord(Stream));
 
    // read lookup list index offsets
-   for LookupIndex := 0 to Length(FLookupListIndex) - 1 do
-    begin
-     Read(Value16, SizeOf(Word));
-     FLookupListIndex[LookupIndex] := Swap16(Value16);
-    end;
+   for LookupIndex := 0 to Length(FLookupListIndex) - 1
+    do FLookupListIndex[LookupIndex] := ReadSwappedWord(Stream);
   end;
 end;
 
 procedure TCustomOpenTypeFeatureTable.SaveToStream(Stream: TStream);
 var
   LookupIndex : Word;
-  Value16     : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    // read feature parameter offset
-   Read(Value16, SizeOf(Word));
-   FFeatureParams := Swap16(Value16);
+   FFeatureParams := ReadSwappedWord(Stream);
 
    // read lookup count
-   Read(Value16, SizeOf(Word));
-   SetLength(FLookupListIndex, Swap16(Value16));
+   SetLength(FLookupListIndex, ReadSwappedWord(Stream));
 
    // read lookup list index offsets
-   for LookupIndex := 0 to Length(FLookupListIndex) - 1 do
-    begin
-     Read(Value16, SizeOf(Word));
-     FLookupListIndex[LookupIndex] := Swap16(Value16);
-    end;
+   for LookupIndex := 0 to Length(FLookupListIndex) - 1
+    do FLookupListIndex[LookupIndex] := ReadSwappedWord(Stream);
   end;
 end;
 
@@ -2191,11 +2100,12 @@ procedure TOpenTypeFeatureListTable.LoadFromStream(Stream: TStream);
 var
   StartPos     : Int64;
   FeatureIndex : Integer;
-  Value16      : Word;
   FeatureList  : array of TTagOffsetRecord;
   FeatureTable : TCustomOpenTypeFeatureTable;
   FeatureClass : TOpenTypeFeatureTableClass;
 begin
+ inherited;
+
  with Stream do
   begin
    StartPos := Position;
@@ -2205,8 +2115,7 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read feature list count
-   Read(Value16, SizeOf(Word));
-   SetLength(FeatureList, Swap16(Value16));
+   SetLength(FeatureList, ReadSwappedWord(Stream));
 
    for FeatureIndex := 0 to Length(FeatureList) - 1 do
     begin
@@ -2214,8 +2123,7 @@ begin
      Read(FeatureList[FeatureIndex].Tag, SizeOf(TTableType));
 
      // read offset
-     Read(Value16, SizeOf(Word));
-     FeatureList[FeatureIndex].Offset := Swap16(Value16);
+     FeatureList[FeatureIndex].Offset := ReadSwappedWord(Stream);
     end;
 
    // clear language system list
@@ -2250,15 +2158,15 @@ var
   StartPos     : Int64;
   FeatureIndex : Integer;
   FeatureList  : array of TTagOffsetRecord;
-  Value16      : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    StartPos := Position;
 
    // write feature list count
-   Value16 := Swap16(FFeatureList.Count);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FFeatureList.Count);
 
    // leave space for feature directory
    Seek(FFeatureList.Count * 6, soCurrent);
@@ -2286,8 +2194,7 @@ begin
       Write(Tag, SizeOf(TTableType));
 
       // write offset
-      Value16 := Swap16(Offset);
-      Write(Value16, SizeOf(Word));
+      WriteSwappedWord(Stream, Offset);
      end;
   end;
 end;
@@ -2330,8 +2237,9 @@ end;
 procedure TOpenTypeCoverage1Table.LoadFromStream(Stream: TStream);
 var
   GlyphIndex : Integer;
-  Value16    : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    // check (minimum) table size
@@ -2339,15 +2247,15 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read glyph array count
-   Read(Value16, SizeOf(Word));
-   SetLength(FGlyphArray, Swap16(Value16));
+   SetLength(FGlyphArray, ReadSwappedWord(Stream));
 
-   for GlyphIndex := 0 to Length(FGlyphArray) - 1 do
-    begin
-     // read glyph
-     Read(Value16, SizeOf(Word));
-     FGlyphArray[GlyphIndex] := Swap16(Value16);
-    end;
+   // yet todo: different types of this table for GPOS and GSUB!!! 
+(*
+   // read glyph
+   for GlyphIndex := 0 to Length(FGlyphArray) - 1
+    do FGlyphArray[GlyphIndex] := ReadSwappedWord(Stream);
+*)
+
   end;
 end;
 
@@ -2356,6 +2264,8 @@ var
   GlyphIndex : Integer;
   Value16    : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    // write coverage format
@@ -2366,12 +2276,9 @@ begin
    Value16 := Length(FGlyphArray);
    Write(Value16, SizeOf(Word));
 
-   for GlyphIndex := 0 to Length(FGlyphArray) - 1 do
-    begin
-     // write glyph
-     Value16 := Swap16(FGlyphArray[GlyphIndex]);
-     Write(Value16, SizeOf(Word));
-    end;
+   // write glyph
+   for GlyphIndex := 0 to Length(FGlyphArray) - 1
+    do WriteSwappedWord(Stream, FGlyphArray[GlyphIndex]);
   end;
 end;
 
@@ -2412,8 +2319,9 @@ end;
 procedure TOpenTypeCoverage2Table.LoadFromStream(Stream: TStream);
 var
   GlyphIndex : Integer;
-  Value16    : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    // check (minimum) table size
@@ -2421,22 +2329,18 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read glyph array count
-   Read(Value16, SizeOf(Word));
-   SetLength(FRangeArray, Swap16(Value16));
+   SetLength(FRangeArray, ReadSwappedWord(Stream));
 
    for GlyphIndex := 0 to Length(FRangeArray) - 1 do
     begin
      // read start glyph
-     Read(Value16, SizeOf(Word));
-     FRangeArray[GlyphIndex].StartGlyph := Swap16(Value16);
+     FRangeArray[GlyphIndex].StartGlyph := ReadSwappedWord(Stream);
 
      // read end glyph
-     Read(Value16, SizeOf(Word));
-     FRangeArray[GlyphIndex].EndGlyph := Swap16(Value16);
+     FRangeArray[GlyphIndex].EndGlyph := ReadSwappedWord(Stream);
 
      // read start coverage
-     Read(Value16, SizeOf(Word));
-     FRangeArray[GlyphIndex].StartCoverageIndex := Swap16(Value16);
+     FRangeArray[GlyphIndex].StartCoverageIndex := ReadSwappedWord(Stream);
     end;
   end;
 end;
@@ -2444,28 +2348,22 @@ end;
 procedure TOpenTypeCoverage2Table.SaveToStream(Stream: TStream);
 var
   GlyphIndex : Integer;
-  Value16    : Word;
 begin
- with Stream do
+ inherited;
+
+ // read glyph array count
+ WriteSwappedWord(Stream, Length(FRangeArray));
+
+ for GlyphIndex := 0 to Length(FRangeArray) - 1 do
   begin
-   // read glyph array count
-   Value16 := Swap16(Length(FRangeArray));
-   Write(Value16, SizeOf(Word));
+   // write start glyph
+   WriteSwappedWord(Stream, FRangeArray[GlyphIndex].StartGlyph);
 
-   for GlyphIndex := 0 to Length(FRangeArray) - 1 do
-    begin
-     // write start glyph
-     Value16 := Swap16(FRangeArray[GlyphIndex].StartGlyph);
-     Write(Value16, SizeOf(Word));
+   // write end glyph
+   WriteSwappedWord(Stream, FRangeArray[GlyphIndex].EndGlyph);
 
-     // write end glyph
-     Value16 := Swap16(FRangeArray[GlyphIndex].EndGlyph);
-     Write(Value16, SizeOf(Word));
-
-     // write start coverage
-     Value16 := Swap16(FRangeArray[GlyphIndex].StartCoverageIndex);
-     Write(Value16, SizeOf(Word));
-    end;
+   // write start coverage
+   WriteSwappedWord(Stream, FRangeArray[GlyphIndex].StartCoverageIndex);
   end;
 end;
 
@@ -2522,11 +2420,12 @@ procedure TOpenTypeLookupTable.LoadFromStream(Stream: TStream);
 var
   StartPos        : Int64;
   LookupIndex     : Word;
-  Value16         : Word;
+  CoverageFormat  : Word;
   SubTableOffsets : array of Word;
   SubTableItem    : TCustomOpenTypeCoverageTable;
-  CoverageFormat  : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    StartPos := Position;
@@ -2536,30 +2435,21 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read lookup type
-   Read(Value16, SizeOf(Word));
-   FLookupType := Swap16(Value16);
+   FLookupType := ReadSwappedWord(Stream);
 
    // read lookup flag
-   Read(Value16, SizeOf(Word));
-   FLookupFlag := Swap16(Value16);
+   FLookupFlag := ReadSwappedWord(Stream);
 
    // read subtable count
-   Read(Value16, SizeOf(Word));
-   SetLength(SubTableOffsets, Swap16(Value16));
+   SetLength(SubTableOffsets, ReadSwappedWord(Stream));
 
    // read lookup list index offsets
-   for LookupIndex := 0 to Length(SubTableOffsets) - 1 do
-    begin
-     Read(Value16, SizeOf(Word));
-     SubTableOffsets[LookupIndex] := Swap16(Value16);
-    end;
+   for LookupIndex := 0 to Length(SubTableOffsets) - 1
+    do SubTableOffsets[LookupIndex] := ReadSwappedWord(Stream);
 
-   if (FLookupFlag and (1 shl 4)) <> 0 then
-    begin
-     // read mark filtering set
-     Read(Value16, SizeOf(Word));
-     FMarkFilteringSet := Swap16(Value16);
-    end;
+   // eventually read mark filtering set
+   if (FLookupFlag and (1 shl 4)) <> 0
+    then FMarkFilteringSet := ReadSwappedWord(Stream);
 
    for LookupIndex := 0 to Length(SubTableOffsets) - 1 do
     begin
@@ -2567,8 +2457,7 @@ begin
      Position := StartPos + SubTableOffsets[LookupIndex];
 
      // read lookup type
-     Read(Value16, SizeOf(Word));
-     CoverageFormat := Swap16(Value16);
+     CoverageFormat := ReadSwappedWord(Stream);
 
      // create coverage sub table item
      case CoverageFormat of
@@ -2592,7 +2481,7 @@ end;
 
 procedure TOpenTypeLookupTable.SaveToStream(Stream: TStream);
 begin
-
+ inherited;
 end;
 
 procedure TOpenTypeLookupTable.SetLookupFlag(const Value: Word);
@@ -2684,10 +2573,11 @@ procedure TOpenTypeLookupListTable.LoadFromStream(Stream: TStream);
 var
   StartPos    : Int64;
   LookupIndex : Integer;
-  Value16     : Word;
   LookupList  : array of Word;
   LookupTable : TOpenTypeLookupTable;
 begin
+ inherited;
+
  with Stream do
   begin
    StartPos := Position;
@@ -2697,15 +2587,11 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read lookup list count
-   Read(Value16, SizeOf(Word));
-   SetLength(LookupList, Swap16(Value16));
+   SetLength(LookupList, ReadSwappedWord(Stream));
 
-   for LookupIndex := 0 to Length(LookupList) - 1 do
-    begin
-     // read offset
-     Read(Value16, SizeOf(Word));
-     LookupList[LookupIndex] := Swap16(Value16);
-    end;
+   // read offsets
+   for LookupIndex := 0 to Length(LookupList) - 1
+    do LookupList[LookupIndex] := ReadSwappedWord(Stream);
 
    // clear language system list
    FLookupList.Clear;
@@ -2729,7 +2615,7 @@ end;
 
 procedure TOpenTypeLookupListTable.SaveToStream(Stream: TStream);
 begin
-
+ inherited;
 end;
 
 
@@ -2777,9 +2663,9 @@ var
   ScriptListPosition  : Int64;
   FeatureListPosition : Int64;
   LookupListPosition  : Int64;
-  Value32             : Cardinal;
-  Value16             : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    // check (minimum) table size
@@ -2787,23 +2673,19 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
 
    if Version.Value <> 1
     then raise Exception.Create(RCStrUnsupportedVersion);
 
    // read script list offset
-   Read(Value16, SizeOf(Word));
-   ScriptListPosition := Position - 6 + Swap16(Value16);
+   ScriptListPosition := Position - 4 + ReadSwappedWord(Stream);
 
    // read feature list offset
-   Read(Value16, SizeOf(Word));
-   FeatureListPosition := Position - 8 + Swap16(Value16);
+   FeatureListPosition := Position - 6 + ReadSwappedWord(Stream);
 
    // read lookup list offset
-   Read(Value16, SizeOf(Word));
-   LookupListPosition := Position - 10 + Swap16(Value16);
+   LookupListPosition := Position - 8 + ReadSwappedWord(Stream);
 
    // locate script list position
    Position := ScriptListPosition;
@@ -2828,36 +2710,31 @@ end;
 procedure TCustomOpenTypeCommonTable.SaveToStream(Stream: TStream);
 var
   StartPos : Int64;
-  Value32  : Cardinal;
-  Value16  : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    StartPos := Position;
 
    // write version
-   Value32 := Swap32(Cardinal(FVersion));
-   Write(Value32, SizeOf(TFixedPoint));
+   WriteSwappedCardinal(Stream, Cardinal(FVersion));
 
    // write script list offset (fixed!)
-   Value16 := Swap16(10);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, 10);
 
    Position := StartPos + 10;
    FScriptListTable.SaveToStream(Stream);
 
 (*
    // write script list offset
-   Value16 := Swap16(FScriptListOffset);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FScriptListOffset);
 
    // write feature list offset
-   Value16 := Swap16(FFeatureListOffset);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FFeatureListOffset);
 
    // write lookup list offset
-   Value16 := Swap16(FLookupListOffset);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FLookupListOffset);
 *)
   end;
 end;
@@ -2983,6 +2860,8 @@ end;
 procedure TCustomOpenTypeJustificationLanguageSystemTable.LoadFromStream(
   Stream: TStream);
 begin
+ inherited;
+
  with Stream do
   begin
    // check (minimum) table size
@@ -3077,6 +2956,8 @@ var
   ExtenderGlyph  : Word;
   DefaultLangSys : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    StartPos := Position;
@@ -3163,6 +3044,8 @@ var
   DefLangSysOff  : Word;
   ExtGlyphOff    : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    // remember start position of the stream
@@ -3220,8 +3103,7 @@ begin
       Write(Tag, SizeOf(TTableType));
 
       // write offset
-      Value16 := Swap16(Offset);
-      Write(Value16, SizeOf(Word));
+      WriteSwappedWord(Stream, Offset);
      end;
   end;
 end;
@@ -3287,9 +3169,9 @@ var
   DirIndex  : Integer;
   Directory : array of TJustificationScriptDirectoryEntry;
   Script    : TCustomOpenTypeJustificationScriptTable;
-  Value32   : Cardinal;
-  Value16   : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    StartPos := Position;
@@ -3298,15 +3180,13 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
 
    if Version.Value <> 1
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read Justification Script Count
-   Read(Value16, SizeOf(Word));
-   SetLength(Directory, Swap16(Value16));
+   SetLength(Directory, ReadSwappedWord(Stream));
 
    // check if table is complete
    if Position + Length(Directory) * SizeOf(TJustificationScriptDirectoryEntry) > Size
@@ -3320,8 +3200,7 @@ begin
       Read(Tag, SizeOf(Cardinal));
 
       // read offset
-      Read(Value16, SizeOf(Word));
-      Offset := Swap16(Value16);
+      Offset := ReadSwappedWord(Stream);
      end;
 
    // clear existing scripts
@@ -3350,21 +3229,19 @@ var
   StartPos  : Int64;
   DirIndex  : Integer;
   Directory : array of TJustificationScriptDirectoryEntry;
-  Value32   : Cardinal;
-  Value16   : Word;
 begin
+ inherited;
+
  with Stream do
   begin
    // store stream start position
    StartPos := Position;
 
    // write version
-   Value32 :=  Swap32(Cardinal(FVersion));
-   Read(Value32, SizeOf(TFixedPoint));
+   WriteSwappedCardinal(Stream, Cardinal(FVersion));
 
    // write Justification Script Count
-   Value16 := Swap16(Length(Directory));
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, Length(Directory));
 
    // set directory length
    SetLength(Directory, FScripts.Count);
@@ -3392,8 +3269,7 @@ begin
       Write(Tag, SizeOf(Cardinal));
 
       // write offset
-      Value16 := Swap16(Offset);
-      Write(Value16, SizeOf(Word));
+      WriteSwappedWord(Stream, Offset);
      end;
   end;
 end;

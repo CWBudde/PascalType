@@ -277,12 +277,33 @@ type
 
   // not entirely implemented, for more details see
   // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6feat.html
-  TPascalTypeFeatureTable = class(TCustomPascalTypeNamedVersionTable)
+  TPascalTypeAppleFeatureTable = class(TCustomPascalTypeTable)
+  private
+    FFeature      : Word;     // Feature type.
+    FNumSettings  : Word;     // The number of records in the setting name array.
+    FSettingTable : Cardinal; // Offset in bytes from the beginning of this table to this feature's setting name array. The actual type of record this offset refers to will depend on the exclusivity value, as described below.
+    FFeatureFlags : Word;     // Single-bit flags associated with the feature type.
+    FNameIndex    : SmallInt; // The name table index for the feature's name. This index has values greater than 255 and less than 32768.
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
   public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+  TPascalTypeFeatureTable = class(TCustomPascalTypeNamedVersionTable)
+  private
+    FFeatures : TObjectList;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    destructor Destroy; override;
+
     class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -564,17 +585,11 @@ begin
 end;
 
 procedure TCustomPascalTypeNamedVersionTable.SaveToStream(Stream: TStream);
-var
-  Value32 : Cardinal;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write version
-   Value32 := Swap32(Cardinal(FVersion));
-   Write(Value32, SizeOf(Cardinal));
-  end;
+ // write version
+ WriteSwappedCardinal(Stream, Cardinal(FVersion));
 end;
 
 procedure TCustomPascalTypeNamedVersionTable.SetVersion(
@@ -660,21 +675,14 @@ begin
 end;
 
 procedure TPascalTypeAccentAttachmentTable.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write first glyph
-   Value16 := Swap16(FFirstAccentGlyphIndex);
-   Write(Value16, SizeOf(Word));
+ // write first glyph
+ WriteSwappedWord(Stream, FFirstAccentGlyphIndex);
 
-   // write last glyph
-   Value16 := Swap16(FLastAccentGlyphIndex);
-   Write(Value16, SizeOf(Word));
-  end;
+ // write last glyph
+ WriteSwappedWord(Stream, FLastAccentGlyphIndex);
 end;
 
 
@@ -727,28 +735,21 @@ end;
 procedure TPascalTypeAxisVariationSegmentTable.SaveToStream(Stream: TStream);
 var
   PairIndex : Integer;
-  Value16   : Word;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write pair count
-   Value16 := Swap16(Length(FCorrespondenceArray));
-   Write(Value16, SizeOf(Word));
+ // write pair count
+ WriteSwappedWord(Stream, Length(FCorrespondenceArray));
 
-   for PairIndex := 0 to Length(FCorrespondenceArray) - 1 do
-    with FCorrespondenceArray[PairIndex] do
-     begin
-      // write 'from' coordinate
-      Value16 := Swap16(fromCoord);
-      Write(Value16, SizeOf(Word));
+ for PairIndex := 0 to Length(FCorrespondenceArray) - 1 do
+  with FCorrespondenceArray[PairIndex] do
+   begin
+    // write 'from' coordinate
+    WriteSwappedWord(Stream, fromCoord);
 
-      // write 'to' coordinate
-      Value16 := Swap16(toCoord);
-      Write(Value16, SizeOf(Word));
-     end;
-  end;
+    // write 'to' coordinate
+    WriteSwappedWord(Stream, toCoord);
+   end;
 end;
 
 
@@ -819,23 +820,18 @@ end;
 
 procedure TPascalTypeAxisVariationTable.SaveToStream(Stream: TStream);
 var
-  Value32   : Cardinal;
   AxisIndex : Cardinal;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write axis count
-   Value32 := Swap32(FSegments.Count);
-   Write(Value32, SizeOf(Cardinal));
+ // write axis count
+ WriteSwappedCardinal(Stream, FSegments.Count);
 
-   for AxisIndex := 0 to FSegments.Count - 1 do
-    with TPascalTypeAxisVariationSegmentTable(FSegments[AxisIndex]) do
-     begin
-      // save segment to stream
-      SaveToStream(Stream);
-    end;
+ for AxisIndex := 0 to FSegments.Count - 1 do
+  with TPascalTypeAxisVariationSegmentTable(FSegments[AxisIndex]) do
+   begin
+    // save segment to stream
+    SaveToStream(Stream);
   end;
 end;
 
@@ -888,21 +884,14 @@ begin
 end;
 
 procedure TPascalTypeBaselineTable.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write format
-   Value16 := Swap16(FFormat);
-   Write(Value16, SizeOf(Word));
+ // write format
+ WriteSwappedWord(Stream, FFormat);
 
-   // write default baseline
-   Value16 := Swap16(FDefaultBaseline);
-   Write(Value16, SizeOf(Word));
-  end;
+ // write default baseline
+ WriteSwappedWord(Stream, FDefaultBaseline);
 end;
 
 
@@ -996,23 +985,18 @@ end;
 
 procedure TPascalTypeBitmapLocationTable.SaveToStream(Stream: TStream);
 var
-  Value32         : Cardinal;
   BitmapSizeIndex : Integer;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write number of BitmapSize tables
-   Value32 := Swap32(FBitmapSizeList.Count);
-   Write(Value32, SizeOf(Cardinal));
+ // write number of BitmapSize tables
+ WriteSwappedCardinal(Stream, FBitmapSizeList.Count);
 
-   // write bitmap size tables
-   for BitmapSizeIndex := 0 to FBitmapSizeList.Count - 1 do
-    begin
-     // save bitmap size table to stream
-     TPascalTypeBitmapSizeTable(FBitmapSizeList).SaveToStream(Stream);
-    end;
+ // write bitmap size tables
+ for BitmapSizeIndex := 0 to FBitmapSizeList.Count - 1 do
+  begin
+   // save bitmap size table to stream
+   TPascalTypeBitmapSizeTable(FBitmapSizeList).SaveToStream(Stream);
   end;
 end;
 
@@ -1090,17 +1074,11 @@ begin
 end;
 
 procedure TCustomPascalTypeTaggedValueTable.SaveToStream(Stream: TStream);
-var
-  Value32 : Cardinal;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write value
-   Value32 := Swap32(Cardinal(FValue));
-   Write(Value32, SizeOf(Cardinal));
-  end;
+ // write value
+ WriteSwappedCardinal(Stream, Cardinal(FValue));
 end;
 
 procedure TCustomPascalTypeTaggedValueTable.ValueChanged;
@@ -1296,8 +1274,7 @@ begin
  with Stream do
   begin
    // write description count
-   Value32 := Swap32(FDescritors.Count);
-   Write(Value32, SizeOf(Cardinal));
+   WriteSwappedCardinal(Stream, FDescritors.Count);
 
    for DescIndex := 0 to FDescritors.Count - 1 do
     with TCustomPascalTypeTaggedValueTable(FDescritors[DescIndex]) do
@@ -1308,12 +1285,85 @@ begin
 
       // write descriptor to stream
       SaveToStream(Stream);
-     end; 
+     end;
   end;
 end;
 
 
+{ TPascalTypeAppleFeatureTable }
+
+procedure TPascalTypeAppleFeatureTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TPascalTypeFeatureTable(Dest) do
+   begin
+    FFeature      := Self.FFeature;
+    FNumSettings  := Self.FNumSettings;
+    FSettingTable := Self.FSettingTable;
+    FFeatureFlags := Self.FFeatureFlags;
+    FNameIndex    := Self.FNameIndex;
+   end
+  else inherited;
+end;
+
+procedure TPascalTypeAppleFeatureTable.ResetToDefaults;
+begin
+ inherited;
+
+ FFeature      := 0;
+ FNumSettings  := 0;
+ FSettingTable := 0;
+ FFeatureFlags := 0;
+ FNameIndex    := 0;
+end;
+
+procedure TPascalTypeAppleFeatureTable.LoadFromStream(Stream: TStream);
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check if table is complete
+   if Position + 12 > Size
+    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+
+   // read feature
+   FFeature := ReadSwappedWord(Stream);
+
+   // read settings count
+   FNumSettings := ReadSwappedWord(Stream);
+
+   // read setting table offset
+   FSettingTable := ReadSwappedCardinal(Stream);
+
+   // read feature flags
+   FFeatureFlags := ReadSwappedWord(Stream);
+
+   // read name index
+   FNameIndex := ReadSwappedSmallInt(Stream);
+  end;
+end;
+
+procedure TPascalTypeAppleFeatureTable.SaveToStream(Stream: TStream);
+begin
+  inherited;
+
+end;
+
+
 { TPascalTypeFeatureTable }
+
+constructor TPascalTypeFeatureTable.Create(Interpreter: IPascalTypeInterpreter);
+begin
+ FFeatures := TObjectList.Create;
+ inherited Create(Interpreter);
+end;
+
+destructor TPascalTypeFeatureTable.Destroy;
+begin
+ FreeAndNil(FFeatures);
+ inherited;
+end;
 
 procedure TPascalTypeFeatureTable.AssignTo(Dest: TPersistent);
 begin
@@ -1322,7 +1372,7 @@ begin
  if Dest is Self.ClassType then
   with TPascalTypeFeatureTable(Dest) do
    begin
-
+    FFeatures.Assign(Self.FFeatures);
    end;
 end;
 
@@ -1333,13 +1383,17 @@ end;
 
 procedure TPascalTypeFeatureTable.ResetToDefaults;
 begin
+ FFeatures.Clear;
  inherited;
-
 end;
 
 procedure TPascalTypeFeatureTable.LoadFromStream(Stream: TStream);
 var
-  Value16 : Cardinal;
+  FeatureNameCount : Word;
+  FeatureNameIndex : Word;
+  Value16          : Word;
+  Value32          : Cardinal;
+  AppleFeature     : TPascalTypeAppleFeatureTable;
 begin
  inherited;
 
@@ -1350,20 +1404,32 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read feature name count
-   Read(Value16, SizeOf(Cardinal));
-   Swap32(Value16);
+   FeatureNameCount := ReadSwappedWord(Stream);
 
    {$IFDEF AmbigiousExceptions}
-   Read(Value16, SizeOf(Cardinal));
+   Read(Value16, SizeOf(Word));
    if Value16 <> 0
     then raise EPascalTypeError.CreateFmt(RCStrReservedValueError, [Swap16(Value16)]);
 
    Read(Value32, SizeOf(Cardinal));
-   if Value16 <> 0
+   if Value32 <> 0
     then raise EPascalTypeError.CreateFmt(RCStrReservedValueError, [Swap32(Value32)]);
    {$ELSE}
    Seek(6, soFromCurrent);
    {$ENDIF}
+
+   for FeatureNameIndex := 0 to FeatureNameCount - 1 do
+    begin
+     // create apple feature
+     AppleFeature := TPascalTypeAppleFeatureTable.Create;
+
+     // load apple feature from stream
+     AppleFeature.LoadFromStream(Stream);
+
+     // add feature to list
+     FFeatures.Add(AppleFeature);
+    end;
+    
   end;
 end;
 
@@ -1471,21 +1537,14 @@ begin
 end;
 
 procedure TPascalTypeGlyphPropertiesTable.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write format
-   Value16 := Swap16(FFormat);
-   Write(Value16, SizeOf(Word));
+ // write format
+ WriteSwappedWord(Stream, FFormat);
 
-   // write default
-   Value16 := Swap16(FDefault);
-   Write(Value16, SizeOf(Word));
-  end;
+ // write default
+ WriteSwappedWord(Stream, FDefault);
 end;
 
 

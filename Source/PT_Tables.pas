@@ -1142,84 +1142,61 @@ begin
 end;
 
 procedure TPascalTypeHeaderTable.SaveToStream(Stream: TStream);
-var
-  Value64 : Int64;
-  Value32 : Cardinal;
-  Value16 : Word;
 begin
- with Stream do
-  begin
-   // write version
-   Value32 := Swap32(Cardinal(FVersion));
-   Write(Value32, SizeOf(TFixedPoint));
+ // write version
+ WriteSwappedCardinal(Stream, Cardinal(FVersion));
 
-   // write font revision
-   Value32 := Swap32(Cardinal(FFontRevision));
-   Write(Value32, SizeOf(TFixedPoint));
+ // write font revision
+ WriteSwappedCardinal(Stream, Cardinal(FFontRevision));
 
-   // write check sum adjust
-   Value32 := Swap32(FCheckSumAdjustment);
-   Write(Value32, SizeOf(LongInt));
+ // write check sum adjust
+ WriteSwappedCardinal(Stream, FCheckSumAdjustment);
 
-   // write magic number
-   Value32 := Swap32(FMagicNumber);
-   Write(Value32, SizeOf(TFixedPoint));
+ // write magic number
+ WriteSwappedCardinal(Stream, FMagicNumber);
 
-   // write flags
-   Value16 := Swap16(FontHeaderTableFlagsToWord(FFlags));
-   Write(Value16, SizeOf(Word));
+ // write flags
+ WriteSwappedWord(Stream, FontHeaderTableFlagsToWord(FFlags));
 
-   // write UnitsPerEm
-   Value16 := Swap16(FUnitsPerEm);
-   Write(Value16, SizeOf(Word));
+ // write UnitsPerEm
+ WriteSwappedWord(Stream, FUnitsPerEm);
 
-   // write CreatedDate
-   Value64 := Swap16(FCreatedDate);
-   Write(Value64, SizeOf(Word));
+ // write CreatedDate
+ WriteSwappedInt64(Stream, FCreatedDate);
 
-   // write ModifiedDate
-   Value64 := Swap16(FModifiedDate);
-   Write(Value64, SizeOf(Word));
+ // write ModifiedDate
+ WriteSwappedInt64(Stream, FModifiedDate);
 
-   // write xMin
-   Value16 := Swap16(FxMin);
-   Write(Value16, SizeOf(Word));
+ // write xMin
+ WriteSwappedSmallInt(Stream, FxMin);
 
-   // write yMin
-   Value16 := Swap16(FyMin);
-   Write(Value16, SizeOf(Word));
+ // write yMin
+ WriteSwappedSmallInt(Stream, FyMin);
 
-   // write xMax
-   Value16 := Swap16(FxMax);
-   Write(Value16, SizeOf(Word));
+ // write xMax
+ WriteSwappedSmallInt(Stream, FxMax);
 
-   // write xMax
-   Value16 := Swap16(FyMax);
-   Write(Value16, SizeOf(Word));
+ // write xMax
+ WriteSwappedSmallInt(Stream, FyMax);
 
-   // write MacStyle
-   Value16 := Swap16(MacStylesToWord(FMacStyle));
-   Write(Value16, SizeOf(Word));
+ // write MacStyle
+ WriteSwappedWord(Stream, MacStylesToWord(FMacStyle));
 
-   // write LowestRecPPEM
-   Value16 := Swap16(FLowestRecPPEM);
-   Write(Value16, SizeOf(Word));
+ // write LowestRecPPEM
+ WriteSwappedWord(Stream, FLowestRecPPEM);
 
-   // write FontDirectionHint
-   Value16 := Swap16(Word(FFontDirectionHint));
-   Write(Value16, SizeOf(Word));
+ // write FontDirectionHint
+ WriteSwappedWord(Stream, Word(FFontDirectionHint));
 
-   // write IndexToLocFormat
-   case FIndexToLocFormat of
-    ilShort: WriteSwappedWord(Stream, 0);
-    ilLong: WriteSwappedWord(Stream, 1);
-    else raise EPascalTypeError.CreateFmt(RCStrWrongIndexToLocFormat, [Value16]);
-   end;
+ // write IndexToLocFormat
+ case FIndexToLocFormat of
+  ilShort : WriteSwappedWord(Stream, 0);
+   ilLong : WriteSwappedWord(Stream, 1);
+  else raise EPascalTypeError.CreateFmt(RCStrWrongIndexToLocFormat, [Word(FIndexToLocFormat)]);
+ end;
 
-   // write GlyphDataFormat
-   Value16 := Swap16(FGlyphDataFormat);
-   Write(Value16, SizeOf(Word));
-  end;
+ // write GlyphDataFormat
+ WriteSwappedWord(Stream, FGlyphDataFormat);
 end;
 
 procedure TPascalTypeHeaderTable.SetCheckSumAdjustment(const Value: Longint);
@@ -1496,19 +1473,12 @@ begin
 end;
 
 procedure TTrueTypeFontFormat0CharacterMap.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
- with Stream do
-  begin
-   // write length
-   Value16 := Swap16(FLength);
-   Write(Value16, SizeOf(Word));
+ // write length
+ WriteSwappedWord(Stream, FLength);
 
-   // write language
-   Value16 := Swap16(FLanguage);
-   Write(Value16, SizeOf(Word));
-  end;
+ // write language
+ WriteSwappedWord(Stream, FLanguage);
 end;
 
 function TTrueTypeFontFormat0CharacterMap.CharacterToGlyph(
@@ -1566,18 +1536,14 @@ begin
 end;
 
 procedure TTrueTypeFontFormat2CharacterMap.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
  with Stream do
   begin
    // write length
-   Value16 := Swap16(FLength);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FLength);
 
    // write language
-   Value16 := Swap16(FLanguage);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FLanguage);
   end;
 end;
 
@@ -1743,19 +1709,12 @@ begin
 end;
 
 procedure TTrueTypeFontFormat4CharacterMap.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
- with Stream do
-  begin
-   // write length
-   Value16 := Swap16(FLength);
-   Write(Value16, SizeOf(Word));
+ // write length
+ WriteSwappedWord(Stream, FLength);
 
-   // write language
-   Value16 := Swap16(FLanguage);
-   Write(Value16, SizeOf(Word));
-  end;
+ // write language
+ WriteSwappedWord(Stream, FLanguage);
 end;
 
 
@@ -2260,7 +2219,6 @@ var
   DirIndex  : Integer;
   Directory : array of Cardinal;
   Value32   : Cardinal;
-  Value16   : Word;
 begin
  with Stream do
   begin
@@ -2268,12 +2226,10 @@ begin
    StartPos := Position;
 
    // write format type
-   Value16 := Swap16(FVersion);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FVersion);
 
    // write directory entry count
-   Value16 := Swap16(FSubtableList.Count);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FSubtableList.Count);
 
    // offset directory
    Seek(soFromCurrent, 6 * FSubtableList.Count);
@@ -2295,12 +2251,10 @@ begin
     with TCustomCharacterMapDirectoryEntry(FSubtableList[DirIndex]) do
      begin
       // write format
-      Value16 := Word(PlatformID);
-      Write(Value16, SizeOf(Word));
+      WriteSwappedWord(Stream, Word(PlatformID));
 
       // write encoding ID
-      Value16 := EncodingID;
-      Write(Value16, SizeOf(Word));
+      WriteSwappedWord(Stream, EncodingID);
 
       // write offset
       Value32 := Directory[DirIndex];
@@ -2453,73 +2407,49 @@ begin
 end;
 
 procedure TPascalTypeHorizontalHeaderTable.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
-  Value32 : Cardinal;
 begin
- with Stream do
-  begin
-   // write version
-   Value32 := Swap32(Cardinal(FVersion));
-   Write(Value32, SizeOf(TFixedPoint));
+ // write version
+ WriteSwappedCardinal(Stream, Cardinal(FVersion));
 
-   // check version
-   if not (Version.Value = 1)
-    then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
+ // write Ascent
+ WriteSwappedSmallInt(Stream, FAscent);
 
-   // write Ascent
-   Value16 := Swap16(FAscent);
-   Write(Value16, SizeOf(SmallInt));
+ // write Descent
+ WriteSwappedSmallInt(Stream, FDescent);
 
-   // write Descent
-   Value16 := Swap16(FDescent);
-   Write(Value16, SizeOf(SmallInt));
+ // write LineGap
+ WriteSwappedSmallInt(Stream, FLineGap);
 
-   // write LineGap
-   Value16 := Swap16(FLineGap);
-   Write(Value16, SizeOf(SmallInt));
+ // write AdvanceWidthMax
+ WriteSwappedWord(Stream, FAdvanceWidthMax);
 
-   // write AdvanceWidthMax
-   Value16 := Swap16(FAdvanceWidthMax);
-   Write(Value16, SizeOf(Word));
+ // write MinLeftSideBearing
+ WriteSwappedSmallInt(Stream, FMinLeftSideBearing);
 
-   // write MinLeftSideBearing
-   Value16 := Swap16(FMinLeftSideBearing);
-   Write(Value16, SizeOf(SmallInt));
+ // write MinRightSideBearing
+ WriteSwappedSmallInt(Stream, FMinRightSideBearing);
 
-   // write MinRightSideBearing
-   Value16 := Swap16(FMinRightSideBearing);
-   Write(Value16, SizeOf(SmallInt));
+ // write XMaxExtent
+ WriteSwappedSmallInt(Stream, FXMaxExtent);
 
-   // write XMaxExtent
-   Value16 := Swap16(FXMaxExtent);
-   Write(Value16, SizeOf(SmallInt));
+ // write CaretSlopeRise
+ WriteSwappedSmallInt(Stream, FCaretSlopeRise);
 
-   // write CaretSlopeRise
-   Value16 := Swap16(FCaretSlopeRise);
-   Write(Value16, SizeOf(SmallInt));
+ // write CaretSlopeRun
+ WriteSwappedSmallInt(Stream, FCaretSlopeRun);
 
-   // write CaretSlopeRun
-   Value16 := Swap16(FCaretSlopeRun);
-   Write(Value16, SizeOf(SmallInt));
+ // write CaretOffset
+ WriteSwappedSmallInt(Stream, FCaretOffset);
 
-   // write CaretOffset
-   Value16 := Swap16(FCaretOffset);
-   Write(Value16, SizeOf(SmallInt));
+ // reserved, set to zero!
+ WriteSwappedCardinal(Stream, 0);
+ WriteSwappedCardinal(Stream, 0);
 
-   // reserved, set to zero!
-   Value32 := 0;
-   Write(Value32, SizeOf(Cardinal));
-   Write(Value32, SizeOf(Cardinal));
+ // write MetricDataFormat
+ WriteSwappedSmallInt(Stream, FMetricDataFormat);
 
-   // write MetricDataFormat
-   Value16 := Swap16(FMetricDataFormat);
-   Write(Value16, SizeOf(SmallInt));
-
-   // write NumOfLongHorMetrics
-   Value16 := Swap16(FNumOfLongHorMetrics);
-   Write(Value16, SizeOf(Word));
-  end;
+ // write NumOfLongHorMetrics
+ WriteSwappedWord(Stream, FNumOfLongHorMetrics);
 end;
 
 procedure TPascalTypeHorizontalHeaderTable.SetAdvanceWidthMax(
@@ -2843,23 +2773,15 @@ begin
 end;
 
 procedure TCustomTrueTypeFontNamePlatform.SaveToStream(Stream: TStream);
-var
-  Value16  : Word;
 begin
- with Stream do
-  begin
-   // write encoding ID
-   Value16 := Swap16(FEncodingID);
-   Write(Value16, SizeOf(Word));
+ // write encoding ID
+ WriteSwappedWord(Stream, FEncodingID);
 
-   // write language ID
-   Value16 := Swap16(FLanguageID);
-   Write(Value16, SizeOf(Word));
+ // write language ID
+ WriteSwappedWord(Stream, FLanguageID);
 
-   // write name ID
-   Value16 := Swap16(Word(FNameID));
-   Write(Value16, SizeOf(Word));
-  end;
+ // write name ID
+ WriteSwappedWord(Stream, Word(FNameID));
 end;
 
 procedure TCustomTrueTypeFontNamePlatform.SetEncodingIDAsWord(
@@ -3296,72 +3218,51 @@ begin
 end;
 
 procedure TPascalTypeMaximumProfileTable.SaveToStream(Stream: TStream);
-var
-  Value32 : Cardinal;
-  Value16 : Word;
 begin
- with Stream do
-  begin
-   // write version
-   Value32 := Swap32(Cardinal(FVersion));
-   Write(Value32, SizeOf(TFixedPoint));
+ // write version
+ WriteSwappedCardinal(Stream, Cardinal(FVersion));
 
-   // write glyphs count
-   Value16 := Swap16(FNumGlyphs);
-   Write(Value16, SizeOf(Word));
+ // write glyphs count
+ WriteSwappedWord(Stream, FNumGlyphs);
 
-   // write max points
-   Value16 := Swap16(FMaxPoints);
-   Write(Value16, SizeOf(Word));
+ // write max points
+ WriteSwappedWord(Stream, FMaxPoints);
 
-   // write max contours
-   Value16 := Swap16(FMaxContours);
-   Write(Value16, SizeOf(Word));
+ // write max contours
+ WriteSwappedWord(Stream, FMaxContours);
 
-   // write max composite points
-   Value16 := Swap16(FMaxCompositePoints);
-   Write(Value16, SizeOf(Word));
+ // write max composite points
+ WriteSwappedWord(Stream, FMaxCompositePoints);
 
-   // write max composite contours
-   Value16 := Swap16(FMaxCompositeContours);
-   Write(Value16, SizeOf(Word));
+ // write max composite contours
+ WriteSwappedWord(Stream, FMaxCompositeContours);
 
-   // write max zones
-   Value16 := Swap16(FMaxZones);
-   Write(Value16, SizeOf(Word));
+ // write max zones
+ WriteSwappedWord(Stream, FMaxZones);
 
-   // write max twilight points
-   Value16 := Swap16(FMaxTwilightPoints);
-   Write(Value16, SizeOf(Word));
+ // write max twilight points
+ WriteSwappedWord(Stream, FMaxTwilightPoints);
 
-   // write max storage
-   Value16 := Swap16(FMaxStorage);
-   Write(Value16, SizeOf(Word));
+ // write max storage
+ WriteSwappedWord(Stream, FMaxStorage);
 
-   // write max function defs
-   Value16 := Swap16(FMaxFunctionDefs);
-   Write(Value16, SizeOf(Word));
+ // write max function defs
+ WriteSwappedWord(Stream, FMaxFunctionDefs);
 
-   // write max instruction defs
-   Value16 := Swap16(FMaxInstructionDefs);
-   Write(Value16, SizeOf(Word));
+ // write max instruction defs
+ WriteSwappedWord(Stream, FMaxInstructionDefs);
 
-   // write max stack elements
-   Value16 := Swap16(FMaxStackElements);
-   Write(Value16, SizeOf(Word));
+ // write max stack elements
+ WriteSwappedWord(Stream, FMaxStackElements);
 
-   // write max size of instructions
-   Value16 := Swap16(FMaxSizeOfInstructions);
-   Write(Value16, SizeOf(Word));
+ // write max size of instructions
+ WriteSwappedWord(Stream, FMaxSizeOfInstructions);
 
-   // write max component elements
-   Value16 := Swap16(FMaxComponentElements);
-   Write(Value16, SizeOf(Word));
+ // write max component elements
+ WriteSwappedWord(Stream, FMaxComponentElements);
 
-   // write max component depth
-   Value16 := Swap16(FMaxComponentDepth);
-   Write(Value16, SizeOf(Word));
-  end;
+ // write max component depth
+ WriteSwappedWord(Stream, FMaxComponentDepth);
 end;
 
 procedure TPascalTypeMaximumProfileTable.SetMaxComponentDepth(
@@ -3778,12 +3679,10 @@ begin
  with Stream do
   begin
    // write version
-   Value16 := Swap16(FVersion);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FVersion);
 
    // write XAvgCharWidth
-   Value16 := Swap16(FXAvgCharWidth);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FXAvgCharWidth);
 
    // write UsWeightClass
 //   UsWeightClass := Swap16(Value16);
@@ -3794,52 +3693,40 @@ begin
    Write(Value16, SizeOf(Word));
 
    // write FsType
-   Value16 := Swap16(FFsType);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FFsType);
 
    // write YSubscriptXSize
-   Value16 := Swap16(FYSubscriptXSize);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FYSubscriptXSize);
 
    // write YSubscriptYSize
-   Value16 := Swap16(FYSubscriptYSize);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FYSubscriptYSize);
 
    // write YSubScriptXOffset
-   Value16 := Swap16(FYSubScriptXOffset);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FYSubScriptXOffset);
 
    // write YSubscriptYOffset
-   Value16 := Swap16(FYSubscriptYOffset);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FYSubscriptYOffset);
 
    // write YSuperscriptXSize
-   Value16 := Swap16(FYSuperscriptXSize);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FYSuperscriptXSize);
 
    // write YSuperscriptYSize
-   Value16 := Swap16(FYSuperscriptYSize);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FYSuperscriptYSize);
 
    // write YSuperscriptXOffset
-   Value16 := Swap16(FYSuperscriptXOffset);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FYSuperscriptXOffset);
 
    // write YSuperscriptYOffset
-   Value16 := Swap16(FYSuperscriptYOffset);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FYSuperscriptYOffset);
 
    // write YStrikeoutSize
-   Value16 := Swap16(FYStrikeoutSize);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FYStrikeoutSize);
 
    // write YStrikeoutPosition
-   Value16 := Swap16(FYStrikeoutPosition);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FYStrikeoutPosition);
 
    // write SFamilyClass
-   Value16 := Swap16(FSFamilyClass);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FSFamilyClass);
 
    // read Panose
    Write(FPanose, 10);
@@ -3851,36 +3738,28 @@ begin
    Write(FAchVendID, 4);
 
    // write FsSelection
-   Value16 := Swap16(FFsSelection);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FFsSelection);
 
    // write UsFirstCharIndex
-   Value16 := Swap16(FUsFirstCharIndex);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FUsFirstCharIndex);
 
    // write UsLastCharIndex
-   Value16 := Swap16(FUsLastCharIndex);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FUsLastCharIndex);
 
    // write STypoAscender
-   Value16 := Swap16(FSTypoAscender);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FSTypoAscender);
 
    // write STypoDescender
-   Value16 := Swap16(FSTypoDescender);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FSTypoDescender);
 
    // write STypoLineGap
-   Value16 := Swap16(FSTypoLineGap);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FSTypoLineGap);
 
    // write UsWinAscent
-   Value16 := Swap16(FUsWinAscent);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FUsWinAscent);
 
    // write UsWinDescent
-   Value16 := Swap16(FUsWinDescent);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FUsWinDescent);
   end;
 end;
 
@@ -4349,48 +4228,33 @@ begin
 end;
 
 procedure TPascalTypePostscriptTable.SaveToStream(Stream: TStream);
-var
-  Value32 : Cardinal;
-  Value16 : Word;
 begin
- with Stream do
-  begin
-   // write format type
-   Value32 := Swap32(Cardinal(FVersion));
-   Write(Value32, SizeOf(Cardinal));
+ // write format type
+ WriteSwappedCardinal(Stream, Cardinal(FVersion));
 
-   // write italic angle
-   Value32 := Swap32(Cardinal(FItalicAngle));
-   Write(Value32, SizeOf(Cardinal));
+ // write italic angle
+ WriteSwappedCardinal(Stream, Cardinal(FItalicAngle));
 
-   // write underline position
-   Value16 := Swap16(FUnderlinePosition);
-   Write(Value16, SizeOf(Word));
+ // write underline position
+ WriteSwappedWord(Stream, FUnderlinePosition);
 
-   // write underline thickness
-   Value16 := Swap16(FUnderlineThickness);
-   Write(Value16, SizeOf(Word));
+ // write underline thickness
+ WriteSwappedWord(Stream, FUnderlineThickness);
 
-   // write is fixed pitch
-   Value32 := Swap32(FIsFixedPitch);
-   Write(Value32, SizeOf(Cardinal));
+ // write is fixed pitch
+ WriteSwappedCardinal(Stream, FIsFixedPitch);
 
-   // write minimum memory usage (type 42)
-   Value32 := Swap32(FMinMemType42);
-   Write(Value32, SizeOf(Cardinal));
+ // write minimum memory usage (type 42)
+ WriteSwappedCardinal(Stream, FMinMemType42);
 
-   // write maximum memory usage (type 42)
-   Value32 := Swap32(FMaxMemType42);
-   Write(Value32, SizeOf(Cardinal));
+ // write maximum memory usage (type 42)
+ WriteSwappedCardinal(Stream, FMaxMemType42);
 
-   // write minimum memory usage (type 1)
-   Value32 := Swap32(FMinMemType1);
-   Write(Value32, SizeOf(Cardinal));
+ // write minimum memory usage (type 1)
+ WriteSwappedCardinal(Stream, FMinMemType1);
 
-   // write maximum memory usage (type 1)
-   Value32 := Swap32(FMaxMemType1);
-   Write(Value32, SizeOf(Cardinal));
-  end;
+ // write maximum memory usage (type 1)
+ WriteSwappedCardinal(Stream, FMaxMemType1);
 end;
 
 procedure TPascalTypePostscriptTable.SetVersion(const Value: TFixedPoint);

@@ -42,9 +42,9 @@ type
   // table 'DSIG'
   TPascalTypeDigitalSignatureBlock = class(TCustomPascalTypeTable)
   private
+    FFormat    : Cardinal;
     FReserved  : array [0..1] of Word; // Reserved for later use; 0 for now
     FSignature : array of Byte;        // PKCS#7 packet
-    FFormat    : Cardinal;
     function GetSignatureByte(Index: Integer): Byte;
     function GetSignatureLength: Cardinal;
     procedure SetReserved(const Index: Integer; const Value: Word);
@@ -610,9 +610,6 @@ begin
 end;
 
 procedure TPascalTypeDigitalSignatureBlock.LoadFromStream(Stream: TStream);
-var
-  Value32  : Cardinal;
-  Value16  : Word;
 begin
  inherited;
  
@@ -623,16 +620,13 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read reserved 1
-   Read(Value16, SizeOf(Word));
-   FReserved[0] := Swap16(Value16);
+   FReserved[0] := ReadSwappedWord(Stream);
 
    // read reserved 2
-   Read(Value16, SizeOf(Word));
-   FReserved[1] := Swap16(Value16);
+   FReserved[1] := ReadSwappedWord(Stream);
 
    // read signature length
-   Read(Value32, SizeOf(Cardinal));
-   SetLength(FSignature, Swap32(Value32));
+   SetLength(FSignature, ReadSwappedCardinal(Stream));
 
    // check if table contains the entire signature
    if Position + Length(FSignature) > Size
@@ -644,27 +638,18 @@ begin
 end;
 
 procedure TPascalTypeDigitalSignatureBlock.SaveToStream(Stream: TStream);
-var
-  Value32  : Cardinal;
-  Value16  : Word;
 begin
- with Stream do
-  begin
-   // write reserved 1
-   Value16 := Swap16(FReserved[0]);
-   Write(Value16, SizeOf(Word));
+ // write reserved 1
+ WriteSwappedWord(Stream, FReserved[0]);
 
-   // write reserved 2
-   Value16 := Swap16(FReserved[1]);
-   Write(Value16, SizeOf(Word));
+ // write reserved 2
+ WriteSwappedWord(Stream, FReserved[1]);
 
-   // write signature length
-   Value32 := Swap32(Length(FSignature));
-   Write(Value32, SizeOf(Cardinal));
+ // write signature length
+ WriteSwappedCardinal(Stream, Length(FSignature));
 
-   // write signature length
-   Write(FSignature[0], Length(FSignature));
-  end;
+ // write signature length
+ Write(FSignature[0], Length(FSignature));
 end;
 
 procedure TPascalTypeDigitalSignatureBlock.SetFormat(const Value: Cardinal);
@@ -756,8 +741,6 @@ var
   DirIndex  : Integer;
   Directory : array of TDigitalSignatureDirectory;
   SigBlock  : TPascalTypeDigitalSignatureBlock;
-  Value32   : Cardinal;
-  Value16   : Word;
 begin
  inherited;
  
@@ -771,19 +754,16 @@ begin
    StartPos := Position;
 
    // read version
-   Read(Value32, SizeOf(Cardinal));
-   FVersion := Swap32(Value32);
+   FVersion := ReadSwappedCardinal(Stream);
 
    if Version <> 1
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read directory entry count
-   Read(Value16, SizeOf(Word));
-   SetLength(Directory, Swap16(Value16));
+   SetLength(Directory, ReadSwappedWord(Stream));
 
    // read flags
-   Read(Value16, SizeOf(Word));
-   FFlags := WordToDigitalSignatureFlags(Swap16(Value16));
+   FFlags := WordToDigitalSignatureFlags(ReadSwappedWord(Stream));
 
    if Position + Length(Directory) * SizeOf(TDigitalSignatureDirectory) > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
@@ -793,16 +773,13 @@ begin
     with Directory[DirIndex] do
      begin
       // read format
-      Read(Value32, SizeOf(Cardinal));
-      Format := Swap32(Value32);
+      Format := ReadSwappedCardinal(Stream);
 
       // read length
-      Read(Value32, SizeOf(Cardinal));
-      Length := Swap32(Value32);
+      Length := ReadSwappedCardinal(Stream);
 
       // read offset
-      Read(Value32, SizeOf(Cardinal));
-      Offset := Swap32(Value32);
+      Offset := ReadSwappedCardinal(Stream);
      end;
 
    // clear existing signatures
@@ -833,8 +810,6 @@ var
   StartPos  : Int64;
   DirIndex  : Integer;
   Directory : array of TDigitalSignatureDirectory;
-  Value32   : Cardinal;
-  Value16   : Word;
 begin
  with Stream do
   begin
@@ -842,17 +817,15 @@ begin
    StartPos := Position;
 
    // write format type
-   Value16 := Swap16(FVersion);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FVersion);
 
    // write directory entry count
-   Value16 := Swap16(FSignatures.Count);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FSignatures.Count);
 
    // write flags
-   Value16 := Swap16(DigitalSignatureFlagsToWord(FFlags));
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, DigitalSignatureFlagsToWord(FFlags));
 
+   // set length of temporary directory
    SetLength(Directory, FSignatures.Count);
 
    // offset directory
@@ -876,16 +849,13 @@ begin
     with Directory[DirIndex], TPascalTypeDigitalSignatureBlock(FSignatures[DirIndex]) do
      begin
       // write format
-      Value32 := Swap32(Format);
-      Write(Value32, SizeOf(Cardinal));
+      WriteSwappedCardinal(Stream, Format);
 
       // write length
-      Value32 := Swap32(Length);
-      Write(Value32, SizeOf(Cardinal));
+      WriteSwappedCardinal(Stream, Length);
 
       // write offset
-      Value32 := Swap32(Offset);
-      Write(Value32, SizeOf(Cardinal));
+      WriteSwappedCardinal(Stream, Offset);
      end;
   end;
 end;
@@ -1114,10 +1084,10 @@ begin
  with Stream do
   begin
    // write ppem
-   Write(Fppem, SizeOf(Word));
+   WriteSwappedWord(Stream, Fppem);
 
    // write max width
-   Write(FMaxWidth, SizeOf(Word));
+   WriteSwappedWord(Stream, FMaxWidth);
 
    // write widths
    Write(FWidths[0], Length(FWidths));
@@ -1256,25 +1226,20 @@ end;
 
 procedure TPascalTypeHorizontalDeviceMetricsTable.SaveToStream(
   Stream: TStream);
-var
-  Value16 : Word;
 begin
  with Stream do
   begin
    // write format type
-   Value16 := Swap16(FVersion);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FVersion);
 
    // write num records
-   Value16 := Swap16(FSubtables.Count);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FSubtables.Count);
 
 (* TODO
 
    // write device record size
-   Value16 := Swap16(FSizeDeviceRecord);
-   Write(Value16, SizeOf(Word));
-*)   
+   WriteSwappedWord(Stream, FSizeDeviceRecord);
+*)
   end;
 end;
 
@@ -1339,7 +1304,6 @@ end;
 
 procedure TPascalTypeKerningFormat0SubTable.LoadFromStream(Stream: TStream);
 var
-  Value16       : Word;
   PairIndex     : Integer;
   SearchRange   : Word;
   EntrySelector : Word;
@@ -1354,8 +1318,7 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read number of pairs
-   Read(Value16, SizeOf(Word));
-   SetLength(FPairs, Swap16(Value16));
+   SetLength(FPairs, ReadSwappedWord(Stream));
 
    // read search range
    SearchRange := ReadSwappedWord(Stream);
@@ -1397,7 +1360,6 @@ end;
 
 procedure TPascalTypeKerningFormat0SubTable.SaveToStream(Stream: TStream);
 var
-  Value16       : Word;
   PairIndex     : Integer;
   SearchRange   : Word;
   EntrySelector : Word;
@@ -1408,38 +1370,31 @@ begin
  with Stream do
   begin
    // write number of pairs
-   Value16 := Swap16(Length(FPairs));
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, Length(FPairs));
 
    // write search range
    SearchRange := Round(6 * (Power(2, Floor(Log2(Length(FPairs))))));
-   Value16 := Swap16(SearchRange);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, SearchRange);
 
    // write entry selector
    EntrySelector := Round(Log2(SearchRange / 6));
-   Value16 := Swap16(EntrySelector);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, EntrySelector);
 
    // write range shift
    RangeShift := 6 * Length(FPairs) - SearchRange;
-   Value16 := Swap16(RangeShift);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, RangeShift);
 
    for PairIndex := 0 to Length(FPairs) - 1 do
     with FPairs[PairIndex] do
      begin
       // write left
-      Value16 := Swap16(Left);
-      Write(Value16, SizeOf(Word));
+      WriteSwappedWord(Stream, Left);
 
       // write right
-      Value16 := Swap16(Right);
-      Write(Value16, SizeOf(Word));
+      WriteSwappedWord(Stream, Right);
 
       // write value
-      Value := Swap16(Value16);
-      Write(Value16, SizeOf(Word));
+      WriteSwappedWord(Stream, Value);
      end;
   end;
 end;
@@ -1503,8 +1458,6 @@ begin
 end;
 
 procedure TPascalTypeKerningSubTable.LoadFromStream(Stream: TStream);
-var
-  Value16       : Word;
 begin
  inherited;
 
@@ -1515,19 +1468,16 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value16, SizeOf(Word));
-   FVersion := Swap16(Value16);
+   FVersion := ReadSwappedWord(Stream);
 
    if FVersion <> 0
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read length
-   Read(Value16, SizeOf(Word));
-   FLength := Swap16(Value16);
+   FLength := ReadSwappedWord(Stream);
 
    // read coverage
-   Read(Value16, SizeOf(Word));
-   FCoverage := Swap16(Value16);
+   FCoverage := ReadSwappedWord(Stream);
    AssignFormat;
 
    case Format of
@@ -1545,25 +1495,17 @@ begin
 end;
 
 procedure TPascalTypeKerningSubTable.SaveToStream(Stream: TStream);
-var
-  Value16       : Word;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write version
-   Value16 := Swap16(FVersion);
-   Write(Value16, SizeOf(Word));
+ // write version
+ WriteSwappedWord(Stream, FVersion);
 
-   // write length
-   Value16 := Swap16(FLength);
-   Write(Value16, SizeOf(Word));
+ // write length
+ WriteSwappedWord(Stream, FLength);
 
-   // write coverage
-   Value16 := Swap16(FCoverage);
-   Write(Value16, SizeOf(Word));
-  end;
+ // write coverage
+ WriteSwappedWord(Stream, FCoverage);
 end;
 
 function TPascalTypeKerningSubTable.GetFormat: Byte;
@@ -1792,23 +1734,17 @@ end;
 
 procedure TPascalTypeKerningTable.SaveToStream(Stream: TStream);
 var
-  Value16       : Word;
   SubTableIndex : Integer;
 begin
- with Stream do
-  begin
-   // write version
-   Value16 := Swap16(FVersion);
-   Write(Value16, SizeOf(Word));
+ // write version
+ WriteSwappedWord(Stream, FVersion);
 
-   // write number of glyphs
-   Value16 := Swap16(FKerningSubtableList.Count);
-   Write(Value16, SizeOf(Word));
+ // write number of glyphs
+ WriteSwappedWord(Stream, FKerningSubtableList.Count);
 
-   // save to stream
-   for SubTableIndex := 0 to FKerningSubtableList.Count - 1
-    do TPascalTypeKerningSubTable(FKerningSubtableList[SubTableIndex]).SaveToStream(Stream);
-  end;
+ // save to stream
+ for SubTableIndex := 0 to FKerningSubtableList.Count - 1
+  do TPascalTypeKerningSubTable(FKerningSubtableList[SubTableIndex]).SaveToStream(Stream);
 end;
 
 procedure TPascalTypeKerningTable.SetVersion(const Value: Word);
@@ -1863,8 +1799,6 @@ begin
 end;
 
 procedure TPascalTypeLinearThresholdTable.LoadFromStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
  inherited;
 
@@ -1875,15 +1809,13 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value16, SizeOf(Word));
-   Version := Swap16(Value16);
+   Version := ReadSwappedWord(Stream);
 
    if Version <> 0
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read number of glyphs
-   Read(Value16, SizeOf(Word));
-   SetLength(FVerticalPels, Swap16(Value16));
+   SetLength(FVerticalPels, ReadSwappedWord(Stream));
                                   
    if Position + Length(FVerticalPels) > Size
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
@@ -1894,22 +1826,15 @@ begin
 end;
 
 procedure TPascalTypeLinearThresholdTable.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
- with Stream do
-  begin
-   // write version
-   Value16 := Swap16(Version);
-   Write(Value16, SizeOf(Word));
+ // write version
+ WriteSwappedWord(Stream, Version);
 
-   // write number of glyphs
-   Value16 := Swap16(Length(FVerticalPels));
-   Write(Value16, SizeOf(Word));
+ // write number of glyphs
+ WriteSwappedWord(Stream, Length(FVerticalPels));
 
-   // write vertical pel height
-   Write(FVerticalPels[0], Length(FVerticalPels));
-  end;
+ // write vertical pel height
+ Stream.Write(FVerticalPels[0], Length(FVerticalPels));
 end;
 
 procedure TPascalTypeLinearThresholdTable.SetVersion(const Value: Word);
@@ -1998,7 +1923,6 @@ end;
 procedure TPascalTypePCL5Table.LoadFromStream(Stream: TStream);
 var
   Value32 : Cardinal;
-  Value16 : Word;
 begin
  inherited;
 
@@ -2009,8 +1933,7 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
 
    if Version.Value <> 1
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
@@ -2020,28 +1943,22 @@ begin
    FFontNumber := TPcl5FontNumber(Value32);
 
    // read pitch
-   Read(Value16, SizeOf(Word));
-   FPitch := Swap16(Value16);
+   FPitch := ReadSwappedWord(Stream);
 
    // read x-height
-   Read(Value16, SizeOf(Word));
-   FXHeight := Swap16(Value16);
+   FXHeight := ReadSwappedWord(Stream);
 
    // read style
-   Read(Value16, SizeOf(Word));
-   FStyle := Swap16(Value16);
+   FStyle := ReadSwappedWord(Stream);
 
    // read type family
-   Read(Value16, SizeOf(Word));
-   FTypeFamily := Swap16(Value16);
+   FTypeFamily := ReadSwappedWord(Stream);
 
    // read capital height
-   Read(Value16, SizeOf(Word));
-   FCapHeight := Swap16(Value16);
+   FCapHeight := ReadSwappedWord(Stream);
 
    // read symbol set
-   Read(Value16, SizeOf(Word));
-   FSymbolSet := Swap16(Value16);
+   FSymbolSet := ReadSwappedWord(Stream);
 
    // read typeface
    Read(FTypeface, 16);
@@ -2067,51 +1984,32 @@ begin
 end;
 
 procedure TPascalTypePCL5Table.SaveToStream(Stream: TStream);
-var
-  Value32 : Cardinal;
-  Value16 : Word;
 begin
  with Stream do
   begin
    // write version
-   Value32 := Swap32(Cardinal(FVersion));
-   Write(Value32, SizeOf(TFixedPoint));
+   WriteSwappedCardinal(Stream, Cardinal(FVersion));
 
    // write font number
-   Value32 := Swap32(Cardinal(FFontNumber));
-   Write(Value32, SizeOf(Cardinal));
+   WriteSwappedCardinal(Stream, Cardinal(FFontNumber));
 
    // write pitch
-   Value16 := Swap16(FPitch);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FPitch);
 
    // write XHeight
-   Value16 := Swap16(FXHeight);
-   Write(Value16, SizeOf(Word));
-
-   // write Pitch
-   Value16 := Swap16(FPitch);
-   Write(Value16, SizeOf(Word));
-
-   // write x-height
-   Value16 := Swap16(FXHeight);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FXHeight);
 
    // write style
-   Value16 := Swap16(FStyle);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FStyle);
 
    // write type family
-   Value16 := Swap16(FTypeFamily);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FTypeFamily);
 
    // write capital height
-   Value16 := Swap16(FCapHeight);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FCapHeight);
 
    // write symbol set
-   Value16 := Swap16(FSymbolSet);
-   Write(Value16, SizeOf(Word));
+   WriteSwappedWord(Stream, FSymbolSet);
 
    // write typeface
    Write(FTypeface, 16);
@@ -2527,22 +2425,15 @@ begin
 end;
 
 procedure TPascalTypeVerticalDeviceMetricsTable.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
- with Stream do
-  begin
-   // write version
-   Value16 := Swap16(FVersion);
-   Write(Value16, SizeOf(Word));
+ // write version
+ WriteSwappedWord(Stream, FVersion);
 
-   // write number of VDMX groups present
-   Value16 := Swap16(FGroups.Count);
-   Write(Value16, SizeOf(Word));
+ // write number of VDMX groups present
+ WriteSwappedWord(Stream, FGroups.Count);
 
-   // write number of aspect ratio groupings
-   WriteSwappedWord(Stream, Length(FRatios));
-  end;
+ // write number of aspect ratio groupings
+ WriteSwappedWord(Stream, Length(FRatios));
 end;
 
 procedure TPascalTypeVerticalDeviceMetricsTable.SetVersion(const Value: Word);
@@ -2613,9 +2504,6 @@ end;
 
 procedure TPascalTypeVerticalHeaderTable.LoadFromStream(
   Stream: TStream);
-var
-  Value32 : Cardinal;
-  Value16 : SmallInt;
 begin
  inherited;
 
@@ -2626,8 +2514,7 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
 
    if Version.Value <> 1
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
@@ -2636,124 +2523,96 @@ begin
 //    then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read ascent
-   Read(Value16, SizeOf(SmallInt));
-   FAscent := Swap16(Value16);
+   FAscent := ReadSwappedWord(Stream);
 
    // read descent
-   Read(Value16, SizeOf(SmallInt));
-   FDescent := Swap16(Value16);
+   FDescent := ReadSwappedWord(Stream);
 
    // read line gap
-   Read(Value16, SizeOf(SmallInt));
-   FLineGap := Swap16(Value16);
+   FLineGap := ReadSwappedWord(Stream);
 
    // read advanced height max
-   Read(Value16, SizeOf(SmallInt));
-   FAdvanceHeightMax := Swap16(Value16);
+   FAdvanceHeightMax := ReadSwappedSmallInt(Stream);
 
    // read minimum side bearing
-   Read(Value16, SizeOf(SmallInt));
-   FMinTopSideBearing := Swap16(Value16);
+   FMinTopSideBearing := ReadSwappedSmallInt(Stream);
 
    // read minimum bottom bearing
-   Read(Value16, SizeOf(SmallInt));
-   FMinBottomSideBearing := Swap16(Value16);
+   FMinBottomSideBearing := ReadSwappedSmallInt(Stream);
 
    // read y-max extent
-   Read(Value16, SizeOf(SmallInt));
-   FYMaxExtent := Swap16(Value16);
+   FYMaxExtent := ReadSwappedSmallInt(Stream);
 
    // read caret slope rise
-   Read(Value16, SizeOf(SmallInt));
-   FCaretSlopeRise := Swap16(Value16);
+   FCaretSlopeRise := ReadSwappedSmallInt(Stream);
 
    // read caret slope run
-   Read(Value16, SizeOf(SmallInt));
-   FCaretSlopeRun := Swap16(Value16);
+   FCaretSlopeRun := ReadSwappedSmallInt(Stream);
 
    // read caret offset
-   Read(Value16, SizeOf(SmallInt));
-   FCaretOffset := Swap16(Value16);
+   FCaretOffset := ReadSwappedSmallInt(Stream);
 
+   {$IFDEF AmbigiousExceptions}
    // read reserved
-   Read(Value32, SizeOf(Cardinal));
-   Assert(Value32 = 0);
+   if ReadSwappedSmallInt(Stream) <> 0
+    then raise EPascalTypeError.Create(RCStrReservedValueError);
+   {$ELSE}
+   Seek(4, soCurrent);
+   {$ENDIF}
 
    // read metric data format
-   Read(Value16, SizeOf(Word));
-   FMetricDataFormat := Swap16(Value16);
+   FMetricDataFormat := ReadSwappedWord(Stream);
 
    // read metric data format
-   Read(Value16, SizeOf(Word));
-   FNumOfLongVerMetrics := Swap16(Word(Value16));
+   FNumOfLongVerMetrics := ReadSwappedWord(Stream);
   end;
 end;
 
 procedure TPascalTypeVerticalHeaderTable.SaveToStream(Stream: TStream);
-var
-  Value32 : Cardinal;
-  Value16 : SmallInt;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write version
-   Value32 := Swap32(Cardinal(FVersion));
-   Write(Value32, SizeOf(TFixedPoint));
+ // write version
+ WriteSwappedCardinal(Stream, Cardinal(FVersion));
 
-   // write ascent
-   Value16 := Swap16(FAscent);
-   Write(Value16, SizeOf(SmallInt));
+ // write ascent
+ WriteSwappedSmallInt(Stream, FAscent);
 
-   // write descent
-   Value16 := Swap16(FDescent);
-   Write(Value16, SizeOf(SmallInt));
+ // write descent
+ WriteSwappedSmallInt(Stream, FDescent);
 
-   // write line gap
-   Value16 := Swap16(FLineGap);
-   Write(Value16, SizeOf(SmallInt));
+ // write line gap
+ WriteSwappedSmallInt(Stream, FLineGap);
 
-   // write advanced height max
-   Value16 := Swap16(FAdvanceHeightMax);
-   Write(Value16, SizeOf(SmallInt));
+ // write advanced height max
+ WriteSwappedSmallInt(Stream, FAdvanceHeightMax);
 
-   // write minimum side bearing
-   Value16 := Swap16(FMinTopSideBearing);
-   Write(Value16, SizeOf(SmallInt));
+ // write minimum side bearing
+ WriteSwappedSmallInt(Stream, FMinTopSideBearing);
 
-   // write minimum bottom bearing
-   Value16 := Swap16(FMinBottomSideBearing);
-   Write(Value16, SizeOf(SmallInt));
+ // write minimum bottom bearing
+ WriteSwappedSmallInt(Stream, FMinBottomSideBearing);
 
-   // write y-max extent
-   Value16 := Swap16(FYMaxExtent);
-   Write(Value16, SizeOf(SmallInt));
+ // write y-max extent
+ WriteSwappedSmallInt(Stream, FYMaxExtent);
 
-   // write caret slope rise
-   Value16 := Swap16(FCaretSlopeRise);
-   Write(Value16, SizeOf(SmallInt));
+ // write caret slope rise
+ WriteSwappedSmallInt(Stream, FCaretSlopeRise);
 
-   // write caret slope run
-   Value16 := Swap16(FCaretSlopeRun);
-   Write(Value16, SizeOf(SmallInt));
+ // write caret slope run
+ WriteSwappedSmallInt(Stream, FCaretSlopeRun);
 
-   // write caret offset
-   Value16 := Swap16(FCaretOffset);
-   Write(Value16, SizeOf(SmallInt));
+ // write caret offset
+ WriteSwappedSmallInt(Stream, FCaretOffset);
 
-   // write reserved
-   Assert(Value32 = 0);
-   Write(Value32, SizeOf(Cardinal));
+ // write reserved
+ WriteSwappedCardinal(Stream, 0);
 
-   // write metric data format
-   Value16 := Swap16(FMetricDataFormat);
-   Write(Value16, SizeOf(Word));
+ // write metric data format
+ WriteSwappedWord(Stream, FMetricDataFormat);
 
-   // write number of long vertical metrics
-   Value16 := Swap16(Word(FNumOfLongVerMetrics));
-   Write(Value16, SizeOf(Word));
-  end;
+ // write number of long vertical metrics
+ WriteSwappedWord(Stream, FNumOfLongVerMetrics);
 end;
 
 procedure TPascalTypeVerticalHeaderTable.SetAdvanceHeightMax(
@@ -2995,7 +2854,6 @@ var
   MtxIndex       : Integer;
   VerticalHeader : TPascalTypeVerticalHeaderTable;
   MaximumProfile : TPascalTypeMaximumProfileTable;
-  Value16        : Word;
 begin
  inherited;
 
@@ -3017,21 +2875,18 @@ begin
     with FVerticalMetrics[MtxIndex] do
      begin
       // read advance width
-      Read(Value16, SizeOf(SmallInt));
-      AdvanceHeight := SmallInt(Swap16(Value16));
+      AdvanceHeight := ReadSwappedSmallInt(Stream);
 
       // read left side bearing
-      Read(Value16, SizeOf(SmallInt));
-      TopSideBearing := Swap16(Value16);
+      TopSideBearing := ReadSwappedSmallInt(Stream);
      end;
 
    for MtxIndex := VerticalHeader.NumOfLongVerMetrics to Length(FVerticalMetrics)  - 1 do
     with FVerticalMetrics[MtxIndex] do
      begin
       // read advance width / left side bearing at once
-      Read(Value16, SizeOf(SmallInt));
-      AdvanceHeight := Swap16(Value16);
-      TopSideBearing := Swap16(Value16);
+      AdvanceHeight := ReadSwappedSmallInt(Stream);
+      TopSideBearing := AdvanceHeight;
      end;
   end;
 end;
@@ -3040,7 +2895,6 @@ procedure TPascalTypeVerticalMetricsTable.SaveToStream(Stream: TStream);
 var
   MtxIndex       : Integer;
   VerticalHeader : TPascalTypeVerticalHeaderTable;
-  Value16        : Word;
 begin
  inherited;
 
@@ -3056,21 +2910,18 @@ begin
    for MtxIndex := 0 to VerticalHeader.NumOfLongVerMetrics - 1 do
     with FVerticalMetrics[MtxIndex] do
      begin
-      // read advance width
-      Value16 := Swap16(AdvanceHeight);
-      Write(Value16, SizeOf(SmallInt));
+      // write advance width
+      WriteSwappedSmallInt(Stream, AdvanceHeight);
 
-      // read left side bearing
-      Value16 := Swap16(TopSideBearing);
-      Write(Value16, SizeOf(SmallInt));
+      // write left side bearing
+      WriteSwappedSmallInt(Stream, TopSideBearing);
      end;
 
    for MtxIndex := VerticalHeader.NumOfLongVerMetrics to Length(FVerticalMetrics)  - 1 do
     with FVerticalMetrics[MtxIndex] do
      begin
       // write advance width / left side bearing at once
-      Value16 := Swap16(AdvanceHeight);
-      Write(Value16, SizeOf(SmallInt));
+      WriteSwappedSmallInt(Stream, AdvanceHeight);
      end;
   end;
 end;

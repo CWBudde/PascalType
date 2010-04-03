@@ -120,7 +120,9 @@ object FmTTF: TFmTTF
           '36'
           '48'
           '72'
-          '96')
+          '96'
+          '128'
+          '256')
       end
     end
     object ListBox: TListBox

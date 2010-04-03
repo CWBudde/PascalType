@@ -184,8 +184,6 @@ begin
 end;
 
 procedure TCustomPascalTypeEmbeddedBitmapTable.LoadFromStream(Stream: TStream);
-var
-  Value32 : Cardinal;
 begin
  inherited;
 
@@ -196,8 +194,7 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value32, SizeOf(Cardinal));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
 
    if FVersion.Value < 2
     then raise EPascalTypeError.Create(RCStrUnknownVersion);
@@ -205,17 +202,11 @@ begin
 end;
 
 procedure TCustomPascalTypeEmbeddedBitmapTable.SaveToStream(Stream: TStream);
-var
-  Value32 : Cardinal;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write version
-   Value32 := Swap32(Cardinal(FVersion));
-   Write(Value32, SizeOf(Cardinal));
-  end;
+ // write version
+ WriteSwappedCardinal(Stream, Cardinal(FVersion));
 end;
 
 procedure TCustomPascalTypeEmbeddedBitmapTable.SetVersion(
@@ -337,7 +328,6 @@ end;
 
 procedure TPascalTypeEmbeddedBitmapLocationTable.LoadFromStream(Stream: TStream);
 var
-  Value32         : Cardinal;
   BitmapSizeCount : Cardinal;
   BitmapSizeIndex : Integer;
   BitmapSizeTable : TPascalTypeBitmapSizeTable;
@@ -351,8 +341,7 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read number of BitmapSize tables
-   Read(Value32, SizeOf(Cardinal));
-   BitmapSizeCount := Swap32(Value32);
+   BitmapSizeCount := ReadSwappedCardinal(Stream);
 
    // read bitmap size tables
    for BitmapSizeIndex := 0 to BitmapSizeCount - 1 do
@@ -371,23 +360,18 @@ end;
 
 procedure TPascalTypeEmbeddedBitmapLocationTable.SaveToStream(Stream: TStream);
 var
-  Value32         : Cardinal;
   BitmapSizeIndex : Integer;
 begin
  inherited;
 
- with Stream do
-  begin
-   // write number of BitmapSize tables
-   Value32 := Swap32(FBitmapSizeList.Count);
-   Write(Value32, SizeOf(Cardinal));
+ // write number of BitmapSize tables
+ WriteSwappedCardinal(Stream, FBitmapSizeList.Count);
 
-   // write bitmap size tables
-   for BitmapSizeIndex := 0 to FBitmapSizeList.Count - 1 do
-    begin
-     // save bitmap size table to stream
-     TPascalTypeBitmapSizeTable(FBitmapSizeList).SaveToStream(Stream);
-    end;
+ // write bitmap size tables
+ for BitmapSizeIndex := 0 to FBitmapSizeList.Count - 1 do
+  begin
+   // save bitmap size table to stream
+   TPascalTypeBitmapSizeTable(FBitmapSizeList).SaveToStream(Stream);
   end;
 end;
 
@@ -600,7 +584,6 @@ end;
 
 procedure TPascalTypeEmbeddedBitmapScalingTable.LoadFromStream(Stream: TStream);
 var
-  Value32         : Cardinal;
   BitmapScaleCount : Cardinal;
   BitmapScaleIndex : Integer;
   BitmapScaleTable : TPascalTypeBitmapScaleTable;
@@ -614,8 +597,7 @@ begin
     then raise EPascalTypeError.Create(RCStrTableIncomplete);
 
    // read number of bitmap scale tables
-   Read(Value32, SizeOf(Cardinal));
-   BitmapScaleCount := Swap32(Value32);
+   BitmapScaleCount := ReadSwappedCardinal(Stream);
 
    // read bitmap size tables
    for BitmapScaleIndex := 0 to BitmapScaleCount - 1 do
@@ -634,7 +616,6 @@ end;
 
 procedure TPascalTypeEmbeddedBitmapScalingTable.SaveToStream(Stream: TStream);
 var
-  Value32         : Cardinal;
   BitmapScaleIndex : Integer;
 begin
  inherited;
@@ -642,8 +623,7 @@ begin
  with Stream do
   begin
    // write number of BitmapScale tables
-   Value32 := Swap32(FBitmapScaleList.Count);
-   Write(Value32, SizeOf(Cardinal));
+   WriteSwappedCardinal(Stream, FBitmapScaleList.Count);
 
    // write bitmap size tables
    for BitmapScaleIndex := 0 to FBitmapScaleList.Count - 1 do
