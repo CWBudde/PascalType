@@ -713,7 +713,7 @@ end;
 
 procedure TOpenTypeClassDefinitionFormat1Table.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeClassDefinitionFormat1Table then
+ if Dest is Self.ClassType then
   with TOpenTypeClassDefinitionFormat1Table(Dest) do
    begin
     FStartGlyph := Self.FStartGlyph;
@@ -807,7 +807,7 @@ end;
 
 procedure TOpenTypeClassDefinitionFormat2Table.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeClassDefinitionFormat1Table then
+ if Dest is Self.ClassType then
   with TOpenTypeClassDefinitionFormat1Table(Dest) do
    begin
     FClassRangeRecords := Self.FClassRangeRecords;
@@ -884,7 +884,7 @@ end;
 procedure TOpenTypeMarkGlyphSetTable.AssignTo(
   Dest: TPersistent);
 begin
- if Dest is TOpenTypeMarkGlyphSetTable then
+ if Dest is Self.ClassType then
   with TOpenTypeMarkGlyphSetTable(Dest) do
    begin
     FTableFormat := Self.FTableFormat;
@@ -1296,7 +1296,7 @@ end;
 
 procedure TOpenTypeGlyphDefinitionTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeGlyphDefinitionTable then
+ if Dest is Self.ClassType then
   with TOpenTypeGlyphDefinitionTable(Dest) do
    begin
     FAttachList       := Self.FAttachList;
@@ -1527,7 +1527,7 @@ end;
 
 procedure TCustomOpenTypeLanguageSystemTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TCustomOpenTypeLanguageSystemTable then
+ if Dest is Self.ClassType then
   with TCustomOpenTypeLanguageSystemTable(Dest) do
    begin
     FLookupOrder     := Self.FLookupOrder;
@@ -1689,7 +1689,7 @@ end;
 
 procedure TCustomOpenTypeScriptTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TCustomOpenTypeScriptTable then
+ if Dest is Self.ClassType then
   with TCustomOpenTypeScriptTable(Dest) do
    begin
     FLanguageSystemTables.Assign(Self.FLanguageSystemTables);
@@ -1879,7 +1879,7 @@ end;
 
 procedure TOpenTypeScriptListTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeScriptListTable then
+ if Dest is Self.ClassType then
   with TOpenTypeScriptListTable(Dest) do
    begin
     FLangSysList.Assign(Self.FLangSysList);
@@ -1969,7 +1969,7 @@ end;
 
 procedure TCustomOpenTypeFeatureTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TCustomOpenTypeFeatureTable then
+ if Dest is Self.ClassType then
   with TCustomOpenTypeFeatureTable(Dest) do
    begin
     FFeatureParams   := Self.FFeatureParams;
@@ -2071,7 +2071,7 @@ end;
 
 procedure TOpenTypeFeatureListTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeFeatureListTable then
+ if Dest is Self.ClassType then
   with TOpenTypeFeatureListTable(Dest) do
    begin
     FFeatureList.Assign(Self.FFeatureList);
@@ -2204,7 +2204,7 @@ end;
 
 procedure TOpenTypeCoverage1Table.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeCoverage1Table then
+ if Dest is Self.ClassType then
   with TOpenTypeCoverage1Table(Dest) do
    begin
     FGlyphArray := Self.FGlyphArray;
@@ -2287,7 +2287,7 @@ end;
 
 procedure TOpenTypeCoverage2Table.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeCoverage2Table then
+ if Dest is Self.ClassType then
   with TOpenTypeCoverage2Table(Dest) do
    begin
    end
@@ -2397,7 +2397,7 @@ end;
 
 procedure TOpenTypeLookupTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeLookupTable then
+ if Dest is Self.ClassType then
   with TOpenTypeLookupTable(Dest) do
    begin
     FLookupType       := Self.FLookupType;
@@ -2543,7 +2543,7 @@ end;
 
 procedure TOpenTypeLookupListTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeLookupListTable then
+ if Dest is Self.ClassType then
   with TOpenTypeLookupListTable(Dest) do
    begin
     FLookupList.Assign(Self.FLookupList);
@@ -2639,7 +2639,7 @@ end;
 
 procedure TCustomOpenTypeCommonTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeGlyphPositionTable then
+ if Dest is Self.ClassType then
   with TOpenTypeGlyphPositionTable(Dest) do
    begin
     FVersion := Self.FVersion;
@@ -2775,7 +2775,7 @@ end;
 
 procedure TOpenTypeExtenderGlyphTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TCustomOpenTypeLanguageSystemTable then
+ if Dest is Self.ClassType then
   with TCustomOpenTypeLanguageSystemTable(Dest) do
    begin
     FGlyphID := Self.FGlyphID;
@@ -2844,7 +2844,7 @@ end;
 procedure TCustomOpenTypeJustificationLanguageSystemTable.AssignTo(
   Dest: TPersistent);
 begin
- if Dest is TCustomOpenTypeLanguageSystemTable then
+ if Dest is Self.ClassType then
   with TCustomOpenTypeLanguageSystemTable(Dest) do
    begin
    end
@@ -3143,7 +3143,7 @@ end;
 
 procedure TOpenTypeJustificationTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TOpenTypeJustificationTable then
+ if Dest is Self.ClassType then
   with TOpenTypeJustificationTable(Dest) do
    begin
     FVersion := Self.FVersion;

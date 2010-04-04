@@ -90,6 +90,7 @@ type
   TIndexToLocationFormat = (ilShort = 0, ilLong = 1);
 
   TOS2WeightClass = (
+    wcUnknownWeight = 0,
     wcThin = 100,
     wcExtraLight = 200,
     wcLight = 300,
@@ -101,8 +102,9 @@ type
     wcBlack = 900
   );
 
-  {$A2} // ensure this works propertly!!!
+  {$A2}
   TOS2WidthClass = (
+    wcUnknownWidth = 0,
     wcUltraCondensed = 1,
     wcExtraCondensed = 2,
     wcCondensed = 3,
@@ -111,8 +113,7 @@ type
     wcSemiExpanded = 6,
     wcExpanded = 7,
     wcExtraExpanded = 8,
-    wcUltraExpanded = 9,
-    wcReserved = 1000 // damn workaround, see above
+    wcUltraExpanded = 9
   );
 
   TOS2FontEmbeddingRight = (

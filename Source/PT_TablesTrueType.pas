@@ -323,7 +323,7 @@ end;
 
 procedure TTrueTypeFontControlValueTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontControlValueTable then
+ if Dest is Self.ClassType then
   with TTrueTypeFontControlValueTable(Dest) do
    begin
     FControlValues := Self.FControlValues;
@@ -393,7 +393,7 @@ end;
 
 procedure TCustomTrueTypeFontInstructionTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TCustomTrueTypeFontInstructionTable then
+ if Dest is Self.ClassType then
   with TCustomTrueTypeFontInstructionTable(Dest) do
    begin
     FInstructions := Self.FInstructions;
@@ -554,7 +554,7 @@ end;
 
 procedure TCustomTrueTypeFontGlyphData.AssignTo(Dest: TPersistent);
 begin
- if Dest is TCustomTrueTypeFontGlyphData then
+ if Dest is Self.ClassType then
   with TCustomTrueTypeFontGlyphData(Dest) do
    begin
     FNumberOfContours := Self.FNumberOfContours;
@@ -712,7 +712,7 @@ end;
 
 procedure TPascalTypeTrueTypeContour.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypeTrueTypeContour then
+ if Dest is Self.ClassType then
   with TPascalTypeTrueTypeContour(Dest) do
    begin
 
@@ -1066,7 +1066,7 @@ end;
 
 procedure TPascalTypeCompositeGlyph.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontCompositeGlyphData then
+ if Dest is Self.ClassType then
   with TTrueTypeFontCompositeGlyphData(Dest) do
    begin
     FFlags := Self.FFlags;
@@ -1496,7 +1496,7 @@ end;
 
 procedure TTrueTypeFontLocationTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TTrueTypeFontLocationTable then
+ if Dest is Self.ClassType then
   with TTrueTypeFontLocationTable(Dest) do
    begin
     FLocations := Self.FLocations;

@@ -10,6 +10,7 @@ uses
   PT_TablesFontForge, PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames,
   PT_Rasterizer, FE_FontHeader;
 
+{$I PT_Compiler.inc}
 {.$DEFINE ShowContours}
 
 type
@@ -88,27 +89,27 @@ type
     procedure FormShow(Sender: TObject);
     procedure AcFileOpenAccept(Sender: TObject);
     procedure CbFontSizeChange(Sender: TObject);
+    procedure MIArialBoldClick(Sender: TObject);
+    procedure MIArialBoldItalicClick(Sender: TObject);
+    procedure MIArialItalicClick(Sender: TObject);
+    procedure MIArialRegularClick(Sender: TObject);
+    procedure MICourierNewBoldClick(Sender: TObject);
+    procedure MICourierNewBoldItalicClick(Sender: TObject);
+    procedure MICourierNewItalicClick(Sender: TObject);
+    procedure MICourierRegularClick(Sender: TObject);
+    procedure MIInternalClick(Sender: TObject);
     procedure MIOpenFromInstalledClick(Sender: TObject);
     procedure MIStatusBarClick(Sender: TObject);
+    procedure MITimesNewRomanBoldClick(Sender: TObject);
+    procedure MITimesNewRomanBoldItalicClick(Sender: TObject);
+    procedure MITimesNewRomanItalicClick(Sender: TObject);
+    procedure MITimesNewRomanRegularClick(Sender: TObject);
     procedure MIToolbarClick(Sender: TObject);
+    procedure MIWingdingsClick(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure ShowHint(Sender: TObject);
     procedure TreeViewChange(Sender: TObject; Node: TTreeNode);
     procedure TreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure MIWingdingsClick(Sender: TObject);
-    procedure MITimesNewRomanRegularClick(Sender: TObject);
-    procedure MITimesNewRomanBoldClick(Sender: TObject);
-    procedure MITimesNewRomanItalicClick(Sender: TObject);
-    procedure MITimesNewRomanBoldItalicClick(Sender: TObject);
-    procedure MIArialRegularClick(Sender: TObject);
-    procedure MIArialBoldClick(Sender: TObject);
-    procedure MIArialItalicClick(Sender: TObject);
-    procedure MIArialBoldItalicClick(Sender: TObject);
-    procedure MICourierRegularClick(Sender: TObject);
-    procedure MICourierNewBoldClick(Sender: TObject);
-    procedure MICourierNewItalicClick(Sender: TObject);
-    procedure MICourierNewBoldItalicClick(Sender: TObject);
-    procedure MIInternalClick(Sender: TObject);
   private
     FRasterizer   : TPascalTypeRasterizer;
     FCurrentGlyph : TBitmap;
@@ -200,7 +201,7 @@ implementation
 uses
   ShlObj, ActiveX, Inifiles, Math, Types;
 
-procedure StrResetLength(var S: AnsiString);
+procedure StrResetLength(var S: string);
 begin
  SetLength(S, StrLen(PChar(S)));
 end;
@@ -208,7 +209,7 @@ end;
 function PidlToPath(IdList: PItemIdList): string;
 begin
  SetLength(Result, MAX_PATH);
- if SHGetPathFromIdList(IdList, PChar(Result))
+ if SHGetPathFromIDList(IdList, PChar(Result))
   then StrResetLength(Result)
   else Result := '';
 end;
@@ -1706,35 +1707,36 @@ begin
    // add visual weight (degree of blackness or thickness) of stroke in glyphs
    with ListView.Items.Add do
     begin
-     Caption := 'Weight Class';
-     case Swap(Word(OS2Table.UsWeightClass)) of
-      100 : SubItems.Add('Thin');
-      200 : SubItems.Add('ExtraLight');
-      300 : SubItems.Add('Light');
-      400 : SubItems.Add('Normal');
-      500 : SubItems.Add('Medium');
-      600 : SubItems.Add('SemiBold');
-      700 : SubItems.Add('Bold');
-      800 : SubItems.Add('ExtraBold');
-      900 : SubItems.Add('Black');
+     Caption := 'Weight';
+     case OS2Table.Weight of
+      100 : SubItems.Add('100 (Thin)');
+      200 : SubItems.Add('200 (ExtraLight)');
+      300 : SubItems.Add('300 (Light)');
+      400 : SubItems.Add('400 (Normal)');
+      500 : SubItems.Add('500 (Medium)');
+      600 : SubItems.Add('600 (SemiBold)');
+      700 : SubItems.Add('700 (Bold)');
+      800 : SubItems.Add('800 (ExtraBold)');
+      900 : SubItems.Add('900 (Black)');
+      else SubItems.Add(IntToStr(Weight));
      end;
     end;
 
    // add relative change from the normal aspect ratio (width to height ratio) as specified by a font designer for the glyphs in the font
    with ListView.Items.Add do
     begin
-     Caption := 'Width Class';
-     case Swap(Word(OS2Table.UsWidthClass)) of
-      1 : SubItems.Add('Ultra-condensed');
-      2 : SubItems.Add('Extra-condensed');
-      3 : SubItems.Add('Condensed');
-      4 : SubItems.Add('Semi-condensed');
-      5 : SubItems.Add('Medium (normal)');
-      6 : SubItems.Add('Semi-expanded');
-      7 : SubItems.Add('Expanded');
-      8 : SubItems.Add('Extra-expanded');
-      9 : SubItems.Add('Ultra-expanded');
-      else SubItems.Add('Unknown: ' + IntToStr(Swap(Word(OS2Table.UsWidthClass))));
+     Caption := 'Width';
+     case OS2Table.WidthType of
+      1 : SubItems.Add('50% (Ultra-condensed)');
+      2 : SubItems.Add('62.5% (Extra-condensed)');
+      3 : SubItems.Add('75% (Condensed)');
+      4 : SubItems.Add('87.5% (Semi-condensed)');
+      5 : SubItems.Add('100% (Medium (normal))');
+      6 : SubItems.Add('112.5% (Semi-expanded)');
+      7 : SubItems.Add('125% (Expanded)');
+      8 : SubItems.Add('150% (Extra-expanded)');
+      9 : SubItems.Add('200% (Ultra-expanded)');
+      else SubItems.Add('Unknown type: ' + IntToStr(OS2Table.WidthType));
      end;
     end;
 
@@ -1791,7 +1793,7 @@ begin
 *)
 
    // add four character identifier for the font vendor
-   ListViewData(['Vendor Identification', OS2Table.AchVendID]);
+   ListViewData(['Vendor Identification', string(OS2Table.AchVendID)]);
 
    // add 2-byte bit field containing information concerning the nature of the font patterns
    ListViewData(['Selection Flags', IntToStr(FsSelection)]);
@@ -2011,8 +2013,8 @@ begin
       for PointIndex := 1 to PointCount - 1 do
        begin
         if (Point[PointIndex].Flags and 1) <> 0
-         then Brush.Color := clSilver
-         else Brush.Color := clGray;
+         then Brush.Color := clGray
+         else Brush.Color := clSilver;
 
         FillRect(Rect(Center.X + Round(Point[PointIndex].XPos * FScaler) - 2,
           Center.Y - Round(Point[PointIndex].YPos * FScaler) - 2,
@@ -2115,10 +2117,10 @@ begin
    ListViewData(['FileName', FileName]);
 
    // add stroke weight
-   ListViewData(['Stroke Weight', StrokeWeight]);
+   ListViewData(['Stroke Weight', string(StrokeWeight)]);
 
    // add width type
-   ListViewData(['Width Type', WidthType]);
+   ListViewData(['Width Type', string(WidthType)]);
 
    // add serif style
    ListViewData(['Serif Style', IntToStr(SerifStyle)]);
@@ -2541,7 +2543,7 @@ begin
      begin
       InitializeDefaultListView;
 
-      ListViewData(['Table Type', GetTableType]);
+      ListViewData(['Table Type', string(TableType)]);
 
       ListView.BringToFront;
      end;
@@ -2724,7 +2726,7 @@ begin
    for OptTableIndex := 0 to OptionalTableCount - 1 do
     with OptionalTable[OptTableIndex] do
      begin
-      Node := Items.AddChildObject(Items[0], GetTableType, OptionalTable[OptTableIndex]);
+      Node := Items.AddChildObject(Items[0], string(TableType), OptionalTable[OptTableIndex]);
 
       // digital signature
       if OptionalTable[OptTableIndex] is TPascalTypeDigitalSignatureTable then

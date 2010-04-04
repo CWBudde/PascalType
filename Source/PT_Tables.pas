@@ -131,9 +131,6 @@ type
     procedure YMaxChanged; virtual;
     procedure YMinChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
-    destructor Destroy; override;
-
     class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -179,9 +176,6 @@ type
     function GetFormat: Word; override;
     procedure ResetToDefaults; override;
   public
-    constructor Create; override;
-    destructor Destroy; override;
-
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
@@ -196,9 +190,6 @@ type
     function GetFormat: Word; override;
     procedure ResetToDefaults; override;
   public
-    constructor Create; override;
-    destructor Destroy; override;
-
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
@@ -412,9 +403,6 @@ type
     procedure ResetToDefaults; override;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
-    destructor Destroy; override;
-
     class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -486,9 +474,6 @@ type
     procedure VersionChanged; virtual;
     procedure XMaxExtentChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
-    destructor Destroy; override;
-
     class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -657,8 +642,8 @@ type
   private
     FVersion             : Word;                     // table version number (set to 0)
     FXAvgCharWidth       : SmallInt;                 // average weighted advance width of lower case letters and space
-    FUsWeightClass       : TOS2WeightClass;          // visual weight (degree of blackness or thickness) of stroke in glyphs
-    FUsWidthClass        : TOS2WidthClass;           // relative change from the normal aspect ratio (width to height ratio) as specified by a font designer for the glyphs in the font
+    FWeight              : Word;                     // visual weight (degree of blackness or thickness) of stroke in glyphs
+    FWidthType           : Word;                     // relative change from the normal aspect ratio (width to height ratio) as specified by a font designer for the glyphs in the font
     FFsType              : SmallInt;                 // characteristics and properties of this font (set undefined bits to zero)
     FYSubscriptXSize     : SmallInt;                 // recommended horizontal size in pixels for subscripts
     FYSubscriptYSize     : SmallInt;                 // recommended vertical size in pixels for subscripts
@@ -682,7 +667,8 @@ type
     FSTypoLineGap        : SmallInt;
     FUsWinAscent         : Word;
     FUsWinDescent        : Word;
-    procedure SetVersion(const Value: Word);
+    function GetWeightClass: TOS2WeightClass;
+    function GetWidthClass: TOS2WidthClass;
     procedure SetAchVendID(const Value: TTableType);
     procedure SetFsSelection(const Value: Word);
     procedure SetFsType(const Value: SmallInt);
@@ -692,10 +678,13 @@ type
     procedure SetSTypoLineGap(const Value: SmallInt);
     procedure SetUsFirstCharIndex(const Value: Word);
     procedure SetUsLastCharIndex(const Value: Word);
-    procedure SetUsWeightClass(const Value: TOS2WeightClass);
-    procedure SetUsWidthClass(const Value: TOS2WidthClass);
     procedure SetUsWinAscent(const Value: Word);
     procedure SetUsWinDescent(const Value: Word);
+    procedure SetVersion(const Value: Word);
+    procedure SetWeight(const Value: Word);
+    procedure SetWeightClass(const Value: TOS2WeightClass);
+    procedure SetWidthClass(const Value: TOS2WidthClass);
+    procedure SetWidthType(const Value: Word);
     procedure SetXAvgCharWidth(const Value: SmallInt);
     procedure SetYStrikeoutPosition(const Value: SmallInt);
     procedure SetYStrikeoutSize(const Value: SmallInt);
@@ -720,10 +709,11 @@ type
     procedure STypoLineGapChanged; virtual;
     procedure UsFirstCharIndexChanged; virtual;
     procedure UsLastCharIndexChanged; virtual;
-    procedure UsWeightClassChanged; virtual;
-    procedure UsWidthClassChanged; virtual;
     procedure UsWinAscentChanged; virtual;
     procedure UsWinDescentChanged; virtual;
+    procedure VersionChanged; virtual;
+    procedure WeightChanged; virtual;
+    procedure WidthTypeChanged; virtual;
     procedure XAvgCharWidthChanged; virtual;
     procedure YStrikeoutPositionChanged; virtual;
     procedure YStrikeoutSizeChanged; virtual;
@@ -735,11 +725,7 @@ type
     procedure YSuperscriptXSizeChanged; virtual;
     procedure YSuperscriptYOffsetChanged; virtual;
     procedure YSuperscriptYSizeChanged; virtual;
-    procedure VersionChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
-    destructor Destroy; override;
-
     class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -747,8 +733,10 @@ type
 
     property Version: Word read FVersion write SetVersion;
     property XAvgCharWidth: SmallInt read FXAvgCharWidth write SetXAvgCharWidth;
-    property UsWeightClass: TOS2WeightClass read FUsWeightClass write SetUsWeightClass;
-    property UsWidthClass: TOS2WidthClass read FUsWidthClass write SetUsWidthClass;
+    property Weight: Word read FWeight write SetWeight;
+    property WeightClass: TOS2WeightClass read GetWeightClass write SetWeightClass;
+    property WidthType: Word read FWidthType write SetWidthType;
+    property WidthClass: TOS2WidthClass read GetWidthClass write SetWidthClass;
     property FsType: SmallInt read FFsType write SetFsType;
     property YSubscriptXSize: SmallInt read FYSubscriptXSize write SetYSubscriptXSize;
     property YSubscriptYSize: SmallInt read FYSubscriptYSize write SetYSubscriptYSize;
@@ -830,7 +818,6 @@ type
     procedure UnderlinePositionChanged; virtual;
     procedure UnderlineThicknessChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -997,21 +984,9 @@ end;
 
 { TPascalTypeHeaderTable }
 
-constructor TPascalTypeHeaderTable.Create;
-begin
- // nothing in here yet
- inherited;
-end;
-
-destructor TPascalTypeHeaderTable.Destroy;
-begin
- // nothing in here yet
- inherited;
-end;
-
 procedure TPascalTypeHeaderTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypeHeaderTable then
+ if Dest is Self.ClassType then
   with TPascalTypeHeaderTable(Dest) do
    begin
     FVersion            := Self.FVersion;
@@ -1429,16 +1404,6 @@ end;
 
 { TTrueTypeFontFormat0CharacterMap }
 
-constructor TTrueTypeFontFormat0CharacterMap.Create;
-begin
- inherited;
-end;
-
-destructor TTrueTypeFontFormat0CharacterMap.Destroy;
-begin
- inherited;
-end;
-
 function TTrueTypeFontFormat0CharacterMap.GetFormat: Word;
 begin
  Result := 0;
@@ -1491,16 +1456,6 @@ end;
 
 
 { TTrueTypeFontFormat2CharacterMap }
-
-constructor TTrueTypeFontFormat2CharacterMap.Create;
-begin
- inherited;
-end;
-
-destructor TTrueTypeFontFormat2CharacterMap.Destroy;
-begin
- inherited;
-end;
 
 function TTrueTypeFontFormat2CharacterMap.GetFormat: Word;
 begin
@@ -1914,7 +1869,7 @@ end;
 
 procedure TCustomCharacterMapDirectoryEntry.AssignTo(Dest: TPersistent);
 begin
- if Dest is TCustomCharacterMapDirectoryEntry then
+ if Dest is Self.ClassType then
   with TCustomCharacterMapDirectoryEntry(Dest) do
    begin
     FEncodingID := Self.FEncodingID;
@@ -2102,7 +2057,7 @@ var
   SubTableIndex : Integer;
 *)
 begin
- if Dest is TPascalTypeCharacterMapTable then
+ if Dest is Self.ClassType then
   with TPascalTypeCharacterMapTable(Dest) do
    begin
     FVersion := Self.FVersion;
@@ -2280,21 +2235,9 @@ end;
 
 { TPascalTypeHorizontalHeaderTable }
 
-constructor TPascalTypeHorizontalHeaderTable.Create;
-begin
- // nothing in here yet
- inherited;
-end;
-
-destructor TPascalTypeHorizontalHeaderTable.Destroy;
-begin
- // nothing in here yet
- inherited;
-end;
-
 procedure TPascalTypeHorizontalHeaderTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypeHorizontalHeaderTable then
+ if Dest is Self.ClassType then
   with TPascalTypeHorizontalHeaderTable(Dest) do
    begin
     FVersion             := Self.FVersion;
@@ -2649,7 +2592,7 @@ end;
 
 procedure TPascalTypeHorizontalMetricsTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypeHorizontalMetricsTable then
+ if Dest is Self.ClassType then
   with TPascalTypeHorizontalMetricsTable(Dest) do
    begin
     FHorizontalMetrics := Self.FHorizontalMetrics;
@@ -2734,7 +2677,7 @@ end;
 
 procedure TCustomTrueTypeFontNamePlatform.AssignTo(Dest: TPersistent);
 begin
- if Dest is TCustomTrueTypeFontNamePlatform then
+ if Dest is Self.ClassType then
   with TCustomTrueTypeFontNamePlatform(Dest) do
    begin
    end else inherited;
@@ -2977,7 +2920,7 @@ end;
 
 procedure TPascalTypeNameTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypeNameTable then
+ if Dest is Self.ClassType then
   with TPascalTypeNameTable(Dest) do
    begin
     FFormat := Self.FFormat;
@@ -3096,21 +3039,9 @@ end;
 
 { TPascalTypeMaximumProfileTable }
 
-constructor TPascalTypeMaximumProfileTable.Create;
-begin
- // nothing in here yet
- inherited;
-end;
-
-destructor TPascalTypeMaximumProfileTable.Destroy;
-begin
- // nothing in here yet
- inherited;
-end;
-
 procedure TPascalTypeMaximumProfileTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypeMaximumProfileTable then
+ if Dest is Self.ClassType then
   with TPascalTypeMaximumProfileTable(Dest) do
    begin
     FVersion               := Self.FVersion;
@@ -3488,27 +3419,15 @@ end;
 
 { TPascalTypeOS2Table }
 
-constructor TPascalTypeOS2Table.Create;
-begin
- // nothing in here yet
- inherited;
-end;
-
-destructor TPascalTypeOS2Table.Destroy;
-begin
- // nothing in here yet
- inherited;
-end;
-
 procedure TPascalTypeOS2Table.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypeNameTable then
+ if Dest is Self.ClassType then
   with TPascalTypeNameTable(Dest) do
    begin
     FVersion             := Self.FVersion;
     FXAvgCharWidth       := Self.FXAvgCharWidth;
-    FUsWeightClass       := Self.FUsWeightClass;
-    FUsWidthClass        := Self.FUsWidthClass;
+    FWeight              := Self.FWeight;
+    FWidthType           := Self.FWidthType;
     FFsType              := Self.FFsType;
     FYSubscriptXSize     := Self.FYSubscriptXSize;
     FYSubscriptYSize     := Self.FYSubscriptYSize;
@@ -3545,8 +3464,8 @@ procedure TPascalTypeOS2Table.ResetToDefaults;
 begin
  FVersion := 0;
  FXAvgCharWidth := 0;
- FUsWeightClass := wcNormal;
- FUsWidthClass := wcMediumNormal;
+ FWeight := 400;
+ FWidthType := 5;
  FFsType := 0;
  FYSubscriptXSize := 0;
  FYSubscriptYSize := 0;
@@ -3589,19 +3508,16 @@ begin
    if not (Version in [0..3])
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
-
-   // read XAvgCharWidth
+   // read average horizontal character width
    FXAvgCharWidth := ReadSwappedWord(Stream);
 
-   // read UsWeightClass
-   Read(Value16, SizeOf(Word));
-//   FUsWeightClass := Swap16(Value16);
+   // read weight
+   FWeight := ReadSwappedWord(Stream);
 
-   // read UsWidthClass
-   Read(Value16, SizeOf(Word));
-//   FUsWidthClass := Swap16(Value16);
+   // read width type
+   FWidthType := ReadSwappedWord(Stream);
 
-   // read FsType
+   // read type flags
    FFsType := ReadSwappedWord(Stream);
 
    // read YSubscriptXSize
@@ -3684,9 +3600,8 @@ begin
    // write XAvgCharWidth
    WriteSwappedWord(Stream, FXAvgCharWidth);
 
-   // write UsWeightClass
-//   UsWeightClass := Swap16(Value16);
-   Write(Value16, SizeOf(Word));
+   // write Weight
+   WriteSwappedWord(Stream, FWeight);
 
    // write UsWidthClass
 //   UsWidthClass := Swap16(Value16);
@@ -3761,6 +3676,38 @@ begin
    // write UsWinDescent
    WriteSwappedWord(Stream, FUsWinDescent);
   end;
+end;
+
+function TPascalTypeOS2Table.GetWeightClass: TOS2WeightClass;
+begin
+ case FWeight of
+   100 :  Result := wcThin;
+   200 :  Result := wcExtraLight;
+   300 :  Result := wcLight;
+   400 :  Result := wcNormal;
+   500 :  Result := wcMedium;
+   600 :  Result := wcSemiBold;
+   700 :  Result := wcBold;
+   800 :  Result := wcExtraBold;
+   900 :  Result := wcBlack;
+  else Result := wcUnknownWeight;
+ end;
+end;
+
+function TPascalTypeOS2Table.GetWidthClass: TOS2WidthClass;
+begin
+ case FWidthType of
+   1 : Result := wcUltraCondensed;
+   2 : Result := wcExtraCondensed;
+   3 : Result := wcCondensed;
+   4 : Result := wcSemiCondensed;
+   5 : Result := wcMediumNormal;
+   6 : Result := wcSemiExpanded;
+   7 : Result := wcExpanded;
+   8 : Result := wcExtraExpanded;
+   9 : Result := wcUltraExpanded;
+  else Result := wcUnknownWidth;
+ end;
 end;
 
 procedure TPascalTypeOS2Table.SetAchVendID(const Value: TTableType);
@@ -3844,21 +3791,24 @@ begin
   end;
 end;
 
-procedure TPascalTypeOS2Table.SetUsWeightClass(const Value: TOS2WeightClass);
+procedure TPascalTypeOS2Table.SetWidthClass(const Value: TOS2WidthClass);
 begin
- if FUsWeightClass <> Value then
+ if Value = wcUnknownWidth
+  then Exit;
+
+ if WidthClass <> Value then
   begin
-   FUsWeightClass := Value;
-   UsWeightClassChanged;
+   FWidthType := Word(Value);
+   WidthTypeChanged;
   end;
 end;
 
-procedure TPascalTypeOS2Table.SetUsWidthClass(const Value: TOS2WidthClass);
+procedure TPascalTypeOS2Table.SetWidthType(const Value: Word);
 begin
- if FUsWidthClass <> Value then
+ if FWidthType <> Value then
   begin
-   FUsWidthClass := Value;
-   UsWidthClassChanged;
+   FWidthType := Value;
+   WidthTypeChanged;
   end;
 end;
 
@@ -3988,6 +3938,27 @@ begin
   end;
 end;
 
+procedure TPascalTypeOS2Table.SetWeight(const Value: Word);
+begin
+ if FWeight <> Value then
+  begin
+   FWeight := Value;
+   WeightChanged;
+  end;
+end;
+
+procedure TPascalTypeOS2Table.SetWeightClass(const Value: TOS2WeightClass);
+begin
+ if Value = wcUnknownWeight
+  then Exit;
+
+ if WeightClass <> Value then
+  begin
+   FWeight := Word(Value);
+   WeightChanged;
+  end;
+end;
+
 procedure TPascalTypeOS2Table.AchVendIDChanged;
 begin
  Changed;
@@ -4033,12 +4004,12 @@ begin
  Changed;
 end;
 
-procedure TPascalTypeOS2Table.UsWeightClassChanged;
+procedure TPascalTypeOS2Table.WeightChanged;
 begin
  Changed;
 end;
 
-procedure TPascalTypeOS2Table.UsWidthClassChanged;
+procedure TPascalTypeOS2Table.WidthTypeChanged;
 begin
  Changed;
 end;
@@ -4116,12 +4087,6 @@ end;
 
 { TPascalTypePostscriptTable }
 
-constructor TPascalTypePostscriptTable.Create;
-begin
- // nothing in here yet
- inherited;
-end;
-
 destructor TPascalTypePostscriptTable.Destroy;
 begin
  if Assigned(FPostscriptV2Table)
@@ -4137,7 +4102,7 @@ end;
 
 procedure TPascalTypePostscriptTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypePostscriptTable then
+ if Dest is Self.ClassType then
   with TPascalTypePostscriptTable(Dest) do
    begin
     FVersion := Self.FVersion;
@@ -4415,7 +4380,7 @@ end;
 
 procedure TPascalTypePostscriptVersion2Table.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypePostscriptVersion2Table then
+ if Dest is Self.ClassType then
   with TPascalTypePostscriptVersion2Table(Dest) do
    begin
     FGlyphNameIndex := Self.FGlyphNameIndex;
@@ -4459,7 +4424,7 @@ end;
 
 procedure TPascalTypePostscriptVersion2Table.SaveToStream(Stream: TStream);
 begin
- raise EPascalTypeError.Create('yet todo!')
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 

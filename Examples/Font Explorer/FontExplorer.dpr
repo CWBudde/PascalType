@@ -1,5 +1,6 @@
 program FontExplorer;
 
+{$I PT_Compiler.inc}
 {$R '..\..\Resource\Default.res' '..\..\Resource\Default.rc'}
 
 // if the first 3 units are missing feel free to download the according library
@@ -8,7 +9,9 @@ program FontExplorer;
 uses
   FastMM4,
   FastMove,
+  {$IFNDEF DELPHI2009_UP}
   RTLVCLOptimize,
+  {$ENDIF}
   Forms,
   PT_ByteCodeInterpreter in '..\..\Source\PT_ByteCodeInterpreter.pas',
   PT_Interpreter in '..\..\Source\PT_Interpreter.pas',
