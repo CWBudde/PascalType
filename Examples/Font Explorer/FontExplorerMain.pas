@@ -8,7 +8,7 @@ uses
   ImgList, PT_Types, PT_Tables, PT_TablesTrueType, PT_TablesOptional,
   PT_TablesBitmap, PT_TablesOpenType, PT_TablesApple, PT_TablesShared,
   PT_TablesFontForge, PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames,
-  PT_Rasterizer, FE_FontHeader;
+  PT_Rasterizer, PT_PanoseClassifications, FE_FontHeader;
 
 {$I PT_Compiler.inc}
 {.$DEFINE ShowContours}
@@ -1741,31 +1741,31 @@ begin
     end;
 
    // add characteristics and properties of this font (set undefined bits to zero)
-   ListViewData(['Type Flags', IntToStr(FsType)]);
+   ListViewData(['Font Embedding Rights', FontEmbeddingRightsToString(FontEmbeddingRights)]);
 
    // add recommended horizontal size in pixels for subscripts
-   ListViewData(['Subscript X Size', IntToStr(YSubscriptXSize)]);
+   ListViewData(['Subscript Horizontal Font Size', IntToStr(YSubscriptXSize)]);
 
    // add recommended vertical size in pixels for subscripts
-   ListViewData(['Subscript Y Size', IntToStr(YSubscriptYSize)]);
+   ListViewData(['Subscript Vertical Size', IntToStr(YSubscriptYSize)]);
 
    // add recommended horizontal offset for subscripts
-   ListViewData(['SubScript X Offset', IntToStr(YSubScriptXOffset)]);
+   ListViewData(['SubScript Horizontal Offset', IntToStr(YSubScriptXOffset)]);
 
    // add recommended vertical offset form the baseline for subscripts
-   ListViewData(['Subscript Y Offset', IntToStr(YSubscriptYOffset)]);
+   ListViewData(['Subscript Vertical Offset', IntToStr(YSubscriptYOffset)]);
 
    // add recommended horizontal size in pixels for superscripts
-   ListViewData(['Superscript X Size', IntToStr(YSuperscriptXSize)]);
+   ListViewData(['Superscript Horizontal Size', IntToStr(YSuperscriptXSize)]);
 
    // add recommended vertical size in pixels for superscripts
-   ListViewData(['Superscript Y Size', IntToStr(YSuperscriptYSize)]);
+   ListViewData(['Superscript Vertical Size', IntToStr(YSuperscriptYSize)]);
 
    // add recommended horizontal offset for superscripts
-   ListViewData(['Superscript X Offset', IntToStr(YSuperscriptXOffset)]);
+   ListViewData(['Superscript Horizontal Offset', IntToStr(YSuperscriptXOffset)]);
 
    // add recommended vertical offset from the baseline for superscripts
-   ListViewData(['Superscript Y Offset', IntToStr(YSuperscriptYOffset)]);
+   ListViewData(['Superscript Vertical Offset', IntToStr(YSuperscriptYOffset)]);
 
    // add width of the strikeout stroke
    ListViewData(['Strikeout Size', IntToStr(YStrikeoutSize)]);
@@ -1773,8 +1773,60 @@ begin
    // add position of the strikeout stroke relative to the baseline
    ListViewData(['Strikeout Position', IntToStr(YStrikeoutPosition)]);
 
-   // add classification of font-family design.
-   ListViewData(['Font Family Class and Subclass', IntToStr(SFamilyClass)]);
+   // add classification of font-family design
+   ListViewData(['Font Family Class and Subclass', FontFamilyTypeToString(FontFamilyType)]);
+
+   // add PANOSE classification number
+   if Panose is TPascalTypeLatinTextPanoseTable then
+    with TPascalTypeLatinTextPanoseTable(Panose) do
+     begin
+      // Family Kind
+      ListViewData(['Panose - Family Kind', 'Latin Text']);
+
+      // Serif Style
+      ListViewData(['Panose - Serif Style', IntToStr(SerifStyle) + ' (' +
+        LatinTextSerifStyleToString(SerifStyle) + ')']);
+
+      // Weight
+      ListViewData(['Panose - Weight', IntToStr(Weight) + ' (' +
+        LatinTextWeightToString(Weight) + ')']);
+
+      // Proportion
+      ListViewData(['Panose - Proportion', IntToStr(Proportion) + ' (' +
+        LatinTextProportionToString(Proportion) + ')']);
+
+      // Contrast
+      ListViewData(['Panose - Contrast', IntToStr(Contrast)]);
+
+      // Stroke Variation
+      ListViewData(['Panose - Stroke Variation', IntToStr(StrokeVariation)]);
+
+      // Arm Style
+      ListViewData(['Panose - Arm Style', IntToStr(ArmStyle)]);
+
+      // Letterform
+      ListViewData(['Panose - Letterform', IntToStr(Letterform)]);
+
+      // Midline
+      ListViewData(['Panose - Midline', IntToStr(Midline)]);
+
+      // X-height
+      ListViewData(['Panose - X-height', IntToStr(Xheight)]);
+     end else
+   if Panose is TPascalTypeDefaultPanoseTable then
+    with TPascalTypeDefaultPanoseTable(Panose)
+     do ListViewData(['Panose', IntToStr(FamilyType) + '-' +
+                                IntToStr(Data[0]) + '-' +
+                                IntToStr(Data[1]) + '-' +
+                                IntToStr(Data[2]) + '-' +
+                                IntToStr(Data[3]) + '-' +
+                                IntToStr(Data[4]) + '-' +
+                                IntToStr(Data[5]) + '-' +
+                                IntToStr(Data[6]) + '-' +
+                                IntToStr(Data[7]) + '-' +
+                                IntToStr(Data[8])]);
+
+//   ListViewData(['Panose', IntToStr(Panose]);
 
 (*
    // add 10 byte series of number used to describe the visual characteristics of a given typeface

@@ -638,13 +638,44 @@ type
     usMaxContext        : Word;
   end;
 
+  TCustomPascalTypePanoseTable = class(TCustomPascalTypeTable)
+  protected
+    FData : array [0..8] of Byte;
+
+    procedure AssignTo(Dest: TPersistent); override;
+    procedure ResetToDefaults; override;
+
+    class function GetFamilyType: Byte; virtual; abstract;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    property FamilyType: Byte read GetFamilyType;
+  end;
+  TCustomPascalTypePanoseClass = class of TCustomPascalTypePanoseTable;
+
+  TPascalTypeDefaultPanoseTable = class(TCustomPascalTypePanoseTable)
+  private
+    FFamilyType : Byte;
+    function GetData(Index: Byte): Byte;
+    procedure SetData(Index: Byte; const Value: Byte);
+  protected
+    class function GetFamilyType: Byte; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    property Data[Index: Byte]: Byte read GetData write SetData;
+    property FamilyType: Byte read FFamilyType;
+  end;
+
   TPascalTypeOS2Table = class(TCustomPascalTypeNamedTable)
   private
     FVersion             : Word;                     // table version number (set to 0)
     FXAvgCharWidth       : SmallInt;                 // average weighted advance width of lower case letters and space
     FWeight              : Word;                     // visual weight (degree of blackness or thickness) of stroke in glyphs
     FWidthType           : Word;                     // relative change from the normal aspect ratio (width to height ratio) as specified by a font designer for the glyphs in the font
-    FFsType              : SmallInt;                 // characteristics and properties of this font (set undefined bits to zero)
+    FFontEmbeddingFlags  : Word;                     // characteristics and properties of this font (set undefined bits to zero)
     FYSubscriptXSize     : SmallInt;                 // recommended horizontal size in pixels for subscripts
     FYSubscriptYSize     : SmallInt;                 // recommended vertical size in pixels for subscripts
     FYSubScriptXOffset   : SmallInt;                 // recommended horizontal offset for subscripts
@@ -655,8 +686,7 @@ type
     FYSuperscriptYOffset : SmallInt;                 // recommended vertical offset from the baseline for superscripts
     FYStrikeoutSize      : SmallInt;                 // width of the strikeout stroke
     FYStrikeoutPosition  : SmallInt;                 // position of the strikeout stroke relative to the baseline
-    FSFamilyClass        : SmallInt;                 // classification of font-family design.
-    FPanose              : array [0..9] of Byte;     // 10 byte series of number used to describe the visual characteristics of a given typeface
+    FFontFamilyType      : Word;                     // classification of font-family design.
     FUlUnicodeRange      : array [0..3] of Cardinal; // Field is split into two bit fields of 96 and 36 bits each. The low 96 bits are used to specify the Unicode blocks encompassed by the font file. The high 32 bits are used to specify the character or script sets covered by the font file. Bit assignments are pending. Set to 01
     FAchVendID           : TTableType;               // four character identifier for the font vendor
     FFsSelection         : Word;                     // 2-byte bit field containing information concerning the nature of the font patterns
@@ -667,12 +697,16 @@ type
     FSTypoLineGap        : SmallInt;
     FUsWinAscent         : Word;
     FUsWinDescent        : Word;
+
+    FPanose              : TCustomPascalTypePanoseTable;
     function GetWeightClass: TOS2WeightClass;
     function GetWidthClass: TOS2WidthClass;
+    function GetFontEmbeddingRights: TOS2FontEmbeddingRights;
     procedure SetAchVendID(const Value: TTableType);
     procedure SetFsSelection(const Value: Word);
-    procedure SetFsType(const Value: SmallInt);
-    procedure SetSFamilyClass(const Value: SmallInt);
+    procedure SetFontEmbeddingFlags(const Value: Word);
+    procedure SetFontEmbeddingRights(const Value: TOS2FontEmbeddingRights);
+    procedure SetFontFamilyType(const Value: Word);
     procedure SetSTypoAscender(const Value: SmallInt);
     procedure SetSTypoDescender(const Value: SmallInt);
     procedure SetSTypoLineGap(const Value: SmallInt);
@@ -696,14 +730,19 @@ type
     procedure SetYSuperscriptXSize(const Value: SmallInt);
     procedure SetYSuperscriptYOffset(const Value: SmallInt);
     procedure SetYSuperscriptYSize(const Value: SmallInt);
+    function GetFontFamilyClassID: Byte;
+    function GetFontFamilySubClassID: Byte;
+    procedure SetFontFamilyClassID(const Value: Byte);
+    procedure SetFontFamilySubClassID(const Value: Byte);
+    procedure SetPanose(const Value: TCustomPascalTypePanoseTable);
   protected
     procedure AssignTo(Dest: TPersistent); override;
     procedure ResetToDefaults; override;
 
     procedure AchVendIDChanged; virtual;
     procedure FsSelectionChanged; virtual;
-    procedure FsTypeChanged; virtual;
-    procedure SFamilyClassChanged; virtual;
+    procedure FontEmbeddingRightsChanged; virtual;
+    procedure FontFamilyChanged; virtual;
     procedure STypoAscenderChanged; virtual;
     procedure STypoDescenderChanged; virtual;
     procedure STypoLineGapChanged; virtual;
@@ -726,6 +765,9 @@ type
     procedure YSuperscriptYOffsetChanged; virtual;
     procedure YSuperscriptYSizeChanged; virtual;
   public
+    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    destructor Destroy; override;
+
     class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -737,7 +779,8 @@ type
     property WeightClass: TOS2WeightClass read GetWeightClass write SetWeightClass;
     property WidthType: Word read FWidthType write SetWidthType;
     property WidthClass: TOS2WidthClass read GetWidthClass write SetWidthClass;
-    property FsType: SmallInt read FFsType write SetFsType;
+    property FontEmbeddingFlags: Word read FFontEmbeddingFlags write SetFontEmbeddingFlags;
+    property FontEmbeddingRights: TOS2FontEmbeddingRights read GetFontEmbeddingRights write SetFontEmbeddingRights;
     property YSubscriptXSize: SmallInt read FYSubscriptXSize write SetYSubscriptXSize;
     property YSubscriptYSize: SmallInt read FYSubscriptYSize write SetYSubscriptYSize;
     property YSubScriptXOffset: SmallInt read FYSubScriptXOffset write SetYSubScriptXOffset;
@@ -748,7 +791,10 @@ type
     property YSuperscriptYOffset: SmallInt read FYSuperscriptYOffset write SetYSuperscriptYOffset;
     property YStrikeoutSize: SmallInt read FYStrikeoutSize write SetYStrikeoutSize;
     property YStrikeoutPosition: SmallInt read FYStrikeoutPosition write SetYStrikeoutPosition;
-    property SFamilyClass: SmallInt read FSFamilyClass write SetSFamilyClass;
+    property FontFamilyType: Word read FFontFamilyType write SetFontFamilyType;
+    property FontFamilyClassID: Byte read GetFontFamilyClassID write SetFontFamilyClassID;
+    property FontFamilySubClassID: Byte read GetFontFamilySubClassID write SetFontFamilySubClassID;
+    property Panose: TCustomPascalTypePanoseTable read FPanose write SetPanose;
     property AchVendID: TTableType read FAchVendID write SetAchVendID;
     property FsSelection: Word read FFsSelection write SetFsSelection;
     property UsFirstCharIndex: Word read FUsFirstCharIndex write SetUsFirstCharIndex;
@@ -853,6 +899,10 @@ procedure WriteSwappedSmallInt(Stream: TStream; Value : SmallInt); {$IFDEF UseIn
 procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal); {$IFDEF UseInline} inline; {$ENDIF}
 procedure WriteSwappedInt64(Stream: TStream; Value: Int64); {$IFDEF UseInline} inline; {$ENDIF}
 
+procedure RegisterPascalTypePanose(PanoseClass: TCustomPascalTypePanoseClass);
+procedure RegisterPascalTypePanoses(PanoseClasses: array of TCustomPascalTypePanoseClass);
+function FindPascalTypePanoseByType(PanoseType: Byte): TCustomPascalTypePanoseClass;
+
 procedure RegisterPascalTypeTable(TableClass: TCustomPascalTypeNamedTableClass);
 procedure RegisterPascalTypeTables(TableClasses: array of TCustomPascalTypeNamedTableClass);
 function FindPascalTypeTableByType(TableType: TTableType): TCustomPascalTypeNamedTableClass;
@@ -864,6 +914,7 @@ uses
 
 
 var
+  GPanoseClasses : array of TCustomPascalTypePanoseClass;
   GTableClasses : array of TCustomPascalTypeNamedTableClass;
 
 function Swap16(Value: Word): Word;
@@ -3416,8 +3467,87 @@ begin
  Changed;
 end;
 
+{ TCustomPascalTypePanoseTable }
+
+procedure TCustomPascalTypePanoseTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TCustomPascalTypePanoseTable(Dest)
+   do FData := Self.FData;
+ inherited;
+end;
+
+procedure TCustomPascalTypePanoseTable.ResetToDefaults;
+begin
+ FillChar(FData[0], 9, 0);
+end;
+
+procedure TCustomPascalTypePanoseTable.LoadFromStream(Stream: TStream);
+begin
+ inherited;
+
+ Stream.Read(FData[0], 9);
+end;
+
+procedure TCustomPascalTypePanoseTable.SaveToStream(Stream: TStream);
+begin
+ inherited;
+
+ Stream.Write(FData[0], 9);
+end;
+
+
+{ TPascalTypeDefaultPanoseTable }
+
+class function TPascalTypeDefaultPanoseTable.GetFamilyType: Byte;
+begin
+ Result := 0; // not specified and thus identifier for unknown panose type
+end;
+
+function TPascalTypeDefaultPanoseTable.GetData(Index: Byte): Byte;
+begin
+ if Index in [0..8]
+  then Result := FData[Index]
+  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+end;
+
+procedure TPascalTypeDefaultPanoseTable.SetData(Index: Byte; const Value: Byte);
+begin
+ if Index in [0..8]
+  then FData[Index] := Value
+  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+end;
+
+procedure TPascalTypeDefaultPanoseTable.LoadFromStream(Stream: TStream);
+begin
+ // read family type frem stream prior to any other data
+ Stream.Read(FFamilyType, 1);
+
+ inherited;
+end;
+
+procedure TPascalTypeDefaultPanoseTable.SaveToStream(Stream: TStream);
+begin
+ // write family type frem stream prior to any other data
+ Stream.Write(FFamilyType, 1);
+
+ inherited;
+end;
+
 
 { TPascalTypeOS2Table }
+
+constructor TPascalTypeOS2Table.Create(Interpreter: IPascalTypeInterpreter);
+begin
+ FPanose := TPascalTypeDefaultPanoseTable.Create;
+ inherited;
+end;
+
+destructor TPascalTypeOS2Table.Destroy;
+begin
+ FreeAndNil(FPanose);
+ inherited;
+end;
 
 procedure TPascalTypeOS2Table.AssignTo(Dest: TPersistent);
 begin
@@ -3428,7 +3558,7 @@ begin
     FXAvgCharWidth       := Self.FXAvgCharWidth;
     FWeight              := Self.FWeight;
     FWidthType           := Self.FWidthType;
-    FFsType              := Self.FFsType;
+    FFontEmbeddingFlags := Self.FFontEmbeddingFlags;
     FYSubscriptXSize     := Self.FYSubscriptXSize;
     FYSubscriptYSize     := Self.FYSubscriptYSize;
     FYSubScriptXOffset   := Self.FYSubScriptXOffset;
@@ -3439,8 +3569,7 @@ begin
     FYSuperscriptYOffset := Self.FYSuperscriptYOffset;
     FYStrikeoutSize      := Self.FYStrikeoutSize;
     FYStrikeoutPosition  := Self.FYStrikeoutPosition;
-    FSFamilyClass        := Self.FSFamilyClass;
-    FPanose              := Self.FPanose;
+    FFontFamilyType      := Self.FFontFamilyType;
     FUlUnicodeRange      := Self.FUlUnicodeRange;
     FAchVendID           := Self.FAchVendID;
     FFsSelection         := Self.FFsSelection;
@@ -3451,8 +3580,24 @@ begin
     FSTypoLineGap        := Self.FSTypoLineGap;
     FUsWinAscent         := Self.FUsWinAscent;
     FUsWinDescent        := Self.FUsWinDescent;
+    FPanose.Assign(Self.FPanose);
    end
  else inherited;
+end;
+
+function TPascalTypeOS2Table.GetFontEmbeddingRights: TOS2FontEmbeddingRights;
+begin
+ Result := FontEmbeddingFlagsToRights(FFontEmbeddingFlags);
+end;
+
+function TPascalTypeOS2Table.GetFontFamilyClassID: Byte;
+begin
+ Result := FFontFamilyType shr 8;
+end;
+
+function TPascalTypeOS2Table.GetFontFamilySubClassID: Byte;
+begin
+ Result := FFontFamilyType and $FF;
 end;
 
 class function TPascalTypeOS2Table.GetTableType: TTableType;
@@ -3466,7 +3611,7 @@ begin
  FXAvgCharWidth := 0;
  FWeight := 400;
  FWidthType := 5;
- FFsType := 0;
+ FFontEmbeddingFlags := 0;
  FYSubscriptXSize := 0;
  FYSubscriptYSize := 0;
  FYSubScriptXOffset := 0;
@@ -3477,8 +3622,7 @@ begin
  FYSuperscriptYOffset := 0;
  FYStrikeoutSize := 0;
  FYStrikeoutPosition := 0;
- FSFamilyClass := 0;
- FillChar(FPanose, 10, 0);
+ FFontFamilyType := 0;
  FillChar(FUlUnicodeRange, 4, 0);
  FAchVendID := #0#0#0#0;
  FFsSelection := 0;
@@ -3489,11 +3633,23 @@ begin
  FSTypoLineGap := 0;
  FUsWinAscent := 0;
  FUsWinDescent := 0;
+
+ // reset panose
+ if not (FPanose is TPascalTypeDefaultPanoseTable) then
+  begin
+   // free other panose object
+   FreeAndNil(FPanose);
+
+   // create new default panose object
+   FPanose := TPascalTypeDefaultPanoseTable.Create;
+  end else FPanose.ResetToDefaults;
+
 end;
 
 procedure TPascalTypeOS2Table.LoadFromStream(Stream: TStream);
 var
-  Value16 : Word;
+  PanoseFamilyKind  : Byte;
+  PanoseFamilyClass : TCustomPascalTypePanoseClass;
 begin
  with Stream do
   begin
@@ -3517,8 +3673,8 @@ begin
    // read width type
    FWidthType := ReadSwappedWord(Stream);
 
-   // read type flags
-   FFsType := ReadSwappedWord(Stream);
+   // read font embedding right flags
+   FFontEmbeddingFlags := ReadSwappedWord(Stream);
 
    // read YSubscriptXSize
    FYSubscriptXSize := ReadSwappedWord(Stream);
@@ -3550,11 +3706,41 @@ begin
    // read YStrikeoutPosition
    FYStrikeoutPosition := ReadSwappedWord(Stream);
 
-   // read SFamilyClass
-   FSFamilyClass := ReadSwappedWord(Stream);
+   // read FontFamilyType
+   FFontFamilyType := ReadSwappedWord(Stream);
 
    // read Panose
-   Read(FPanose, 10);
+   Read(PanoseFamilyKind, 1);
+
+   // find panose family class by type
+   PanoseFamilyClass := FindPascalTypePanoseByType(PanoseFamilyKind);
+
+   if not Assigned(PanoseFamilyClass) then
+    begin
+     if not (FPanose is TPascalTypeDefaultPanoseTable) then
+      begin
+       // free other panose object
+       FreeAndNil(FPanose);
+
+       // create new latin text panose object
+       FPanose := TPascalTypeDefaultPanoseTable.Create;
+      end;
+
+     // rewind current position to read the family type as well
+     Seek(-1, soFromCurrent);
+    end
+   else
+    if not (FPanose is PanoseFamilyClass) then
+     begin
+      // free other panose object
+      FreeAndNil(FPanose);
+
+      // create new latin text panose object
+      FPanose := PanoseFamilyClass.Create;
+     end;
+
+   // load panose object from stream
+   FPanose.LoadFromStream(Stream);
 
    // read UlUnicodeRange
    Read(FUlUnicodeRange, 4 * SizeOf(Cardinal));
@@ -3589,26 +3775,23 @@ begin
 end;
 
 procedure TPascalTypeOS2Table.SaveToStream(Stream: TStream);
-var
-  Value16 : Word;
 begin
  with Stream do
   begin
    // write version
    WriteSwappedWord(Stream, FVersion);
 
-   // write XAvgCharWidth
+   // write average horizontal character width
    WriteSwappedWord(Stream, FXAvgCharWidth);
 
-   // write Weight
+   // write weight
    WriteSwappedWord(Stream, FWeight);
 
-   // write UsWidthClass
-//   UsWidthClass := Swap16(Value16);
-   Write(Value16, SizeOf(Word));
+   // write width class
+   WriteSwappedWord(Stream, FWidthType);
 
-   // write FsType
-   WriteSwappedWord(Stream, FFsType);
+   // write font embedding rights
+   WriteSwappedWord(Stream, FFontEmbeddingFlags);
 
    // write YSubscriptXSize
    WriteSwappedWord(Stream, FYSubscriptXSize);
@@ -3640,8 +3823,8 @@ begin
    // write YStrikeoutPosition
    WriteSwappedWord(Stream, FYStrikeoutPosition);
 
-   // write SFamilyClass
-   WriteSwappedWord(Stream, FSFamilyClass);
+   // write FontFamilyType
+   WriteSwappedWord(Stream, FFontFamilyType);
 
    // read Panose
    Write(FPanose, 10);
@@ -3728,21 +3911,54 @@ begin
   end;
 end;
 
-procedure TPascalTypeOS2Table.SetFsType(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetPanose(
+  const Value: TCustomPascalTypePanoseTable);
 begin
- if FFsType <> Value then
+ FPanose.Assign(Value);
+end;
+
+procedure TPascalTypeOS2Table.SetFontEmbeddingFlags(const Value: Word);
+begin
+ if FFontEmbeddingFlags <> Value then
   begin
-   FFsType := Value;
-   FsTypeChanged;
+   FFontEmbeddingFlags := Value;
+   FontEmbeddingRightsChanged;
   end;
 end;
 
-procedure TPascalTypeOS2Table.SetSFamilyClass(const Value: SmallInt);
+procedure TPascalTypeOS2Table.SetFontEmbeddingRights(const Value: TOS2FontEmbeddingRights);
 begin
- if FSFamilyClass <> Value then
+ if FontEmbeddingRights <> Value then
   begin
-   FSFamilyClass := Value;
-   SFamilyClassChanged;
+   FFontEmbeddingFlags := FontEmbeddingRightsToFlags(Value);
+   FontEmbeddingRightsChanged;
+  end;
+end;
+
+procedure TPascalTypeOS2Table.SetFontFamilyClassID(const Value: Byte);
+begin
+ if FontFamilyClassID <> Value then
+  begin
+   FFontFamilyType := (FFontFamilyType and $FF) or (Value shl 8);
+   FontFamilyChanged;
+  end;
+end;
+
+procedure TPascalTypeOS2Table.SetFontFamilySubClassID(const Value: Byte);
+begin
+ if FontFamilySubClassID <> Value then
+  begin
+   FFontFamilyType := (FFontFamilyType and $FF00) or Value;
+   FontFamilyChanged;
+  end;
+end;
+
+procedure TPascalTypeOS2Table.SetFontFamilyType(const Value: Word);
+begin
+ if FFontFamilyType <> Value then
+  begin
+   FFontFamilyType := Value;
+   FontFamilyChanged;
   end;
 end;
 
@@ -3969,12 +4185,12 @@ begin
  Changed;
 end;
 
-procedure TPascalTypeOS2Table.FsTypeChanged;
+procedure TPascalTypeOS2Table.FontEmbeddingRightsChanged;
 begin
  Changed;
 end;
 
-procedure TPascalTypeOS2Table.SFamilyClassChanged;
+procedure TPascalTypeOS2Table.FontFamilyChanged;
 begin
  Changed;
 end;
@@ -4425,6 +4641,51 @@ end;
 procedure TPascalTypePostscriptVersion2Table.SaveToStream(Stream: TStream);
 begin
  raise EPascalTypeError.Create(RCStrNotImplemented);
+end;
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+function IsPascalTypePanoseRegistered(PanoseClass: TCustomPascalTypePanoseClass): Boolean;
+var
+  PanoseClassIndex : Integer;
+begin
+ Result := False;
+ for PanoseClassIndex := 0 to Length(GPanoseClasses) - 1 do
+  if GPanoseClasses[PanoseClassIndex] = PanoseClass then
+   begin
+    Result := True;
+    Exit;
+   end;
+end;
+
+procedure RegisterPascalTypePanose(PanoseClass: TCustomPascalTypePanoseClass);
+begin
+ Assert(IsPascalTypePanoseRegistered(PanoseClass) = False);
+ SetLength(GPanoseClasses, Length(GPanoseClasses) + 1);
+ GPanoseClasses[Length(GPanoseClasses) - 1] := PanoseClass;
+end;
+
+procedure RegisterPascalTypePanoses(PanoseClasses: array of TCustomPascalTypePanoseClass);
+var
+  PanoseClassIndex : Integer;
+begin
+ for PanoseClassIndex := 0 to Length(PanoseClasses) - 1
+  do RegisterPascalTypePanose(PanoseClasses[PanoseClassIndex]);
+end;
+
+function FindPascalTypePanoseByType(PanoseType: Byte): TCustomPascalTypePanoseClass;
+var
+  PanoseClassIndex : Integer;
+begin
+ Result := nil;
+ for PanoseClassIndex := 0 to Length(GPanoseClasses) - 1 do
+  if GPanoseClasses[PanoseClassIndex].GetFamilyType = PanoseType then
+   begin
+    Result := GPanoseClasses[PanoseClassIndex];
+    Exit;
+   end;
+// raise EPascalTypeError.Create('Unknown Table Class: ' + TableType);
 end;
 
 

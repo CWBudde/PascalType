@@ -117,14 +117,9 @@ type
   );
 
   TOS2FontEmbeddingRight = (
-    wcReserved1,
     wcRestricted,
     wcPreviewAndPrint,
     wcEditableEmbedding,
-    wcReserved4,
-    wcReserved5,
-    wcReserved6,
-    wcReserved7,
     wcNoSubsetting,
     wcBitmapEmbeddingOnly
   );
@@ -522,6 +517,11 @@ function WordToDigitalSignatureFlags(Value: Word): TDigitalSignatureFlags;
 function DigitalSignatureFlagsToWord(Value: TDigitalSignatureFlags): Word;
 function MacStylesToWord(Value: TMacStyles): Word;
 function WordToMacStyles(Value: Word): TMacStyles;
+function FontEmbeddingRightsToFlags(Value: TOS2FontEmbeddingRights): Word;
+function FontEmbeddingFlagsToRights(Value: Word): TOS2FontEmbeddingRights;
+function FontEmbeddingRightsToString(Value: TOS2FontEmbeddingRights): string;
+function FontFamilyTypeToString(Value: Word): string;
+function FontFamilyClassToString(Value: Byte): string;
 
 function MacStylesToString(Value: TMacStyles): String;
 
@@ -709,6 +709,191 @@ begin
  if dsfResigningProhibited in Value
   then Result := 1
   else Result := 0;
+end;
+
+function FontEmbeddingRightsToFlags(Value: TOS2FontEmbeddingRights): Word;
+begin
+ if wcRestricted in Value then Result := 2 else Result := 0;
+ if wcPreviewAndPrint in Value then Result := Result + 1 shl 2;
+ if wcEditableEmbedding in Value then Result := Result + 1 shl 3;
+ if wcNoSubsetting in Value then Result := Result + 1 shl 8;
+ if wcBitmapEmbeddingOnly in Value then Result := Result + 1 shl 9;
+end;
+
+function FontEmbeddingFlagsToRights(Value: Word): TOS2FontEmbeddingRights;
+begin
+ if (Value and (1 shl 1)) <> 0 then Result := [wcRestricted] else Result := [];
+ if (Value and (1 shl 2)) <> 0 then Result := Result + [wcPreviewAndPrint];
+ if (Value and (1 shl 3)) <> 0 then Result := Result + [wcEditableEmbedding];
+ if (Value and (1 shl 8)) <> 0 then Result := Result + [wcNoSubsetting];
+ if (Value and (1 shl 9)) <> 0 then Result := Result + [wcBitmapEmbeddingOnly];
+end;
+
+function FontEmbeddingRightsToString(Value: TOS2FontEmbeddingRights): string;
+begin
+ if wcRestricted in Value then Result := 'Restricted, ' else Result := '';
+ if wcPreviewAndPrint in Value then Result := Result + 'Preview and Print, ';
+ if wcEditableEmbedding in Value then Result := Result + 'Editable Embedding, ';
+ if wcNoSubsetting in Value then Result := Result + 'No Subsetting, ';
+ if wcBitmapEmbeddingOnly in Value then Result := Result + 'Bitmap Embedding Only, ';
+
+ // eventually remove last comma
+ if Length(Result) > 0
+  then SetLength(Result, Length(Result) - 2);
+end;
+
+function FontFamilyTypeToString(Value: Word): string;
+begin
+ case Value shr 8 of
+   0: Result := 'No classification';
+   1: begin
+       Result := 'Oldstyle Serifs';
+       case (Value and $FF) of
+         0 : Result := Result + ' - No Classification';
+         1 : Result := Result + ' - IBM Rounded Legibility';
+         2 : Result := Result + ' - Garalde';
+         3 : Result := Result + ' - Venetian';
+         4 : Result := Result + ' - Modified Venetian';
+         5 : Result := Result + ' - Dutch Modern';
+         6 : Result := Result + ' - Dutch Traditional';
+         7 : Result := Result + ' - Contemporary';
+         8 : Result := Result + ' - Calligraphic';
+        15 : Result := Result + ' - Miscellaneous';
+        else Result := Result + ' - Unknown';
+       end;
+      end;
+   2: begin
+       Result := 'Transitional Serifs';
+       case (Value and $FF) of
+         0 : Result := Result + ' - No Classification';
+         1 : Result := Result + ' - Direct Line';
+         2 : Result := Result + ' - Script';
+        15 : Result := Result + ' - Miscellaneous';
+        else Result := Result + ' - Unknown';
+       end;
+      end;
+   3: begin
+       Result := 'Modern Serifs';
+       case (Value and $FF) of
+         0 : Result := Result + ' - No Classification';
+         1 : Result := Result + ' - Italian';
+         2 : Result := Result + ' - Script';
+        15 : Result := Result + ' - Miscellaneous';
+        else Result := Result + ' - Unknown';
+       end;
+      end;
+   4: begin
+       Result := 'Clarendon Serifs';
+       case (Value and $FF) of
+         0 : Result := Result + ' - No Classification';
+         1 : Result := Result + ' - Clarendon';
+         2 : Result := Result + ' - Modern';
+         3 : Result := Result + ' - Traditional';
+         4 : Result := Result + ' - Newspaper';
+         5 : Result := Result + ' - Stub Serif';
+         6 : Result := Result + ' - Monotone';
+         7 : Result := Result + ' - Typewriter';
+        15 : Result := Result + ' - Miscellaneous';
+        else Result := Result + ' - Unknown';
+       end;
+      end;
+   5: begin
+       Result := 'Slab Serifs';
+       case (Value and $FF) of
+         0 : Result := Result + ' - No Classification';
+         1 : Result := Result + ' - Monotone';
+         2 : Result := Result + ' - Humanist';
+         3 : Result := Result + ' - Geometric';
+         4 : Result := Result + ' - Swiss';
+         5 : Result := Result + ' - Typewriter';
+        15 : Result := Result + ' - Miscellaneous';
+        else Result := Result + ' - Unknown';
+       end;
+      end;
+   7: begin
+       Result := 'Freeform Serifs';
+       case (Value and $FF) of
+         0 : Result := Result + ' - No Classification';
+         1 : Result := Result + ' - Modern';
+        15 : Result := Result + ' - Miscellaneous';
+        else Result := Result + ' - Unknown';
+       end;
+      end;
+   8: begin
+       Result := 'Sans Serifs';
+       case (Value and $FF) of
+         0 : Result := Result + ' - No Classification';
+         1 : Result := Result + ' - IBM Neo-grotesque Gothic';
+         2 : Result := Result + ' - Humanist';
+         3 : Result := Result + ' - Low-x Round Geometric';
+         4 : Result := Result + ' - High-x Round Geometric';
+         5 : Result := Result + ' - Neo-grotesque Gothic';
+         6 : Result := Result + ' - Modified Neo-grotesque Gothic';
+         9 : Result := Result + ' - Typewriter Gothic';
+        10 : Result := Result + ' - Matrix';
+        15 : Result := Result + ' - Miscellaneous';
+        else Result := Result + ' - Unknown';
+       end;
+      end;
+   9: begin
+       Result := 'Ornamentals';
+       case (Value and $FF) of
+         0 : Result := Result + ' - No Classification';
+         1 : Result := Result + ' - Engraver';
+         2 : Result := Result + ' - Black Letter';
+         3 : Result := Result + ' - Decorative';
+         4 : Result := Result + ' - Three Dimensional';
+        15 : Result := Result + ' - Miscellaneous';
+        else Result := Result + ' - Unknown';
+       end;
+      end;
+  10: begin
+       Result := 'Scripts';
+       case (Value and $FF) of
+         0 : Result := Result + ' - No Classification';
+         1 : Result := Result + ' - Uncial';
+         2 : Result := Result + ' - Brush Joined';
+         3 : Result := Result + ' - Formal Joined';
+         4 : Result := Result + ' - Monotone Joined';
+         5 : Result := Result + ' - Calligraphic';
+         6 : Result := Result + ' - Brush Unjoined';
+         7 : Result := Result + ' - Formal Unjoined';
+         8 : Result := Result + ' - Monotone Unjoined';
+        15 : Result := Result + ' - Miscellaneous';
+        else Result := Result + ' - Unknown';
+       end;
+      end;
+  12: begin
+       Result := 'Symbolic';
+       case (Value and $FF) of
+         0 : Result := Result + ' - No Classification';
+         3 : Result := Result + ' - Mixed Serif';
+         6 : Result := Result + ' - Oldstyle Serif';
+         7 : Result := Result + ' - Neo-grotesque Sans Serif';
+        15 : Result := Result + ' - Miscellaneous';
+        else Result := Result + ' - Unknown';
+       end;
+      end;
+  else Result := 'Unknown';
+ end;
+end;
+
+function FontFamilyClassToString(Value: Byte): string;
+begin
+ case Value shr 8 of
+   0: Result := 'No classification';
+   1: Result := 'Oldstyle Serifs';
+   2: Result := 'Transitional Serifs';
+   3: Result := 'Modern Serifs';
+   4: Result := 'Clarendon Serifs';
+   5: Result := 'Slab Serifs';
+   7: Result := 'Freeform Serifs';
+   8: Result := 'Sans Serifs';
+   9: Result := 'Ornamentals';
+  10: Result := 'Scripts';
+  12: Result := 'Symbolic';
+ else Result := 'Unknown';
+ end;
 end;
 
 function DefaultGlyphName(Value: Word): string;

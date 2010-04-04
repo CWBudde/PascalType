@@ -1,7 +1,7 @@
 program FontExplorer;
 
 {$I PT_Compiler.inc}
-{$R '..\..\Resource\Default.res' '..\..\Resource\Default.rc'}
+{$R 'Default.res' '..\..\Resource\Default.rc'}
 
 // if the first 3 units are missing feel free to download the according library
 // or simply remove them from the uses section without major problems
@@ -9,7 +9,7 @@ program FontExplorer;
 uses
   FastMM4,
   FastMove,
-  {$IFNDEF DELPHI2009_UP}
+  {$IFNDEF DELPHI2010_UP}
   RTLVCLOptimize,
   {$ENDIF}
   Forms,
@@ -32,7 +32,8 @@ uses
   PT_Types in '..\..\Source\PT_Types.pas',
   PT_UnicodeNames in '..\..\Source\PT_UnicodeNames.pas',
   FontExplorerMain in 'FontExplorerMain.pas' {FmTTF},
-  FE_FontHeader in 'FE_FontHeader.pas' {FrameFontHeader: TFrame};
+  FE_FontHeader in 'FE_FontHeader.pas' {FrameFontHeader: TFrame},
+  PT_PanoseClassifications in '..\..\Source\PT_PanoseClassifications.pas';
 
 {$R *.res}
 
