@@ -1891,7 +1891,6 @@ var
   PointIndex    : Integer;
   Center        : TPoint;
   CurrentPoint  : TPoint;
-  LastPoint     : TPoint;
   MidPoint      : TPoint;
   ControlPoint  : TPoint;
   WasOnCurve    : Boolean;
@@ -1945,8 +1944,8 @@ begin
       // store last point
       if WasOnCurve then
        begin
-        LastPoint.X := Center.X + Round(Point[0].XPos * FScaler);
-        LastPoint.Y := Center.Y - Round(Point[0].YPos * FScaler);
+        CurrentPoint.X := Center.X + Round(Point[0].XPos * FScaler);
+        CurrentPoint.Y := Center.Y - Round(Point[0].YPos * FScaler);
        end
       else
        begin
@@ -1954,19 +1953,19 @@ begin
         // check if last point is on curve
         if IsOnCurve then
          begin
-          LastPoint.X := Center.X + Round(Point[PointCount - 1].XPos * FScaler);
-          LastPoint.Y := Center.Y - Round(Point[PointCount - 1].YPos * FScaler);
+          CurrentPoint.X := Center.X + Round(Point[PointCount - 1].XPos * FScaler);
+          CurrentPoint.Y := Center.Y - Round(Point[PointCount - 1].YPos * FScaler);
          end
         else
          begin
           // in case it is not start at a temporary point in between both
-          LastPoint.X := Center.X + Round((Point[0].XPos + Point[PointCount - 1].XPos) * 0.5 * FScaler);
-          LastPoint.Y := Center.Y - Round((Point[0].YPos + Point[PointCount - 1].YPos) * 0.5 * FScaler);
+          CurrentPoint.X := Center.X + Round((Point[0].XPos + Point[PointCount - 1].XPos) * 0.5 * FScaler);
+          CurrentPoint.Y := Center.Y - Round((Point[0].YPos + Point[PointCount - 1].YPos) * 0.5 * FScaler);
          end;
        end;
 
       // move to last point
-      MoveTo(LastPoint.X, LastPoint.Y);
+      MoveTo(CurrentPoint.X, CurrentPoint.Y);
 
       PointIndex := 1;
 
@@ -1979,31 +1978,19 @@ begin
         IsOnCurve := (Point[PointIndex].Flags and 1) <> 0;
 
         if IsOnCurve then
-         if WasOnCurve then
-          begin
-           // simple line
-           MoveTo(LastPoint.X, LastPoint.Y);
-           LineTo(CurrentPoint.X, CurrentPoint.Y);
-           LastPoint := CurrentPoint;
-          end
-         else
-          begin
-           PolyBezier([LastPoint, ControlPoint, CurrentPoint, CurrentPoint]);
-           LastPoint := CurrentPoint;
-          end
+         if WasOnCurve
+          then LineTo(CurrentPoint.X, CurrentPoint.Y)
+          else PolyBezierTo([ControlPoint, CurrentPoint, CurrentPoint])
         else
-         if WasOnCurve then
-          begin
-           ControlPoint := CurrentPoint;
-          end
-         else
-          begin
-           MidPoint.X := (CurrentPoint.X + ControlPoint.X) div 2;
-           MidPoint.Y := (CurrentPoint.Y + ControlPoint.Y) div 2;
-           PolyBezier([LastPoint, ControlPoint, MidPoint, MidPoint]);
-           ControlPoint := CurrentPoint;
-           LastPoint := MidPoint;
-          end;
+         if WasOnCurve
+          then ControlPoint := CurrentPoint
+          else
+           begin
+            MidPoint.X := (CurrentPoint.X + ControlPoint.X) div 2;
+            MidPoint.Y := (CurrentPoint.Y + ControlPoint.Y) div 2;
+            PolyBezierTo([ControlPoint, MidPoint, MidPoint]);
+            ControlPoint := CurrentPoint;
+           end;
 
         Inc(PointIndex);
         WasOnCurve := IsOnCurve;

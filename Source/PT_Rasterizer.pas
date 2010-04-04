@@ -42,51 +42,20 @@ type
     X, Y : Single; 
   end;
 
-  TCustomPascalTypePrimitive = class(TPersistent)
-  end;
-
-  TPascalTypePrimitiveLineTo = class(TCustomPascalTypePrimitive)
-  private
-    FPosition: TPointSingle;
+  TPascalTypeScaledContour = class(TPersistent)
   protected
-    procedure AssignTo(Dest: TPersistent); override;
-  public
-    property Position: TPointSingle read FPosition;
-  end;
-
-  TPascalTypePrimitiveQuadraticBezierTo = class(TCustomPascalTypePrimitive)
-  private
-    FPosition: TPointSingle;
-    FControlValue: TPointSingle;
-  protected
-    procedure AssignTo(Dest: TPersistent); override;
-  public
-    property Position: TPointSingle read FPosition;
-    property ControlValue: TPointSingle read FControlValue;
-  end;
-
-
-  TPascalTypeContour = class(TPersistent)
-  private
-    function GetPrimitive(Index: Integer): TCustomPascalTypePrimitive;
-    function GetPrimitiveCount: Integer;
-  protected
-    FPrimitives: TObjectList;
-  published
+    FPrimitives: TList;
   public
     constructor Create; virtual;
     destructor Destroy; override;
-
-    property Primitive[Index : Integer]: TCustomPascalTypePrimitive read GetPrimitive;
-    property PrimitiveCount: Integer read GetPrimitiveCount;
   end;
 
 
   TCustomPascalTypeScaledGlyph = class(TPersistent)
   protected
-    FGlyphIndex   : Integer;
-    FAdvanceWidth : Single;
-    FLeftSideBearing: Single;
+    FGlyphIndex      : Integer;
+    FAdvanceWidth    : Single;
+    FLeftSideBearing : Single;
   public
     constructor Create(GlyphIndex: Integer); virtual;
 
@@ -98,13 +67,13 @@ type
   TPascalTypeScaledTrueTypeGlyph = class(TCustomPascalTypeScaledGlyph)
   private
     FContours : TObjectList;
-    function GetContour(Index: Integer): TPascalTypeContour;
+    function GetContour(Index: Integer): TPascalTypeScaledContour;
     function GetContourCount: Integer;
   public
     constructor Create(GlyphIndex: Integer); override;
     destructor Destroy; override;
 
-    property Contour[Index : Integer]: TPascalTypeContour read GetContour;
+    property Contour[Index : Integer]: TPascalTypeScaledContour read GetContour;
     property ContourCount: Integer read GetContourCount;
   end;
 
@@ -155,47 +124,18 @@ uses
   PT_ResourceStrings;
 
 
-{ TPascalTypePrimitiveLineTo }
+{ TPascalTypeScaledContour }
 
-procedure TPascalTypePrimitiveLineTo.AssignTo(Dest: TPersistent);
-begin
- inherited;
-
-end;
-
-{ TPascalTypePrimitiveQuadraticBezierTo }
-
-procedure TPascalTypePrimitiveQuadraticBezierTo.AssignTo(Dest: TPersistent);
-begin
-  inherited;
-
-end;
-
-
-{ TPascalTypeContour }
-
-constructor TPascalTypeContour.Create;
+constructor TPascalTypeScaledContour.Create;
 begin
  inherited;
  FPrimitives := TObjectList.Create;
 end;
 
-destructor TPascalTypeContour.Destroy;
+destructor TPascalTypeScaledContour.Destroy;
 begin
  FreeAndNil(FPrimitives);
  inherited;
-end;
-
-
-function TPascalTypeContour.GetPrimitive(
-  Index: Integer): TCustomPascalTypePrimitive;
-begin
-
-end;
-
-function TPascalTypeContour.GetPrimitiveCount: Integer;
-begin
- FPrimitives.Count;
 end;
 
 
@@ -223,10 +163,10 @@ begin
 end;
 
 function TPascalTypeScaledTrueTypeGlyph.GetContour(
-  Index: Integer): TPascalTypeContour;
+  Index: Integer): TPascalTypeScaledContour;
 begin
  if (Index >= 0) and (Index < FContours.Count)
-  then Result := TPascalTypeContour(FContours[Index])
+  then Result := TPascalTypeScaledContour(FContours[Index])
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 

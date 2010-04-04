@@ -105,7 +105,7 @@ type
     function GetOptionalTableCount: Integer;
     function GetOptionalTable(Index: Integer): TCustomPascalTypeNamedTable;
   protected
-    function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; override;
+    function GetTableByTableType(ATableType: TTableType): TCustomPascalTypeNamedTable; override;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
 
     procedure DirectoryTableReaded(DirectoryTable: TPascalTypeDirectoryTable); override;
@@ -479,23 +479,23 @@ begin
 end;
 
 function TPascalTypeInterpreter.GetTableByTableType(
-  TableType: TTableType): TCustomPascalTypeNamedTable;
+  ATableType: TTableType): TCustomPascalTypeNamedTable;
 var
   TableIndex : Integer;
 begin
  // return nil if the table hasn't been found
  Result := nil;
 
- if TableType = FHeaderTable.TableType then Result := FHeaderTable else
- if TableType = FHorizontalHeader.TableType then Result := FHorizontalHeader else
- if TableType = FHorizontalMetrics.TableType then Result := FHorizontalMetrics else
- if TableType = FCharacterMap.TableType then Result := FCharacterMap else
- if TableType = FMaximumProfile.TableType then Result := FMaximumProfile else
- if TableType = FNameTable.TableType then Result := FNameTable else
- if TableType = FPostScriptTable.TableType then Result := FPostScriptTable else
+ if ATableType = FHeaderTable.TableType then Result := FHeaderTable else
+ if ATableType = FHorizontalHeader.TableType then Result := FHorizontalHeader else
+ if ATableType = FHorizontalMetrics.TableType then Result := FHorizontalMetrics else
+ if ATableType = FCharacterMap.TableType then Result := FCharacterMap else
+ if ATableType = FMaximumProfile.TableType then Result := FMaximumProfile else
+ if ATableType = FNameTable.TableType then Result := FNameTable else
+ if ATableType = FPostScriptTable.TableType then Result := FPostScriptTable else
  for TableIndex := 0 to FOptionalTables.Count - 1 do
   with TCustomPascalTypeNamedTable(FOptionalTables[TableIndex]) do
-   if GetTableType = TableType
+   if ATableType = TableType 
     then Result := TCustomPascalTypeNamedTable(FOptionalTables[TableIndex]);
 end;
 
