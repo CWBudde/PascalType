@@ -165,6 +165,9 @@ type
     procedure DisplayOpenTypeLookUpListTable(LookUpListTable: TOpenTypeLookupListTable);
     procedure DisplayOpenTypeScriptListTable(ScriptListTable: TOpenTypeScriptListTable);
     procedure DisplayOS2Table(OS2Table: TPascalTypeOS2Table);
+    procedure DisplayOS2PanoseTable(OS2Panose: TCustomPascalTypePanoseTable);
+    procedure DisplayOS2UnicodeRangeTable(OS2UnicodeRange: TPascalTypeUnicodeRangeTable);
+    procedure DisplayOS2CodePageRangeTable(OS2CodePageRange: TPascalTypeOS2CodePageRangeTable);
     procedure DisplayPCL5Table(PCL5Table: TPascalTypePCL5Table);
     procedure DisplayPostscriptTable(PostscriptTable: TPascalTypePostscriptTable);
     procedure DisplayPostscriptV2Table(PostscriptTable: TPascalTypePostscriptVersion2Table);
@@ -1699,7 +1702,7 @@ begin
    InitializeDefaultListView;
 
    // add version number
-   ListViewData(['Version', IntToStr(OS2Table.Version shr 8)]);
+   ListViewData(['Version', IntToStr(OS2Table.Version)]);
 
    // add average weighted advanced width of lower case letters and space
    ListViewData(['Averge weighted escapement', IntToStr(XAvgCharWidth)]);
@@ -1776,100 +1779,897 @@ begin
    // add classification of font-family design
    ListViewData(['Font Family Class and Subclass', FontFamilyTypeToString(FontFamilyType)]);
 
-   // add PANOSE classification number
-   if Panose is TPascalTypeLatinTextPanoseTable then
-    with TPascalTypeLatinTextPanoseTable(Panose) do
-     begin
-      // Family Kind
-      ListViewData(['Panose - Family Kind', 'Latin Text']);
-
-      // Serif Style
-      ListViewData(['Panose - Serif Style', IntToStr(SerifStyle) + ' (' +
-        LatinTextSerifStyleToString(SerifStyle) + ')']);
-
-      // Weight
-      ListViewData(['Panose - Weight', IntToStr(Weight) + ' (' +
-        LatinTextWeightToString(Weight) + ')']);
-
-      // Proportion
-      ListViewData(['Panose - Proportion', IntToStr(Proportion) + ' (' +
-        LatinTextProportionToString(Proportion) + ')']);
-
-      // Contrast
-      ListViewData(['Panose - Contrast', IntToStr(Contrast)]);
-
-      // Stroke Variation
-      ListViewData(['Panose - Stroke Variation', IntToStr(StrokeVariation)]);
-
-      // Arm Style
-      ListViewData(['Panose - Arm Style', IntToStr(ArmStyle)]);
-
-      // Letterform
-      ListViewData(['Panose - Letterform', IntToStr(Letterform)]);
-
-      // Midline
-      ListViewData(['Panose - Midline', IntToStr(Midline)]);
-
-      // X-height
-      ListViewData(['Panose - X-height', IntToStr(Xheight)]);
-     end else
-   if Panose is TPascalTypeDefaultPanoseTable then
-    with TPascalTypeDefaultPanoseTable(Panose)
-     do ListViewData(['Panose', IntToStr(FamilyType) + '-' +
-                                IntToStr(Data[0]) + '-' +
-                                IntToStr(Data[1]) + '-' +
-                                IntToStr(Data[2]) + '-' +
-                                IntToStr(Data[3]) + '-' +
-                                IntToStr(Data[4]) + '-' +
-                                IntToStr(Data[5]) + '-' +
-                                IntToStr(Data[6]) + '-' +
-                                IntToStr(Data[7]) + '-' +
-                                IntToStr(Data[8])]);
-
-//   ListViewData(['Panose', IntToStr(Panose]);
-
-(*
-   // add 10 byte series of number used to describe the visual characteristics of a given typeface
-   with ListView.Items.Add do
-    begin
-     Caption := 'Panose';
-     SubItems.Add(IntToStr(OS2Table.Panose));
-    end;
-
-   // add Field is split into two bit fields of 96 and 36 bits each. The low 96 bits are used to specify the Unicode blocks encompassed by the font file. The high 32 bits are used to specify the character or script sets covered by the font file. Bit assignments are pending. Set to 01
-   with ListView.Items.Add do
-    begin
-     Caption := 'UlUnicodeRange';
-     SubItems.Add(IntToStr(OS2Table.UlUnicodeRange));
-    end;
-*)
-
    // add four character identifier for the font vendor
-   ListViewData(['Vendor Identification', string(OS2Table.AchVendID)]);
+   ListViewData(['Vendor Identification', string(OS2Table.FontVendorID)]);
 
    // add 2-byte bit field containing information concerning the nature of the font patterns
-   ListViewData(['Selection Flags', IntToStr(FsSelection)]);
+   ListViewData(['Selection Flags', FontSelectionFlagsToString(FontSelectionFlags)]);
 
    // add the minimum Unicode index in this font.
-   ListViewData(['Minimum Unicode Index', 'U+' + IntToHex(UsFirstCharIndex, 4)]);
+   ListViewData(['Minimum Unicode Index', 'U+' + IntToHex(UnicodeFirstCharacterIndex, 4)]);
 
    // add the maximum Unicode index in this font.
-   ListViewData(['Maximum Unicode Index', 'U+' + IntToHex(UsLastCharIndex, 4)]);
+   ListViewData(['Maximum Unicode Index', 'U+' + IntToHex(UnicodeLastCharacterIndex, 4)]);
 
-   // add STypoAscender
-   ListViewData(['Typographic Ascender', IntToStr(STypoAscender)]);
+   // add typographic ascender
+   ListViewData(['Typographic Ascender', IntToStr(TypographicAscender)]);
 
-   // add STypoDescender
-   ListViewData(['Typographic Descender', IntToStr(STypoDescender)]);
+   // add typographic descender
+   ListViewData(['Typographic Descender', IntToStr(TypographicDescender)]);
 
-   // add STypoLineGap
-   ListViewData(['Typographic Line Gap', IntToStr(STypoLineGap)]);
+   // add typographic line gap
+   ListViewData(['Typographic Line Gap', IntToStr(TypographicLineGap)]);
 
-   // add UsWinAscent
-   ListViewData(['Ascender for Windows', IntToStr(UsWinAscent)]);
+   // add ascender metric for Windows
+   ListViewData(['Ascender for Windows', IntToStr(WindowsAscent)]);
 
-   // add UsWinDescent
-   ListViewData(['Descender for Windows', IntToStr(OS2Table.UsWinDescent)]);
+   // add descender metric for Windows
+   ListViewData(['Descender for Windows', IntToStr(WindowsDescent)]);
+
+   if Assigned(AddendumTable) then
+    begin
+     // add X-Height
+     ListViewData(['X-Height', IntToStr(AddendumTable.XHeight)]);
+
+     // add CapHeight
+     ListViewData(['Capital Height', IntToStr(AddendumTable.CapHeight)]);
+
+     // add default character
+     ListViewData(['Default Character', '#' + IntToStr(AddendumTable.DefaultChar)]);
+
+     // add break character
+     ListViewData(['Break Character', '#' + IntToStr(AddendumTable.BreakChar)]);
+
+     // add maximum context length
+     ListViewData(['Maximum Context Length', IntToStr(AddendumTable.MaxContext)]);
+    end;
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayOS2PanoseTable(OS2Panose: TCustomPascalTypePanoseTable);
+begin
+ // add columns
+ ListViewColumns(['Name', 'Value', 'Description']);
+ ListView.Columns[0].Width := 128;
+ ListView.Columns[1].Width := 48;
+
+ // add PANOSE classification number
+ if OS2Panose is TPascalTypeLatinTextPanoseTable then
+  with TPascalTypeLatinTextPanoseTable(OS2Panose) do
+   begin
+    // Family Kind
+    ListViewData(['Family Kind', '2', 'Latin Text']);
+
+    // Serif Style
+    ListViewData(['Serif Style', IntToStr(SerifStyle),
+      LatinTextSerifStyleToString(SerifStyle)]);
+
+    // Weight
+    ListViewData(['Weight', IntToStr(Weight),
+      LatinTextWeightToString(Weight)]);
+
+    // Proportion
+    ListViewData(['Proportion', IntToStr(Proportion),
+      LatinTextProportionToString(Proportion)]);
+
+    // Contrast
+    ListViewData(['Contrast', IntToStr(Contrast),
+      LatinTextContrastToString(Contrast)]);
+
+    // Stroke Variation
+    ListViewData(['Stroke Variation', IntToStr(StrokeVariation),
+      LatinTextStrokeVariationToString(StrokeVariation)]);
+
+    // Arm Style
+    ListViewData(['Arm Style', IntToStr(ArmStyle),
+      LatinTextArmStyleToString(ArmStyle)]);
+
+    // Letterform
+    ListViewData(['Letterform', IntToStr(Letterform),
+      LatinTextLetterformToString(Letterform)]);
+
+    // Midline
+    ListViewData(['Midline', IntToStr(Midline),
+      LatinTextMidlineToString(Midline)]);
+
+    // X-height
+    ListViewData(['X-Height', IntToStr(XHeight),
+      LatinTextXHeightToString(XHeight)]);
+   end else
+ if OS2Panose is TPascalTypeLatinHandwrittenPanoseTable then
+  with TPascalTypeLatinHandwrittenPanoseTable(OS2Panose) do
+   begin
+    // Family Kind
+    ListViewData(['Family Kind', '3', 'Latin Hand Written']);
+
+    // Tool Kind
+    ListViewData(['Tool Kind', IntToStr(ToolKind),
+      LatinHandWrittenToolKindToString(ToolKind)]);
+
+    // Weight
+    ListViewData(['Weight', IntToStr(Weight),
+      LatinHandWrittenWeightToString(Weight)]);
+
+    // Spacing
+    ListViewData(['Spacing', IntToStr(Spacing),
+      LatinHandWrittenSpacingToString(Spacing)]);
+
+    // Aspect Ratio
+    ListViewData(['Aspect Ratio', IntToStr(AspectRatio),
+      LatinHandWrittenAspectRatioToString(AspectRatio)]);
+
+    // Contrast
+    ListViewData(['Contrast', IntToStr(Contrast),
+      LatinHandWrittenContrastToString(Contrast)]);
+
+    // Topology
+    ListViewData(['Topology', IntToStr(Topology),
+      LatinHandWrittenTopologyToString(Topology)]);
+
+    // Form
+    ListViewData(['Form', IntToStr(Form),
+      LatinHandWrittenFormToString(Form)]);
+
+    // Finials
+    ListViewData(['Finials', IntToStr(Finials),
+      LatinHandWrittenFinialsToString(Finials)]);
+
+    // XAscent
+    ListViewData(['X-Ascent', IntToStr(XAscent),
+      LatinHandWrittenXAscentToString(XAscent)]);
+   end else
+ if OS2Panose is TPascalTypeLatinDecorativePanoseTable then
+  with TPascalTypeLatinDecorativePanoseTable(OS2Panose) do
+   begin
+    // Family Kind
+    ListViewData(['Family Kind', '4' , 'Latin Decorative']);
+
+    // Font Class
+    ListViewData(['Font Class', IntToStr(FontClass),
+      LatinDecorativeFontClassToString(FontClass)]);
+
+    // Weight
+    ListViewData(['Weight', IntToStr(Weight),
+      LatinDecorativeWeightToString(Weight)]);
+
+    // Aspect
+    ListViewData(['Aspect', IntToStr(Aspect),
+      LatinDecorativeAspectToString(Aspect)]);
+
+    // Contrast
+    ListViewData(['Contrast', IntToStr(Contrast),
+      LatinDecorativeContrastToString(Contrast)]);
+
+    // Serif Variant
+    ListViewData(['Serif Variant', IntToStr(SerifVariant),
+      LatinDecorativeSerifVariantToString(SerifVariant)]);
+
+    // Treatment
+    ListViewData(['Treatment', IntToStr(Treatment),
+      LatinDecorativeTreatmentToString(Treatment)]);
+
+    // Lining
+    ListViewData(['Lining', IntToStr(Lining),
+      LatinDecorativeLiningToString(Lining)]);
+
+    // Topology
+    ListViewData(['Topology', IntToStr(Topology),
+      LatinDecorativeTopologyToString(Topology)]);
+
+    // Range of Characters
+    ListViewData(['Range of Characters', IntToStr(RangeOfCharacters),
+      LatinDecorativeRangeOfCharactersToString(RangeOfCharacters)]);
+   end else
+ if OS2Panose is TPascalTypeLatinSymbolPanoseTable then
+  with TPascalTypeLatinSymbolPanoseTable(OS2Panose) do
+   begin
+    // Family Kind
+    ListViewData(['Family Kind', '5', 'Latin Symbol']);
+
+    // Font Class
+    ListViewData(['Kind', IntToStr(Kind),
+      LatinSymboleKindToString(Kind)]);
+
+    // Weight
+    ListViewData(['Weight', IntToStr(Weight),
+      LatinSymboleWeightToString(Weight)]);
+
+    // Spacing
+    ListViewData(['Spacing', IntToStr(Spacing),
+      LatinSymboleSpacingToString(Spacing)]);
+
+    // Aspect Ratio & Contrast
+    ListViewData(['Aspect Ratio & Contrast', IntToStr(AspectRatioContrast),
+      LatinSymboleAspectRatioContrastToString(AspectRatioContrast)]);
+
+    // Aspect Ratio of Character 94
+    ListViewData(['Aspect Ratio of Character', IntToStr(AspectRatioCharacter94),
+      LatinSymboleAspectRatioCharacter94ToString(AspectRatioCharacter94)]);
+
+    // Aspect Ratio of Character 119
+    ListViewData(['Aspect Ratio of Character', IntToStr(AspectRatioCharacter119),
+      LatinSymboleAspectRatioCharacter119ToString(AspectRatioCharacter119)]);
+
+    // Aspect Ratio of Character 157
+    ListViewData(['Aspect Ratio of Character', IntToStr(AspectRatioCharacter157),
+      LatinSymboleAspectRatioCharacter157ToString(AspectRatioCharacter157)]);
+
+    // Aspect Ratio of Character 163
+    ListViewData(['Aspect Ratio of Character', IntToStr(AspectRatioCharacter163),
+      LatinSymboleAspectRatioCharacter163ToString(AspectRatioCharacter163)]);
+
+    // Aspect Ratio of Character 211
+    ListViewData(['Aspect Ratio of Character', IntToStr(AspectRatioCharacter211),
+      LatinSymboleAspectRatioCharacter211ToString(AspectRatioCharacter211)]);
+   end else
+ if OS2Panose is TPascalTypeDefaultPanoseTable then
+  with TPascalTypeDefaultPanoseTable(OS2Panose) do
+   begin
+    // Family Type
+    ListViewData(['Family Kind', IntToStr(FamilyType), 'Unknown']);
+
+    // Byte 1
+    ListViewData(['Byte 1', IntToStr(Data[0])]);
+
+    // Byte 2
+    ListViewData(['Byte 2', IntToStr(Data[1])]);
+
+    // Byte 3
+    ListViewData(['Byte 3', IntToStr(Data[2])]);
+
+    // Byte 4
+    ListViewData(['Byte 4', IntToStr(Data[3])]);
+
+    // Byte 5
+    ListViewData(['Byte 5', IntToStr(Data[4])]);
+
+    // Byte 6
+    ListViewData(['Byte 6', IntToStr(Data[5])]);
+
+    // Byte 7
+    ListViewData(['Byte 7', IntToStr(Data[6])]);
+
+    // Byte 8
+    ListViewData(['Byte 8', IntToStr(Data[7])]);
+
+    // Byte 9
+    ListViewData(['Byte 9', IntToStr(Data[8])]);
+   end;
+
+
+ ListView.BringToFront;
+end;
+
+procedure TFmTTF.DisplayOS2UnicodeRangeTable(
+  OS2UnicodeRange: TPascalTypeUnicodeRangeTable);
+begin
+ with OS2UnicodeRange do
+  begin
+   // add columns
+   ListViewColumns(['Name', 'Range']);
+
+   // Basic Latin
+   if SupportsBasicLatin then ListViewData(['Basic Latin', '$0000-$007F']);
+
+   // Latin-1 Supplement
+   if SupportsLatin1Supplement then ListViewData(['Latin-1 Supplement', '$0080-$00FF']);
+
+   // Latin Extended-A
+   if SupportsLatinExtendedA then ListViewData(['Latin Extended-A', '$0100-$017F']);
+
+   // Latin Extended-B
+   if SupportsLatinExtendedB then ListViewData(['Latin Extended-B', '$0180-$024F']);
+
+   // IPA Extensions
+   if SupportsIPAExtensions then ListViewData(['IPA Extensions', '$0250-$02AF']);
+
+   // Phonetic Extensions
+   if SupportsPhoneticExtensions then ListViewData(['Phonetic Extensions', '$1D00-$1D7F']);
+
+   // Phonetic Extensions Supplement
+   if SupportsPhoneticExtensionsSupplement then ListViewData(['Phonetic Extensions Supplement', '$1D80-$1DBF']);
+
+   // Spacing Modifier Letters
+   if SupportsSpacingModifierLetters then ListViewData(['Spacing Modifier Letters', '$02B0-$02FF']);
+
+   // Modifier Tone Letters
+   if SupportsModifierToneLetters then ListViewData(['Modifier Tone Letters', '$A700-$A71F']);
+
+   // Combining Diacritical Marks
+   if SupportsCombiningDiacriticalMarks then ListViewData(['Combining Diacritical Marks', '$0300-$036F']);
+
+   // Combining Diacritical Marks Supplement
+   if SupportsCombiningDiacriticalMarksSupplement then ListViewData(['Combining Diacritical Marks Supplement', '$1DC0-$1DFF']);
+
+   // Greek and Coptic
+   if SupportsGreekAndCoptic then ListViewData(['Greek and Coptic', '$0370-$03FF']);
+
+   // Coptic
+   if SupportsCoptic then ListViewData(['Coptic', '$2C80-$2CFF']);
+
+   // Cyrillic
+   if SupportsCyrillic then ListViewData(['Cyrillic', '$0400-$04FF']);
+
+   // Cyrillic Supplement
+   if SupportsCyrillicSupplement then ListViewData(['Cyrillic Supplement', '$0500-$052F']);
+
+   // Cyrillic Extended-A
+   if SupportsCyrillicExtendedA then ListViewData(['Cyrillic Extended-A', '$2DE0-$2DFF']);
+
+   // Cyrillic Extended-B
+   if SupportsCyrillicExtendedB then ListViewData(['Cyrillic Extended-B', '$A640-$A69F']);
+
+   // Armenian
+   if SupportsArmenian then ListViewData(['Armenian', '$0530-$058F']);
+
+   // Hebrew
+   if SupportsHebrew then ListViewData(['Hebrew', '$0590-$05FF']);
+
+   // Vai
+   if SupportsVai then ListViewData(['Vai', '$A500-$A63F']);
+
+   // Arabic
+   if SupportsArabic then ListViewData(['Arabic', '$0600-$06FF']);
+
+   // Arabic Supplement
+   if SupportsArabicSupplement then ListViewData(['Arabic Supplement', '$0750-$077F']);
+
+   // NKo
+   if SupportsNKo then ListViewData(['NKo', '$07C0-$07FF']);
+
+   // Devanagari
+   if SupportsDevanagari then ListViewData(['Devanagari', '$0900-$097F']);
+
+   // Bengali
+   if SupportsBengali then ListViewData(['Bengali', '$0980-$09FF']);
+
+   // Gurmukhi
+   if SupportsGurmukhi then ListViewData(['Gurmukhi', '$0A00-$0A7F']);
+
+   // Gujarati
+   if SupportsGujarati then ListViewData(['Gujarati', '$0A80-$0AFF']);
+
+   // Oriya
+   if SupportsOriya then ListViewData(['Oriya', '$0B00-$0B7F']);
+
+   // Tamil
+   if SupportsTamil then ListViewData(['Tamil', '$0B80-$0BFF']);
+
+   // Telugu
+   if SupportsTelugu then ListViewData(['Telugu', '$0C00-$0C7F']);
+
+   // Kannada
+   if SupportsKannada then ListViewData(['Kannada', '$0C80-$0CFF']);
+
+   // Malayalam
+   if SupportsMalayalam then ListViewData(['Malayalam', '$0D00-$0D7F']);
+
+   // Thai
+   if SupportsThai then ListViewData(['Thai', '$0E00-$0E7F']);
+
+   // Lao
+   if SupportsLao then ListViewData(['Lao', '$0E80-$0EFF']);
+
+   // Georgian
+   if SupportsGeorgian then ListViewData(['Georgian', '$10A0-$10FF']);
+
+   // Georgian Supplement
+   if SupportsGeorgianSupplement then ListViewData(['Georgian Supplement', '$2D00-$2D2F']);
+
+   // Balinese
+   if SupportsBalinese then ListViewData(['Balinese', '$1B00-$1B7F']);
+
+   // Hangul Jamo
+   if SupportsHangulJamo then ListViewData(['Hangul Jamo', '$1100-$11FF']);
+
+   // Latin Extended Additional
+   if SupportsLatinExtendedAdditional then ListViewData(['Latin Extended Additional', '$1E00-$1EFF']);
+
+   // Latin Extended-C
+   if SupportsLatinExtendedC then ListViewData(['Latin Extended-C', '$2C60-$2C7F']);
+
+   // Latin Extended-D
+   if SupportsLatinExtendedD then ListViewData(['Latin Extended-D', '$A720-$A7FF']);
+
+   // Greek Extended
+   if SupportsGreekExtended then ListViewData(['Greek Extended', '$1F00-$1FFF']);
+
+   // General Punctuation
+   if SupportsGeneralPunctuation then ListViewData(['General Punctuation', '$2000-$206F']);
+
+   // Supplemental Punctuation
+   if SupportsSupplementalPunctuation then ListViewData(['Supplemental Punctuation', '$2E00-$2E7F']);
+
+   // Superscripts And Subscripts
+   if SupportsSuperscriptsAndSubscripts then ListViewData(['Superscripts And Subscripts', '$2070-$209F']);
+
+   // Currency Symbols
+   if SupportsCurrencySymbols then ListViewData(['Currency Symbols', '$20A0-$20CF']);
+
+   // Combining Diacritical Marks For Symbols
+   if SupportsCombiningDiacriticalMarksForSymbols then ListViewData(['Combining Diacritical Marks For Symbols', '$20D0-$20FF']);
+
+   // Letterlike Symbols
+   if SupportsLetterlikeSymbols then ListViewData(['Letterlike Symbols', '$2100-$214F']);
+
+   // Number Forms
+   if SupportsNumberForms then ListViewData(['Number Forms', '$2150-$218F']);
+
+   // Arrows
+   if SupportsArrows then ListViewData(['Arrows', '$2190-$21FF']);
+
+   // Supplemental Arrows-A
+   if SupportsSupplementalArrowsA then ListViewData(['Supplemental Arrows-A', '$27F0-$27FF']);
+
+   // Supplemental Arrows-B
+   if SupportsSupplementalArrowsB then ListViewData(['Supplemental Arrows-B', '$2900-$297F']);
+
+   // Miscellaneous Symbols and Arrows
+   if SupportsMiscellaneousSymbolsAndArrows then ListViewData(['Miscellaneous Symbols and Arrows', '$2B00-$2BFF']);
+
+   // Mathematical Operators
+   if SupportsMathematicalOperators then ListViewData(['Mathematical Operators', '$2200-$22FF']);
+
+   // Supplemental Mathematical Operators
+   if SupportsSupplementalMathematicalOperators then ListViewData(['Supplemental Mathematical Operators', '$2A00-$2AFF']);
+
+   // Miscellaneous Mathematical Symbols-A
+   if SupportsMiscellaneousMathematicalSymbolsA then ListViewData(['Miscellaneous Mathematical Symbols-A', '$27C0-$27EF']);
+
+   // Miscellaneous Mathematical Symbols-B
+   if SupportsMiscellaneousMathematicalSymbolsB then ListViewData(['Miscellaneous Mathematical Symbols-B', '$2980-$29FF']);
+
+   // Miscellaneous Technical
+   if SupportsMiscellaneousTechnical then ListViewData(['Miscellaneous Technical', '$2300-$23FF']);
+
+   // Control Pictures
+   if SupportsControlPictures then ListViewData(['Control Pictures', '$2400-$243F']);
+
+   // Optical Character Recognition
+   if SupportsOpticalCharacterRecognition then ListViewData(['Optical Character Recognition', '$2440-$245F']);
+
+   // Enclosed Alphanumerics
+   if SupportsEnclosedAlphanumerics then ListViewData(['Enclosed Alphanumerics', '$2460-$24FF']);
+
+   // Box Drawing
+   if SupportsBoxDrawing then ListViewData(['Box Drawing', '$2500-$257F']);
+
+   // Block Elements
+   if SupportsBlockElements then ListViewData(['Block Elements', '$2580-$259F']);
+
+   // Geometric Shapes
+   if SupportsGeometricShapes then ListViewData(['Geometric Shapes', '$25A0-$25FF']);
+
+   // Miscellaneous Symbols
+   if SupportsMiscellaneousSymbols then ListViewData(['Miscellaneous Symbols', '$2600-$26FF']);
+
+   // Dingbats
+   if SupportsDingbats then ListViewData(['Dingbats', '$2700-$27BF']);
+
+   // CJK Symbols And Punctuation
+   if SupportsCJKSymbolsAndPunctuation then ListViewData(['CJK Symbols And Punctuation', '$3000-$303F']);
+
+   // Hiragana
+   if SupportsHiragana then ListViewData(['Hiragana', '$3040-$309F']);
+
+   // Katakana
+   if SupportsKatakana then ListViewData(['Katakana', '$30A0-$30FF']);
+
+   // Katakana Phonetic Extensions
+   if SupportsKatakanaPhoneticExtensions then ListViewData(['Katakana Phonetic Extensions', '$31F0-$31FF']);
+
+   // Bopomofo
+   if SupportsBopomofo then ListViewData(['Bopomofo', '$3100-$312F']);
+
+   // Bopomofo Extended
+   if SupportsBopomofoExtended then ListViewData(['Bopomofo Extended', '$31A0-$31BF']);
+
+   // Hangul Compatibility Jamo
+   if SupportsHangulCompatibilityJamo then ListViewData(['Hangul Compatibility Jamo', '$3130-$318F']);
+
+   // Phags-pa
+   if SupportsPhagsPa then ListViewData(['Phags-pa', '$A840-$A87F']);
+
+   // Enclosed CJK Letters And Months
+   if SupportsEnclosedCJKLettersAndMonths then ListViewData(['Enclosed CJK Letters And Months', '$3200-$32FF']);
+
+   // CJK Compatibility
+   if SupportsCJKCompatibility then ListViewData(['CJK Compatibility', '$3300-$33FF']);
+
+   // Hangul Syllables
+   if SupportsHangulSyllables then ListViewData(['Hangul Syllables', '$AC00-$D7AF']);
+
+   // Non-Plane 0 *
+   if SupportsNonPlane0 then ListViewData(['Non-Plane 0 *', '$D800-$DFFF']);
+
+   // Phoenician
+   if SupportsPhoenician then ListViewData(['Phoenician', '$10900-$1091F']);
+
+   // CJK Unified Ideographs
+   if SupportsCJKUnifiedIdeographs then ListViewData(['CJK Unified Ideographs', '$4E00-$9FFF']);
+
+   // CJK Radicals Supplement
+   if SupportsCJKRadicalsSupplement then ListViewData(['CJK Radicals Supplement', '$2E80-$2EFF']);
+
+   // Kangxi Radicals
+   if SupportsKangxiRadicals then ListViewData(['Kangxi Radicals', '$2F00-$2FDF']);
+
+   // Ideographic Description Characters
+   if SupportsIdeographicDescriptionCharacters then ListViewData(['Ideographic Description Characters', '$2FF0-$2FFF']);
+
+   // CJK Unified Ideographs Extension A
+   if SupportsCJKUnifiedIdeographsExtensionA then ListViewData(['CJK Unified Ideographs Extension A', '$3400-$4DBF']);
+
+   // CJK Unified Ideographs Extension B
+   if SupportsCJKUnifiedIdeographsExtensionB then ListViewData(['CJK Unified Ideographs Extension B', '$20000-$2A6DF']);
+
+   // Kanbun
+   if SupportsKanbun then ListViewData(['Kanbun', '$3190-$319F']);
+
+   // Private Use Area (plane 0)
+   if SupportsPrivateUseAreaPlane0 then ListViewData(['Private Use Area (plane 0)', '$E000-$F8FF']);
+
+   // CJK Strokes
+   if SupportsCJKStrokes then ListViewData(['CJK Strokes', '$31C0-$31EF']);
+
+   // CJK Compatibility Ideographs
+   if SupportsCJKCompatibilityIdeographs then ListViewData(['CJK Compatibility Ideographs', '$F900-$FAFF']);
+
+   // CJK Compatibility Ideographs Supplement
+   if SupportsCJKCompatibilityIdeographsSupplement then ListViewData(['CJK Compatibility Ideographs Supplement', '$2F800-$2Fa1F']);
+
+   // Alphabetic Presentation Forms
+   if SupportsAlphabeticPresentationForms then ListViewData(['Alphabetic Presentation Forms', '$FB00-$FB4F']);
+
+   // Arabic Presentation Forms-A
+   if SupportsArabicPresentationFormsA then ListViewData(['Arabic Presentation Forms-A', '$FB50-$FDFF']);
+
+   // Combining Half Marks
+   if SupportsCombiningHalfMarks then ListViewData(['Combining Half Marks', '$FE20-$FE2F']);
+
+   // Vertical Forms
+   if SupportsVerticalForms then ListViewData(['Vertical Forms', '$FE10-$FE1F']);
+
+   // CJK Compatibility Forms
+   if SupportsCJKCompatibilityForms then ListViewData(['CJK Compatibility Forms', '$FE30-$FE4F']);
+
+   // Small Form Variants
+   if SupportsSmallFormVariants then ListViewData(['Small Form Variants', '$FE50-$FE6F']);
+
+   // Arabic Presentation Forms-B
+   if SupportsArabicPresentationFormsB then ListViewData(['Arabic Presentation Forms-B', '$FE70-$FEFF']);
+
+   // Halfwidth And Fullwidth Forms
+   if SupportsHalfwidthAndFullwidthForms then ListViewData(['Halfwidth And Fullwidth Forms', '$FF00-$FFEF']);
+
+   // Specials
+   if SupportsSpecials then ListViewData(['Specials', '$FFF0-$FFFF']);
+
+   // Tibetan
+   if SupportsTibetan then ListViewData(['Tibetan', '$0F00-$0FFF']);
+
+   // Syriac
+   if SupportsSyriac then ListViewData(['Syriac', '$0700-$074F']);
+
+   // Thaana
+   if SupportsThaana then ListViewData(['Thaana', '$0780-$07BF']);
+
+   // Sinhala
+   if SupportsSinhala then ListViewData(['Sinhala', '$0D80-$0DFF']);
+
+   // Myanmar
+   if SupportsMyanmar then ListViewData(['Myanmar', '$1000-$109F']);
+
+   // Ethiopic
+   if SupportsEthiopic then ListViewData(['Ethiopic', '$1200-$137F']);
+
+   // Ethiopic Supplement
+   if SupportsEthiopicSupplement then ListViewData(['Ethiopic Supplement', '$1380-$139F']);
+
+   // Ethiopic Extended
+   if SupportsEthiopicExtended then ListViewData(['Ethiopic Extended', '$2D80-$2DDF']);
+
+   // Cherokee
+   if SupportsCherokee then ListViewData(['Cherokee', '$13A0-$13FF']);
+
+   // Unified Canadian Aboriginal Syllabics
+   if SupportsUnifiedCanadianAboriginalSyllabics then ListViewData(['Unified Canadian Aboriginal Syllabics', '$1400-$167F']);
+
+   // Ogham
+   if SupportsOgham then ListViewData(['Ogham', '$1680-$169F']);
+
+   // Runic
+   if SupportsRunic then ListViewData(['Runic', '$16A0-$16FF']);
+
+   // Khmer
+   if SupportsKhmer then ListViewData(['Khmer', '$1780-$17FF']);
+
+   // Khmer Symbols
+   if SupportsKhmerSymbols then ListViewData(['Khmer Symbols', '$19E0-$19FF']);
+
+   // Mongolian
+   if SupportsMongolian then ListViewData(['Mongolian', '$1800-$18AF']);
+
+   // Braille Patterns
+   if SupportsBraillePatterns then ListViewData(['Braille Patterns', '$2800-$28FF']);
+
+   // Yi Syllables
+   if SupportsYiSyllables then ListViewData(['Yi Syllables', '$A000-$A48F']);
+
+   // Yi Radicals
+   if SupportsYiRadicals then ListViewData(['Yi Radicals', '$A490-$A4CF']);
+
+   // Tagalog
+   if SupportsTagalog then ListViewData(['Tagalog', '$1700-$171F']);
+
+   // Hanunoo
+   if SupportsHanunoo then ListViewData(['Hanunoo', '$1720-$173F']);
+
+   // Buhid
+   if SupportsBuhid then ListViewData(['Buhid', '$1740-$175F']);
+
+   // Tagbanwa
+   if SupportsTagbanwa then ListViewData(['Tagbanwa', '$1760-$177F']);
+
+   // Old Italic
+   if SupportsOldItalic then ListViewData(['Old Italic', '$10300-$1032F']);
+
+   // Gothic
+   if SupportsGothic then ListViewData(['Gothic', '$10330-$1034F']);
+
+   // Deseret
+   if SupportsDeseret then ListViewData(['Deseret', '$10400-$1044F']);
+
+   // Byzantine Musical Symbols
+   if SupportsByzantineMusicalSymbols then ListViewData(['Byzantine Musical Symbols', '$1D000-$1D0FF']);
+
+   // Musical Symbols
+   if SupportsMusicalSymbols then ListViewData(['Musical Symbols', '$1D100-$1D1FF']);
+
+   // Ancient Greek Musical Notation
+   if SupportsAncientGreekMusicalNotation then ListViewData(['Ancient Greek Musical Notation', '$1D200-$1D24F']);
+
+   // Mathematical Alphanumeric Symbols
+   if SupportsMathematicalAlphanumericSymbols then ListViewData(['Mathematical Alphanumeric Symbols', '$1D400-$1D7FF']);
+
+   // Private Use (plane 15)
+   if SupportsPrivateUsePlane15 then ListViewData(['Private Use (plane 15)', '$FF000-$FFFFD']);
+
+   // Private Use (plane 16)
+   if SupportsPrivateUsePlane16 then ListViewData(['Private Use (plane 16)', '$100000-$10FFFD']);
+
+   // Variation Selectors
+   if SupportsVariationSelectors then ListViewData(['Variation Selectors', '$FE00-$FE0F']);
+
+   // Variation Selectors Supplement
+   if SupportsVariationSelectorsSupplement then ListViewData(['Variation Selectors Supplement', '$E0100-$E01EF']);
+
+   // Tags
+   if SupportsTags then ListViewData(['Tags', '$E0000-$E007F']);
+
+   // Limbu
+   if SupportsLimbu then ListViewData(['Limbu', '$1900-$194F']);
+
+   // Tai Le
+   if SupportsTaiLe then ListViewData(['Tai Le', '$1950-$197F']);
+
+   // New Tai Lue
+   if SupportsNewTaiLue then ListViewData(['New Tai Lue', '$1980-$19DF']);
+
+   // Buginese
+   if SupportsBuginese then ListViewData(['Buginese', '$1A00-$1A1F']);
+
+   // Glagolitic
+   if SupportsGlagolitic then ListViewData(['Glagolitic', '$2C00-$2C5F']);
+
+   // Tifinagh
+   if SupportsTifinagh then ListViewData(['Tifinagh', '$2D30-$2D7F']);
+
+   // Yijing Hexagram Symbols
+   if SupportsYijingHexagramSymbols then ListViewData(['Yijing Hexagram Symbols', '$4DC0-$4DFF']);
+
+   // Syloti Nagri
+   if SupportsSylotiNagri then ListViewData(['Syloti Nagri', '$A800-$A82F']);
+
+   // Linear B Syllabary
+   if SupportsLinearBSyllabary then ListViewData(['Linear B Syllabary', '$10000-$1007F']);
+
+   // Linear B Ideograms
+   if SupportsLinearBIdeograms then ListViewData(['Linear B Ideograms', '$10080-$100FF']);
+
+   // Aegean Numbers
+   if SupportsAegeanNumbers then ListViewData(['Aegean Numbers', '$10100-$1013F']);
+
+   // Ancient Greek Numbers
+   if SupportsAncientGreekNumbers then ListViewData(['Ancient Greek Numbers', '$10140-$1018F']);
+
+   // Ugaritic
+   if SupportsUgaritic then ListViewData(['Ugaritic', '$10380-$1039F']);
+
+   // Old Persian
+   if SupportsOldPersian then ListViewData(['Old Persian', '$103A0-$103DF']);
+
+   // Shavian
+   if SupportsShavian then ListViewData(['Shavian', '$10450-$1047F']);
+
+   // Osmanya
+   if SupportsOsmanya then ListViewData(['Osmanya', '$10480-$104AF']);
+
+   // Cypriot Syllabary
+   if SupportsCypriotSyllabary then ListViewData(['Cypriot Syllabary', '$10800-$1083F']);
+
+   // Kharoshthi
+   if SupportsKharoshthi then ListViewData(['Kharoshthi', '$10A00-$10A5F']);
+
+   // Tai Xuan Jing Symbols
+   if SupportsTaiXuanJingSymbols then ListViewData(['Tai Xuan Jing Symbols', '$1D300-$1D35F']);
+
+   // Cuneiform
+   if SupportsCuneiform then ListViewData(['Cuneiform', '$12000-$123FF']);
+
+   // Cuneiform Numbers and Punctuation
+   if SupportsCuneiformNumbersAndPunctuation then ListViewData(['Cuneiform Numbers and Punctuation', '$12400-$1247F']);
+
+   // Counting Rod Numerals
+   if SupportsCountingRodNumerals then ListViewData(['Counting Rod Numerals', '$1D360-$1D37F']);
+
+   // Sundanese
+   if SupportsSundanese then ListViewData(['Sundanese', '$1B80-$1BBF']);
+
+   // Lepcha
+   if SupportsLepcha then ListViewData(['Lepcha', '$1C00-$1C4F']);
+
+   // Ol Chiki
+   if SupportsOlChiki then ListViewData(['Ol Chiki', '$1C50-$1C7F']);
+
+   // Saurashtra
+   if SupportsSaurashtra then ListViewData(['Saurashtra', '$A880-$A8DF']);
+
+   // Kayah Li
+   if SupportsKayahLi then ListViewData(['Kayah Li', '$A900-$A92F']);
+
+   // Rejang
+   if SupportsRejang then ListViewData(['Rejang', '$A930-$A95F']);
+
+   // Cham
+   if SupportsCham then ListViewData(['Cham', '$AA00-$AA5F']);
+
+   // Ancient Symbols
+   if SupportsAncientSymbols then ListViewData(['Ancient Symbols', '$10190-$101CF']);
+
+   // Phaistos Disc
+   if SupportsPhaistosDisc then ListViewData(['Phaistos Disc', '$101D0-$101FF']);
+
+   // Carian
+   if SupportsCarian then ListViewData(['Carian', '$102A0-$102DF']);
+
+   // Lycian
+   if SupportsLycian then ListViewData(['Lycian', '$10280-$1029F']);
+
+   // Lydian
+   if SupportsLydian then ListViewData(['Lydian', '$10920-$1093F']);
+
+   // Domino Tiles
+   if SupportsDominoTiles then ListViewData(['Domino Tiles', '$1F030-$1F09F']);
+
+   // Mahjong Tiles
+   if SupportsMahjongTiles then ListViewData(['Mahjong Tiles', '$1F000-$1F02F']);
+
+   ListView.BringToFront;
+  end;
+end;
+
+procedure TFmTTF.DisplayOS2CodePageRangeTable(
+  OS2CodePageRange: TPascalTypeOS2CodePageRangeTable);
+begin
+ with OS2CodePageRange do
+  begin
+   // add columns
+   ListViewColumns(['Name', 'Code Page']);
+
+   // SupportsLatin1
+   if SupportsLatin1 then ListViewData(['Latin 1', '1252']);
+
+   // SupportsLatin2EasternEurope
+   if SupportsLatin2EasternEurope then ListViewData(['Latin 2: Eastern Europe', '1250']);
+
+   // SupportsCyrillic
+   if SupportsCyrillic then ListViewData(['Cyrillic', '1251']);
+
+   // SupportsGreek
+   if SupportsGreek then ListViewData(['Greek', '1253']);
+
+   // SupportsTurkish
+   if SupportsTurkish then ListViewData(['Turkish', '1254']);
+
+   // SupportsHebrew
+   if SupportsHebrew then ListViewData(['Hebrew', '1255']);
+
+   // SupportsArabic
+   if SupportsArabic then ListViewData(['Arabic', '1256']);
+
+   // SupportsWindowsBaltic
+   if SupportsWindowsBaltic then ListViewData(['Windows Baltic', '1257']);
+
+   // SupportsVietnamese
+   if SupportsVietnamese then ListViewData(['Vietnamese', '1258']);
+
+   // SupportsThai
+   if SupportsThai then ListViewData(['Thai', '874']);
+
+   // SupportsJISJapan
+   if SupportsJISJapan then ListViewData(['JIS/Japan', '932']);
+
+   // SupportsChineseSimplified
+   if SupportsChineseSimplified then ListViewData(['Chinese: Simplified chars--PRC and Singapore', '936']);
+
+   // SupportsKoreanWansung
+   if SupportsKoreanWansung then ListViewData(['Korean Wansung', '949']);
+
+   // SupportsChineseTraditional
+   if SupportsChineseTraditional then ListViewData(['Chinese: Traditional chars--Taiwan and Hong Kong', '950']);
+
+   // SupportsKoreanJohab
+   if SupportsKoreanJohab then ListViewData(['Korean Johab', '1361']);
+
+   // SupportsMacintoshCharacterSet
+   if SupportsMacintoshCharacterSet then ListViewData(['Character Set Macintosh (US Roman)', '-']);
+
+   // SupportsOEMCharacter
+   if SupportsOEMCharacter then ListViewData(['Character Set OEM', '-']);
+
+   // SupportsSymbolCharacterSet
+   if SupportsSymbolCharacterSet then ListViewData(['Character Set Symbol', '-']);
+
+   // SupportsIBMGreek
+   if SupportsIBMGreek then ListViewData(['IBM Greek', '869']);
+
+   // SupportsMSDOSRussian
+   if SupportsMSDOSRussian then ListViewData(['MS-DOS Russian', '866']);
+
+   // SupportsMSDOSNordic
+   if SupportsMSDOSNordic then ListViewData(['MS-DOS Nordic', '865']);
+
+   // SupportsAlternativeArabic
+   if SupportsAlternativeArabic then ListViewData(['Arabic', '864']);
+
+   // SupportsMSDOSCanadianFrench
+   if SupportsMSDOSCanadianFrench then ListViewData(['MS-DOS Canadian French', '863']);
+
+   // SupportsAlternativeHebrew
+   if SupportsAlternativeHebrew then ListViewData(['Hebrew', '862']);
+
+   // SupportsMSDOSIcelandic
+   if SupportsMSDOSIcelandic then ListViewData(['MS-DOS Icelandic', '861']);
+
+   // SupportsMSDOSPortuguese
+   if SupportsMSDOSPortuguese then ListViewData(['MS-DOS Portuguese', '860']);
+
+   // SupportsIBMTurkish
+   if SupportsIBMTurkish then ListViewData(['IBM Turkish', '857']);
+
+   // SupportsIBMCyrillic
+   if SupportsIBMCyrillic then ListViewData(['IBM Cyrillic; primarily Russian', '855']);
+
+   // SupportsLatin2
+   if SupportsLatin2 then ListViewData(['Latin 2', '852']);
+
+   // SupportsMSDOSBaltic
+   if SupportsMSDOSBaltic then ListViewData(['MS-DOS Baltic', '775']);
+
+   // SupportsGreekFormer437G
+   if SupportsGreekFormer437G then ListViewData(['Greek; former 437 G', '737']);
+
+   // SupportsArabicASMO708
+   if SupportsArabicASMO708 then ListViewData(['Arabic; ASMO 708', '708']);
+
+   // SupportsWELatin1
+   if SupportsWELatin1 then ListViewData(['WE/Latin 1', '850']);
+
+   // SupportsUS
+   if SupportsUS then ListViewData(['US', '437']);
 
    ListView.BringToFront;
   end;
@@ -2387,6 +3187,18 @@ begin
    if TObject(Node.Data) is TPascalTypeOS2Table
     then DisplayOS2Table(TPascalTypeOS2Table(Node.Data)) else
 
+   // 0S/2 Panose Table
+   if TObject(Node.Data) is TCustomPascalTypePanoseTable
+    then DisplayOS2PanoseTable(TCustomPascalTypePanoseTable(Node.Data)) else
+
+   // 0S/2 Unicode Range Table
+   if TObject(Node.Data) is TPascalTypeUnicodeRangeTable
+    then DisplayOS2UnicodeRangeTable(TPascalTypeUnicodeRangeTable(Node.Data)) else
+
+   // 0S/2 Unicode Range Table
+   if TObject(Node.Data) is TPascalTypeOS2CodePageRangeTable
+    then DisplayOS2CodePageRangeTable(TPascalTypeOS2CodePageRangeTable(Node.Data)) else
+
    // Character Map Table
    if TObject(Node.Data) is TPascalTypeCharacterMapTable
     then DisplayCharacterMapTable(TPascalTypeCharacterMapTable(Node.Data)) else
@@ -2717,7 +3529,6 @@ begin
    // begin update
    Items.BeginUpdate;
 
-
    // add font header table
    Items.AddChildObject(Items[0], 'head', HeaderTable);
 
@@ -2779,6 +3590,16 @@ begin
     with OptionalTable[OptTableIndex] do
      begin
       Node := Items.AddChildObject(Items[0], string(TableType), OptionalTable[OptTableIndex]);
+
+      // OS/2 table
+      if OptionalTable[OptTableIndex] is TPascalTypeOS2Table then
+       with TPascalTypeOS2Table(OptionalTable[OptTableIndex]) do
+        begin
+         Items.AddChildObject(Node, 'Panpose', Panose);
+         Items.AddChildObject(Node, 'Unicode Range', UnicodeRange);
+         if Assigned(CodePageRange)
+          then Items.AddChildObject(Node, 'Code Rage Range', CodePageRange);
+        end else
 
       // digital signature
       if OptionalTable[OptTableIndex] is TPascalTypeDigitalSignatureTable then

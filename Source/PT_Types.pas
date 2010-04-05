@@ -125,6 +125,23 @@ type
   );
   TOS2FontEmbeddingRights = set of TOS2FontEmbeddingRight;
 
+  TOS2UnicodeRange = array [0..3] of Cardinal;
+  TOS2CodePageRange = array [0..1] of Cardinal;
+
+  TOS2FontSelectionFlag = (
+    fsfItalic         = 0, // Font contains italic or oblique characters, otherwise they are upright.
+    fsfUnderscore     = 1, // Characters are underscored.
+    fsfNegative       = 2, // Characters have their foreground and background reversed.
+    fsfOutlined       = 3, // Outline (hollow) characters, otherwise they are solid.
+    fsfStrikeout      = 4, // Characters are overstruck.
+    fsfBold           = 5, // Characters are emboldened.
+    fsfRegular        = 6, // Characters are in the standard weight/style for the font.
+    fsfUseTypoMetrics = 7, // If set, it is strongly recommended to use OS/2.sTypoAscender - OS/2.sTypoDescender + OS/2.sTypoLineGap as a value for default line spacing for this font.
+    fsfWws            = 8, // The font has ‘name’ table strings consistent with a weight/width/slope family without requiring use of ‘name’ IDs 21 and 22.
+    fsfOblique        = 9  // Font contains oblique characters.
+  );
+  TOS2FontSelectionFlags = set of TOS2FontSelectionFlag;
+
   TFontDirectionHint = (           // Deprecated (set to 2)
     fdhRightToLeftNeutrals = -2,   // right to left glyphs containing neutrals
     fdhRightToLeft = -1,           // Only strongly right to left glyphs
@@ -444,72 +461,14 @@ type
     fpAlternateItalic = 1,   // (backslanted, cursive, swash)
     fpReserved = 2);
 
-(*
-TypeFamily
-
-The 4 most significant bits are font vendor codes. The 12 least significant bits are typeface family codes. Both are assigned by HP Boise Division.
-
-
-Vendor Codes (bits 12-15)0	reserved
-1	Agfa Corporation
-2	Bitstream Inc.
-3	Linotype Company
-4	Monotype Typography Ltd.
-5	Adobe Systems
-6	font repackagers
-7	vendors of unique typefaces
-8-15	reserved
-
-CapHeight
-
-The height of the optical line describing the top of the uppercase H in FUnits. This might not be the same as the measured height of the uppercase H.
-SymbolSet
-
-The most significant 11 bits are the value of the symbol set “number” field. The value of the least significant 5 bits, when added to 64, is the ASCII value of the symbol set “ID” field. Symbol set values are assigned by HP Boise Division. Unbound fonts, or “typefaces” should have a symbol set value of 0. See the PCL 5 Printer Language Technical Reference Manual or the PCL 5 Comparison Guide for the most recent published list of codes.
-Examples 	PCL 	decimal 
-Windows 3.1 “ANSI”	19U	629
-Windows 3.0 “ANSI”	9U	309
-Adobe “Symbol”	19M	621
-Macintosh	12J	394
-PostScript ISO Latin 1	11J	362
-PostScript Std. Encoding	10J	330
-Code Page 1004	9J	298
-DeskTop	7J	234
-
-TypeFace
-
-This 16-byte ASCII string appears in the “font print” of PCL printers. Care should be taken to insure that the base string for all typefaces of a family are consistent, and that the designators for bold, italic, etc. are standardized.
-Example Times New	 
- Times New	 Bd
- Times New	 It
- Times New	 BdIt
- Courier New	 
- Courier New	 Bd
- Courier New	 It
- Courier New	 BdIt
-
-CharacterComplement
-
-This 8-byte field identifies the symbol collections provided by the font, each bit identifies a symbol collection and is independently interpreted. Symbol set bound fonts should have this field set to all F's (except bit 0).
-ExampleDOS/PCL Complement	0xFFFFFFFF003FFFFE
-Windows 3.1 “ANSI”	0xFFFFFFFF37FFFFFE
-Macintosh	0xFFFFFFFF36FFFFFE
-ISO 8859-1 Latin 1	0xFFFFFFFF3BFFFFFE
-ISO 8859-1,2,9 Latin 1,2,5	0xFFFFFFFF0BFFFFFE
-
-
-The character collections identified by each bit are as follows:31	ASCII (supports several standard interpretations)
-30	Latin 1 extensions
-29	Latin 2 extensions
-28	Latin 5 extensions
-27	Desktop Publishing Extensions
-26	Accent Extensions (East and West Europe)
-25	PCL Extensions
-24	Macintosh Extensions
-23	PostScript Extensions
-22	Code Page Extensions
-*)
-
+  TPcl5VendorCodes = (
+    vcAgfaCorporation,
+    vcBitstream,
+    vcLinotypeCompany,
+    vcMonotypeTypography,
+    vcAdobeSystems,
+    vfFontRepackagers,
+    vcVendorsOfUniqueTypefaces);
 
 function FontHeaderTableFlagsToWord(Value: TFontHeaderTableFlags): Word;
 function WordToFontHeaderTableFlags(Value: Word): TFontHeaderTableFlags;
@@ -522,6 +481,11 @@ function FontEmbeddingFlagsToRights(Value: Word): TOS2FontEmbeddingRights;
 function FontEmbeddingRightsToString(Value: TOS2FontEmbeddingRights): string;
 function FontFamilyTypeToString(Value: Word): string;
 function FontFamilyClassToString(Value: Byte): string;
+function UnicodeRangeToString(Value: TOS2UnicodeRange): string;
+function CodePageRangeToString(Value: TOS2CodePageRange): string;
+function WordToFontSelectionFlags(Value: Word): TOS2FontSelectionFlags;
+function FontSelectionFlagsToWord(Value: TOS2FontSelectionFlags): Word;
+function FontSelectionFlagsToString(Value: TOS2FontSelectionFlags): string;
 
 function MacStylesToString(Value: TMacStyles): String;
 
@@ -894,6 +858,227 @@ begin
   12: Result := 'Symbolic';
  else Result := 'Unknown';
  end;
+end;
+
+function UnicodeRangeToString(Value: TOS2UnicodeRange): string;
+begin
+ if (Value[0] and 1) <> 0 then Result := 'Basic Latin, ' else Result := '';
+ if (Value[0] and (1 shl  1)) <> 0 then Result := Result + 'Latin-1 Supplement, ';
+ if (Value[0] and (1 shl  2)) <> 0 then Result := Result + 'Latin Extended-A, ';
+ if (Value[0] and (1 shl  3)) <> 0 then Result := Result + 'Latin Extended-B, ';
+ if (Value[0] and (1 shl  4)) <> 0 then Result := Result + 'IPA & Phonetic Extensions, ';
+ if (Value[0] and (1 shl  5)) <> 0 then Result := Result + 'Spacing Modifier & Modifier Tone Letters, ';
+ if (Value[0] and (1 shl  6)) <> 0 then Result := Result + 'Combining Diacritical Marks, ';
+ if (Value[0] and (1 shl  7)) <> 0 then Result := Result + 'Greek and Coptic, ';
+ if (Value[0] and (1 shl  8)) <> 0 then Result := Result + 'Coptic, ';
+ if (Value[0] and (1 shl  9)) <> 0 then Result := Result + 'Cyrillic, ';
+ if (Value[0] and (1 shl 10)) <> 0 then Result := Result + 'Armenian, ';
+ if (Value[0] and (1 shl 11)) <> 0 then Result := Result + 'Hebrew, ';
+ if (Value[0] and (1 shl 12)) <> 0 then Result := Result + 'Vai, ';
+ if (Value[0] and (1 shl 13)) <> 0 then Result := Result + 'Arabic, ';
+ if (Value[0] and (1 shl 14)) <> 0 then Result := Result + 'N''Ko, ';
+ if (Value[0] and (1 shl 15)) <> 0 then Result := Result + 'Devanagari, ';
+ if (Value[0] and (1 shl 16)) <> 0 then Result := Result + 'Bengali, ';
+ if (Value[0] and (1 shl 17)) <> 0 then Result := Result + 'Gurmukhi, ';
+ if (Value[0] and (1 shl 18)) <> 0 then Result := Result + 'Gujarati, ';
+ if (Value[0] and (1 shl 19)) <> 0 then Result := Result + 'Oriya, ';
+ if (Value[0] and (1 shl 20)) <> 0 then Result := Result + 'Tamil, ';
+ if (Value[0] and (1 shl 21)) <> 0 then Result := Result + 'Telugu, ';
+ if (Value[0] and (1 shl 22)) <> 0 then Result := Result + 'Kannada, ';
+ if (Value[0] and (1 shl 23)) <> 0 then Result := Result + 'Malayalam, ';
+ if (Value[0] and (1 shl 24)) <> 0 then Result := Result + 'Thai, ';
+ if (Value[0] and (1 shl 25)) <> 0 then Result := Result + 'Lao, ';
+ if (Value[0] and (1 shl 26)) <> 0 then Result := Result + 'Georgian, ';
+ if (Value[0] and (1 shl 27)) <> 0 then Result := Result + 'Balinese, ';
+ if (Value[0] and (1 shl 28)) <> 0 then Result := Result + 'Hangul Jamo, ';
+ if (Value[0] and (1 shl 29)) <> 0 then Result := Result + 'Latin Extended Additional, ';
+ if (Value[0] and (1 shl 30)) <> 0 then Result := Result + 'Greek Extended, ';
+ if (Value[0] and (1 shl 31)) <> 0 then Result := Result + 'General & Supplemental Punctuation, ';
+ if (Value[1] and (1 shl  0)) <> 0 then Result := Result + 'Superscripts And Subscripts, ';
+ if (Value[1] and (1 shl  1)) <> 0 then Result := Result + 'Currency Symbols, ';
+ if (Value[1] and (1 shl  2)) <> 0 then Result := Result + 'Combining Diacritical Marks For Symbols, ';
+ if (Value[1] and (1 shl  3)) <> 0 then Result := Result + 'Letterlike Symbols, ';
+ if (Value[1] and (1 shl  4)) <> 0 then Result := Result + 'Number Forms, ';
+ if (Value[1] and (1 shl  5)) <> 0 then Result := Result + 'Arrows & Miscellaneous Symbols, ';
+ if (Value[1] and (1 shl  6)) <> 0 then Result := Result + 'Mathematical Operators & Symbols, ';
+ if (Value[1] and (1 shl  7)) <> 0 then Result := Result + 'Miscellaneous Technical, ';
+ if (Value[1] and (1 shl  8)) <> 0 then Result := Result + 'Control Pictures, ';
+ if (Value[1] and (1 shl  9)) <> 0 then Result := Result + 'Optical Character Recognition, ';
+ if (Value[1] and (1 shl 10)) <> 0 then Result := Result + 'Enclosed Alphanumerics, ';
+ if (Value[1] and (1 shl 11)) <> 0 then Result := Result + 'Box Drawing, ';
+ if (Value[1] and (1 shl 12)) <> 0 then Result := Result + 'Block Elements, ';
+ if (Value[1] and (1 shl 13)) <> 0 then Result := Result + 'Geometric Shapes, ';
+ if (Value[1] and (1 shl 14)) <> 0 then Result := Result + 'Miscellaneous Symbols, ';
+ if (Value[1] and (1 shl 15)) <> 0 then Result := Result + 'Dingbats, ';
+ if (Value[1] and (1 shl 16)) <> 0 then Result := Result + 'CJK Symbols And Punctuation, ';
+ if (Value[1] and (1 shl 17)) <> 0 then Result := Result + 'Hiragana, ';
+ if (Value[1] and (1 shl 18)) <> 0 then Result := Result + 'Katakana, ';
+ if (Value[1] and (1 shl 19)) <> 0 then Result := Result + 'Bopomofo, ';
+ if (Value[1] and (1 shl 20)) <> 0 then Result := Result + 'Hangul Compatibility Jamo, ';
+ if (Value[1] and (1 shl 21)) <> 0 then Result := Result + 'Phags-pa, ';
+ if (Value[1] and (1 shl 22)) <> 0 then Result := Result + 'Enclosed CJK Letters And Months, ';
+ if (Value[1] and (1 shl 23)) <> 0 then Result := Result + 'CJK Compatibility, ';
+ if (Value[1] and (1 shl 24)) <> 0 then Result := Result + 'Hangul Syllables, ';
+ if (Value[1] and (1 shl 25)) <> 0 then Result := Result + 'Non-Plane 0 *, ';
+ if (Value[1] and (1 shl 26)) <> 0 then Result := Result + 'Phoenician, ';
+ if (Value[1] and (1 shl 27)) <> 0 then Result := Result + 'CJK Unified Ideographs ' +
+   '& Radicals Supplement, Kangxi Radicals, ' +
+   'Ideographic Description Characters, CJK Radicals, Kanbun';
+ if (Value[1] and (1 shl 28)) <> 0 then Result := Result + 'Private Use Area (plane 0), ';
+ if (Value[1] and (1 shl 29)) <> 0 then Result := Result + 'CJK Strokes & Compatibility Ideographs, ';
+ if (Value[1] and (1 shl 30)) <> 0 then Result := Result + 'Alphabetic Presentation Forms, ';
+ if (Value[1] and (1 shl 31)) <> 0 then Result := Result + 'Arabic Presentation Forms-A, ';
+ if (Value[2] and (1 shl  0)) <> 0 then Result := Result + 'Combining Half Marks, ';
+ if (Value[2] and (1 shl  1)) <> 0 then Result := Result + 'Vertical & CJK Compatibility Forms, ';
+ if (Value[2] and (1 shl  2)) <> 0 then Result := Result + 'Small Form Variants, ';
+ if (Value[2] and (1 shl  3)) <> 0 then Result := Result + 'Arabic Presentation Forms-B, ';
+ if (Value[2] and (1 shl  4)) <> 0 then Result := Result + 'Halfwidth And Fullwidth Forms, ';
+ if (Value[2] and (1 shl  5)) <> 0 then Result := Result + 'Specials, ';
+ if (Value[2] and (1 shl  6)) <> 0 then Result := Result + 'Tibetan, ';
+ if (Value[2] and (1 shl  7)) <> 0 then Result := Result + 'Syriac, ';
+ if (Value[2] and (1 shl  8)) <> 0 then Result := Result + 'Thaana, ';
+ if (Value[2] and (1 shl  9)) <> 0 then Result := Result + 'Sinhala, ';
+ if (Value[2] and (1 shl 10)) <> 0 then Result := Result + 'Myanmar, ';
+ if (Value[2] and (1 shl 11)) <> 0 then Result := Result + 'Ethiopic, ';
+ if (Value[2] and (1 shl 12)) <> 0 then Result := Result + 'Cherokee, ';
+ if (Value[2] and (1 shl 13)) <> 0 then Result := Result + 'Unified Canadian Aboriginal Syllabics, ';
+ if (Value[2] and (1 shl 14)) <> 0 then Result := Result + 'Ogham, ';
+ if (Value[2] and (1 shl 15)) <> 0 then Result := Result + 'Runic, ';
+ if (Value[2] and (1 shl 16)) <> 0 then Result := Result + 'Khmer, ';
+ if (Value[2] and (1 shl 17)) <> 0 then Result := Result + 'Mongolian, ';
+ if (Value[2] and (1 shl 18)) <> 0 then Result := Result + 'Braille Patterns, ';
+ if (Value[2] and (1 shl 19)) <> 0 then Result := Result + 'Yi Syllables & Radicals, ';
+ if (Value[2] and (1 shl 20)) <> 0 then Result := Result + 'Tagalog, Hanunoo, Buhid, Tagbanwa, ';
+ if (Value[2] and (1 shl 21)) <> 0 then Result := Result + 'Old Italic, ';
+ if (Value[2] and (1 shl 22)) <> 0 then Result := Result + 'Gothic, ';
+ if (Value[2] and (1 shl 23)) <> 0 then Result := Result + 'Deseret, ';
+ if (Value[2] and (1 shl 24)) <> 0 then Result := Result + 'Byzantine Musical Symbols, Musical Symbols, Ancient Greek Musical Notation';
+ if (Value[2] and (1 shl 25)) <> 0 then Result := Result + 'Mathematical Alphanumeric Symbols, ';
+ if (Value[2] and (1 shl 26)) <> 0 then Result := Result + 'Private Use (plane 15-15), ';
+ if (Value[2] and (1 shl 27)) <> 0 then Result := Result + 'Variation Selectors, ';
+ if (Value[2] and (1 shl 28)) <> 0 then Result := Result + 'Tags, ';
+ if (Value[2] and (1 shl 29)) <> 0 then Result := Result + 'Limbu, ';
+ if (Value[2] and (1 shl 30)) <> 0 then Result := Result + 'Tai Le, ';
+ if (Value[2] and (1 shl 31)) <> 0 then Result := Result + 'New Tai Lue, ';
+ if (Value[3] and (1 shl  0)) <> 0 then Result := Result + 'Buginese, ';
+ if (Value[3] and (1 shl  1)) <> 0 then Result := Result + 'Glagolitic, ';
+ if (Value[3] and (1 shl  2)) <> 0 then Result := Result + 'Tifinagh, ';
+ if (Value[3] and (1 shl  3)) <> 0 then Result := Result + 'Yijing Hexagram Symbols, ';
+ if (Value[3] and (1 shl  4)) <> 0 then Result := Result + 'Syloti Nagri, ';
+ if (Value[3] and (1 shl  5)) <> 0 then Result := Result + 'Linear B Syllabary & Ideograms, Aegean Numbers, ';
+ if (Value[3] and (1 shl  6)) <> 0 then Result := Result + 'Ancient Greek Numbers, ';
+ if (Value[3] and (1 shl  7)) <> 0 then Result := Result + 'Ugaritic, ';
+ if (Value[3] and (1 shl  8)) <> 0 then Result := Result + 'Old Persian, ';
+ if (Value[3] and (1 shl  9)) <> 0 then Result := Result + 'Shavian, ';
+ if (Value[3] and (1 shl 10)) <> 0 then Result := Result + 'Osmanya, ';
+ if (Value[3] and (1 shl 11)) <> 0 then Result := Result + 'Cypriot Syllabary, ';
+ if (Value[3] and (1 shl 12)) <> 0 then Result := Result + 'Kharoshthi, ';
+ if (Value[3] and (1 shl 13)) <> 0 then Result := Result + 'Tai Xuan Jing Symbols, ';
+ if (Value[3] and (1 shl 14)) <> 0 then Result := Result + 'Cuneiform, ';
+ if (Value[3] and (1 shl 15)) <> 0 then Result := Result + 'Counting Rod Numerals, ';
+ if (Value[3] and (1 shl 16)) <> 0 then Result := Result + 'Sundanese, ';
+ if (Value[3] and (1 shl 17)) <> 0 then Result := Result + 'Lepcha, ';
+ if (Value[3] and (1 shl 18)) <> 0 then Result := Result + 'Ol Chiki, ';
+ if (Value[3] and (1 shl 19)) <> 0 then Result := Result + 'Saurashtra, ';
+ if (Value[3] and (1 shl 20)) <> 0 then Result := Result + 'Kayah Li, ';
+ if (Value[3] and (1 shl 21)) <> 0 then Result := Result + 'Rejang, ';
+ if (Value[3] and (1 shl 22)) <> 0 then Result := Result + 'Cham, ';
+ if (Value[3] and (1 shl 23)) <> 0 then Result := Result + 'Ancient Symbols, ';
+ if (Value[3] and (1 shl 24)) <> 0 then Result := Result + 'Phaistos Disc, ';
+ if (Value[3] and (1 shl 25)) <> 0 then Result := Result + 'Carian, Lycian & Lydian, ';
+ if (Value[3] and (1 shl 26)) <> 0 then Result := Result + 'Domino & Mahjong Tiles, ';
+
+ // remove last comma
+ if Length(Result) > 0
+  then SetLength(Result, Length(Result) - 2);
+end;
+
+function CodePageRangeToString(Value: TOS2CodePageRange): string;
+begin
+ if (Value[0] and 1) <> 0 then Result := 'Latin 1, ' else Result := '';
+ if (Value[0] and (1 shl  1)) <> 0 then Result := Result + 'Latin 2: Eastern Europe, ';
+ if (Value[0] and (1 shl 2)) <> 0 then Result := Result + 'Cyrillic, ';
+ if (Value[0] and (1 shl 3)) <> 0 then Result := Result + 'Greek, ';
+ if (Value[0] and (1 shl 4)) <> 0 then Result := Result + 'Turkish, ';
+ if (Value[0] and (1 shl 5)) <> 0 then Result := Result + 'Hebrew, ';
+ if (Value[0] and (1 shl 6)) <> 0 then Result := Result + 'Arabic, ';
+ if (Value[0] and (1 shl 7)) <> 0 then Result := Result + 'Windows Baltic, ';
+ if (Value[0] and (1 shl 8)) <> 0 then Result := Result + 'Vietnamese, ';
+ if (Value[0] and (1 shl 16)) <> 0 then Result := Result + 'Thai, ';
+ if (Value[0] and (1 shl 17)) <> 0 then Result := Result + 'JIS/Japan, ';
+ if (Value[0] and (1 shl 18)) <> 0 then Result := Result + 'Chinese: Simplified chars--PRC and Singapore, ';
+ if (Value[0] and (1 shl 19)) <> 0 then Result := Result + 'Korean Wansung, ';
+ if (Value[0] and (1 shl 20)) <> 0 then Result := Result + 'Chinese: Traditional chars--Taiwan and Hong Kong, ';
+ if (Value[0] and (1 shl 21)) <> 0 then Result := Result + 'Korean Johab, ';
+ if (Value[0] and (1 shl 29)) <> 0 then Result := Result + 'Character Set (US Roman), ';
+ if (Value[0] and (1 shl 30)) <> 0 then Result := Result + 'Character Set, ';
+ if (Value[0] and (1 shl 31)) <> 0 then Result := Result + 'Character Set, ';
+ if (Value[0] and (1 shl 16)) <> 0 then Result := Result + 'IBM Greek, ';
+ if (Value[1] and (1 shl 17)) <> 0 then Result := Result + 'MS-DOS Russian, ';
+ if (Value[1] and (1 shl 18)) <> 0 then Result := Result + 'MS-DOS Nordic, ';
+ if (Value[1] and (1 shl 19)) <> 0 then Result := Result + 'Arabic, ';
+ if (Value[1] and (1 shl 20)) <> 0 then Result := Result + 'MS-DOS Canadian French, ';
+ if (Value[1] and (1 shl 21)) <> 0 then Result := Result + 'Hebrew, ';
+ if (Value[1] and (1 shl 22)) <> 0 then Result := Result + 'MS-DOS Icelandic, ';
+ if (Value[1] and (1 shl 23)) <> 0 then Result := Result + 'MS-DOS Portuguese, ';
+ if (Value[1] and (1 shl 24)) <> 0 then Result := Result + 'IBM Turkish, ';
+ if (Value[1] and (1 shl 25)) <> 0 then Result := Result + 'IBM Cyrillic; primarily Russian, ';
+ if (Value[1] and (1 shl 26)) <> 0 then Result := Result + 'Latin 2, ';
+ if (Value[1] and (1 shl 27)) <> 0 then Result := Result + 'MS-DOS Baltic, ';
+ if (Value[1] and (1 shl 28)) <> 0 then Result := Result + 'Greek; former 437 G, ';
+ if (Value[1] and (1 shl 29)) <> 0 then Result := Result + 'Arabic; ASMO 708, ';
+ if (Value[1] and (1 shl 30)) <> 0 then Result := Result + 'WE/Latin 1, ';
+ if (Value[1] and (1 shl 31)) <> 0 then Result := Result + 'US, ';
+
+ // remove last comma
+ if Length(Result) > 0
+  then SetLength(Result, Length(Result) - 2);
+end;
+
+function WordToFontSelectionFlags(Value: Word): TOS2FontSelectionFlags;
+begin
+ if (Value and 1) <> 0 then Result := [fsfItalic] else Result := [];
+ if (Value and (1 shl 1)) <> 0 then Result := Result + [fsfUnderscore];
+ if (Value and (1 shl 2)) <> 0 then Result := Result + [fsfNegative];
+ if (Value and (1 shl 3)) <> 0 then Result := Result + [fsfOutlined];
+ if (Value and (1 shl 4)) <> 0 then Result := Result + [fsfStrikeout];
+ if (Value and (1 shl 5)) <> 0 then Result := Result + [fsfBold];
+ if (Value and (1 shl 6)) <> 0 then Result := Result + [fsfRegular];
+ if (Value and (1 shl 7)) <> 0 then Result := Result + [fsfUseTypoMetrics];
+ if (Value and (1 shl 8)) <> 0 then Result := Result + [fsfWws];
+ if (Value and (1 shl 9)) <> 0 then Result := Result + [fsfOblique];
+end;
+
+function FontSelectionFlagsToWord(Value: TOS2FontSelectionFlags): Word;
+begin
+ if fsfItalic in Value then Result := 1 else Result := 0;
+ if fsfUnderscore in Value then Result := Result + 1 shl 1;
+ if fsfNegative in Value then Result := Result + 1 shl 2;
+ if fsfOutlined in Value then Result := Result + 1 shl 3;
+ if fsfStrikeout in Value then Result := Result + 1 shl 4;
+ if fsfBold in Value then Result := Result + 1 shl 5;
+ if fsfRegular in Value then Result := Result + 1 shl 6;
+ if fsfUseTypoMetrics in Value then Result := Result + 1 shl 7;
+ if fsfWws in Value then Result := Result + 1 shl 8;
+ if fsfOblique in Value then Result := Result + 1 shl 9;
+end;
+
+function FontSelectionFlagsToString(Value: TOS2FontSelectionFlags): string;
+begin
+ if fsfItalic in Value then Result := 'Italic, ' else Result := '';
+ if fsfUnderscore in Value then Result := Result + 'Underscore, ';
+ if fsfNegative in Value then Result := Result + 'Negative, ';
+ if fsfOutlined in Value then Result := Result + 'Outlined, ';
+ if fsfStrikeout in Value then Result := Result + 'Strikeout, ';
+ if fsfBold in Value then Result := Result + 'Bold, ';
+ if fsfRegular in Value then Result := Result + 'Regular, ';
+ if fsfUseTypoMetrics in Value then Result := Result + 'Use Typo Metrics, ';
+ if fsfWws in Value then Result := Result + 'Weight/Width/Slope, ';
+ if fsfOblique in Value then Result := Result + 'Oblique, ';
+
+ // remove last comma
+ if Length(Result) > 0
+  then SetLength(Result, Length(Result) - 2);
 end;
 
 function DefaultGlyphName(Value: Word): string;

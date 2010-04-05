@@ -88,6 +88,8 @@ resourcestring
   RCStrWrongMajorVersion = 'Wrong major version (%d)';
   RCStrWrongRangeShift = 'Wrong range shift!';
   RCStrWrongSearchRange = 'Wrong search range!';
+  RCStrCodePageRangeTableUndefined = 'Code Page Range Table undefined!';
+  RCStrAddendumTableUndefined = 'Addendum Table undefined!';
   {$IFDEF ValidateEveryReadOperation}
   RCStrStreamReadError = 'Stream read error!';
   {$ENDIF}
