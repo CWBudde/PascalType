@@ -191,7 +191,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
@@ -267,13 +267,9 @@ begin
 end;
 
 procedure TPascalTypeEmbeddedBitmapDataTable.SaveToStream(Stream: TStream);
-//var Value32 : Cardinal;
 begin
  inherited;
-
- with Stream do
-  begin
-  end;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -338,7 +334,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read number of BitmapSize tables
    BitmapSizeCount := ReadSwappedCardinal(Stream);
@@ -434,7 +430,7 @@ begin
 
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read horizontal pixels per Em
    Read(FPpemX, 1);
@@ -594,7 +590,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read number of bitmap scale tables
    BitmapScaleCount := ReadSwappedCardinal(Stream);

@@ -59,6 +59,7 @@ type
   published
     procedure TestInterpreteLocalFonts;
     procedure TestInterpreteWindowsFonts;
+    procedure TestWriteFont;
   end;
 
 implementation
@@ -152,7 +153,6 @@ procedure TTestPascalTypeScanner.TestScanWindowsFonts;
 var
   SR          : TSearchRec;
   Succeed     : Boolean;
-  PWindowsDir : array [0..MAX_PATH] of Char;
 begin
  SetCurrentDir(GetFontDirectory);
 
@@ -193,7 +193,6 @@ procedure TTestPascalTypeInterpreter.TestInterpreteLocalFonts;
 var
   SR          : TSearchRec;
   Succeed     : Boolean;
-  PWindowsDir : array [0..MAX_PATH] of Char;
 begin
  if FindFirst('*.ttf', faAnyFile, SR) = 0 then
   try
@@ -216,7 +215,6 @@ procedure TTestPascalTypeInterpreter.TestInterpreteWindowsFonts;
 var
   SR          : TSearchRec;
   Succeed     : Boolean;
-  PWindowsDir : array [0..MAX_PATH] of Char;
 begin
  SetCurrentDir(GetFontDirectory);
 
@@ -235,6 +233,25 @@ begin
   finally
    FindClose(SR);
   end;
+end;
+
+procedure TTestPascalTypeInterpreter.TestWriteFont;
+var
+  ResourceStream : TResourceStream;
+  TempStream     : TMemoryStream;
+begin
+ ResourceStream := TResourceStream.Create(HInstance, 'Default', 'TTFFONT');
+ try
+  FPascalTypeInterpreter.LoadFromStream(ResourceStream);
+  TempStream := TMemoryStream.Create;
+  try
+   FPascalTypeInterpreter.SaveToStream(TempStream);
+  finally
+   FreeAndNil(TempStream);
+  end;
+ finally
+  FreeAndNil(ResourceStream);
+ end;
 end;
 
 initialization

@@ -19,32 +19,57 @@ type
     AcEditCut: TEditCut;
     AcEditPaste: TEditPaste;
     AcEditUndo: TEditUndo;
+    AcFileExit: TFileExit;
     AcFileOpen: TFileOpen;
+    AcFileSaveAs: TFileSaveAs;
     ActionList: TActionList;
     CbFontSize: TComboBox;
     CoolBar: TCoolBar;
     FontDialog: TFontDialog;
+    FrFontHeader: TFrameFontHeader;
     LbFontSize: TLabel;
     ListBox: TListBox;
     ListView: TListView;
     MainMenu: TMainMenu;
     MIAbout: TMenuItem;
+    MIArial: TMenuItem;
+    MIArialBold: TMenuItem;
+    MIArialBoldItalic: TMenuItem;
+    MIArialItalic: TMenuItem;
+    MIArialRegular: TMenuItem;
     MiCopy: TMenuItem;
+    MICourierNew: TMenuItem;
+    MICourierNewBold: TMenuItem;
+    MICourierNewBoldItalic: TMenuItem;
+    MICourierNewItalic: TMenuItem;
+    MICourierRegular: TMenuItem;
     MICut: TMenuItem;
     MIEdit: TMenuItem;
     MIExit: TMenuItem;
     MIFile: TMenuItem;
     MIHelp: TMenuItem;
+    MIInternal: TMenuItem;
+    MINew: TMenuItem;
     MIOpen: TMenuItem;
+    MiOpenDefaultFonts: TMenuItem;
     MIOpenFromInstalled: TMenuItem;
     MIPaste: TMenuItem;
+    MISave: TMenuItem;
+    MISaveAs: TMenuItem;
     MIStatusBar: TMenuItem;
+    MITimesNewRoman: TMenuItem;
+    MITimesNewRomanBold: TMenuItem;
+    MITimesNewRomanBoldItalic: TMenuItem;
+    MITimesNewRomanItalic: TMenuItem;
+    MITimesNewRomanRegular: TMenuItem;
     MIToolbar: TMenuItem;
     MIUndo: TMenuItem;
     MIView: TMenuItem;
+    MIWingdings: TMenuItem;
     N1: TMenuItem;
     N2: TMenuItem;
     N3: TMenuItem;
+    N4: TMenuItem;
     PaintBox: TPaintBox;
     PnMain: TPanel;
     PnPaintBox: TPanel;
@@ -59,31 +84,6 @@ type
     ToolBar: TToolBar;
     ToolbarImages: TImageList;
     TreeView: TTreeView;
-    FrFontHeader: TFrameFontHeader;
-    MiOpenDefaultFonts: TMenuItem;
-    MIArial: TMenuItem;
-    MIArialBold: TMenuItem;
-    MIArialItalic: TMenuItem;
-    MIArialBoldItalic: TMenuItem;
-    MICourierNew: TMenuItem;
-    MICourierNewBold: TMenuItem;
-    MICourierNewItalic: TMenuItem;
-    MICourierNewBoldItalic: TMenuItem;
-    MIArialRegular: TMenuItem;
-    MICourierRegular: TMenuItem;
-    MITimesNewRoman: TMenuItem;
-    MITimesNewRomanRegular: TMenuItem;
-    MITimesNewRomanBold: TMenuItem;
-    MITimesNewRomanItalic: TMenuItem;
-    MITimesNewRomanBoldItalic: TMenuItem;
-    MIWingdings: TMenuItem;
-    AcFileSaveAs: TFileSaveAs;
-    AcFileExit: TFileExit;
-    MISaveAs: TMenuItem;
-    MINew: TMenuItem;
-    MISave: TMenuItem;
-    MIInternal: TMenuItem;
-    N4: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -3417,26 +3417,49 @@ end;
 procedure TFmTTF.LoadFromFile(Filename: TFileName);
 var
   Start, Stop, Freq : Int64;
+  MemoryFileStream  : TMemoryStream;
 begin
  if FileExists(FileName) then
   begin
-   // query start
-   QueryPerformanceCounter(Start);
-
-   // load font file
-   FRasterizer.Interpreter.LoadFromFile(FileName);
-
-   // query stop
-   QueryPerformanceCounter(Stop);
-
-   // query performance frequency
-   QueryPerformanceFrequency(Freq);
-
    // initialize listview
    InitializeDefaultListView;
 
-   // add loading time
-   ListViewData(['loading time', FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms']);
+   // create temporary memory strem
+   MemoryFileStream := TMemoryStream.Create;
+   try
+    // query start
+    QueryPerformanceCounter(Start);
+
+    // load data from file
+    MemoryFileStream.LoadFromFile(Filename);
+
+    // query stop
+    QueryPerformanceCounter(Stop);
+
+    // query performance frequency
+    QueryPerformanceFrequency(Freq);
+
+    // add loading time
+    ListViewData(['loading time', FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms']);
+
+    // query start
+    QueryPerformanceCounter(Start);
+
+    // load font file
+    FRasterizer.Interpreter.LoadFromStream(MemoryFileStream);
+
+    // query stop
+    QueryPerformanceCounter(Stop);
+
+    // query performance frequency
+    QueryPerformanceFrequency(Freq);
+
+    // add loading time
+    ListViewData(['interpreting time', FloatToStrF((Stop - Start) * 1000 / Freq, ffGeneral, 4, 4) + ' ms']);
+
+   finally
+    FreeAndNil(MemoryFileStream);
+   end;
 
    // clear existing items on treeview
    TreeView.Items.Clear;
@@ -3726,7 +3749,11 @@ begin
        with TTrueTypeFontGlyphDataTable(OptionalTable[OptTableIndex]) do
         for SubtableIndex := 0 to GlyphDataCount - 1 do
          begin
-          SubNode := Items.AddChildObject(Node, 'Glyph #' + IntToStr(SubtableIndex + 1), GlyphData[SubtableIndex]);
+          with PostScriptTable.PostscriptV2Table
+           do SubNode := Items.AddChildObject(Node, 'Glyph #' +
+                IntToStr(SubtableIndex + 1) + ' (' +
+                GlyphIndexToString(SubtableIndex) + ')',
+                GlyphData[SubtableIndex]);
           if Assigned(GlyphData[SubtableIndex]) then
            begin
             Items.AddChildObject(SubNode, 'Outline', GlyphData[SubtableIndex]);

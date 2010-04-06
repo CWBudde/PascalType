@@ -209,8 +209,8 @@ type
     FGlyphClassDef      : TCustomOpenTypeClassDefinitionTable; // Class definition table for glyph type
     FAttachList         : Word; // Offset to list of glyphs with attachment points-from beginning of GDEF header (may be NULL)
     FLigCaretList       : Word; // Offset to list of positioning points for ligature carets-from beginning of GDEF header (may be NULL)
-    FMarkAttachClassDef : TCustomOpenTypeClassDefinitionTable; // Offset to class definition table for mark attachment type-from beginning of GDEF header (may be NULL)
-    FMarkGlyphSetsDef   : TOpenTypeMarkGlyphSetTable; // Offset to the table of mark set definitions - from beginning of GDEF header (may be NULL)
+    FMarkAttachClassDef : TCustomOpenTypeClassDefinitionTable; // Class definition table for mark attachment type (may be nil)
+    FMarkGlyphSetsDef   : TOpenTypeMarkGlyphSetTable; // Table of mark set definitions (may be nil)
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -757,7 +757,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read start glyph
    FStartGlyph := ReadSwappedWord(Stream);
@@ -849,7 +849,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 2 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read ClassRangeRecords length
    SetLength(FClassRangeRecords, ReadSwappedWord(Stream));
@@ -924,13 +924,20 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FTableFormat := ReadSwappedWord(Stream);
 
+   if FTableFormat > 1
+    then raise EPascalTypeError.Create(RCStrUnknownVersion);
+
    // read coverage length
    SetLength(FCoverage, ReadSwappedWord(Stream));
+
+   // check (minimum) table size
+   if Position + Length(FCoverage) * SizeOf(Cardinal) > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read coverage data
    for CoverageIndex := 0 to Length(FCoverage) - 1
@@ -1084,8 +1091,8 @@ end;
 
 procedure TOpenTypeBaselineScriptListTable.SaveToStream(Stream: TStream);
 begin
-  inherited;
-
+ inherited;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -1161,8 +1168,7 @@ end;
 procedure TOpenTypeAxisTable.SaveToStream(Stream: TStream);
 begin
  inherited;
-
- raise Exception.Create(RCStrNotImplemented);
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -1276,11 +1282,7 @@ end;
 procedure TOpenTypeBaselineTable.SaveToStream(Stream: TStream);
 begin
  inherited;
-
- with Stream do
-  begin
-
-  end;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -1951,7 +1953,7 @@ end;
 procedure TOpenTypeScriptListTable.SaveToStream(Stream: TStream);
 begin
  inherited;
-
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -2482,6 +2484,7 @@ end;
 procedure TOpenTypeLookupTable.SaveToStream(Stream: TStream);
 begin
  inherited;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 procedure TOpenTypeLookupTable.SetLookupFlag(const Value: Word);
@@ -2616,6 +2619,7 @@ end;
 procedure TOpenTypeLookupListTable.SaveToStream(Stream: TStream);
 begin
  inherited;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -2873,8 +2877,8 @@ end;
 procedure TCustomOpenTypeJustificationLanguageSystemTable.SaveToStream(
   Stream: TStream);
 begin
-  inherited;
-
+ inherited;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -3177,7 +3181,7 @@ begin
    StartPos := Position;
 
    if Position + 6 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
@@ -3190,7 +3194,7 @@ begin
 
    // check if table is complete
    if Position + Length(Directory) * SizeOf(TJustificationScriptDirectoryEntry) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read directory entry
    for DirIndex := 0 to Length(Directory) - 1 do

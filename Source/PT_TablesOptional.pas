@@ -617,7 +617,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read reserved 1
    FReserved[0] := ReadSwappedWord(Stream);
@@ -630,7 +630,7 @@ begin
 
    // check if table contains the entire signature
    if Position + Length(FSignature) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read signature length
    Read(FSignature[0], Length(FSignature));
@@ -748,7 +748,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // store stream start position
    StartPos := Position;
@@ -766,7 +766,7 @@ begin
    FFlags := WordToDigitalSignatureFlags(ReadSwappedWord(Stream));
 
    if Position + Length(Directory) * SizeOf(TDigitalSignatureDirectory) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read directory entry
    for DirIndex := 0 to Length(Directory) - 1 do
@@ -795,7 +795,7 @@ begin
 
       // check if table contains the entire signature
       if Position + Length > Size
-       then raise EPascalTypeError.Create(RCStrTableIncomplete);
+       then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
       // load digital signature from stream
       SigBlock.LoadFromStream(Stream);
@@ -940,7 +940,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := ReadSwappedWord(Stream);
@@ -954,7 +954,7 @@ begin
 
    // check (minimum) table size
    if Position + 4 * Length(FGaspRanges) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    for RangeIndex := 0 to Length(FGaspRanges) - 1 do
     begin
@@ -1056,7 +1056,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 2 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read ppem
    Read(Fppem, 1);
@@ -1069,7 +1069,7 @@ begin
 
    // check (minimum) table size
    if Position + Length(FWidths) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read widths
    Read(FWidths[0], Length(FWidths));
@@ -1190,7 +1190,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read format type
    FVersion := ReadSwappedWord(Stream);
@@ -1315,7 +1315,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read number of pairs
    SetLength(FPairs, ReadSwappedWord(Stream));
@@ -1324,7 +1324,7 @@ begin
    SearchRange := ReadSwappedWord(Stream);
 
    // confirm search range has a valid value
-   if SearchRange > Round(6 * (Power(2, Floor(Log2(Length(FPairs))))))
+   if SearchRange > Round(6 * (1 shl FloorLog2(Length(FPairs))))
     then raise EPascalTypeError.Create(RCStrErrorInKerningSubTable + ': ' + RCStrWrongSearchRange);
 
    // read entry selector
@@ -1410,15 +1410,13 @@ end;
 procedure TPascalTypeKerningFormat2SubTable.LoadFromStream(Stream: TStream);
 begin
  inherited;
-
- raise EPascalTypeError.Create('not yet implemented');
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 procedure TPascalTypeKerningFormat2SubTable.SaveToStream(Stream: TStream);
 begin
  inherited;
-
- raise EPascalTypeError.Create('not yet implemented');
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -1465,7 +1463,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := ReadSwappedWord(Stream);
@@ -1486,7 +1484,7 @@ begin
      begin
       // check minimum size
       if Position + FLength - 6 > Size
-       then raise EPascalTypeError.Create(RCStrTableIncomplete);
+       then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
       Seek(soFromCurrent, FLength - 6);
      end;
@@ -1706,7 +1704,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := ReadSwappedWord(Stream);
@@ -1806,7 +1804,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    Version := ReadSwappedWord(Stream);
@@ -1818,7 +1816,7 @@ begin
    SetLength(FVerticalPels, ReadSwappedWord(Stream));
                                   
    if Position + Length(FVerticalPels) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read vertical pel height
    Read(FVerticalPels[0], Length(FVerticalPels));
@@ -1930,7 +1928,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 54 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
@@ -2254,7 +2252,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read number of height records
    SetLength(FEntry, ReadSwappedWord(Stream));
@@ -2375,7 +2373,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 6 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := ReadSwappedWord(Stream);
@@ -2393,7 +2391,7 @@ begin
 
    // check (minimum) table size
    if Position + 6 * Length(FRatios) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read ratios
    for RatioIndex := 0 to Length(FRatios) - 1 do
@@ -2511,7 +2509,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 36 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := TFixedPoint(ReadSwappedCardinal(Stream));

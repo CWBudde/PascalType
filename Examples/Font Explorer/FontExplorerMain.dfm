@@ -97,6 +97,7 @@ object FmTTF: TFmTTF
         Font.Height = -11
         Font.Name = 'MS Sans Serif'
         Font.Style = []
+        ItemHeight = 13
         ItemIndex = 16
         ParentFont = False
         TabOrder = 0
@@ -135,6 +136,7 @@ object FmTTF: TFmTTF
       Font.Height = -13
       Font.Name = 'Courier New'
       Font.Style = []
+      ItemHeight = 16
       ParentFont = False
       TabOrder = 1
     end
@@ -188,7 +190,7 @@ object FmTTF: TFmTTF
     object ToolBar: TToolBar
       Left = 9
       Top = 0
-      Width = 682
+      Width = 678
       Height = 22
       Caption = 'ToolBar'
       EdgeInner = esNone

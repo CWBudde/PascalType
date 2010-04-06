@@ -97,10 +97,6 @@ type
   TPascalTypeDirectoryTable = class(TCustomPascalTypeTable)
   private
     FVersion             : Cardinal;  // A tag to indicate the OFA scaler (should be $10000)
-    FNumTables           : Word;      // number of tables
-    FSearchRange         : Word;      // (maximum power of 2 <= numTables) * 16
-    FEntrySelector       : Word;      // log2(maximum power of 2 <= numTables)
-    FRangeShift          : Word;      // numTables * 16 - searchRange
 
     // required tables
     FHeaderTable         : TPascalTypeDirectoryTableEntry;
@@ -126,6 +122,9 @@ type
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
+    procedure ClearAndBuildRequiredEntries;
+    function AddTableEntry(TableType: TTableType): TPascalTypeDirectoryTableEntry;
+
     property Version: Cardinal read FVersion;
     property TableList: TPascalTypeDirectoryTableList read FTableList;
     property HeaderTable: TPascalTypeDirectoryTableEntry read FHeaderTable;
@@ -143,7 +142,7 @@ type
 implementation
 
 uses
-  PT_ResourceStrings;
+  PT_ResourceStrings, Math;
 
 function SortTableEntryByOffset(Item1, Item2: Pointer): Integer;
 begin
@@ -389,17 +388,20 @@ begin
  inherited;
 end;
 
+function TPascalTypeDirectoryTable.AddTableEntry(
+  TableType: TTableType): TPascalTypeDirectoryTableEntry;
+begin
+ Result := TPascalTypeDirectoryTableEntry.Create;
+ Result.TableType := TableType;
+ FTableList.Add(Result);
+end;
+
 procedure TPascalTypeDirectoryTable.AssignTo(Dest: TPersistent);
 begin
  if Dest is Self.ClassType then
   with TPascalTypeDirectoryTable(Dest) do
    begin
-    FVersion       := Self.FVersion;
-    FNumTables     := Self.FNumTables;
-    FSearchRange   := Self.FSearchRange;
-    FEntrySelector := Self.FEntrySelector;
-    FRangeShift    := Self.FRangeShift;
-
+    FVersion := Self.FVersion;
     FTableList.Assign(Self.FTableList);
    end else inherited;
 end;
@@ -408,24 +410,85 @@ procedure TPascalTypeDirectoryTable.ResetToDefaults;
 begin
  inherited;
  FVersion       := $10000;
- FNumTables     := 0;
- FSearchRange   := 0;
- FEntrySelector := 0;
- FRangeShift    := 0;
 
+ // clear fixed table entries
  if Assigned(FHeaderTable)
   then FreeAndNil(FHeaderTable);
+
+ if Assigned(FMaxProfileDataEntry)
+  then FreeAndNil(FMaxProfileDataEntry);
+
+ if Assigned(FHorHeaderDataEntry)
+  then FreeAndNil(FHorHeaderDataEntry );
+
+ if Assigned(FHorMetricsDataEntry)
+  then FreeAndNil(FHorMetricsDataEntry);
+
+ if Assigned(FCharMapDataEntry)
+  then FreeAndNil(FCharMapDataEntry);
+
+ if Assigned(FNameDataEntry)
+  then FreeAndNil(FNameDataEntry);
+
+ if Assigned(FPostscriptDataEntry)
+  then FreeAndNil(FPostscriptDataEntry);
+
+ if Assigned(FLocationDataEntry)
+  then FreeAndNil(FLocationDataEntry);
+
+ if Assigned(FGlyphDataEntry)
+  then FreeAndNil(FGlyphDataEntry);
+
+ if Assigned(FOS2TableEntry)
+  then FreeAndNil(FOS2TableEntry);
 
  // clear table list
  FTableList.Clear;
 end;
 
+procedure TPascalTypeDirectoryTable.ClearAndBuildRequiredEntries;
+begin
+ ResetToDefaults;
+
+ // create head table entry
+ FHeaderTable := TPascalTypeDirectoryTableEntry.Create;
+ FHeaderTable.TableType := 'head';
+
+ // create maxp table entry
+ FMaxProfileDataEntry := TPascalTypeDirectoryTableEntry.Create;
+ FMaxProfileDataEntry.TableType := 'maxp';
+
+ // create hhea table entry
+ FHorHeaderDataEntry := TPascalTypeDirectoryTableEntry.Create;
+ FHorHeaderDataEntry.TableType := 'hhea';
+
+ // create hmtx table entry
+ FHorMetricsDataEntry := TPascalTypeDirectoryTableEntry.Create;
+ FHorMetricsDataEntry.TableType := 'hmtx';
+
+ // create cmap table entry
+ FCharMapDataEntry := TPascalTypeDirectoryTableEntry.Create;
+ FCharMapDataEntry.TableType := 'cmap';
+
+ // create name table entry
+ FNameDataEntry := TPascalTypeDirectoryTableEntry.Create;
+ FNameDataEntry.TableType := 'name';
+
+ // create post table entry
+ FPostscriptDataEntry := TPascalTypeDirectoryTableEntry.Create;
+ FPostscriptDataEntry.TableType := 'post';
+end;
+
 procedure TPascalTypeDirectoryTable.LoadFromStream(Stream: TStream);
 var
-  TableIndex : Integer;
-  TableEntry : TPascalTypeDirectoryTableEntry;
-  Value32    : Cardinal;
-  Value16    : Word;
+  TableIndex    : Integer;
+  TableEntry    : TPascalTypeDirectoryTableEntry;
+  NumTables     : Word; // number of tables
+  {$IFDEF AmbigiousExceptions}
+  SearchRange   : Word; // (maximum power of 2 <= numTables) * 16
+  EntrySelector : Word; // log2(maximum power of 2 <= numTables)
+  RangeShift    : Word; // numTables * 16 - searchRange
+   {$ENDIF}
 begin
  inherited;
 
@@ -436,31 +499,36 @@ begin
     then raise EPascalTypeError.Create(RCStrWrongFilesize);
 
    // read version
-   Read(Value32, SizeOf(Cardinal));
-   FVersion := Swap32(Value32);
+   FVersion := ReadSwappedCardinal(Stream);
 
    // check for known scaler types (OSX and Windows)
    if not ((Version = $74727565) or (Version = $00010000))
     then raise EPascalTypeError.Create(RCStrUnknownVersion);
 
    // read number of tables
-   Read(Value16, SizeOf(Word));
-   FNumTables := Swap16(Value16);
+   NumTables := ReadSwappedWord(Stream);
 
+   {$IFDEF AmbigiousExceptions}
    // read search range
-   Read(Value16, SizeOf(Word));
-   FSearchRange := Swap16(Value16);
+   SearchRange := ReadSwappedWord(Stream);
+   if SearchRange > Round(16 * (1 shl FloorLog2(NumTables)))
+    then raise EPascalTypeError.Create(RCStrWrongSearchRange);
 
    // read entry selector
-   Read(Value16, SizeOf(Word));
-   FEntrySelector := Swap16(Value16);
+   EntrySelector := ReadSwappedWord(Stream);
+   if EntrySelector < Round(Log2(SearchRange / 16))
+    then raise EPascalTypeError.Create(RCStrWrongEntrySelector);
 
    // read range shift
-   Read(Value16, SizeOf(Word));
-   FRangeShift := Swap16(Value16);
+   RangeShift := ReadSwappedWord(Stream);
+   if RangeShift <> (16 * NumTables - SearchRange)
+    then raise EPascalTypeError.Create(RCStrWrongRangeShift);
+   {$ELSE}
+   Seek(6, soFromCurrent);
+   {$ENDIF}
 
    // read table entries from stream
-   for TableIndex := 0 to FNumTables - 1 do
+   for TableIndex := 0 to NumTables - 1 do
     begin
      TableEntry := TPascalTypeDirectoryTableEntry.Create;
      TableEntry.LoadFromStream(Stream);

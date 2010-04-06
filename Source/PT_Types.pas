@@ -32,11 +32,18 @@ unit PT_Types;
 
 interface
 
+{$I PT_Compiler.inc}
+
 uses
   SysUtils;
 
 type
   EPascalTypeError = class(Exception);
+  EPascalTypeTableIncomplete = class(EPascalTypeError);
+  {$IFDEF ValidateEveryReadOperation}
+  EPascalTypeStremReadError = class(EPascalTypeTableIncomplete);
+  {$ENDIF}
+
 
   TTableType = array [0..3] of AnsiChar;
 
@@ -470,6 +477,7 @@ type
     vfFontRepackagers,
     vcVendorsOfUniqueTypefaces);
 
+function FloorLog2(Value: Cardinal): Cardinal;
 function FontHeaderTableFlagsToWord(Value: TFontHeaderTableFlags): Word;
 function WordToFontHeaderTableFlags(Value: Word): TFontHeaderTableFlags;
 function WordToDigitalSignatureFlags(Value: Word): TDigitalSignatureFlags;
@@ -495,6 +503,40 @@ function FixedPointToNonAlphabeticCode(Value: TFixedPoint): TNonAlphabeticCode;
 function NonAlphabeticCodeToFixedPoint(Value: TNonAlphabeticCode): TFixedPoint;
 
 implementation
+
+function FloorLog2(Value: Cardinal): Cardinal;
+begin
+ // check if Value is zero as log2(0) is undefined
+ if (Value = 0)
+  then raise EPascalTypeError.Create('FloorLog2 Error');
+
+ // set basic value
+ Result := 0;
+
+ if (Value >= 1 shl 16) then
+  begin
+   Value := Value shr 16;
+   Result := Result + 16;
+  end;
+ if (Value >= 1 shl  8) then
+  begin
+   Value := Value shr  8;
+   Result := Result +  8;
+  end;
+ if (Value >= 1 shl  4) then
+  begin
+   Value := Value shr  4;
+   Result := Result +  4;
+  end;
+ if (Value >= 1 shl  2) then
+  begin
+   Value := Value shr  2;
+   Result := Result +  2;
+  end;
+ if (Value >= 1 shl  1)
+  then Result := Result + 1;
+end;
+
 
 function FontHeaderTableFlagsToWord(Value: TFontHeaderTableFlags): Word;
 begin

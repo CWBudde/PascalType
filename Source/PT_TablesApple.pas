@@ -573,7 +573,7 @@ begin
  with Stream do
   begin
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    Read(Value32, SizeOf(TFixedPoint));
@@ -871,7 +871,7 @@ begin
   begin
    // check if table is complete
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read format
    Read(Value16, SizeOf(Word));
@@ -1032,6 +1032,7 @@ end;
 procedure TPascalTypeBitmapDataTable.SaveToStream(Stream: TStream);
 begin
  inherited;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -1065,7 +1066,7 @@ begin
   begin
    // check if table is complete
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read value
    Read(Value32, SizeOf(Cardinal));
@@ -1233,7 +1234,7 @@ begin
   begin
    // check if table is complete
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read description count
    Read(Value32, SizeOf(Cardinal));
@@ -1325,7 +1326,7 @@ begin
   begin
    // check if table is complete
    if Position + 12 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read feature
    FFeature := ReadSwappedWord(Stream);
@@ -1346,8 +1347,8 @@ end;
 
 procedure TPascalTypeAppleFeatureTable.SaveToStream(Stream: TStream);
 begin
-  inherited;
-
+ inherited;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -1391,8 +1392,6 @@ procedure TPascalTypeFeatureTable.LoadFromStream(Stream: TStream);
 var
   FeatureNameCount : Word;
   FeatureNameIndex : Word;
-  Value16          : Word;
-  Value32          : Cardinal;
   AppleFeature     : TPascalTypeAppleFeatureTable;
 begin
  inherited;
@@ -1401,7 +1400,7 @@ begin
   begin
    // check if table is complete
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read feature name count
    FeatureNameCount := ReadSwappedWord(Stream);
@@ -1436,7 +1435,7 @@ end;
 procedure TPascalTypeFeatureTable.SaveToStream(Stream: TStream);
 begin
  inherited;
-
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -1484,7 +1483,7 @@ end;
 procedure TPascalTypeFontVariationTable.SaveToStream(Stream: TStream);
 begin
  inherited;
-
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -1524,7 +1523,7 @@ begin
   begin
    // check if table is complete
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read format
    Read(Value16, SizeOf(Word));
@@ -1594,7 +1593,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read extra plain
    FExtraPlain := ReadSwappedWord(Stream);
@@ -1721,7 +1720,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 12 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // remember start position
    StartPosition := Position;
@@ -1775,7 +1774,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read number of chains
    Read(Value32, SizeOf(Cardinal));
@@ -1802,7 +1801,6 @@ end;
 
 procedure TPascalTypeGlyphMetamorphosisTable.SaveToStream(Stream: TStream);
 var
-  Value32    : Cardinal;
   ChainIndex : Cardinal;
   ChainTable : TPascalTypeGlyphMetamorphosisChainTable;
 begin
@@ -1846,7 +1844,7 @@ end;
 function TPascalTypeExtendedGlyphMetamorphosisChainTable.GetFeature(
   Index: Cardinal): TFeatureSubtableRecord;
 begin
- if (Index >= 0) and (Index < Length(FFeatureArray))
+ if (Index < Length(FFeatureArray))
   then Result := FFeatureArray[Index]
   else raise Exception.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
@@ -1870,7 +1868,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 12 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // remember start position
    StartPosition := Position;
@@ -1918,7 +1916,7 @@ procedure TPascalTypeExtendedGlyphMetamorphosisChainTable.SaveToStream(
   Stream: TStream);
 begin
  inherited;
-
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 procedure TPascalTypeExtendedGlyphMetamorphosisChainTable.SetDefaultFlags(
@@ -1957,7 +1955,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // check version (should be >= 2.0)
    if Version.Value < 2
@@ -1989,6 +1987,7 @@ end;
 procedure TPascalTypeExtendedGlyphMetamorphosisTable.SaveToStream(Stream: TStream);
 begin
  inherited;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -2024,7 +2023,7 @@ begin
  with Stream do
   begin
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read format
    Read(Value16, SizeOf(Word));
@@ -2038,6 +2037,7 @@ end;
 procedure TPascalTypeOpticalBoundsTable.SaveToStream(Stream: TStream);
 begin
  inherited;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -2076,7 +2076,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read format
    FFormat := ReadSwappedWord(Stream);
@@ -2101,7 +2101,7 @@ end;
 procedure TPascalTypeTrackingTable.SaveToStream(Stream: TStream);
 begin
  inherited;
-
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -2138,7 +2138,7 @@ end;
 procedure TPascalTypeZapfTable.SaveToStream(Stream: TStream);
 begin
  inherited;
-
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 

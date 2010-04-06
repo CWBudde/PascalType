@@ -178,7 +178,7 @@ begin
   begin
    // check if table is complete
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := ReadSwappedWord(Stream);
@@ -254,7 +254,7 @@ begin
   begin
    // check if table is complete
    if Position + 28 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := ReadSwappedCardinal(Stream);
@@ -278,7 +278,7 @@ begin
   begin
    // check if table is complete
    if Position + 28 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // write version
    WriteSwappedInt64(Stream, FVersion);
@@ -383,7 +383,7 @@ begin
   begin
    // check if table is complete
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
@@ -453,7 +453,7 @@ begin
   begin
    // check if table is complete
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := TFixedPoint(ReadSwappedCardinal(Stream));

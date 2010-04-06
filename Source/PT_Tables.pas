@@ -1416,7 +1416,7 @@ function ReadSwappedWord(Stream: TStream): Word;
 begin
  {$IFDEF ValidateEveryReadOperation}
  if Stream.Read(Result, SizeOf(Word)) <> SizeOf(Word)
-  then raise EPascalTypeError.Create(RCStrStreamReadError);
+  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
  {$ELSE}
  Stream.Read(Result, SizeOf(Word));
  {$ENDIF}
@@ -1427,7 +1427,7 @@ function ReadSwappedSmallInt(Stream: TStream): SmallInt;
 begin
  {$IFDEF ValidateEveryReadOperation}
  if Stream.Read(Result, SizeOf(SmallInt)) <> SizeOf(SmallInt)
-  then raise EPascalTypeError.Create(RCStrStreamReadError);
+  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
  {$ELSE}
  Stream.Read(Result, SizeOf(SmallInt));
  {$ENDIF}
@@ -1438,7 +1438,7 @@ function ReadSwappedCardinal(Stream: TStream): Cardinal;
 begin
  {$IFDEF ValidateEveryReadOperation}
  if Stream.Read(Result, SizeOf(Cardinal)) <> SizeOf(Cardinal)
-  then raise EPascalTypeError.Create(RCStrStreamReadError);
+  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
  {$ELSE}
  Stream.Read(Result, SizeOf(Cardinal));
  {$ENDIF}
@@ -1449,7 +1449,7 @@ function ReadSwappedInt64(Stream: TStream): Int64;
 begin
  {$IFDEF ValidateEveryReadOperation}
  if Stream.Read(Result, SizeOf(Int64)) <> SizeOf(Int64)
-  then raise EPascalTypeError.Create(RCStrStreamReadError);
+  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
  {$ELSE}
  Stream.Read(Result, SizeOf(Int64));
  {$ENDIF}
@@ -1559,7 +1559,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 54 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    Read(Value32, SizeOf(TFixedPoint));
@@ -1948,7 +1948,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read length
    FLength := ReadSwappedWord(Stream);
@@ -2003,7 +2003,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read length
    FLength := ReadSwappedWord(Stream);
@@ -2089,14 +2089,14 @@ begin
 
    // check (minimum) table size
    if StartPos + 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read length
    FLength := ReadSwappedWord(Stream);
 
    // check (minimum) table size
    if StartPos + FLength - 4 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read language
    FLanguage := ReadSwappedWord(Stream);
@@ -2108,7 +2108,7 @@ begin
    FSearchRange := ReadSwappedWord(Stream);
 
    // confirm search range has a valid value
-   if FSearchRange <> 2 * (Power(2, Floor(Log2(0.5 * FSegCountX2))))
+   if FSearchRange <> 2 * (1 shl FloorLog2(FSegCountX2 div 2))
     then raise EPascalTypeError.Create(RCStrCharMapError + ': ' + 'wrong search range!');
 
    // read entry selector
@@ -2435,7 +2435,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 2 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read format
    Value16 := ReadSwappedWord(Stream);
@@ -2636,7 +2636,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // store stream start position
    StartPos := Position;
@@ -2657,7 +2657,7 @@ begin
 
    // check if table is complete
    if Position + SubtableCount * 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read directory entry
    for SubtableIndex := 0 to SubtableCount - 1 do
@@ -2811,7 +2811,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 32 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    Read(Value32, SizeOf(TFixedPoint));
@@ -3128,6 +3128,11 @@ begin
  Result := 'hmtx';
 end;
 
+procedure TPascalTypeHorizontalMetricsTable.ResetToDefaults;
+begin
+ SetLength(FHorizontalMetrics, 1);
+end;
+
 procedure TPascalTypeHorizontalMetricsTable.LoadFromStream(Stream: TStream);
 var
   HorHead  : TPascalTypeHorizontalHeaderTable;
@@ -3168,16 +3173,39 @@ begin
   end;
 end;
 
-procedure TPascalTypeHorizontalMetricsTable.ResetToDefaults;
-begin
- SetLength(FHorizontalMetrics, 1);
-end;
-
 procedure TPascalTypeHorizontalMetricsTable.SaveToStream(Stream: TStream);
+var
+  HorHead  : TPascalTypeHorizontalHeaderTable;
+  MaxProf  : TPascalTypeMaximumProfileTable;
+  MtxIndex : Integer;
 begin
+ inherited;
+
+ HorHead := TPascalTypeHorizontalHeaderTable(FInterpreter.GetTableByTableClass(TPascalTypeHorizontalHeaderTable));
+ MaxProf := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableClass(TPascalTypeMaximumProfileTable));
+
+ // check if vertical metrics header is available
+ if HorHead = nil
+  then raise EPascalTypeError.Create(RCStrNoHorizontalHeader);
+
  with Stream do
   begin
-   Write(FHorizontalMetrics[0], Length(FHorizontalMetrics) * SizeOf(THorizontalMetric));
+   for MtxIndex := 0 to HorHead.NumOfLongHorMetrics - 1 do
+    with FHorizontalMetrics[MtxIndex] do
+     begin
+      // write advance width
+      WriteSwappedSmallInt(Stream, AdvanceWidth);
+
+      // write left side bearing
+      WriteSwappedSmallInt(Stream, Bearing);
+     end;
+
+   for MtxIndex := HorHead.NumOfLongHorMetrics to Length(FHorizontalMetrics)  - 1 do
+    with FHorizontalMetrics[MtxIndex] do
+     begin
+      // write advance width / left side bearing at once
+      WriteSwappedSmallInt(Stream, AdvanceWidth);
+     end;
   end;
 end;
 
@@ -3225,7 +3253,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 6 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read encoding ID
    FEncodingID := ReadSwappedWord(Stream);
@@ -3475,7 +3503,7 @@ begin
   begin
    // check for minimum table size
    if Position + 6 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // store start position as preliminary storage position in stream
    StoragePos := Position;
@@ -3494,7 +3522,7 @@ begin
 
    // check for minimum table size
    if Position + NumRecords * 12 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // clear current name record list 
    FNameRecords.Clear;
@@ -3539,10 +3567,7 @@ end;
 
 procedure TPascalTypeNameTable.SaveToStream(Stream: TStream);
 begin
- with Stream do
-  begin
-//   Write(FNameTableHeader, SizeOf(TNameTableHeader));
-  end;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 procedure TPascalTypeNameTable.SetFormat(const Value: Word);
@@ -3618,7 +3643,7 @@ begin
   begin
    // check (minimum) table size
    if Position + $20 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    Read(Value32, SizeOf(TFixedPoint));
@@ -4030,7 +4055,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 16 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read range from stream
    FUnicodeRange[0] := ReadSwappedCardinal(Stream);
@@ -5122,7 +5147,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read first cardinal
    FCodePageRange[0] := ReadSwappedCardinal(Stream);
@@ -5177,7 +5202,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 10 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read x-Height
    FXHeight := ReadSwappedWord(Stream);
@@ -5418,7 +5443,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 68 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
    FVersion := ReadSwappedWord(Stream);
@@ -5518,8 +5543,8 @@ begin
    {$IFDEF AmbigiousExceptions}
     else if FVersion = 4 then
      if (FFontSelection and $FF80) <> 0
-      then raise EPascalTypeError.Create(RCStrReservedValueError);
-   {$ENDIF}
+      then raise EPascalTypeError.Create(RCStrReservedValueError)
+   {$ENDIF};
 
    // read UnicodeFirstCharacterIndex
    FUnicodeFirstCharIndex := ReadSwappedWord(Stream);
@@ -5568,103 +5593,100 @@ end;
 
 procedure TPascalTypeOS2Table.SaveToStream(Stream: TStream);
 begin
- with Stream do
+ // write version
+ WriteSwappedWord(Stream, FVersion);
+
+ // write average horizontal character width
+ WriteSwappedWord(Stream, FXAvgCharWidth);
+
+ // write weight
+ WriteSwappedWord(Stream, FWeight);
+
+ // write width class
+ WriteSwappedWord(Stream, FWidthType);
+
+ // write font embedding rights
+ WriteSwappedWord(Stream, FFontEmbeddingFlags);
+
+ // write YSubscriptXSize
+ WriteSwappedWord(Stream, FYSubscriptXSize);
+
+ // write YSubscriptYSize
+ WriteSwappedWord(Stream, FYSubscriptYSize);
+
+ // write YSubScriptXOffset
+ WriteSwappedWord(Stream, FYSubScriptXOffset);
+
+ // write YSubscriptYOffset
+ WriteSwappedWord(Stream, FYSubscriptYOffset);
+
+ // write YSuperscriptXSize
+ WriteSwappedWord(Stream, FYSuperscriptXSize);
+
+ // write YSuperscriptYSize
+ WriteSwappedWord(Stream, FYSuperscriptYSize);
+
+ // write YSuperscriptXOffset
+ WriteSwappedWord(Stream, FYSuperscriptXOffset);
+
+ // write YSuperscriptYOffset
+ WriteSwappedWord(Stream, FYSuperscriptYOffset);
+
+ // write YStrikeoutSize
+ WriteSwappedWord(Stream, FYStrikeoutSize);
+
+ // write YStrikeoutPosition
+ WriteSwappedWord(Stream, FYStrikeoutPosition);
+
+ // write font family type
+ WriteSwappedWord(Stream, FFontFamilyType);
+
+ // write panose
+ FPanose.SaveToStream(Stream);
+
+ // write unicode range
+ FUnicodeRangeTable.SaveToStream(Stream);
+
+ // read font vendor identification
+ Stream.Write(FFontVendorID, 4);
+
+ // write font selection
+ WriteSwappedWord(Stream, FFontSelection);
+
+ // write UnicodeFirstCharacterIndex
+ WriteSwappedWord(Stream, FUnicodeFirstCharIndex);
+
+ // write UnicodeLastCharacterIndex
+ WriteSwappedWord(Stream, FUnicodeLastCharIndex);
+
+ // write TypographicAscender
+ WriteSwappedWord(Stream, FTypographicAscender);
+
+ // write TypographicDescender
+ WriteSwappedWord(Stream, FTypographicDescender);
+
+ // write TypographicLineGap
+ WriteSwappedWord(Stream, FTypographicLineGap);
+
+ // write WindowsAscent
+ WriteSwappedWord(Stream, FWindowsAscent);
+
+ // write WindowsDescent
+ WriteSwappedWord(Stream, FWindowsDescent);
+
+ // eventually write code page range and addendum table
+ if (FVersion > 0) then
   begin
-   // write version
-   WriteSwappedWord(Stream, FVersion);
+   // check if code page range has been set and eventually save to stream
+   if Assigned(FCodePageRange)
+    then FCodePageRange.SaveToStream(Stream)
+    else raise EPascalTypeError.Create(RCStrCodePageRangeTableUndefined);
 
-   // write average horizontal character width
-   WriteSwappedWord(Stream, FXAvgCharWidth);
-
-   // write weight
-   WriteSwappedWord(Stream, FWeight);
-
-   // write width class
-   WriteSwappedWord(Stream, FWidthType);
-
-   // write font embedding rights
-   WriteSwappedWord(Stream, FFontEmbeddingFlags);
-
-   // write YSubscriptXSize
-   WriteSwappedWord(Stream, FYSubscriptXSize);
-
-   // write YSubscriptYSize
-   WriteSwappedWord(Stream, FYSubscriptYSize);
-
-   // write YSubScriptXOffset
-   WriteSwappedWord(Stream, FYSubScriptXOffset);
-
-   // write YSubscriptYOffset
-   WriteSwappedWord(Stream, FYSubscriptYOffset);
-
-   // write YSuperscriptXSize
-   WriteSwappedWord(Stream, FYSuperscriptXSize);
-
-   // write YSuperscriptYSize
-   WriteSwappedWord(Stream, FYSuperscriptYSize);
-
-   // write YSuperscriptXOffset
-   WriteSwappedWord(Stream, FYSuperscriptXOffset);
-
-   // write YSuperscriptYOffset
-   WriteSwappedWord(Stream, FYSuperscriptYOffset);
-
-   // write YStrikeoutSize
-   WriteSwappedWord(Stream, FYStrikeoutSize);
-
-   // write YStrikeoutPosition
-   WriteSwappedWord(Stream, FYStrikeoutPosition);
-
-   // write font family type
-   WriteSwappedWord(Stream, FFontFamilyType);
-
-   // write panose
-   FPanose.SaveToStream(Stream);
-
-   // write unicode range
-   FUnicodeRangeTable.SaveToStream(Stream);
-
-   // read font vendor identification
-   Write(FFontVendorID, 4);
-
-   // write font selection
-   WriteSwappedWord(Stream, FFontSelection);
-
-   // write UnicodeFirstCharacterIndex
-   WriteSwappedWord(Stream, FUnicodeFirstCharIndex);
-
-   // write UnicodeLastCharacterIndex
-   WriteSwappedWord(Stream, FUnicodeLastCharIndex);
-
-   // write TypographicAscender
-   WriteSwappedWord(Stream, FTypographicAscender);
-
-   // write TypographicDescender
-   WriteSwappedWord(Stream, FTypographicDescender);
-
-   // write TypographicLineGap
-   WriteSwappedWord(Stream, FTypographicLineGap);
-
-   // write WindowsAscent
-   WriteSwappedWord(Stream, FWindowsAscent);
-
-   // write WindowsDescent
-   WriteSwappedWord(Stream, FWindowsDescent);
-
-   // eventually write code page range and addendum table
-   if (FVersion > 0) then
-    begin
-     // check if code page range has been set and eventually save to stream
-     if Assigned(FCodePageRange)
-      then FCodePageRange.SaveToStream(Stream)
-      else raise EPascalTypeError.Create(RCStrCodePageRangeTableUndefined);
-
-     // check if addendum table has been set and eventually save to stream
-     if Version >= 2 then
-      if Assigned(FAddendumTable)
-       then FAddendumTable.SaveToStream(Stream)
-       else raise EPascalTypeError.Create(RCStrAddendumTableUndefined);
-    end;
+   // check if addendum table has been set and eventually save to stream
+   if Version >= 2 then
+    if Assigned(FAddendumTable)
+     then FAddendumTable.SaveToStream(Stream)
+     else raise EPascalTypeError.Create(RCStrAddendumTableUndefined);
   end;
 end;
 
@@ -6237,7 +6259,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 32 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read format type
    Read(Value32, SizeOf(Cardinal));
@@ -6493,7 +6515,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 2 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // load number of glyphs
    SetLength(FGlyphNameIndex, ReadSwappedWord(Stream));

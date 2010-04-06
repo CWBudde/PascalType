@@ -208,7 +208,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 12 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read horizontal metrics ascender
    Read(FAscender, 1);
@@ -501,7 +501,7 @@ begin
   begin
    // check (minimum) table size
    if Position + 24 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read index subtable array offset
    FIndexSubTableArrayOffset := ReadSwappedCardinal(Stream);

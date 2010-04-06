@@ -179,8 +179,8 @@ end;
 
 procedure TCustomPascalTypePostscriptIndexTable.SaveToStream(Stream: TStream);
 begin
-  inherited;
-
+ inherited;
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 

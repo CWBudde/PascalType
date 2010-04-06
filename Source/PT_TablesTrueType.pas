@@ -362,7 +362,7 @@ begin
 
    // check for minimal table size
    if Position + Length(FControlValues) * SizeOf(Word) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read control values
    Read(FControlValues[0], Length(FControlValues) * SizeOf(Word));
@@ -426,7 +426,7 @@ begin
 
    // check for minimal table size
    if Position + Length(FInstructions) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read control values
    Read(FInstructions[0], Length(FInstructions) * SizeOf(Word));
@@ -585,7 +585,7 @@ begin
  with Stream do
   begin
    if Position + 2 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read number of contours
    FNumberOfContours := ReadSwappedSmallInt(Stream);
@@ -599,7 +599,7 @@ begin
     then Exit;
 
    if Position + 8 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read XMin
    FXMin := ReadSwappedSmallInt(Stream);
@@ -1437,7 +1437,7 @@ begin
 
    // check (minimum) table size
    if Position + 10 > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // clear glyph data list length
    for LocIndex := 0 to Length(FGlyphDataList) - 1
@@ -1472,7 +1472,7 @@ begin
    {$IFDEF AmbigiousExceptions}
    with Locations do
     if Locations[LocationCount - 1] > Size
-     then raise EPascalTypeError.Create(RCStrTableIncomplete);
+     then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
    {$ENDIF}
   end;
 end;
@@ -1542,10 +1542,10 @@ begin
       begin
        // check (minimum) table size
        if (MaxProfTable.NumGlyphs + 1) * SizeOf(Word) > Size
-        then raise EPascalTypeError.Create(RCStrTableIncomplete);
+        then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
        // set location array length
-       SetLength(FLocations, MaxProfTable.NumGlyphs);
+       SetLength(FLocations, MaxProfTable.NumGlyphs + 1);
 
        // read location array data
        for LocationIndex := 0 to Length(FLocations) - 1
@@ -1555,7 +1555,7 @@ begin
       begin
        // check (minimum) table size
        if (MaxProfTable.NumGlyphs + 1) * SizeOf(Cardinal) > Size
-        then raise EPascalTypeError.Create(RCStrTableIncomplete);
+        then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
        // set location array length
        SetLength(FLocations, MaxProfTable.NumGlyphs + 1);
@@ -1593,7 +1593,7 @@ begin
 
    // check whether the number of glyps matches the location array length
    if (MaxProfTable.NumGlyphs + 1) <> Length(FLocations)
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    case HeaderTable.IndexToLocationFormat of
     ilShort :

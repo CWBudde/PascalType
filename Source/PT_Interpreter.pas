@@ -59,7 +59,7 @@ type
     constructor Create; virtual;
 
     procedure LoadFromStream(Stream: TStream); virtual;
-    procedure SaveToStream(Stream: TStream); virtual;
+    procedure SaveToStream(Stream: TStream); virtual; abstract;
     procedure LoadFromFile(FileName: TFileName);
     procedure SaveToFile(FileName: TFileName);
 
@@ -85,6 +85,8 @@ type
   public
     constructor Create; override;
     destructor Destroy; override;
+
+    procedure SaveToStream(Stream: TStream); override;
   published
     property HeaderTable;
     property HorizontalHeader;
@@ -113,6 +115,8 @@ type
   public
     constructor Create; override;
     destructor Destroy; override;
+
+    procedure SaveToStream(Stream: TStream); override;
 
     property OptionalTable[Index: Integer]: TCustomPascalTypeNamedTable read GetOptionalTable;
   published
@@ -316,13 +320,17 @@ begin
 end;
 
 procedure TCustomPascalTypeInterpreter.SaveToFile(FileName: TFileName);
+var
+  FileStream : TFileStream;
 begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
-end;
-
-procedure TCustomPascalTypeInterpreter.SaveToStream(Stream: TStream);
-begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ if FileExists(FileName)
+  then FileStream := TFileStream.Create(FileName, fmCreate)
+  else FileStream := TFileStream.Create(FileName, fmOpenWrite);
+ try
+  SaveToStream(FileStream);
+ finally
+  FreeAndNil(FileStream);
+ end;
 end;
 
 
@@ -421,6 +429,11 @@ begin
   finally
    FreeAndNil(MemoryStream);
   end;
+end;
+
+procedure TPascalTypeScanner.SaveToStream(Stream: TStream);
+begin
+ raise EPascalTypeError.Create(RCStrNotImplemented);
 end;
 
 
@@ -568,20 +581,38 @@ begin
      CurrentTable := TableClass.Create(Self);
      try
       // load table from stream
-      CurrentTable.LoadFromStream(MemoryStream);
+      try
+       CurrentTable.LoadFromStream(MemoryStream);
 
-      // assign tables
-      if TableClass = TPascalTypeHeaderTable then FHeaderTable.Assign(CurrentTable) else
-      if TableClass = TPascalTypeHorizontalHeaderTable then FHorizontalHeader.Assign(CurrentTable) else
-      if TableClass = TPascalTypeHorizontalMetricsTable then FHorizontalMetrics.Assign(CurrentTable) else
-      if TableClass = TPascalTypePostscriptTable then FPostScriptTable.Assign(CurrentTable) else
-      if TableClass = TPascalTypeMaximumProfileTable then FMaximumProfile.Assign(CurrentTable) else
-      if TableClass = TPascalTypeNameTable then FNameTable.Assign(CurrentTable) else
-      if TableClass = TPascalTypeCharacterMapTable then FCharacterMap.Assign(CurrentTable) else
-       begin
-        FOptionalTables.Add(CurrentTable);
-        CurrentTable := nil;
-       end;
+       // assign tables
+       if TableClass = TPascalTypeHeaderTable then FHeaderTable.Assign(CurrentTable) else
+       if TableClass = TPascalTypeHorizontalHeaderTable then FHorizontalHeader.Assign(CurrentTable) else
+       if TableClass = TPascalTypeHorizontalMetricsTable then FHorizontalMetrics.Assign(CurrentTable) else
+       if TableClass = TPascalTypePostscriptTable then FPostScriptTable.Assign(CurrentTable) else
+       if TableClass = TPascalTypeMaximumProfileTable then FMaximumProfile.Assign(CurrentTable) else
+       if TableClass = TPascalTypeNameTable then FNameTable.Assign(CurrentTable) else
+       if TableClass = TPascalTypeCharacterMapTable then FCharacterMap.Assign(CurrentTable) else
+        begin
+         FOptionalTables.Add(CurrentTable);
+         CurrentTable := nil;
+        end;
+
+      except
+       {$IFDEF IgnoreIncompleteOptionalTables}
+       on E: EPascalTypeTableIncomplete do
+        begin
+         if (TableClass = TPascalTypeHeaderTable) or
+            (TableClass = TPascalTypeHorizontalHeaderTable) or
+            (TableClass = TPascalTypeHorizontalMetricsTable) or
+            (TableClass = TPascalTypePostscriptTable) or
+            (TableClass = TPascalTypeMaximumProfileTable) or
+            (TableClass = TPascalTypeNameTable) then raise;
+        end
+       else raise;
+       {$ELSE}
+       raise
+       {$ENDIF}
+      end;
 
      finally
       // dispose temporary table
@@ -592,6 +623,69 @@ begin
 
   finally
    FreeAndNil(MemoryStream);
+  end;
+end;
+
+procedure TPascalTypeInterpreter.SaveToStream(Stream: TStream);
+var
+  DirectoryTable : TPascalTypeDirectoryTable;
+  TableIndex     : Integer;
+  NamedTable     : TCustomPascalTypeNamedTable;
+  MemoryStream   : TMemoryStream;
+begin
+ // create directory table
+ DirectoryTable := TPascalTypeDirectoryTable.Create;
+
+ with DirectoryTable, Stream do
+  try
+   ClearAndBuildRequiredEntries;
+
+   // build directory table
+   for TableIndex := 0 to FOptionalTables.Count - 1 do
+    with TCustomPascalTypeNamedTable(FOptionalTables[TableIndex])
+     do AddTableEntry(TableType);
+
+   // write temporary directory to determine its size
+   SaveToStream(Stream);
+
+   // build directory table
+   for TableIndex := 0 to TableCount - 1 do
+    with TableList[TableIndex] do
+     begin
+      NamedTable := GetTableByTableType(TableType);
+      Assert(Assigned(NamedTable));
+
+      Offset := Stream.Position;
+      MemoryStream := TMemoryStream.Create;
+      try
+       NamedTable.SaveToStream(MemoryStream);
+
+       // store original stream length
+       Length := MemoryStream.Size;
+
+       // extend to a modulo 4 size
+       MemoryStream.Size := 4 * ((Length + 3) div 4);
+
+       // calculate checksum
+       CheckSum := CalculateCheckSum(MemoryStream);
+
+       // reset stream position
+       MemoryStream.Position := 0;
+
+       // copy streams
+       CopyFrom(MemoryStream, Length);
+      finally
+       FreeAndNil(MemoryStream);
+      end;
+     end;
+
+    // reset stream position
+    Seek(0, soFromBeginning);
+
+   // write final directory
+   SaveToStream(Stream);
+  finally
+   FreeAndNil(DirectoryTable);
   end;
 end;
 

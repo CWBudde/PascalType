@@ -14,6 +14,8 @@ program PascalTypeTest;
 {$APPTYPE CONSOLE}
 {$ENDIF}
 
+{$R '..\..\Resource\Default.res' '..\..\Resource\Default.rc'}
+
 uses
   FastMM4,
   FastMove,
@@ -24,6 +26,7 @@ uses
   TestPascalTypeInterpreter in 'TestPascalTypeInterpreter.pas',
   PT_ByteCodeInterpreter in '..\..\Source\PT_ByteCodeInterpreter.pas',
   PT_Interpreter in '..\..\Source\PT_Interpreter.pas',
+  PT_PanoseClassifications in '..\..\Source\PT_PanoseClassifications.pas',
   PT_Rasterizer in '..\..\Source\PT_Rasterizer.pas',
   PT_ResourceStrings in '..\..\Source\PT_ResourceStrings.pas',
   PT_TableDirectory in '..\..\Source\PT_TableDirectory.pas',
