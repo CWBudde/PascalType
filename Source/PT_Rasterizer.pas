@@ -97,7 +97,6 @@ type
 
     procedure RenderText(Text: string);
     procedure RenderCharacter(Character: AnsiChar);
-
     property Interpreter: TPascalTypeInterpreter read FInterpreter;
   public
     constructor Create; virtual;
