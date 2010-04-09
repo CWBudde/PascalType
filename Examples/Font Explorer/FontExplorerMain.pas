@@ -2,16 +2,21 @@ unit FontExplorerMain;
 
 interface
 
+{$I PT_Compiler.inc}
+
+{.$DEFINE ShowContours}
+{$DEFINE ShowOpenType}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ComCtrls, StdCtrls, ExtCtrls, ToolWin, ActnList, StdActns, AppEvnts,
   ImgList, PT_Types, PT_Tables, PT_TablesTrueType, PT_TablesOptional,
-  PT_TablesBitmap, PT_TablesOpenType, PT_TablesApple, PT_TablesShared,
+  PT_TablesBitmap, PT_TablesApple, PT_TablesShared,
+  {$IFDEF ShowOpenType}
+  PT_TablesOpenType,
+  {$ENDIF}
   PT_TablesFontForge, PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames,
   PT_Rasterizer, PT_PanoseClassifications, FE_FontHeader;
-
-{$I PT_Compiler.inc}
-{.$DEFINE ShowContours}
 
 type
   TFmTTF = class(TForm)
@@ -126,7 +131,7 @@ type
     procedure DisplayAppleFeatureTable(FeatureTable: TPascalTypeFeatureTable);
     procedure DisplayBitmapLocationTable(BitmapLocationTable: TPascalTypeBitmapLocationTable);
     procedure DisplayBitmapSizeTable(BitmapSizeTable: TPascalTypeBitmapSizeTable);
-    procedure DisplayCharacterMapSubTable(CharacterMapSubTable: TCustomCharacterMapDirectoryEntry);
+    procedure DisplayCharacterMapSubTable(CharacterMapSubTable: TCustomPascalTypeCharacterMapDirectory);
     procedure DisplayCharacterMapTable(CharacterMapTable: TPascalTypeCharacterMapTable);
     procedure DisplayControlValueTable(ControlValueTable: TTrueTypeFontControlValueTable);
     procedure DisplayDigitalSignatureBlock(DigitalSignatureBlock: TPascalTypeDigitalSignatureBlock);
@@ -144,7 +149,6 @@ type
     procedure DisplayGaspTable(GaspTable: TPascalTypeGridFittingAndScanConversionProcedureTable);
     procedure DisplayGlyphData(GlyphData: TCustomTrueTypeFontGlyphData);
     procedure DisplayGlyphDataTable(GlyphDataTable: TTrueTypeFontGlyphDataTable);
-    procedure DisplayGlyphDefinitionTable(GlyphDefinitionTable: TOpenTypeGlyphDefinitionTable);
     procedure DisplayGlyphInstructionTable(GlyphInstructionTable: TTrueTypeFontGlyphInstructionTable);
     procedure DisplayGlyphPropertiesTable(GlyphProperties: TPascalTypeGlyphPropertiesTable);
     procedure DisplayHeaderTable(HeaderTable: TPascalTypeHeaderTable);
@@ -152,7 +156,6 @@ type
     procedure DisplayHorizontalDeviceMetricsTable(HorDevMetricsTable: TPascalTypeHorizontalDeviceMetricsTable);
     procedure DisplayHorizontalHeader(HorizontalHeaderTable: TPascalTypeHorizontalHeaderTable);
     procedure DisplayHorizontalMetrics(HorizontalMetricsTable: TPascalTypeHorizontalMetricsTable);
-    procedure DisplayJustificationTable(JustificationTable: TOpenTypeJustificationTable);
     procedure DisplayLinearThresholdTable(LinearThresholdTable: TPascalTypeLinearThresholdTable);
     procedure DisplayLocationTable(LocationTable: TTrueTypeFontLocationTable);
     procedure DisplayMaximumProfileTable(MaximumProfileTable: TPascalTypeMaximumProfileTable);
@@ -160,10 +163,6 @@ type
     procedure DisplayNameMicrosoftTable(NameTable: TPascalTypeNameTable);
     procedure DisplayNameTable(NameTable: TPascalTypeNameTable);
     procedure DisplayNameUnicodeTable(NameTable: TPascalTypeNameTable);
-    procedure DisplayOpenTypeCommonTable(OpenTypeCommonTable: TCustomOpenTypeCommonTable);
-    procedure DisplayOpenTypeFeatureListTable(FeatureListTable: TOpenTypeFeatureListTable);
-    procedure DisplayOpenTypeLookUpListTable(LookUpListTable: TOpenTypeLookupListTable);
-    procedure DisplayOpenTypeScriptListTable(ScriptListTable: TOpenTypeScriptListTable);
     procedure DisplayOS2Table(OS2Table: TPascalTypeOS2Table);
     procedure DisplayOS2PanoseTable(OS2Panose: TCustomPascalTypePanoseTable);
     procedure DisplayOS2UnicodeRangeTable(OS2UnicodeRange: TPascalTypeUnicodeRangeTable);
@@ -174,12 +173,20 @@ type
     procedure DisplayVerticalDeviceMetricsTable(VerticalDeviceMetricsTable: TPascalTypeVerticalDeviceMetricsTable);
     procedure DisplayVerticalHeader(VerticalHeaderTable: TPascalTypeVerticalHeaderTable);
 
+    {$IFDEF ShowOpenType}
+    procedure DisplayGlyphDefinitionTable(GlyphDefinitionTable: TOpenTypeGlyphDefinitionTable);
+    procedure DisplayJustificationTable(JustificationTable: TOpenTypeJustificationTable);
+    procedure DisplayOpenTypeCommonTable(OpenTypeCommonTable: TCustomOpenTypeCommonTable);
+    procedure DisplayOpenTypeFeatureListTable(FeatureListTable: TOpenTypeFeatureListTable);
+    procedure DisplayOpenTypeLookUpListTable(LookUpListTable: TOpenTypeLookupListTable);
+    procedure DisplayOpenTypeScriptListTable(ScriptListTable: TOpenTypeScriptListTable);
     procedure DisplayCustomOpenTypeScriptTable(ScriptTable: TCustomOpenTypeScriptTable);
     procedure DisplayCustomOpenTypeLanguageSystemTable(LanguageSystemTable: TCustomOpenTypeLanguageSystemTable);
     procedure DisplayCustomOpenTypeFeatureTable(FeatureTable: TCustomOpenTypeFeatureTable);
     procedure DisplayCustomOpenTypeClassDefinitionTable(ClasDefinitionTable: TCustomOpenTypeClassDefinitionTable);
     procedure DisplayOpenTypeMarkGlyphSetTable(MarkGlyphSetTable: TOpenTypeMarkGlyphSetTable);
     procedure DisplayOpenTypeLookupTable(LookupTable: TOpenTypeLookupTable);
+    {$ENDIF}
 
     procedure DisplayGlyphDataPoints(SimpleGlyphData: TTrueTypeFontSimpleGlyphData);
     procedure DisplayGlyphDataSimpleOutline(SimpleGlyphData: TTrueTypeFontSimpleGlyphData);
@@ -458,7 +465,7 @@ begin
   begin
    InitializeDefaultListView;
 
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
@@ -529,7 +536,7 @@ begin
 end;
 
 procedure TFmTTF.DisplayCharacterMapSubTable(
-  CharacterMapSubTable: TCustomCharacterMapDirectoryEntry);
+  CharacterMapSubTable: TCustomPascalTypeCharacterMapDirectory);
 var
   GlyphIndex : Integer;
   GlyphName  : string;
@@ -548,14 +555,14 @@ begin
    // begin update (lock)
    ListView.Items.BeginUpdate;
 
-   if CharacterMap is TTrueTypeFontFormat0CharacterMap then
+   if CharacterMap is TPascalTypeFormat0CharacterMap then
     for CharIndex := Low(Byte) to High(Byte) do
      with ListView.Items.Add do
       begin
        Caption := IntToStr(CharIndex);
        SubItems.Add(IntToStr(CharacterMap.CharacterToGlyph(CharIndex)));
       end else
-   if CharacterMap is TTrueTypeFontFormat4CharacterMap then
+   if CharacterMap is TPascalTypeFormat4CharacterMap then
     for CharIndex := $20 to $FFFF do
      begin
       // get glyph index
@@ -573,7 +580,7 @@ begin
           end;
        end;
      end else
-   if CharacterMap is TTrueTypeFontFormat12CharacterMap then
+   if CharacterMap is TPascalTypeFormat12CharacterMap then
     for CharIndex := $20 to $FFFF do
      begin
       // get glyph index
@@ -642,6 +649,7 @@ begin
   end;
 end;
 
+{$IFDEF ShowOpenType}
 procedure TFmTTF.DisplayCustomOpenTypeClassDefinitionTable(
   ClasDefinitionTable: TCustomOpenTypeClassDefinitionTable);
 var
@@ -777,6 +785,7 @@ begin
    ListView.BringToFront;
   end;
 end;
+{$ENDIF}
 
 procedure TFmTTF.DisplayDigitalSignatureBlock(
   DigitalSignatureBlock: TPascalTypeDigitalSignatureBlock);
@@ -827,7 +836,7 @@ begin
    InitializeDefaultListView;
 
    // add Version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
@@ -841,7 +850,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    // add chain count
    ListViewData(['Subchains', IntToStr(ChainCount)]);
@@ -858,7 +867,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
@@ -871,7 +880,7 @@ begin
   begin
    InitializeDefaultListView;
 
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
@@ -884,7 +893,7 @@ begin
   begin
    InitializeDefaultListView;
 
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
@@ -921,7 +930,7 @@ begin
    InitializeDefaultListView;
 
    // show version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
@@ -934,7 +943,7 @@ begin
    InitializeDefaultListView;
 
    // show version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
@@ -948,7 +957,7 @@ begin
    InitializeDefaultListView;
 
    // show version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
@@ -1105,6 +1114,7 @@ begin
   end;
 end;
 
+{$IFDEF ShowOpenType}
 procedure TFmTTF.DisplayGlyphDefinitionTable(
   GlyphDefinitionTable: TOpenTypeGlyphDefinitionTable);
 begin
@@ -1113,11 +1123,12 @@ begin
    InitializeDefaultListView;
 
    // add version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
 end;
+{$ENDIF}
 
 procedure TFmTTF.DisplayGlyphInstructionTable(
   GlyphInstructionTable: TTrueTypeFontGlyphInstructionTable);
@@ -1149,7 +1160,7 @@ procedure TFmTTF.DisplayHeaderTable(HeaderTable: TPascalTypeHeaderTable);
 begin
  with FrFontHeader, HeaderTable do
   begin
-   EdFontRevision.Text := FloatToStrF(FontRevision.Value + FontRevision.Fract / (1 shl 16), ffGeneral, 4, 4);
+   EdFontRevision.Text := VersionToString(FontRevision);
    EdUnitsPerEm.Text := IntToStr(UnitsPerEm);
    EdLowestRecPPEM.Text := IntToStr(LowestRecPPEM);
 
@@ -1292,6 +1303,7 @@ begin
   end;
 end;
 
+{$IFDEF ShowOpenType}
 procedure TFmTTF.DisplayJustificationTable(
   JustificationTable: TOpenTypeJustificationTable);
 begin
@@ -1300,7 +1312,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    // add script count
    ListViewData(['Number of Scripts', IntToStr(ScriptCount)]);
@@ -1308,6 +1320,7 @@ begin
    ListView.BringToFront;
   end;
 end;
+{$ENDIF}
 
 procedure TFmTTF.DisplayLinearThresholdTable(
   LinearThresholdTable: TPascalTypeLinearThresholdTable);
@@ -1620,6 +1633,7 @@ begin
   end;
 end;
 
+{$IFDEF ShowOpenType}
 procedure TFmTTF.DisplayOpenTypeCommonTable(
   OpenTypeCommonTable: TCustomOpenTypeCommonTable);
 begin
@@ -1628,7 +1642,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
@@ -1694,6 +1708,7 @@ begin
    ListView.BringToFront;
   end;
 end;
+{$ENDIF}
 
 procedure TFmTTF.DisplayOS2Table(OS2Table: TPascalTypeOS2Table);
 begin
@@ -1705,7 +1720,7 @@ begin
    ListViewData(['Version', IntToStr(OS2Table.Version)]);
 
    // add average weighted advanced width of lower case letters and space
-   ListViewData(['Averge weighted escapement', IntToStr(XAvgCharWidth)]);
+   ListViewData(['Averge weighted escapement', IntToStr(AverageCharacterWidth)]);
 
    // add visual weight (degree of blackness or thickness) of stroke in glyphs
    with ListView.Items.Add do
@@ -1747,34 +1762,34 @@ begin
    ListViewData(['Font Embedding Rights', FontEmbeddingRightsToString(FontEmbeddingRights)]);
 
    // add recommended horizontal size in pixels for subscripts
-   ListViewData(['Subscript Horizontal Font Size', IntToStr(YSubscriptXSize)]);
+   ListViewData(['Subscript Horizontal Font Size', IntToStr(SubscriptSizeX)]);
 
    // add recommended vertical size in pixels for subscripts
-   ListViewData(['Subscript Vertical Size', IntToStr(YSubscriptYSize)]);
+   ListViewData(['Subscript Vertical Size', IntToStr(SubscriptSizeY)]);
 
    // add recommended horizontal offset for subscripts
-   ListViewData(['SubScript Horizontal Offset', IntToStr(YSubScriptXOffset)]);
+   ListViewData(['SubScript Horizontal Offset', IntToStr(SubscriptOffsetX)]);
 
    // add recommended vertical offset form the baseline for subscripts
-   ListViewData(['Subscript Vertical Offset', IntToStr(YSubscriptYOffset)]);
+   ListViewData(['Subscript Vertical Offset', IntToStr(SubscriptOffsetY)]);
 
    // add recommended horizontal size in pixels for superscripts
-   ListViewData(['Superscript Horizontal Size', IntToStr(YSuperscriptXSize)]);
+   ListViewData(['Superscript Horizontal Size', IntToStr(SuperscriptSizeX)]);
 
    // add recommended vertical size in pixels for superscripts
-   ListViewData(['Superscript Vertical Size', IntToStr(YSuperscriptYSize)]);
+   ListViewData(['Superscript Vertical Size', IntToStr(SuperscriptSizeY)]);
 
    // add recommended horizontal offset for superscripts
-   ListViewData(['Superscript Horizontal Offset', IntToStr(YSuperscriptXOffset)]);
+   ListViewData(['Superscript Horizontal Offset', IntToStr(SuperscriptOffsetX)]);
 
    // add recommended vertical offset from the baseline for superscripts
-   ListViewData(['Superscript Vertical Offset', IntToStr(YSuperscriptYOffset)]);
+   ListViewData(['Superscript Vertical Offset', IntToStr(SuperscriptOffsetY)]);
 
    // add width of the strikeout stroke
-   ListViewData(['Strikeout Size', IntToStr(YStrikeoutSize)]);
+   ListViewData(['Strikeout Size', IntToStr(StrikeoutSize)]);
 
    // add position of the strikeout stroke relative to the baseline
-   ListViewData(['Strikeout Position', IntToStr(YStrikeoutPosition)]);
+   ListViewData(['Strikeout Position', IntToStr(StrikeoutPosition)]);
 
    // add classification of font-family design
    ListViewData(['Font Family Class and Subclass', FontFamilyTypeToString(FontFamilyType)]);
@@ -1792,10 +1807,10 @@ begin
    ListViewData(['Maximum Unicode Index', 'U+' + IntToHex(UnicodeLastCharacterIndex, 4)]);
 
    // add typographic ascender
-   ListViewData(['Typographic Ascender', IntToStr(TypographicAscender)]);
+   ListViewData(['Typographic Ascender', IntToStr(TypographicAscent)]);
 
    // add typographic descender
-   ListViewData(['Typographic Descender', IntToStr(TypographicDescender)]);
+   ListViewData(['Typographic Descender', IntToStr(TypographicDescent)]);
 
    // add typographic line gap
    ListViewData(['Typographic Line Gap', IntToStr(TypographicLineGap)]);
@@ -2914,7 +2929,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    // add font number
    with ListView.Items.Add do
@@ -2992,7 +3007,7 @@ begin
    InitializeDefaultListView;
 
    // add Version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    // add Italic Angle
    ListViewData(['Italic Angle', FloatToStrF(ItalicAngle.Value + ItalicAngle.Fract / (1 shl 16), ffGeneral, 4, 4)]);
@@ -3081,7 +3096,7 @@ begin
    InitializeDefaultListView;
 
    // add version
-   ListViewData(['Version', FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4)]);
+   ListViewData(['Version', VersionToString(Version)]);
 
    ListView.BringToFront;
   end;
@@ -3110,7 +3125,7 @@ begin
    if TObject(ParentNode.Data) is TCustomPascalTypeNamedTable then
     with TCustomPascalTypeNamedTable(ParentNode.Data) do
      begin
-      StatusBar.SimpleText := 'Table ID: ' + GetTableType;
+      StatusBar.SimpleText := 'Table ID: ' + TableType;
      end;
   end;
 end;
@@ -3204,8 +3219,8 @@ begin
     then DisplayCharacterMapTable(TPascalTypeCharacterMapTable(Node.Data)) else
 
    // Character Map SubTable
-   if TObject(Node.Data) is TCustomCharacterMapDirectoryEntry
-    then DisplayCharacterMapSubTable(TCustomCharacterMapDirectoryEntry(Node.Data)) else
+   if TObject(Node.Data) is TCustomPascalTypeCharacterMapDirectory
+    then DisplayCharacterMapSubTable(TCustomPascalTypeCharacterMapDirectory(Node.Data)) else
 
    // Maximum Profile Table
    if TObject(Node.Data) is TPascalTypeMaximumProfileTable
@@ -3267,13 +3282,18 @@ begin
    if TObject(Node.Data) is TPascalTypeGridFittingAndScanConversionProcedureTable
     then DisplayGaspTable(TPascalTypeGridFittingAndScanConversionProcedureTable(Node.Data)) else
 
+   // Glyph Instruction Table
+   if TObject(Node.Data) is TTrueTypeFontGlyphInstructionTable
+    then DisplayGlyphInstructionTable(TTrueTypeFontGlyphInstructionTable(Node.Data)) else
+
+   {$IFDEF ShowOpenType}
    // Glyph Definition Table
    if TObject(Node.Data) is TOpenTypeGlyphDefinitionTable
     then DisplayGlyphDefinitionTable(TOpenTypeGlyphDefinitionTable(Node.Data)) else
 
-   // Glyph Instruction Table
-   if TObject(Node.Data) is TTrueTypeFontGlyphInstructionTable
-    then DisplayGlyphInstructionTable(TTrueTypeFontGlyphInstructionTable(Node.Data)) else
+   // Justification Table
+   if TObject(Node.Data) is TOpenTypeJustificationTable
+    then DisplayJustificationTable(TOpenTypeJustificationTable(Node.Data)) else
 
    // Open Type Common Table
    if TObject(Node.Data) is TCustomOpenTypeCommonTable
@@ -3314,6 +3334,7 @@ begin
    // Open Type Mark Glyph Set Table
    if TObject(Node.Data) is TOpenTypeMarkGlyphSetTable
     then DisplayOpenTypeMarkGlyphSetTable(TOpenTypeMarkGlyphSetTable(Node.Data)) else
+   {$ENDIF}
 
    // Digital Signature Table
    if TObject(Node.Data) is TPascalTypeDigitalSignatureTable
@@ -3354,10 +3375,6 @@ begin
    // Location Table
    if TObject(Node.Data) is TTrueTypeFontLocationTable
     then DisplayLocationTable(TTrueTypeFontLocationTable(Node.Data)) else
-
-   // Justification Table
-   if TObject(Node.Data) is TOpenTypeJustificationTable
-    then DisplayJustificationTable(TOpenTypeJustificationTable(Node.Data)) else
 
    // Glyph Data Table
    if TObject(Node.Data) is TTrueTypeFontGlyphDataTable
@@ -3566,15 +3583,30 @@ begin
 
    // add character mapping
    Node := Items.AddChildObject(Items[0], 'cmap', CharacterMap);
-   for SubtableIndex := 0 to CharacterMap.CharacterMapSubtableCount - 1 do
-    begin
-     case CharacterMap.CharacterMapSubtable[SubtableIndex].PlatformID of
-      piUnicode   : Items.AddChildObjectFirst(Node, 'Unicode', CharacterMap.CharacterMapSubtable[SubtableIndex]);
-      piApple     : Items.AddChildObjectFirst(Node, 'Apple', CharacterMap.CharacterMapSubtable[SubtableIndex]);
-      piMicrosoft : Items.AddChildObjectFirst(Node, 'Microsoft', CharacterMap.CharacterMapSubtable[SubtableIndex]);
-      else Items.AddChildObjectFirst(Node, 'Unknown', CharacterMap.CharacterMapSubtable[SubtableIndex]);
+   with CharacterMap do
+    for SubtableIndex := 0 to CharacterMapSubtableCount - 1 do
+     begin
+      case CharacterMapSubtable[SubtableIndex].PlatformID of
+       piUnicode   : Items.AddChildObjectFirst(Node, 'Unicode', CharacterMapSubtable[SubtableIndex]);
+       piApple     : Items.AddChildObjectFirst(Node, 'Apple', CharacterMapSubtable[SubtableIndex]);
+       piMicrosoft :
+        begin
+         str := 'Microsoft';
+         case TPascalTypeCharacterMapMicrosoftDirectory(CharacterMapSubtable[SubtableIndex]).PlatformSpecificID of
+          meSymbol      : str := str + ', Symbol';
+          meUnicodeBMP  : str := str + ', Unicode';
+          meShiftJIS    : str := str + ', ShiftJIS';
+          mePRC         : str := str + ', PRC';
+          meBig5        : str := str + ', Big5';
+          meWansung     : str := str + ', Wansung';
+          meJohab       : str := str + ', Johab';
+          meUnicodeUCS4 : str := str + ', UnicodeUCS4';
+         end;
+         Items.AddChildObjectFirst(Node, str, CharacterMapSubtable[SubtableIndex]);
+        end
+       else Items.AddChildObjectFirst(Node, 'Unknown', CharacterMapSubtable[SubtableIndex]);
+      end;
      end;
-    end;
 
    // add name table
    Node := Items.AddChildObject(Items[0], 'name', NameTable);
@@ -3608,21 +3640,22 @@ begin
    if Assigned(PostScriptTable.PostscriptV2Table)
     then Items.AddChildObjectFirst(Node, 'Glyph Names', PostScriptTable.PostscriptV2Table);
 
+   // add OS/2 table
+   if Assigned(OS2Table) then
+    with TPascalTypeOS2Table(OS2Table) do
+     begin
+      Node := Items.AddChildObject(Items[0], TableType, OS2Table);
+      Items.AddChildObject(Node, 'Panpose', Panose);
+      Items.AddChildObject(Node, 'Unicode Range', UnicodeRange);
+      if Assigned(CodePageRange)
+       then Items.AddChildObject(Node, 'Code Rage Range', CodePageRange);
+     end;
+
    // add additional tables
    for OptTableIndex := 0 to OptionalTableCount - 1 do
     with OptionalTable[OptTableIndex] do
      begin
-      Node := Items.AddChildObject(Items[0], string(TableType), OptionalTable[OptTableIndex]);
-
-      // OS/2 table
-      if OptionalTable[OptTableIndex] is TPascalTypeOS2Table then
-       with TPascalTypeOS2Table(OptionalTable[OptTableIndex]) do
-        begin
-         Items.AddChildObject(Node, 'Panpose', Panose);
-         Items.AddChildObject(Node, 'Unicode Range', UnicodeRange);
-         if Assigned(CodePageRange)
-          then Items.AddChildObject(Node, 'Code Rage Range', CodePageRange);
-        end else
+      Node := Items.AddChildObject(Items[0], TableType, OptionalTable[OptTableIndex]);
 
       // digital signature
       if OptionalTable[OptTableIndex] is TPascalTypeDigitalSignatureTable then
@@ -3655,6 +3688,7 @@ begin
           do Items.AddChildObject(Node, 'Device Record #' + IntToStr(SubtableIndex), DeviceRecord[SubtableIndex]);
         end else
 
+      {$IFDEF ShowOpenType}
       // open type common table
       if OptionalTable[OptTableIndex] is TOpenTypeGlyphDefinitionTable then
        with TOpenTypeGlyphDefinitionTable(OptionalTable[OptTableIndex]) do
@@ -3741,8 +3775,8 @@ begin
               Items.AddChildObject(SubSubNode, str, LookUpTable[SubtableIndex].Subtable[SubSubIndex]);
              end;
            end;
-
         end else
+      {$ENDIF}
 
       // glyph data table
       if OptionalTable[OptTableIndex] is TTrueTypeFontGlyphDataTable then

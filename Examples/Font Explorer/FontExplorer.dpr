@@ -21,10 +21,12 @@ uses
   PT_TablesApple in '..\..\Source\PT_TablesApple.pas',
   PT_TablesBitmap in '..\..\Source\PT_TablesBitmap.pas',
   PT_TablesFontForge in '..\..\Source\PT_TablesFontForge.pas',
+(*
   PT_TablesOpenType in '..\..\Source\PT_TablesOpenType.pas',
   PT_TablesOpenTypeFeatures in '..\..\Source\PT_TablesOpenTypeFeatures.pas',
   PT_TablesOpenTypeLanguages in '..\..\Source\PT_TablesOpenTypeLanguages.pas',
   PT_TablesOpenTypeScripts in '..\..\Source\PT_TablesOpenTypeScripts.pas',
+*)
   PT_TablesOptional in '..\..\Source\PT_TablesOptional.pas',
   PT_TablesPostscript in '..\..\Source\PT_TablesPostscript.pas',
   PT_TablesShared in '..\..\Source\PT_TablesShared.pas',

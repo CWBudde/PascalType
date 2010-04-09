@@ -164,6 +164,7 @@ begin
      FPascalTypeScanner.LoadFromFile(SR.Name);
     except
      on e: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
+//     on e: Exception do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
      else Succeed := False;
     end;
     Check(Succeed, 'Error scanning file: ' + SR.Name);

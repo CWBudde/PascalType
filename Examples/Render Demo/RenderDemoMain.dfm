@@ -42,11 +42,11 @@ object FmRenderDemo: TFmRenderDemo
     Height = 13
     Caption = 'Size:'
   end
-  object Label1: TLabel
+  object LbRasterizer: TLabel
     Left = 8
     Top = 159
     Width = 53
-    Height = 16
+    Height = 13
     Caption = 'Rasterizer:'
   end
   object EdText: TEdit
@@ -143,7 +143,6 @@ object FmRenderDemo: TFmRenderDemo
     Width = 74
     Height = 17
     Caption = 'PascalType'
-    Enabled = False
     TabOrder = 5
     OnClick = RbPascalTypeClick
   end

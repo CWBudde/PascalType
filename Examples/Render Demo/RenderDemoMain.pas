@@ -4,13 +4,13 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, PT_Types, PT_RasterizerGDI, PT_Interpreter, PT_Tables,
-  RenderDemoFontNameScanner, ExtCtrls;
+  StdCtrls, ExtCtrls, PT_Types, PT_RasterizerGDI, PT_Interpreter, PT_Tables,
+  RenderDemoFontNameScanner;
 
 type
   TFontNameFile = packed record
-    FontName : string;
-    FileName : TFileName;
+    FullFontName : string;
+    FileName     : TFileName;
   end;
 
   TFmRenderDemo = class(TForm)
@@ -23,16 +23,16 @@ type
     PnText: TPanel;
     PaintBox: TPaintBox;
     RbWindows: TRadioButton;
-    Label1: TLabel;
+    LbRasterizer: TLabel;
     RbPascalType: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure CbFontChange(Sender: TObject);
     procedure CbFontSizeChange(Sender: TObject);
+    procedure EdTextChange(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure PnTextResize(Sender: TObject);
-    procedure EdTextChange(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure RbPascalTypeClick(Sender: TObject);
     procedure RbWindowsClick(Sender: TObject);
   private
@@ -42,7 +42,7 @@ type
     FBitmap      : TBitmap;
     FText        : string;
     FFontSize    : Integer;
-    FFontName: string;
+    FFontName    : string;
     procedure FontScannedHandler(Sender: TObject; FontFileName: TFilename;
       Font: TCustomPascalTypeInterpreter);
     procedure SetText(const Value: string);
@@ -182,7 +182,7 @@ var
 begin
  FBitmap.Canvas.Font.Name := FFontName;
  for FontIndex := 0 to Length(FFontArray) - 1 do
-  if FFontArray[FontIndex].FontName = FFontName then
+  if FFontArray[FontIndex].FullFontName = FFontName then
    begin
     FRasterizer.LoadFromFile(FFontArray[FontIndex].FileName);
     Break;
@@ -294,7 +294,7 @@ begin
  SetLength(FFontArray, Length(FFontArray) + 1);
  with FFontArray[Length(FFontArray) - 1] do
   begin
-   FontName := CurrentFontName;
+   FullFontName := CurrentFontName;
    FileName := FontFileName;
   end;
 end;
