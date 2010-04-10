@@ -34,7 +34,8 @@ interface
 
 uses
   Windows, TestFramework, Classes, Contnrs, SysUtils, PT_Types, PT_Tables,
-  PT_TablesOptional, PT_TablesOpenType, PT_Interpreter;
+  PT_TablesOptional, PT_TablesOpenType, PT_TablesApple, PT_Interpreter,
+  PT_CharacterMap, PT_Windows;
 
 type
   // Test methods for class TTrueTypeFontInterpreter
@@ -65,53 +66,7 @@ type
 implementation
 
 uses
-  ShlObj, ActiveX, Dialogs;
-
-procedure StrResetLength(var S: AnsiString);
-begin
- SetLength(S, StrLen(PChar(S)));
-end;
-
-function PidlToPath(IdList: PItemIdList): string;
-begin
- SetLength(Result, MAX_PATH);
- if SHGetPathFromIdList(IdList, PChar(Result))
-  then StrResetLength(Result)
-  else Result := '';
-end;
-
-function PidlFree(var IdList: PItemIdList): Boolean;
-var
-  Malloc: IMalloc;
-begin
- Result := False;
- if IdList = nil
-  then Result := True
-  else
-   begin
-    if Succeeded(SHGetMalloc(Malloc)) and (Malloc.DidAlloc(IdList) > 0) then
-     begin
-      Malloc.Free(IdList);
-      IdList := nil;
-      Result := True;
-     end;
-   end;
-end;
-
-function GetFontDirectory: string;
-var
-  lFolderPidl: PItemIdList;
-begin
-  if Succeeded(SHGetSpecialFolderLocation(0, CSIDL_FONTS, lFolderPidl)) then
-  begin
-    Result := PidlToPath(lFolderPidl);
-    PidlFree(lFolderPidl);
-  end
-  else
-    Result := '';
-end;
-
-////////////////////////////////////////////////////////////////////////////////
+  Dialogs;
 
 { TTestPascalTypeScanner }
 

@@ -43,7 +43,9 @@ uses
   PT_TablesShared in '..\..\Source\PT_TablesShared.pas',
   PT_TablesTrueType in '..\..\Source\PT_TablesTrueType.pas',
   PT_Types in '..\..\Source\PT_Types.pas',
-  PT_UnicodeNames in '..\..\Source\PT_UnicodeNames.pas';
+  PT_UnicodeNames in '..\..\Source\PT_UnicodeNames.pas',
+  PT_Windows in '..\..\Source\PT_Windows.pas',
+  PT_CharacterMap in '..\..\Source\PT_CharacterMap.pas';
 
 {$R *.RES}
 

@@ -187,102 +187,13 @@ type
 
   TCustomPascalTypeCharacterMap = class(TCustomPascalTypeTable)
   protected
-    function GetFormat: Word; virtual; abstract;
+    class function GetFormat: Word; virtual; abstract;
   public
     function CharacterToGlyph(CharacterIndex: Integer): Integer; virtual; abstract;
 
     property Format: Word read GetFormat;
   end;
-
-  TPascalTypeFormat0CharacterMap = class(TCustomPascalTypeCharacterMap)
-  private
-    FLength       : Word; // This is the length in bytes of the subtable.
-    FLanguage     : Word; // Please see 'Note on the language field in 'cmap' subtables' in this document.
-    FGlyphIdArray : array [0..255] of Byte; // An array that maps character codes to glyph index values.
-  protected
-    function GetFormat: Word; override;
-    procedure ResetToDefaults; override;
-  public
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    function CharacterToGlyph(CharacterIndex: Integer): Integer; override;
-  end;
-
-  TPascalTypeFormat2CharacterMap = class(TCustomPascalTypeCharacterMap)
-  private
-    FLength       : Word; // This is the length in bytes of the subtable.
-    FLanguage     : Word; // Please see 'Note on the language field in 'cmap' subtables' in this document.
-  protected
-    function GetFormat: Word; override;
-    procedure ResetToDefaults; override;
-  public
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    function CharacterToGlyph(CharacterIndex: Integer): Integer; override;
-  end;
-
-  TPascalTypeFormat4CharacterMap = class(TCustomPascalTypeCharacterMap)
-  private
-    FLength          : Word;              // This is the length in bytes of the subtable.
-    FLanguage        : Word;              // Please see 'Note on the language field in 'cmap' subtables' in this document.
-    FSegCountX2      : Word;              // 2 x segCount.
-    FSearchRange     : Word;              // 2 x (2**floor(log2(segCount)))
-    FEntrySelector   : Word;              // log2(searchRange / 2)
-    FRangeShift      : Word;              // 2 x segCount - searchRange
-    FEndCount        : array of Word;     // End characterCode for each segment, last=0xFFFF.
-    FStartCount      : array of Word;     // Start character code for each segment.
-    FIdDelta         : array of SmallInt; // Delta for all character codes in segment.
-    FIdRangeOffset   : array of Word;     // Offsets into glyphIdArray or 0
-    FGlyphIdArray    : array of Word;     // Glyph index array (arbitrary length)  protected
-  protected
-    function GetFormat: Word; override;
-    procedure ResetToDefaults; override;
-  public
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    function CharacterToGlyph(CharacterIndex: Integer): Integer; override;
-  end;
-
-  TPascalTypeFormat6CharacterMap = class(TCustomPascalTypeCharacterMap)
-  private
-    FLanguage     : Word; // Please see “Note on the language field in 'cmap' subtables“ in this document.
-    FFirstCode    : Word; // First character code of subrange.
-    FGlyphIdArray : array of Word;
-    function GetEntryCount: Word; // Array of glyph index values for character codes in the range.
-  protected
-    function GetFormat: Word; override;
-    procedure ResetToDefaults; override;
-  public
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    function CharacterToGlyph(CharacterIndex: Integer): Integer; override;
-
-    property EntryCount: Word read GetEntryCount;
-  end;
-
-  TCharMapSegmentedCoverageRecord = packed record
-    StartCharCode : Cardinal; // First character code in this group
-    EndCharCode   : Cardinal; // Last character code in this group
-    StartGlyphID  : Cardinal; // Glyph index corresponding to the starting character code
-  end;  
-
-  TPascalTypeFormat12CharacterMap = class(TCustomPascalTypeCharacterMap)
-  private
-    FLanguage      : Cardinal; // Please see “Note on the language field in 'cmap' subtables“ in this document.
-    FCoverageArray : array of TCharMapSegmentedCoverageRecord;
-  protected
-    function GetFormat: Word; override;
-    procedure ResetToDefaults; override;
-  public
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-
-    function CharacterToGlyph(CharacterIndex: Integer): Integer; override;
-  end;
+  TCustomPascalTypeCharacterMapClass = class of TCustomPascalTypeCharacterMap;
 
   TCustomPascalTypeCharacterMapDirectory = class(TCustomPascalTypeTable)
   private
@@ -311,6 +222,7 @@ type
     property EncodingID: Word read GetEncodingIDAsWord;
     property CharacterMap: TCustomPascalTypeCharacterMap read FCharacterMap;
   end;
+  TPascalTypeCharacterMapDirectoryClass = class of TCustomPascalTypeCharacterMapDirectory;
 
   TPascalTypeCharacterMapUnicodeDirectory = class(TCustomPascalTypeCharacterMapDirectory)
   private
@@ -351,18 +263,18 @@ type
 
   TPascalTypeCharacterMapTable = class(TCustomPascalTypeNamedTable)
   private
-    FVersion      : Word; // Version number (Set to zero)
-    FSubtableList : TObjectList;
-    procedure SetVersion(const Value: Word);
+    FVersion : Word; // Version number (Set to zero)
+    FMaps    : array of TCustomPascalTypeCharacterMapDirectory;
     function GetCharacterMapSubtableCount: Word;
     function GetCharacterMapSubtable(Index: Integer): TCustomPascalTypeCharacterMapDirectory;
+    procedure SetVersion(const Value: Word);
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure CharacterMapDirectoryChanged; virtual;
     procedure ResetToDefaults; override;
+    procedure FreeMapItems; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -578,6 +490,7 @@ type
     property PlatformID: TPlatformID read GetPlatformID;
     property LanguageID: Word read FLanguageID;
   end;
+  TTrueTypeFontNamePlatformClass = class of TCustomTrueTypeFontNamePlatform; 
 
   TTrueTypeFontNamePlatformUnicode = class(TCustomTrueTypeFontNamePlatform)
   private
@@ -624,11 +537,12 @@ type
 
   TPascalTypeNameTable = class(TCustomPascalTypeNamedTable)
   private
-    FFormat      : Word; // Format selector. Set to 0.
-    FNameRecords : TObjectList;
+    FFormat        : Word; // Format selector. Set to 0.
+    FNameSubTables : array of TCustomTrueTypeFontNamePlatform;
     procedure SetFormat(const Value: Word);
-    function GetNameRecord(Index: Word): TCustomTrueTypeFontNamePlatform;
-    function GetNameRecordCount: Word;
+    function GetNameSubTable(Index: Word): TCustomTrueTypeFontNamePlatform;
+    function GetNameSubTableCount: Word;
+    procedure FreeNameSubTables;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -636,7 +550,6 @@ type
 
     procedure FormatChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -645,8 +558,8 @@ type
     procedure SaveToStream(Stream: TStream); override;
 
     property Format: Word read FFormat write SetFormat;
-    property NameRecordCount: Word read GetNameRecordCount;
-    property NameRecord[Index: Word]: TCustomTrueTypeFontNamePlatform read GetNameRecord;
+    property NameSubTableCount: Word read GetNameSubTableCount;
+    property NameSubTable[Index: Word]: TCustomTrueTypeFontNamePlatform read GetNameSubTable;
   end;
 
 
@@ -1399,6 +1312,10 @@ procedure WriteSwappedSmallInt(Stream: TStream; Value : SmallInt); {$IFDEF UseIn
 procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal); {$IFDEF UseInline} inline; {$ENDIF}
 procedure WriteSwappedInt64(Stream: TStream; Value: Int64); {$IFDEF UseInline} inline; {$ENDIF}
 
+procedure RegisterPascalTypeCharacterMap(CharacterMapClass: TCustomPascalTypeCharacterMapClass);
+procedure RegisterPascalTypeCharacterMaps(CharacterMapClasses: array of TCustomPascalTypeCharacterMapClass);
+function FindPascalTypeCharacterMapByFormat(Format: Word): TCustomPascalTypeCharacterMapClass;
+
 procedure RegisterPascalTypePanose(PanoseClass: TCustomPascalTypePanoseClass);
 procedure RegisterPascalTypePanoses(PanoseClasses: array of TCustomPascalTypePanoseClass);
 function FindPascalTypePanoseByType(PanoseType: Byte): TCustomPascalTypePanoseClass;
@@ -1412,8 +1329,11 @@ implementation
 uses
   Math, PT_ResourceStrings;
 
+resourcestring
+  RCStrUnknownCharacterMap = 'Unknown character map (%d)';
 
 var
+  GCharacterMapClasses : array of TCustomPascalTypeCharacterMapClass;
   GPanoseClasses : array of TCustomPascalTypePanoseClass;
   GTableClasses : array of TCustomPascalTypeNamedTableClass;
 
@@ -2020,455 +1940,6 @@ begin
 end;
 
 
-{ TPascalTypeFormat0CharacterMap }
-
-function TPascalTypeFormat0CharacterMap.GetFormat: Word;
-begin
- Result := 0;
-end;
-
-procedure TPascalTypeFormat0CharacterMap.ResetToDefaults;
-var
-  GlyphIdIndex : Byte;
-begin
- FLength   := 0;
- FLanguage := 0;
- for GlyphIdIndex := Low(Byte) to High(Byte)
-  do FGlyphIdArray[GlyphIdIndex] := GlyphIdIndex;
-end;
-
-procedure TPascalTypeFormat0CharacterMap.LoadFromStream(Stream: TStream);
-begin
- with Stream do
-  begin
-   // check (minimum) table size
-   if Position + 4 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
-
-   // read length
-   FLength := ReadSwappedWord(Stream);
-
-   // read language
-   FLanguage := ReadSwappedWord(Stream);
-
-   Read(FGlyphIdArray[0], 256);
-  end;
-end;
-
-procedure TPascalTypeFormat0CharacterMap.SaveToStream(Stream: TStream);
-begin
- // write length
- WriteSwappedWord(Stream, FLength);
-
- // write language
- WriteSwappedWord(Stream, FLanguage);
-end;
-
-function TPascalTypeFormat0CharacterMap.CharacterToGlyph(
-  CharacterIndex: Integer): Integer;
-begin
- if CharacterIndex in [0..255]
-  then Result := FGlyphIdArray[CharacterIndex]
-  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [CharacterIndex]);
-end;
-
-
-{ TPascalTypeFormat2CharacterMap }
-
-function TPascalTypeFormat2CharacterMap.GetFormat: Word;
-begin
- Result := 2;
-end;
-
-procedure TPascalTypeFormat2CharacterMap.ResetToDefaults;
-begin
- FLength   := 0;
- FLanguage := 0;
-end;
-
-function TPascalTypeFormat2CharacterMap.CharacterToGlyph(
-  CharacterIndex: Integer): Integer;
-begin
- Result := CharacterIndex;
-end;
-
-procedure TPascalTypeFormat2CharacterMap.LoadFromStream(Stream: TStream);
-begin
- with Stream do
-  begin
-   // check (minimum) table size
-   if Position + 4 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
-
-   // read length
-   FLength := ReadSwappedWord(Stream);
-
-   // read language
-   FLanguage := ReadSwappedWord(Stream);
-  end;
-end;
-
-procedure TPascalTypeFormat2CharacterMap.SaveToStream(Stream: TStream);
-begin
- with Stream do
-  begin
-   // write length
-   WriteSwappedWord(Stream, FLength);
-
-   // write language
-   WriteSwappedWord(Stream, FLanguage);
-  end;
-end;
-
-
-{ TPascalTypeFormat4CharacterMap }
-
-function TPascalTypeFormat4CharacterMap.GetFormat: Word;
-begin
- Result := 4;
-end;
-
-procedure TPascalTypeFormat4CharacterMap.ResetToDefaults;
-begin
- FLength   := 0;
- FLanguage := 0;
-end;
-
-function TPascalTypeFormat4CharacterMap.CharacterToGlyph(
-  CharacterIndex: Integer): Integer;
-var
-  SegmentIndex : Integer;
-begin
- SegmentIndex := 0;
- while (SegmentIndex < Length(FEndCount)) do
-  if (CharacterIndex <= FEndCount[SegmentIndex])
-   then Break
-   else Inc(SegmentIndex);
-
- if not (CharacterIndex >= FStartCount[SegmentIndex]) then
-  begin
-   // missing glyph
-   Result := 0;
-   Exit;
-  end;
-
- if FIdRangeOffset[SegmentIndex] = 0
-  then Result := (FIdDelta[SegmentIndex] + CharacterIndex) mod (1 shl 16)
-  else
-   begin
-    Result := FIdRangeOffset[SegmentIndex] + (CharacterIndex - FStartCount[SegmentIndex]);
-
-    // modulo operation
-    Result := Result mod (1 shl 16);
-
-    // check for missing character and add offset eventually
-    if Result = 0
-     then Result := FIdDelta[SegmentIndex] mod (1 shl 16)
-   end;
-
- Result := Result mod (1 shl 16);
-
-end;
-
-procedure TPascalTypeFormat4CharacterMap.LoadFromStream(Stream: TStream);
-var
-  StartPos : Int64;
-  SegIndex : Integer;
-  {$IFDEF AmbigiousExceptions}
-  Value16  : Word;
-  {$ENDIF}
-begin
- with Stream do
-  begin
-   StartPos := Position;
-
-   // check (minimum) table size
-   if StartPos + 4 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
-
-   // read length
-   FLength := ReadSwappedWord(Stream);
-
-   // check (minimum) table size
-   if StartPos + FLength - 4 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
-
-   // read language
-   FLanguage := ReadSwappedWord(Stream);
-
-   // read segCountX2
-   FSegCountX2 := ReadSwappedWord(Stream);
-
-   // read search range
-   FSearchRange := ReadSwappedWord(Stream);
-
-   // confirm search range has a valid value
-   if FSearchRange <> 2 * (1 shl FloorLog2(FSegCountX2 div 2))
-    then raise EPascalTypeError.Create(RCStrCharMapError + ': ' + 'wrong search range!');
-
-   // read entry selector
-   FEntrySelector := ReadSwappedWord(Stream);
-
-   // confirm entry selector has a valid value
-   if FEntrySelector <> Log2(FSearchRange * 0.5)
-    then raise EPascalTypeError.Create(RCStrCharMapError + ': ' + 'wrong entry selector!');
-
-   // read range shift
-   FRangeShift := ReadSwappedWord(Stream);
-
-   {$IFDEF AmbigiousExceptions}
-   // confirm range shift has a valid value
-   if FRangeShift <> FSegCountX2 - FSearchRange
-    then raise EPascalTypeError.Create(RCStrCharMapError + ': ' + 'wrong range shift!');
-   {$ENDIF}
-
-   SetLength(FEndCount, FSegCountX2 div 2);
-   SetLength(FStartCount, FSegCountX2 div 2);
-   SetLength(FIdDelta, FSegCountX2 div 2);
-   SetLength(FIdRangeOffset, FSegCountX2 div 2);
-
-   // read end count
-   for SegIndex := 0 to Length(FEndCount) - 1
-    do FEndCount[SegIndex] := ReadSwappedWord(Stream);
-
-   // confirm end count is valid
-   if FEndCount[Length(FEndCount) - 1] <> $FFFF
-    then raise EPascalTypeError.CreateFmt(RCStrCharMapErrorEndCount, [FEndCount[Length(FEndCount) - 1]]);
-
-   {$IFDEF AmbigiousExceptions}
-   // read reserved
-   Value16 := ReadSwappedWord(Stream);
-
-   // confirm reserved value is valid
-   if Value16 <> 0
-    then raise EPascalTypeError.CreateFmt(RCStrCharMapErrorReserved, [Value16]);
-   {$ELSE}
-   // skip reserved
-   Seek(2, soFromCurrent);
-   {$ENDIF}
-
-   // read start count
-   for SegIndex := 0 to Length(FStartCount) - 1 do
-    begin
-     FStartCount[SegIndex] := ReadSwappedWord(Stream);
-
-     {$IFDEF AmbigiousExceptions}
-     // confirm start count is valid
-     if FStartCount[SegIndex] > FEndCount[SegIndex]
-      then raise EPascalTypeError.CreateFmt(RCStrCharMapErrorStartCount, [FStartCount[SegIndex]]);
-     {$ENDIF}
-    end;
-
-   // read ID delta
-   for SegIndex := 0 to Length(FIdDelta) - 1
-    do FIdDelta[SegIndex] := ReadSwappedWord(Stream);
-
-   {$IFDEF AmbigiousExceptions}
-   // confirm ID delta is valid
-   if FIdDelta[Length(FIdDelta) - 1] <> 1
-    then raise EPascalTypeError.CreateFmt(RCStrCharMapErrorIdDelta, [FIdDelta[Length(FIdDelta) - 1]]);
-   {$ENDIF}
-
-   // read ID range offset
-   for SegIndex := 0 to Length(FIdRangeOffset) - 1
-    do FIdRangeOffset[SegIndex] := ReadSwappedWord(Stream);
-
-   SetLength(FGlyphIdArray, (FLength - 2 - (Position - StartPos)) div 2);
-
-   // read glyph ID array
-   for SegIndex := 0 to Length(FGlyphIdArray) - 1
-    do FGlyphIdArray[SegIndex] := ReadSwappedWord(Stream);
-  end;
-end;
-
-procedure TPascalTypeFormat4CharacterMap.SaveToStream(Stream: TStream);
-begin
- // write length
- WriteSwappedWord(Stream, FLength);
-
- // write language
- WriteSwappedWord(Stream, FLanguage);
-end;
-
-
-{ TPascalTypeFormat6CharacterMap }
-
-function TPascalTypeFormat6CharacterMap.CharacterToGlyph(
-  CharacterIndex: Integer): Integer;
-begin
- Result := 0;
- if CharacterIndex >= FFirstCode then
-  if CharacterIndex < FFirstCode + Length(FGlyphIdArray)
-   then Result := FGlyphIdArray[CharacterIndex - FFirstCode];
-end;
-
-function TPascalTypeFormat6CharacterMap.GetEntryCount: Word;
-begin
- Result := Length(FGlyphIdArray);
-end;
-
-function TPascalTypeFormat6CharacterMap.GetFormat: Word;
-begin
- Result := 6
-end;
-
-procedure TPascalTypeFormat6CharacterMap.ResetToDefaults;
-begin
- FLanguage := 0;
- FFirstCode := 0;
- SetLength(FGlyphIdArray, 0);
-end;
-
-procedure TPascalTypeFormat6CharacterMap.LoadFromStream(Stream: TStream);
-var
-  StartPos    : Int64;
-  EntryIndex  : Integer;
-  TableLength : Word;
-begin
- inherited;
-
- with Stream do
-  begin
-   // remember start position
-   StartPos := Position;
-
-   // read table size
-   TableLength := ReadSwappedWord(Stream);
-
-   // read language
-   FLanguage := ReadSwappedWord(Stream);
-
-   // read first code
-   FFirstCode := ReadSwappedWord(Stream);
-
-   // read number of character codes in subrange
-   SetLength(FGlyphIdArray, ReadSwappedWord(Stream));
-
-   for EntryIndex := 0 to Length(FGlyphIdArray) - 1
-    do FGlyphIdArray[EntryIndex] := ReadSwappedWord(Stream);
-
-   {$IFDEF AmbigiousExceptions}
-   if Position <> StartPos + TableLength
-    then raise EPascalTypeError.Create('Character map error: Wrong length of subtable!');
-   {$ENDIF}
-
-   // seek end of table
-   Position := StartPos + TableLength;
-  end;
-end;
-
-procedure TPascalTypeFormat6CharacterMap.SaveToStream(Stream: TStream);
-var
-  EntryIndex : Integer;
-begin
- inherited;
-
- with Stream do
-  begin
-   // write table size
-   WriteSwappedWord(Stream, 8 + 2 * Length(FGlyphIdArray));
-
-   // write language
-   WriteSwappedWord(Stream, FLanguage);
-
-   // write first code
-   WriteSwappedWord(Stream, FFirstCode);
-
-   // write number of character codes in subrange
-   WriteSwappedWord(Stream, Length(FGlyphIdArray));
-
-   // write glyph indices
-   for EntryIndex := 0 to Length(FGlyphIdArray) - 1
-    do WriteSwappedWord(Stream, FGlyphIdArray[EntryIndex]);
-  end;
-end;
-
-
-{ TPascalTypeFormat12CharacterMap }
-
-function TPascalTypeFormat12CharacterMap.CharacterToGlyph(
-  CharacterIndex: Integer): Integer;
-var
-  GroupIndex : Integer;
-begin
- Result := 0;
- GroupIndex := 0;
-
- while GroupIndex < Length(FCoverageArray) do
-  with FCoverageArray[GroupIndex] do
-   begin
-    if CharacterIndex >= Integer(StartCharCode) then
-     begin
-      if CharacterIndex < Integer(EndCharCode)
-       then Result := Integer(StartGlyphID) + (CharacterIndex - Integer(StartCharCode));
-
-      Exit;
-     end;
-    Inc(GroupIndex);
-   end;
-end;
-
-function TPascalTypeFormat12CharacterMap.GetFormat: Word;
-begin
- Result := 12;
-end;
-
-procedure TPascalTypeFormat12CharacterMap.ResetToDefaults;
-begin
- FLanguage := 0;
- SetLength(FCoverageArray, 0);
-end;
-
-procedure TPascalTypeFormat12CharacterMap.LoadFromStream(Stream: TStream);
-var
-  StartPos    : Int64;
-  TableLength : Cardinal;
-  GroupIndex  : Cardinal;
-begin
- with Stream do
-  begin
-   StartPos := Position;
-
-   {$IFDEF AmbigiousExceptions}
-   if ReadSwappedWord(Stream) <> 0
-    then raise EPascalTypeError.Create(RCStrReservedValueError);
-   {$ELSE}
-   Seek(2, soFromCurrent);
-   {$ENDIF}
-
-   // read table length
-   TableLength := ReadSwappedCardinal(Stream);
-
-   // read language
-   FLanguage := ReadSwappedCardinal(Stream);
-
-   // read group count
-   SetLength(FCoverageArray, ReadSwappedCardinal(Stream));
-
-   for GroupIndex := 0 to Length(FCoverageArray) - 1 do
-    with FCoverageArray[GroupIndex] do
-     begin
-      // read start character code
-      StartCharCode := ReadSwappedCardinal(Stream);
-
-      // read end character code
-      EndCharCode := ReadSwappedCardinal(Stream);
-
-      // read start glyph ID
-      StartGlyphID := ReadSwappedCardinal(Stream);
-     end;
-
-   // seek end of this table
-   Position := StartPos + TableLength - 2;
-  end;
-end;
-
-procedure TPascalTypeFormat12CharacterMap.SaveToStream(Stream: TStream);
-begin
- raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
-end;
-
-
 { TCustomPascalTypeCharacterMapDirectory }
 
 constructor TCustomPascalTypeCharacterMapDirectory.Create(EncodingID: Word);
@@ -2491,7 +1962,20 @@ begin
   with TCustomPascalTypeCharacterMapDirectory(Dest) do
    begin
     FEncodingID := Self.FEncodingID;
-    FCharacterMap.Assign(Self.FCharacterMap);
+
+    // match character map type
+    if not (FCharacterMap is Self.FCharacterMap.ClassType) then
+     begin
+      if Assigned(FCharacterMap)
+       then FreeAndNil(FCharacterMap);
+
+      // create new character map
+      FCharacterMap := TCustomPascalTypeCharacterMapClass(Self.FCharacterMap.ClassType).Create;
+     end;
+
+    // assign character map
+    if Assigned(FCharacterMap)
+     then FCharacterMap.Assign(Self.FCharacterMap);
    end else inherited;
 end;
 
@@ -2523,8 +2007,9 @@ end;
 
 procedure TCustomPascalTypeCharacterMapDirectory.LoadFromStream(Stream: TStream);
 var
-  Value16 : Word;
-  OldMap  : TCustomPascalTypeCharacterMap;
+  Value16  : Word;
+  MapClass : TCustomPascalTypeCharacterMapClass;
+  OldMap   : TCustomPascalTypeCharacterMap;
 begin
  with Stream do
   begin
@@ -2534,39 +2019,16 @@ begin
 
    // read format
    Value16 := ReadSwappedWord(Stream);
-   case Value16 of
-     0 : begin
-          OldMap := FCharacterMap;
-          FCharacterMap := TPascalTypeFormat0CharacterMap.Create;
-          if Assigned(OldMap)
-           then FreeAndNil(OldMap);
-         end;
-     2 : begin
-          OldMap := FCharacterMap;
-          FCharacterMap := TPascalTypeFormat2CharacterMap.Create;
-          if Assigned(OldMap)
-           then FreeAndNil(OldMap);
-         end;
-     4 : begin
-          OldMap := FCharacterMap;
-          FCharacterMap := TPascalTypeFormat4CharacterMap.Create;
-          if Assigned(OldMap)
-           then FreeAndNil(OldMap);
-         end;
-     6 : begin
-          OldMap := FCharacterMap;
-          FCharacterMap := TPascalTypeFormat6CharacterMap.Create;
-          if Assigned(OldMap)
-           then FreeAndNil(OldMap);
-         end;
-    12 : begin
-         OldMap := FCharacterMap;
-         FCharacterMap := TPascalTypeFormat12CharacterMap.Create;
-         if Assigned(OldMap)
-          then FreeAndNil(OldMap);
-        end;
-    else raise EPascalTypeError.CreateFmt('Unknown character map (%d)', [Value16]);
-   end;
+   MapClass := FindPascalTypeCharacterMapByFormat(Value16);
+
+   if Assigned(MapClass) then
+    begin
+     OldMap := FCharacterMap;
+     FCharacterMap := MapClass.Create;
+     if Assigned(OldMap)
+      then FreeAndNil(OldMap);
+    end
+   else raise EPascalTypeError.CreateFmt(RCStrUnknownCharacterMap, [Value16]);
 
    if Assigned(FCharacterMap)
     then FCharacterMap.LoadFromStream(Stream);
@@ -2657,38 +2119,38 @@ end;
 
 { TPascalTypeCharacterMapTable }
 
-constructor TPascalTypeCharacterMapTable.Create;
-begin
- FSubtableList := TObjectList.Create;
- inherited;
-end;
-
 destructor TPascalTypeCharacterMapTable.Destroy;
 begin
- FreeAndNil(FSubtableList);
+ FreeMapItems;
  inherited;
 end;
 
 procedure TPascalTypeCharacterMapTable.AssignTo(Dest: TPersistent);
-(*
 var
-  SubTableIndex : Integer;
-*)
+  MapIndex : Integer;
+  MapClass : TPascalTypeCharacterMapDirectoryClass;
 begin
  if Dest is Self.ClassType then
   with TPascalTypeCharacterMapTable(Dest) do
    begin
     FVersion := Self.FVersion;
-    FSubtableList.Assign(Self.FSubtableList);
 
-(*
-    for SubTableIndex := 0 to Self.FSubtableList.Count - 1 do
-      begin
-       Self.FSubtableList[SubTableIndex].ClassType.Create;
-      end;
-*)
-    // damn hack!!! (it is necessary to create a separate instance!!!)
-    Self.FSubtableList.OwnsObjects := False;
+    FreeMapItems;
+
+    // set length of map array
+    SetLength(FMaps, Length(Self.FMaps));
+
+    // assign maps
+    for MapIndex := 0 to Length(Self.FMaps) - 1 do
+     begin
+      MapClass := TPascalTypeCharacterMapDirectoryClass(Self.FMaps[MapIndex].ClassType);
+
+      // eventually create the map
+      FMaps[MapIndex] := MapClass.Create(Self.FMaps[MapIndex].EncodingID);
+
+      // assign map
+      FMaps[MapIndex].Assign(Self.FMaps[MapIndex]);
+     end;
    end
  else inherited;
 end;
@@ -2696,14 +2158,14 @@ end;
 function TPascalTypeCharacterMapTable.GetCharacterMapSubtable(
   Index: Integer): TCustomPascalTypeCharacterMapDirectory;
 begin
- if (Index >= 0) and (Index < FSubtableList.Count)
-  then Result := TCustomPascalTypeCharacterMapDirectory(FSubtableList[Index])
+ if (Index >= 0) and (Index < Length(FMaps))
+  then Result := FMaps[Index]
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
 function TPascalTypeCharacterMapTable.GetCharacterMapSubtableCount: Word;
 begin
- Result := FSubtableList.Count;
+ Result := Length(FMaps);
 end;
 
 class function TPascalTypeCharacterMapTable.GetTableType: TTableType;
@@ -2714,18 +2176,27 @@ end;
 procedure TPascalTypeCharacterMapTable.ResetToDefaults;
 begin
  FVersion := 0;
- FSubtableList.Clear;
+
+ // free map items and set length of map array to zero
+ FreeMapItems;
+ SetLength(FMaps, 0);
+end;
+
+procedure TPascalTypeCharacterMapTable.FreeMapItems;
+var
+  MapIndex : Integer;
+begin
+ for MapIndex := 0 to Length(FMaps) - 1
+  do FreeAndNil(FMaps[MapIndex]);
 end;
 
 procedure TPascalTypeCharacterMapTable.LoadFromStream(Stream: TStream);
 var
-  StartPos        : Int64;
-  SubtableCount   : Integer;
-  SubtableIndex   : Integer;
-  CharMapDirEntry : TCustomPascalTypeCharacterMapDirectory;
-  Value32         : Cardinal;
-  PlatformID      : Word;
-  EncodingID      : Word;
+  StartPos   : Int64;
+  MapIndex   : Integer;
+  Value32    : Cardinal;
+  PlatformID : Word;
+  EncodingID : Word;
 begin
  with Stream do
   begin
@@ -2744,20 +2215,20 @@ begin
    if not (FVersion = 0)
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
-   // clear subtable list
-   FSubtableList.Clear;
+   // clear maps
+   FreeMapItems;
 
    // read subtable count
-   SubtableCount := ReadSwappedWord(Stream);
+   SetLength(FMaps, ReadSwappedWord(Stream));
 
-   // check if table is complete
-   if Position + SubtableCount * 8 > Size
+   // check (minimum) table size
+   if Position + Length(FMaps) * 8 > Size
     then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read directory entry
-   for SubtableIndex := 0 to SubtableCount - 1 do
+   for MapIndex := 0 to Length(FMaps) - 1 do
     begin
-     Position := StartPos + 4 + SubtableIndex * 8;
+     Position := StartPos + 4 + MapIndex * 8;
 
      // read Platform ID
      PlatformID := ReadSwappedWord(Stream);
@@ -2767,10 +2238,10 @@ begin
 
      // create character map based on encoding
      case PlatformID of
-       0 : CharMapDirEntry := TPascalTypeCharacterMapUnicodeDirectory.Create(EncodingID);
-       1 : CharMapDirEntry := TPascalTypeCharacterMapMacintoshDirectory.Create(EncodingID);
-       3 : CharMapDirEntry := TPascalTypeCharacterMapMicrosoftDirectory.Create(EncodingID);
-      else CharMapDirEntry := TPascalTypeCharacterMapDirectoryGenericEntry.Create(EncodingID);
+       0 : FMaps[MapIndex] := TPascalTypeCharacterMapUnicodeDirectory.Create(EncodingID);
+       1 : FMaps[MapIndex] := TPascalTypeCharacterMapMacintoshDirectory.Create(EncodingID);
+       3 : FMaps[MapIndex] := TPascalTypeCharacterMapMicrosoftDirectory.Create(EncodingID);
+      else FMaps[MapIndex] := TPascalTypeCharacterMapDirectoryGenericEntry.Create(EncodingID);
      end;
 
      // read and apply offset
@@ -2778,10 +2249,8 @@ begin
      Position := StartPos + Swap32(Value32);
 
      // load character map entry from stream
-     CharMapDirEntry.LoadFromStream(Stream);
-
-     if Assigned(CharMapDirEntry)
-      then FSubtableList.Add(CharMapDirEntry);
+     if Assigned(FMaps[MapIndex])
+      then FMaps[MapIndex].LoadFromStream(Stream);
     end;
   end;
 end;
@@ -2802,16 +2271,16 @@ begin
    WriteSwappedWord(Stream, FVersion);
 
    // write directory entry count
-   WriteSwappedWord(Stream, FSubtableList.Count);
+   WriteSwappedWord(Stream, Length(FMaps));
 
    // offset directory
-   Seek(soFromCurrent, 6 * FSubtableList.Count);
+   Seek(soFromCurrent, 6 * Length(FMaps));
 
    // build directory (to be written later) and write data
-   SetLength(Directory, FSubtableList.Count);
+   SetLength(Directory, Length(FMaps));
 
-   for DirIndex := 0 to FSubtableList.Count - 1 do
-    with TCustomPascalTypeCharacterMapDirectory(FSubtableList[DirIndex]) do
+   for DirIndex := 0 to Length(FMaps) - 1 do
+    with FMaps[DirIndex] do
      begin
       Directory[DirIndex] := Cardinal(Position - StartPos);
       SaveToStream(Stream);
@@ -2820,8 +2289,8 @@ begin
    // locate directory
    Position := StartPos + 4;
 
-   for DirIndex := 0 to FSubtableList.Count - 1 do
-    with TCustomPascalTypeCharacterMapDirectory(FSubtableList[DirIndex]) do
+   for DirIndex := 0 to Length(FMaps) - 1 do
+    with FMaps[DirIndex] do
      begin
       // write format
       WriteSwappedWord(Stream, Word(PlatformID));
@@ -3331,7 +2800,12 @@ begin
  if Dest is Self.ClassType then
   with TCustomTrueTypeFontNamePlatform(Dest) do
    begin
-   end else inherited;
+    FEncodingID := Self.FEncodingID;
+    FLanguageID := Self.FLanguageID;
+    FNameID     := Self.FNameID;
+    FNameString := Self.FNameString;
+   end
+ else inherited;
 end;
 
 procedure TCustomTrueTypeFontNamePlatform.ResetToDefaults;
@@ -3540,28 +3014,22 @@ end;
 
 { TPascalTypeNameTable }
 
-constructor TPascalTypeNameTable.Create;
-begin
- FNameRecords := TObjectList.Create;
- inherited;
-end;
-
 destructor TPascalTypeNameTable.Destroy;
 begin
- FreeAndNil(FNameRecords);
+ FreeNameSubTables;
  inherited;
 end;
 
-function TPascalTypeNameTable.GetNameRecord(Index: Word): TCustomTrueTypeFontNamePlatform;
+function TPascalTypeNameTable.GetNameSubTable(Index: Word): TCustomTrueTypeFontNamePlatform;
 begin
- if (Index < FNameRecords.Count)
-  then Result := TCustomTrueTypeFontNamePlatform(FNameRecords[Index])
+ if (Index < Length(FNameSubTables))
+  then Result := TCustomTrueTypeFontNamePlatform(FNameSubTables[Index])
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TPascalTypeNameTable.GetNameRecordCount: Word;
+function TPascalTypeNameTable.GetNameSubTableCount: Word;
 begin
- Result := FNameRecords.Count;
+ Result := Length(FNameSubTables);
 end;
 
 class function TPascalTypeNameTable.GetTableType: TTableType;
@@ -3570,22 +3038,49 @@ begin
 end;
 
 procedure TPascalTypeNameTable.AssignTo(Dest: TPersistent);
+var
+  NameTableClass : TTrueTypeFontNamePlatformClass;
+  NameTableIndex : Integer;
 begin
  if Dest is Self.ClassType then
   with TPascalTypeNameTable(Dest) do
    begin
     FFormat := Self.FFormat;
 
-    Self.FNameRecords.OwnsObjects := False;
-    FNameRecords.Assign(Self.FNameRecords);
+    // free all name tables
+    FreeNameSubTables;
+
+    // set length of name table array
+    SetLength(FNameSubTables, Length(Self.FNameSubTables));
+
+    // assign name tables
+    for NameTableIndex := 0 to Length(Self.FNameSubTables) - 1 do
+     begin
+      NameTableClass := TTrueTypeFontNamePlatformClass(Self.FNameSubTables[NameTableIndex].ClassType);
+
+      // create name table
+      FNameSubTables[NameTableIndex] := NameTableClass.Create;
+
+      // assign name table
+      FNameSubTables[NameTableIndex].Assign(Self.FNameSubTables[NameTableIndex]);
+     end;
    end
  else inherited;
+end;
+
+procedure TPascalTypeNameTable.FreeNameSubTables;
+var
+  NameIndex : Integer;
+begin
+ for NameIndex := 0 to Length(FNameSubTables) - 1
+  do FreeAndNil(FNameSubTables[NameIndex]);
 end;
 
 procedure TPascalTypeNameTable.ResetToDefaults;
 begin
  FFormat := 0;
- FNameRecords.Clear;
+ FreeNameSubTables;
+ SetLength(FNameSubTables, 0);
 end;
 
 procedure TPascalTypeNameTable.LoadFromStream(Stream: TStream);
@@ -3593,15 +3088,13 @@ var
   StoragePos  : Int64;
   OldPosition : Int64;
   NameIndex   : Integer;
-  NameRecord  : TCustomTrueTypeFontNamePlatform;
-  NumRecords  : Word;
   StrLength   : Word;
   StrOffset   : Word;
   Value16     : Word;
 begin
  with Stream do
   begin
-   // check for minimum table size
+   // check (minimum) table size
    if Position + 6 > Size
     then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
@@ -3614,32 +3107,33 @@ begin
    if not (FFormat in [0..1])
     then raise EPascalTypeError.Create(RCStrUnknownFormat);
 
+   // free current name items
+   FreeNameSubTables;
+
    // internally store number of records
-   NumRecords := ReadSwappedWord(Stream);
+   SetLength(FNameSubTables, ReadSwappedWord(Stream));
 
    // read storage offset and add to preliminary storage position
    StoragePos := StoragePos + ReadSwappedWord(Stream);
 
-   // check for minimum table size
-   if Position + NumRecords * 12 > Size
+   // check (minimum) table size
+   if Position + Length(FNameSubTables) * 12 > Size
     then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
-   // clear current name record list 
-   FNameRecords.Clear;
-
-   for NameIndex := 0 to NumRecords - 1 do
+   for NameIndex := 0 to Length(FNameSubTables) - 1 do
     begin
      // read platform ID
      Value16 := ReadSwappedWord(Stream);
      case TPlatformID(Value16) of
-        piUnicode : NameRecord := TTrueTypeFontNamePlatformUnicode.Create;
-          piApple : NameRecord := TTrueTypeFontNamePlatformApple.Create;
-            piISO : NameRecord := TTrueTypeFontNamePlatformISO.Create;
-      piMicrosoft : NameRecord := TTrueTypeFontNamePlatformMicrosoft.Create;
+        piUnicode : FNameSubTables[NameIndex] := TTrueTypeFontNamePlatformUnicode.Create;
+          piApple : FNameSubTables[NameIndex] := TTrueTypeFontNamePlatformApple.Create;
+            piISO : FNameSubTables[NameIndex] := TTrueTypeFontNamePlatformISO.Create;
+      piMicrosoft : FNameSubTables[NameIndex] := TTrueTypeFontNamePlatformMicrosoft.Create;
       else raise EPascalTypeError.CreateFmt(RCStrUnsupportedPlatform, [Value16]);
      end;
 
-     NameRecord.LoadFromStream(Stream);
+     // load name record from stream
+     FNameSubTables[NameIndex].LoadFromStream(Stream);
 
      // read length
      StrLength := ReadSwappedWord(Stream);
@@ -3651,12 +3145,11 @@ begin
      OldPosition := Position;
      Position := StoragePos + StrOffset;
 
-     NameRecord.ReadStringFromStream(Stream, StrLength);
+     // read string from steam
+     FNameSubTables[NameIndex].ReadStringFromStream(Stream, StrLength);
 
+     // restore position
      Position := OldPosition;
-
-     // add to name record list
-     FNameRecords.Add(NameRecord);
     end;
 
    // ignore format 1 addition
@@ -4146,7 +3639,7 @@ end;
 
 procedure TPascalTypeUnicodeRangeTable.ResetToDefaults;
 begin
- FillChar(FUnicodeRange, SizeOf(TOS2UnicodeRange), 0);
+ FillChar(FUnicodeRange[0], SizeOf(TOS2UnicodeRange), 0);
 end;
 
 procedure TPascalTypeUnicodeRangeTable.LoadFromStream(Stream: TStream);
@@ -5282,7 +4775,11 @@ begin
  if Dest is Self.ClassType then
   with TPascalTypeOS2AddendumTable(Dest) do
    begin
-
+    FXHeight     := Self.FXHeight;
+    FCapHeight   := Self.FCapHeight;
+    FDefaultChar := Self.FDefaultChar;
+    FBreakChar   := Self.FBreakChar;
+    FMaxContext  := Self.FMaxContext;
    end
   else inherited;
 end;
@@ -6667,6 +6164,51 @@ end;
 procedure TPascalTypePostscriptVersion2Table.SaveToStream(Stream: TStream);
 begin
  raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
+end;
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+function IsPascalTypeCharacterMapRegistered(CharacterMapClass: TCustomPascalTypeCharacterMapClass): Boolean;
+var
+  CharacterMapClassIndex : Integer;
+begin
+ Result := False;
+ for CharacterMapClassIndex := 0 to Length(GCharacterMapClasses) - 1 do
+  if GCharacterMapClasses[CharacterMapClassIndex] = CharacterMapClass then
+   begin
+    Result := True;
+    Exit;
+   end;
+end;
+
+procedure RegisterPascalTypeCharacterMap(CharacterMapClass: TCustomPascalTypeCharacterMapClass);
+begin
+ Assert(IsPascalTypeCharacterMapRegistered(CharacterMapClass) = False);
+ SetLength(GCharacterMapClasses, Length(GCharacterMapClasses) + 1);
+ GCharacterMapClasses[Length(GCharacterMapClasses) - 1] := CharacterMapClass;
+end;
+
+procedure RegisterPascalTypeCharacterMaps(CharacterMapClasses: array of TCustomPascalTypeCharacterMapClass);
+var
+  CharacterMapClassIndex : Integer;
+begin
+ for CharacterMapClassIndex := 0 to Length(CharacterMapClasses) - 1
+  do RegisterPascalTypeCharacterMap(CharacterMapClasses[CharacterMapClassIndex]);
+end;
+
+function FindPascalTypeCharacterMapByFormat(Format: Word): TCustomPascalTypeCharacterMapClass;
+var
+  CharacterMapClassIndex : Integer;
+begin
+ Result := nil;
+ for CharacterMapClassIndex := 0 to Length(GCharacterMapClasses) - 1 do
+  if GCharacterMapClasses[CharacterMapClassIndex].GetFormat = Format then
+   begin
+    Result := GCharacterMapClasses[CharacterMapClassIndex];
+    Exit;
+   end;
+// raise EPascalTypeError.Create('Unknown Table Class: ' + TableType);
 end;
 
 

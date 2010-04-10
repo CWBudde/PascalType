@@ -11,12 +11,12 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ComCtrls, StdCtrls, ExtCtrls, ToolWin, ActnList, StdActns, AppEvnts,
   ImgList, PT_Types, PT_Tables, PT_TablesTrueType, PT_TablesOptional,
-  PT_TablesBitmap, PT_TablesApple, PT_TablesShared,
+  PT_TablesBitmap, PT_TablesApple, PT_TablesShared, PT_CharacterMap,
   {$IFDEF ShowOpenType}
   PT_TablesOpenType,
   {$ENDIF}
   PT_TablesFontForge, PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames,
-  PT_Rasterizer, PT_PanoseClassifications, FE_FontHeader;
+  PT_Rasterizer, PT_PanoseClassifications, PT_Windows, FE_FontHeader;
 
 type
   TFmTTF = class(TForm)
@@ -209,51 +209,7 @@ implementation
 {$R *.dfm}
 
 uses
-  ShlObj, ActiveX, Inifiles, Math, Types;
-
-procedure StrResetLength(var S: string);
-begin
- SetLength(S, StrLen(PChar(S)));
-end;
-
-function PidlToPath(IdList: PItemIdList): string;
-begin
- SetLength(Result, MAX_PATH);
- if SHGetPathFromIDList(IdList, PChar(Result))
-  then StrResetLength(Result)
-  else Result := '';
-end;
-
-function PidlFree(var IdList: PItemIdList): Boolean;
-var
-  Malloc: IMalloc;
-begin
- Result := False;
- if IdList = nil
-  then Result := True
-  else
-   begin
-    if Succeeded(SHGetMalloc(Malloc)) and (Malloc.DidAlloc(IdList) > 0) then
-     begin
-      Malloc.Free(IdList);
-      IdList := nil;
-      Result := True;
-     end;
-   end;
-end;
-
-function GetFontDirectory: string;
-var
-  lFolderPidl: PItemIdList;
-begin
-  if Succeeded(SHGetSpecialFolderLocation(0, CSIDL_FONTS, lFolderPidl)) then
-  begin
-    Result := PidlToPath(lFolderPidl);
-    PidlFree(lFolderPidl);
-  end
-  else
-    Result := '';
-end;
+  Inifiles, Math, Types;
 
 procedure TFmTTF.FormCreate(Sender: TObject);
 var
@@ -1437,16 +1393,16 @@ begin
    // add version number
    ListViewData(['Format', IntToStr(Format)]);
 
-   for StrIndex := 0 to NameRecordCount - 1 do
+   for StrIndex := 0 to NameSubTableCount - 1 do
     with ListView.Items.Add do
      begin
-      case NameRecord[StrIndex].PlatformID of
+      case NameSubTable[StrIndex].PlatformID of
        piApple: str := 'Apple';
        piUnicode: str := 'Unicode';
        piMicrosoft: str := 'Microsoft';
       end;
 
-      case NameRecord[StrIndex].NameID of
+      case NameSubTable[StrIndex].NameID of
        niCopyrightNotice    : str := str + ' - Copyright Notice';
        niFamily             : str := str + ' - Family';
        niSubfamily          : str := str + ' - Subfamily';
@@ -1473,7 +1429,7 @@ begin
       end;
 
       Caption := str;
-      SubItems.Add(NameRecord[StrIndex].Name);
+      SubItems.Add(NameSubTable[StrIndex].Name);
      end;
 
    ListView.BringToFront;
@@ -1488,16 +1444,16 @@ begin
   begin
    InitializeDefaultListView;
 
-   for StrIndex := 0 to NameRecordCount - 1 do
+   for StrIndex := 0 to NameSubTableCount - 1 do
     begin
-     case NameRecord[StrIndex].PlatformID of
+     case NameSubTable[StrIndex].PlatformID of
       piUnicode: Continue;
       piMicrosoft: Continue;
      end;
 
      with ListView.Items.Add do
       begin
-       case NameRecord[StrIndex].NameID of
+       case NameSubTable[StrIndex].NameID of
         niCopyrightNotice    : Caption := 'Copyright Notice';
         niFamily             : Caption := 'Family';
         niSubfamily          : Caption := 'Subfamily';
@@ -1523,7 +1479,7 @@ begin
         else Caption := 'String #' + IntToStr(StrIndex + 1);
        end;
 
-       SubItems.Add(NameRecord[StrIndex].Name);
+       SubItems.Add(NameSubTable[StrIndex].Name);
       end;
     end;
 
@@ -1539,16 +1495,16 @@ begin
   begin
    InitializeDefaultListView;
 
-   for StrIndex := 0 to NameRecordCount - 1 do
+   for StrIndex := 0 to NameSubTableCount - 1 do
     begin
-     case NameRecord[StrIndex].PlatformID of
+     case NameSubTable[StrIndex].PlatformID of
        piApple: Continue;
        piMicrosoft: Continue;
       end;
 
      with ListView.Items.Add do
       begin
-       case NameRecord[StrIndex].NameID of
+       case NameSubTable[StrIndex].NameID of
         niCopyrightNotice    : Caption := 'Copyright Notice';
         niFamily             : Caption := 'Family';
         niSubfamily          : Caption := 'Subfamily';
@@ -1574,7 +1530,7 @@ begin
         else Caption := 'String #' + IntToStr(StrIndex + 1);
        end;
 
-       SubItems.Add(NameRecord[StrIndex].Name);
+       SubItems.Add(NameSubTable[StrIndex].Name);
       end;
     end;
 
@@ -1590,16 +1546,16 @@ begin
   begin
    InitializeDefaultListView;
 
-   for StrIndex := 0 to NameRecordCount - 1 do
+   for StrIndex := 0 to NameSubTableCount - 1 do
     begin
-     case NameRecord[StrIndex].PlatformID of
+     case NameSubTable[StrIndex].PlatformID of
       piUnicode: Continue;
       piApple: Continue;
      end;
 
      with ListView.Items.Add do
       begin
-       case NameRecord[StrIndex].NameID of
+       case NameSubTable[StrIndex].NameID of
         niCopyrightNotice    : Caption := 'Copyright Notice';
         niFamily             : Caption := 'Family';
         niSubfamily          : Caption := 'Subfamily';
@@ -1625,7 +1581,7 @@ begin
         else Caption := 'String #' + IntToStr(StrIndex + 1);
        end;
 
-       SubItems.Add(NameRecord[StrIndex].Name);
+       SubItems.Add(NameSubTable[StrIndex].Name);
       end;
     end;
 
@@ -3613,22 +3569,22 @@ begin
    with NameTable do
     begin
      // check for Unicode
-     for SubtableIndex := 0 to NameRecordCount - 1 do
-      if NameRecord[SubtableIndex].PlatformID = piUnicode then
+     for SubtableIndex := 0 to NameSubTableCount - 1 do
+      if NameSubTable[SubtableIndex].PlatformID = piUnicode then
        begin
         Items.AddChildObject(Node, 'Unicode', NameTable);
         Break;
        end;
      // check for Apple
-     for SubtableIndex := 0 to NameRecordCount - 1 do
-      if NameRecord[SubtableIndex].PlatformID = piApple then
+     for SubtableIndex := 0 to NameSubTableCount - 1 do
+      if NameSubTable[SubtableIndex].PlatformID = piApple then
        begin
         Items.AddChildObject(Node, 'Apple', NameTable);
         Break;
        end;
      // check for Microsoft
-     for SubtableIndex := 0 to NameRecordCount - 1 do
-      if NameRecord[SubtableIndex].PlatformID = piMicrosoft then
+     for SubtableIndex := 0 to NameSubTableCount - 1 do
+      if NameSubTable[SubtableIndex].PlatformID = piMicrosoft then
        begin
         Items.AddChildObject(Node, 'Microsoft', NameTable);
         Break;

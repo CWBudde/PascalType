@@ -192,6 +192,7 @@ type
   private
     FContours : array of TPascalTypeTrueTypeContour;
     function GetContour(Index: Integer): TPascalTypeTrueTypeContour;
+    procedure FreeContourArrayItems;
   protected
     procedure ResetToDefaults; override;
     procedure AssignTo(Dest: TPersistent); override;
@@ -258,7 +259,8 @@ type
   private
     FGlyphDataList : array of TCustomTrueTypeFontGlyphData;
     function GetGlyphDataCount: Integer;
-    function GetGlyphData(Index: Integer): TCustomTrueTypeFontGlyphData; // List of TCustomTrueTypeFontGlyphData
+    function GetGlyphData(Index: Integer): TCustomTrueTypeFontGlyphData;
+    procedure FreeGlyphDataListItems;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -718,7 +720,7 @@ begin
  if Dest is Self.ClassType then
   with TPascalTypeTrueTypeContour(Dest) do
    begin
-
+    FPoints := Self.FPoints;
    end
   else inherited;
 end;
@@ -783,11 +785,8 @@ end;
 { TTrueTypeFontSimpleGlyphData }
 
 destructor TTrueTypeFontSimpleGlyphData.Destroy;
-var
-  ContourIndex : Integer;
 begin
- for ContourIndex := 0 to Length(FContours) - 1
-  do FreeAndNil(FContours[ContourIndex]);
+ FreeContourArrayItems;
  inherited;
 end;
 
@@ -819,16 +818,21 @@ begin
  else inherited;
 end;
 
-procedure TTrueTypeFontSimpleGlyphData.ResetToDefaults;
+procedure TTrueTypeFontSimpleGlyphData.FreeContourArrayItems;
 var
   ContourIndex : Integer;
+begin
+ for ContourIndex := 0 to Length(FContours) - 1
+  do FreeAndNil(FContours[ContourIndex]);
+end;
+
+procedure TTrueTypeFontSimpleGlyphData.ResetToDefaults;
 begin
  FInstructions.ResetToDefaults;
 
  // free contour list
- for ContourIndex := 0 to Length(FContours) - 1
-  do FreeAndNil(FContours[ContourIndex]);
- SetLength(FContours, 0); 
+ FreeContourArrayItems;
+ SetLength(FContours, 0);
 end;
 
 function TTrueTypeFontSimpleGlyphData.GetContour(
@@ -1375,11 +1379,8 @@ end;
 { TTrueTypeFontGlyphDataTable }
 
 destructor TTrueTypeFontGlyphDataTable.Destroy;
-var
-  GlyphIndex : Integer;
 begin
- for GlyphIndex := 0 to Length(FGlyphDataList) - 1
-  do FreeAndNil(FGlyphDataList[GlyphIndex]);
+ FreeGlyphDataListItems;
  inherited;
 end;
 
@@ -1391,9 +1392,8 @@ begin
  if Dest is Self.ClassType then
   with TTrueTypeFontGlyphDataTable(Dest) do
    begin
-    // clear all glyph data
-    for GlyphsIndex := 0 to Length(FGlyphDataList) - 1
-     do FreeAndNil(FGlyphDataList[GlyphsIndex]);
+    // free all glyph data
+    FreeGlyphDataListItems;
 
     // set length of countour array
     SetLength(FGlyphDataList, Length(Self.FGlyphDataList));
@@ -1432,13 +1432,20 @@ begin
 end;
 
 procedure TTrueTypeFontGlyphDataTable.ResetToDefaults;
+begin
+ // free glyph list items
+ FreeGlyphDataListItems;
+
+ // set glyph data list length to zero
+ SetLength(FGlyphDataList, 0);
+end;
+
+procedure TTrueTypeFontGlyphDataTable.FreeGlyphDataListItems;
 var
   GlyphIndex : Integer;
 begin
- // free Glyph list
  for GlyphIndex := 0 to Length(FGlyphDataList) - 1
   do FreeAndNil(FGlyphDataList[GlyphIndex]);
- SetLength(FGlyphDataList, 0); 
 end;
 
 procedure TTrueTypeFontGlyphDataTable.LoadFromStream(Stream: TStream);

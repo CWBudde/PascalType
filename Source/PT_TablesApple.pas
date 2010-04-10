@@ -2105,7 +2105,7 @@ begin
      end;
 
    for InstIndex := 0 to Length(FInstances) - 1 do
-    with FInstances[AxisIndex] do
+    with FInstances[InstIndex] do
      begin
       // read name ID
       NameID := ReadSwappedWord(Stream);

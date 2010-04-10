@@ -23,8 +23,10 @@ uses
   PT_TablesTrueType in '..\..\Source\PT_TablesTrueType.pas',
   PT_Types in '..\..\Source\PT_Types.pas',
   PT_UnicodeNames in '..\..\Source\PT_UnicodeNames.pas',
+  PT_RasterizerGDI in '..\..\Source\PT_RasterizerGDI.pas',
+  PT_Windows in '..\..\Source\PT_Windows.pas',
   RenderDemoFontNameScanner in 'RenderDemoFontNameScanner.pas',
-  PT_RasterizerGDI in '..\..\Source\PT_RasterizerGDI.pas';
+  PT_CharacterMap in '..\..\Source\PT_CharacterMap.pas';
 
 {$R *.res}
 

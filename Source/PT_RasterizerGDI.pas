@@ -584,6 +584,8 @@ begin
    Pen.Color := clBlack;
    Pen.Style := psSolid;
 
+   Y := Y + Abs(FontHeight);
+
    for ContourIndex := 0 to ContourCount - 1 do
     with Contour[ContourIndex] do
      begin
@@ -655,7 +657,8 @@ end;
 procedure TPascalTypeRasterizerGDI.RenderText(Text: string; Canvas: TCanvas; X,
   Y: Integer);                      
 var
-  CharIndex : Integer;
+  CharIndex  : Integer;
+  GlyphIndex : Integer;
 begin
   for CharIndex := 1 to Length(Text) do
    begin
@@ -666,11 +669,14 @@ begin
      end
     else
      begin
+      // get glyph index
+      GlyphIndex := GetGlyphByCharacter(Text[CharIndex]);
+
       // rasterize character
-      RasterizeGlyph(GetGlyphByCharacter(Word(Text[CharIndex])), Canvas, X, Y);
+      RasterizeGlyph(GlyphIndex, Canvas, X, Y);
 
       // advance cursor
-      X := X + 10;
+      X := X + Round(GetAdvanceWidth(GlyphIndex));
     end;
   end;
 end;

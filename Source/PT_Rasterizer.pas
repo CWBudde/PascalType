@@ -94,6 +94,7 @@ type
   protected
     function GetGlyphByCharacter(Character: Word): Integer; overload;
     function GetGlyphByCharacter(Character: WideChar): Integer; overload;
+    function GetGlyphByCharacter(Character: AnsiChar): Integer; overload;
 
     procedure CalculateScalerX;
     procedure CalculateScalerY;
@@ -327,6 +328,12 @@ end;
 
 function TCustomPascalTypeRasterizer.GetGlyphByCharacter(
   Character: WideChar): Integer;
+begin
+ Result := GetGlyphByCharacter(Word(Character));
+end;
+
+function TCustomPascalTypeRasterizer.GetGlyphByCharacter(
+  Character: AnsiChar): Integer;
 begin
  Result := GetGlyphByCharacter(Word(Character));
 end;

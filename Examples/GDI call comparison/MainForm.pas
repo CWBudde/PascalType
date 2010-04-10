@@ -38,53 +38,9 @@ var
 implementation
 
 uses
-  ShlObj, ActiveX, PT_Rasterizer;
+  PT_Windows, PT_Rasterizer;
 
 {$R *.dfm}
-
-procedure StrResetLength(var S: string);
-begin
- SetLength(S, StrLen(PChar(S)));
-end;
-
-function PidlToPath(IdList: PItemIdList): string;
-begin
- SetLength(Result, MAX_PATH);
- if SHGetPathFromIDList(IdList, PChar(Result))
-  then StrResetLength(Result)
-  else Result := '';
-end;
-
-function PidlFree(var IdList: PItemIdList): Boolean;
-var
-  Malloc: IMalloc;
-begin
- Result := False;
- if IdList = nil
-  then Result := True
-  else
-   begin
-    if Succeeded(SHGetMalloc(Malloc)) and (Malloc.DidAlloc(IdList) > 0) then
-     begin
-      Malloc.Free(IdList);
-      IdList := nil;
-      Result := True;
-     end;
-   end;
-end;
-
-function GetFontDirectory: string;
-var
-  lFolderPidl: PItemIdList;
-begin
-  if Succeeded(SHGetSpecialFolderLocation(0, CSIDL_FONTS, lFolderPidl)) then
-  begin
-    Result := PidlToPath(lFolderPidl);
-    PidlFree(lFolderPidl);
-  end
-  else
-    Result := '';
-end;
 
 procedure TFmComparison.FormCreate(Sender: TObject);
 begin

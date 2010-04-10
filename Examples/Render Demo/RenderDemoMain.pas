@@ -5,7 +5,9 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, PT_Types, PT_RasterizerGDI, PT_Interpreter, PT_Tables,
-  RenderDemoFontNameScanner;
+  PT_Windows, RenderDemoFontNameScanner;
+
+{$I ..\..\Source\PT_Compiler.inc}  
 
 type
   TFontNameFile = packed record
@@ -19,12 +21,12 @@ type
     EdText: TEdit;
     LbFont: TLabel;
     LbFontSize: TLabel;
-    LbText: TLabel;
-    PnText: TPanel;
-    PaintBox: TPaintBox;
-    RbWindows: TRadioButton;
     LbRasterizer: TLabel;
+    LbText: TLabel;
+    PaintBox: TPaintBox;
+    PnText: TPanel;
     RbPascalType: TRadioButton;
+    RbWindows: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -67,53 +69,7 @@ implementation
 {$R *.dfm}
 
 uses
-  ShlObj, ActiveX, Inifiles, Math, Types;
-
-procedure StrResetLength(var S: string);
-begin
- SetLength(S, StrLen(PChar(S)));
-end;
-
-function PidlToPath(IdList: PItemIdList): string;
-begin
- SetLength(Result, MAX_PATH);
- if SHGetPathFromIDList(IdList, PChar(Result))
-  then StrResetLength(Result)
-  else Result := '';
-end;
-
-function PidlFree(var IdList: PItemIdList): Boolean;
-var
-  Malloc: IMalloc;
-begin
- Result := False;
- if IdList = nil
-  then Result := True
-  else
-   begin
-    if Succeeded(SHGetMalloc(Malloc)) and (Malloc.DidAlloc(IdList) > 0) then
-     begin
-      Malloc.Free(IdList);
-      IdList := nil;
-      Result := True;
-     end;
-   end;
-end;
-
-function GetFontDirectory: string;
-var
-  lFolderPidl: PItemIdList;
-begin
-  if Succeeded(SHGetSpecialFolderLocation(0, CSIDL_FONTS, lFolderPidl)) then
-  begin
-    Result := PidlToPath(lFolderPidl);
-    PidlFree(lFolderPidl);
-  end
-  else
-    Result := '';
-end;
-
-////////////////////////////////////////////////////////////////////////////////
+  Math, Types;
 
 procedure TFmRenderDemo.FormCreate(Sender: TObject);
 begin
@@ -285,11 +241,6 @@ begin
  // add font name to font combo box
  CurrentFontName := Font.FontName;
  CbFont.Items.Add(CurrentFontName);
- if CurrentFontName = 'Arial' then
-  begin
-   CbFont.ItemIndex := CbFont.Items.Count - 1;
-   FontName := CurrentFontName;
-  end;
 
  SetLength(FFontArray, Length(FFontArray) + 1);
  with FFontArray[Length(FFontArray) - 1] do
@@ -297,6 +248,14 @@ begin
    FullFontName := CurrentFontName;
    FileName := FontFileName;
   end;
+
+ // check if current font is the one requested
+ if CurrentFontName = 'Arial' then
+  begin
+   CbFont.ItemIndex := CbFont.Items.Count - 1;
+   FontName := CurrentFontName;
+  end;
+
 end;
 
 end.

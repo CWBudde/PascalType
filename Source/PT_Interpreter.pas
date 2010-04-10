@@ -242,11 +242,11 @@ end;
 
 function TCustomPascalTypeInterpreter.GetFontName: string;
 var
-  NameRecordIndex : Integer;
+  NameSubTableIndex : Integer;
 begin
  with FNameTable do
-  for NameRecordIndex := 0 to NameRecordCount - 1 do
-   with NameRecord[NameRecordIndex] do
+  for NameSubTableIndex := 0 to NameSubTableCount - 1 do
+   with NameSubTable[NameSubTableIndex] do
     {$IFDEF MSWINDOWS}
     if PlatformID = piMicrosoft then
     {$ENDIF}
