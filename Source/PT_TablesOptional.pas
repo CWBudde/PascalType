@@ -1181,7 +1181,7 @@ var
   OffsetPosition   : Int64;
   SizeDeviceRecord : Cardinal;
   NumRecords       : SmallInt;
-  RecordIndex      : Integer;
+  RecordIndex      : Cardinal;
   SubTableRecord   : TPascalTypeHorizontalDeviceMetricsSubTable;
 begin
  inherited;

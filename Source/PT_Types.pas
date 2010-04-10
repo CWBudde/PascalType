@@ -40,8 +40,13 @@ uses
 type
   EPascalTypeError = class(Exception);
   EPascalTypeTableIncomplete = class(EPascalTypeError);
+
   {$IFDEF ValidateEveryReadOperation}
   EPascalTypeStremReadError = class(EPascalTypeTableIncomplete);
+  {$ENDIF}
+
+  {$IFDEF ChecksumTest}
+  EPascalTypeChecksumError = class(EPascalTypeError);
   {$ENDIF}
 
 
@@ -53,6 +58,31 @@ type
   end;
 
   TShortFrac = type SmallInt;
+
+  TTransformationMatrix = packed record
+    xx: TFixedPoint;
+    xy: TFixedPoint;
+    yx: TFixedPoint;
+    yy: TFixedPoint;
+  end;
+
+  TGetGlyphOutlineFlag = (ggoGlyphIndex  = 7, ggoUnhinted = 8, ggoBezier = 9);
+  TGetGlyphOutlineFlags = set of TGetGlyphOutlineFlag;
+
+  TGetGlyphOutlineFormat = (
+    ggoMetrics     =   0,
+    ggoBitmap      =   1,
+    ggoNative      =   2,
+    ggoGray2Bitmap =   4,
+    ggoGray4Bitmap =   5,
+    ggoGray8Bitmap =   6
+  );
+
+  TGetGlyphOutlineUnion = record
+  case Boolean of
+   True  : (Format : TGetGlyphOutlineFormat);
+   False : (Flags  : TGetGlyphOutlineFlags);
+  end;
 
   {$Z2}
   TFontHeaderTableFlag = (
@@ -77,12 +107,9 @@ type
     ofOnCurve = 0,      // If set, the point is on the curve; Otherwise, it is off the curve.
     ofXShortVector = 1, // If set, the corresponding x-coordinate is 1 byte long; Otherwise, the corresponding x-coordinate is 2 bytes long
     ofYShortVector = 2, // If set, the corresponding y-coordinate is 1 byte long; Otherwise, the corresponding y-coordinate is 2 bytes long
-    ofRepeat = 3        // If set, the next byte specifies the number of additional times this set of flags is to be repeated. In this way, the number of flags listed can be smaller than the number of points in a character.
-(*
-    This x is same (Positive x-Short vector) = 4, // This flag has one of two meanings, depending on how the x-Short Vector flag is set. If the x-Short Vector bit is set, this bit describes the sign of the value, with a value of 1 equalling positive and a zero value negative. If the x-short Vector bit is not set, and this bit is set, then the current x-coordinate is the same as the previous x-coordinate. If the x-short Vector bit is not set, and this bit is not set, the current x-coordinate is a signed 16-bit delta vector. In this case, the delta vector is the change in x
-    This y is same (Positive y-Short vector) = 5, // This flag has one of two meanings, depending on how the y-Short Vector flag is set. If the y-Short Vector bit is set, this bit describes the sign of the value, with a value of 1 equalling positive and a zero value negative. If the y-short Vector bit is not set, and this bit is set, then the current y-coordinate is the same as the previous y-coordinate. If the y-short Vector bit is not set, and this bit is not set, the current y-coordinate is a signed 16-bit delta vector. In this case, the delta vector is the change in y
-    ofReserved = 6 - 7, //Set to zero
-*)
+    ofRepeat = 3,       // If set, the next byte specifies the number of additional times this set of flags is to be repeated. In this way, the number of flags listed can be smaller than the number of points in a character.
+    ofNoXChange = 4,    // This flag has one of two meanings, depending on how the x-Short Vector flag is set. If the x-Short Vector bit is set, this bit describes the sign of the value, with a value of 1 equalling positive and a zero value negative. If the x-short Vector bit is not set, and this bit is set, then the current x-coordinate is the same as the previous x-coordinate. If the x-short Vector bit is not set, and this bit is not set, the current x-coordinate is a signed 16-bit delta vector. In this case, the delta vector is the change in x
+    ofNoYChange = 5     // This flag has one of two meanings, depending on how the y-Short Vector flag is set. If the y-Short Vector bit is set, this bit describes the sign of the value, with a value of 1 equalling positive and a zero value negative. If the y-short Vector bit is not set, and this bit is set, then the current y-coordinate is the same as the previous y-coordinate. If the y-short Vector bit is not set, and this bit is not set, the current y-coordinate is a signed 16-bit delta vector. In this case, the delta vector is the change in y
   );
 
   {$Z2}
@@ -478,6 +505,7 @@ type
     vcVendorsOfUniqueTypefaces);
 
 function FloorLog2(Value: Cardinal): Cardinal;
+function VersionToString(Value: TFixedPoint): string;
 function FontHeaderTableFlagsToWord(Value: TFontHeaderTableFlags): Word;
 function WordToFontHeaderTableFlags(Value: Word): TFontHeaderTableFlags;
 function WordToDigitalSignatureFlags(Value: Word): TDigitalSignatureFlags;
@@ -538,26 +566,71 @@ begin
 end;
 
 
+function VersionToString(Value: TFixedPoint): string;
+begin
+ Result := IntToStr(Round(100 * Value.Fract / (1 shl 16)));
+ if Length(Result) < 2 then Result := '0' + Result;
+ if Length(Result) < 3 then Result := '0' + Result;
+ Result := IntToStr(Value.Value) + '.' + Result;
+end;
+
+
 function FontHeaderTableFlagsToWord(Value: TFontHeaderTableFlags): Word;
 begin
- Result := Word(Value);
-// Result := ^TFontHeaderTableFlags(@Value)^;
+ if htfZeroSpecBaseline in Value then Result := 1 else Result := 0;
+ if htfXPosLSB in Value then Result := Result + (1 shl 1);
+ if htfScaledSizeDiffers in Value then Result := Result + (1 shl 2);
+ if htfIntegerScaling in Value then Result := Result + (1 shl 3);
+ if htfAdvanceWidth in Value then Result := Result + (1 shl 4);
+ if htfVertical in Value then Result := Result + (1 shl 5);
+ if htfZero in Value then Result := Result + (1 shl 6);
+ if htfLinguistic in Value then Result := Result + (1 shl 7);
+ if htfMetamorphosis in Value then Result := Result + (1 shl 8);
+ if htfRightToLeft in Value then Result := Result + (1 shl 9);
+ if htfRearrangement in Value then Result := Result + (1 shl 10);
+ if htfLossless in Value then Result := Result + (1 shl 11);
+ if htfFontConverted in Value then Result := Result + (1 shl 12);
+ if htfClearType in Value then Result := Result + (1 shl 13);
 end;
 
 function WordToFontHeaderTableFlags(Value: Word): TFontHeaderTableFlags;
 begin
- Result := TFontHeaderTableFlags(Value);
-// Result := ^TFontHeaderTableFlags(@Value)^;
+ if (Value and 1) <> 0 then Result := [htfZeroSpecBaseline] else Result := [];
+ if (Value and (1 shl  1)) <> 0 then Result := Result + [htfXPosLSB];
+ if (Value and (1 shl  2)) <> 0 then Result := Result + [htfScaledSizeDiffers];
+ if (Value and (1 shl  3)) <> 0 then Result := Result + [htfIntegerScaling];
+ if (Value and (1 shl  4)) <> 0 then Result := Result + [htfAdvanceWidth];
+ if (Value and (1 shl  5)) <> 0 then Result := Result + [htfVertical];
+ if (Value and (1 shl  6)) <> 0 then Result := Result + [htfZero];
+ if (Value and (1 shl  7)) <> 0 then Result := Result + [htfLinguistic];
+ if (Value and (1 shl  8)) <> 0 then Result := Result + [htfMetamorphosis];
+ if (Value and (1 shl  9)) <> 0 then Result := Result + [htfRightToLeft];
+ if (Value and (1 shl 10)) <> 0 then Result := Result + [htfRearrangement];
+ if (Value and (1 shl 11)) <> 0 then Result := Result + [htfLossless];
+ if (Value and (1 shl 12)) <> 0 then Result := Result + [htfFontConverted];
+ if (Value and (1 shl 13)) <> 0 then Result := Result + [htfClearType];
 end;
 
 function MacStylesToWord(Value: TMacStyles): Word;
 begin
- Result := PWord(@Value)^;
+ if msBold in Value then Result := 1 else Result := 0;
+ if msItalic in Value then Result := Result + (1 shl 1);
+ if msUnderline in Value then Result := Result + (1 shl 2);
+ if msOutline in Value then Result := Result + (1 shl 3);
+ if msShadow in Value then Result := Result + (1 shl 4);
+ if msCondensed in Value then Result := Result + (1 shl 5);
+ if msExtended in Value then Result := Result + (1 shl 6);
 end;
 
 function WordToMacStyles(Value: Word): TMacStyles;
 begin
- Result := PMacStyles(@Value)^;
+ if (Value and 1) <> 0 then Result := [msBold] else Result := [];
+ if (Value and (1 shl  1)) <> 0 then Result := Result + [msItalic];
+ if (Value and (1 shl  2)) <> 0 then Result := Result + [msUnderline];
+ if (Value and (1 shl  3)) <> 0 then Result := Result + [msOutline];
+ if (Value and (1 shl  4)) <> 0 then Result := Result + [msShadow];
+ if (Value and (1 shl  5)) <> 0 then Result := Result + [msCondensed];
+ if (Value and (1 shl  6)) <> 0 then Result := Result + [msExtended];
 end;
 
 function MacStylesToString(Value: TMacStyles): String;

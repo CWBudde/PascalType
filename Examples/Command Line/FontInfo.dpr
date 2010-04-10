@@ -3,7 +3,7 @@ program FontInfo;
 {$APPTYPE CONSOLE}
 
 uses
-  PT_Types, PT_Tables, PT_TablesOptional, PT_TablesOpenType, PT_Interpreter,
+  PT_Types, PT_Tables, PT_TablesOptional, PT_Interpreter,
   SysUtils, Math;
 
 resourcestring

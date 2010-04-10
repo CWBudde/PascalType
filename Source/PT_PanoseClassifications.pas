@@ -255,9 +255,6 @@ function LatinSymboleAspectRatioCharacter211ToString(AspectRatio: Byte): string;
 
 implementation
 
-var
-  GTableClasses : array of TCustomPascalTypeNamedTableClass;
-
 function LatinTextSerifStyleToString(SerifStyle: Byte): string;
 const
   CLatinTextSerifStyleText : array [0..15] of string = ('Any', 'No Fit',

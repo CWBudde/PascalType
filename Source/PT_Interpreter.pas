@@ -55,8 +55,13 @@ type
 
     procedure DirectoryTableReaded(DirectoryTable: TPascalTypeDirectoryTable); virtual;
     procedure LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry); virtual; abstract;
+
+    {$IFDEF ChecksumTest}
+    procedure ValidateChecksum(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry); virtual;
+    {$ENDIF}
   public
     constructor Create; virtual;
+    destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); virtual;
     procedure SaveToStream(Stream: TStream); virtual; abstract;
@@ -76,16 +81,12 @@ type
   end;
 
   TPascalTypeScanner = class(TCustomPascalTypeInterpreter)
-  private
   protected
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; override;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
 
     procedure LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry); override;
   public
-    constructor Create; override;
-    destructor Destroy; override;
-
     procedure SaveToStream(Stream: TStream); override;
   published
     property HeaderTable;
@@ -98,14 +99,18 @@ type
   TPascalTypeInterpreter = class(TCustomPascalTypeInterpreter)
   private
     // required tables
-    FHorizontalMetrics  : TPascalTypeHorizontalMetricsTable;
-    FCharacterMap       : TPascalTypeCharacterMapTable;
+    FHorizontalMetrics : TPascalTypeHorizontalMetricsTable;
+    FCharacterMap      : TPascalTypeCharacterMapTable;
+    FOS2Table          : TPascalTypeOS2Table;
 
-    FOptionalTables     : TObjectList;
+    FOptionalTables    : TObjectList;
 
     function GetTableCount: Integer;
     function GetOptionalTableCount: Integer;
     function GetOptionalTable(Index: Integer): TCustomPascalTypeNamedTable;
+    function GetGlyphData(Index: Integer): TCustomPascalTypeGlyphDataTable;
+    function GetPanose: TCustomPascalTypePanoseTable;
+    function GetBoundingBox: TRect;
   protected
     function GetTableByTableType(ATableType: TTableType): TCustomPascalTypeNamedTable; override;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
@@ -117,6 +122,10 @@ type
     destructor Destroy; override;
 
     procedure SaveToStream(Stream: TStream); override;
+    function ContainsTable(TableType: TTableType): Boolean;
+    function GetAdvanceWidth(GlyphIndex: Integer): Word;
+
+    property GlyphData[Index: Integer]: TCustomPascalTypeGlyphDataTable read GetGlyphData;
 
     property OptionalTable[Index: Integer]: TCustomPascalTypeNamedTable read GetOptionalTable;
   published
@@ -128,18 +137,23 @@ type
     property PostScriptTable;
     property HorizontalMetrics: TPascalTypeHorizontalMetricsTable read FHorizontalMetrics;
     property CharacterMap: TPascalTypeCharacterMapTable read FCharacterMap;
+    property OS2Table: TPascalTypeOS2Table read FOS2Table;
 
     property TableCount: Integer read GetTableCount;
     property OptionalTableCount: Integer read GetOptionalTableCount;
+
+    // redirected properties
+    property Panose: TCustomPascalTypePanoseTable read GetPanose;
+    property BoundingBox: TRect read GetBoundingBox;
   end;
 
 implementation
 
 uses
-  PT_ResourceStrings;
+  PT_TablesTrueType, PT_ResourceStrings;
 
 
-function CalculateCheckSum(Stream : TMemoryStream): Cardinal;
+function CalculateCheckSum(Stream: TStream): Cardinal;
 var
   I     : Integer;
   Value : Cardinal;
@@ -200,6 +214,24 @@ end;
 
 constructor TCustomPascalTypeInterpreter.Create;
 begin
+ inherited;
+ 
+ // create required tables
+ FHeaderTable        := TPascalTypeHeaderTable.Create(Self);
+ FHorizontalHeader   := TPascalTypeHorizontalHeaderTable.Create(Self);
+ FMaximumProfile     := TPascalTypeMaximumProfileTable.Create(Self);
+ FNameTable          := TPascalTypeNameTable.Create(Self);
+ FPostScriptTable    := TPascalTypePostscriptTable.Create(Self);
+end;
+
+destructor TCustomPascalTypeInterpreter.Destroy;
+begin
+ FreeAndNil(FHeaderTable);
+ FreeAndNil(FHorizontalHeader);
+ FreeAndNil(FMaximumProfile);
+ FreeAndNil(FNameTable);
+ FreeAndNil(FPostScriptTable);
+ inherited;
 end;
 
 procedure TCustomPascalTypeInterpreter.DirectoryTableReaded(DirectoryTable: TPascalTypeDirectoryTable);
@@ -262,15 +294,21 @@ begin
     then raise EPascalTypeError.Create(RCStrNoHeaderTable);
    LoadTableFromStream(Stream, HeaderTable);
 
+   // read horizontal header table
+   if not Assigned(HorizontalHeaderDataEntry)
+    then raise EPascalTypeError.Create(RCStrNoHorizontalHeaderTable);
+   LoadTableFromStream(Stream, HorizontalHeaderDataEntry);
+
    // read maximum profile table
    if not Assigned(MaximumProfileDataEntry)
     then raise EPascalTypeError.Create(RCStrNoMaximumProfileTable);
    LoadTableFromStream(Stream, MaximumProfileDataEntry);
 
-   // read horizontal header table
-   if not Assigned(HorizontalHeaderDataEntry)
-    then raise EPascalTypeError.Create(RCStrNoHorizontalHeaderTable);
-   LoadTableFromStream(Stream, HorizontalHeaderDataEntry);
+   // eventually read OS/2 table or eventually raise an exception
+   if Assigned(OS2TableEntry)
+    then LoadTableFromStream(Stream, OS2TableEntry) else
+   if (Version = $00010000)
+    then raise EPascalTypeError.Create(RCStrNoOS2Table);
 
    // read horizontal metrics table
    if not Assigned(HorizontalMetricsDataEntry)
@@ -281,22 +319,6 @@ begin
    if not Assigned(CharacterMapDataEntry)
     then raise EPascalTypeError.Create(RCStrNoCharacterMapTable);
    LoadTableFromStream(Stream, CharacterMapDataEntry);
-
-   // read name table
-   if not Assigned(NameDataEntry)
-    then raise EPascalTypeError.Create(RCStrNoNameTable);
-   LoadTableFromStream(Stream, NameDataEntry);
-
-   // read postscript table
-   if not Assigned(PostscriptDataEntry)
-    then raise EPascalTypeError.Create(RCStrNoPostscriptTable);
-   LoadTableFromStream(Stream, PostscriptDataEntry);
-
-   // eventually read OS/2 table or eventually raise an exception
-   if Assigned(OS2TableEntry)
-    then LoadTableFromStream(Stream, OS2TableEntry) else
-   if (Version = $00010000)
-    then raise EPascalTypeError.Create(RCStrNoOS2Table);
 
    // TODO check if these are required by tables already read!!!
    // read index to location table
@@ -310,6 +332,16 @@ begin
     then LoadTableFromStream(Stream, GlyphDataEntry) else
    if (Version = $74727565)
     then raise EPascalTypeError.Create(RCStrNoGlyphDataTable);
+
+   // read name table
+   if not Assigned(NameDataEntry)
+    then raise EPascalTypeError.Create(RCStrNoNameTable);
+   LoadTableFromStream(Stream, NameDataEntry);
+
+   // read postscript table
+   if not Assigned(PostscriptDataEntry)
+    then raise EPascalTypeError.Create(RCStrNoPostscriptTable);
+   LoadTableFromStream(Stream, PostscriptDataEntry);
 
    // read other table entries from stream
    for TableIndex := 0 to TableList.Count - 1
@@ -333,31 +365,32 @@ begin
  end;
 end;
 
+{$IFDEF ChecksumTest}
+procedure TCustomPascalTypeInterpreter.ValidateChecksum(Stream: TStream;
+  TableEntry: TPascalTypeDirectoryTableEntry);
+var
+  Checksum : Cardinal;
+begin
+ Stream.Position := 0;
+
+ // calculate checksum of strem
+ Checksum := CalculateCheckSum(Stream);
+
+ if TableEntry.TableType = 'head' then
+  begin
+   // ignore checksume adjustment
+   Stream.Position := 8;
+   Checksum := Checksum - ReadSwappedCardinal(Stream);
+  end;
+
+ // check checksum
+ if (Checksum <> TableEntry.CheckSum)
+  then raise EPascalTypeChecksumError.CreateFmt(RCStrChecksumError, [string(TableEntry.TableType)]);
+end;
+{$ENDIF}
+
 
 { TPascalTypeScanner }
-
-constructor TPascalTypeScanner.Create;
-begin
- inherited;
-
- // create required tables
- FHeaderTable        := TPascalTypeHeaderTable.Create(Self);
- FHorizontalHeader   := TPascalTypeHorizontalHeaderTable.Create(Self);
- FMaximumProfile     := TPascalTypeMaximumProfileTable.Create(Self);
- FNameTable          := TPascalTypeNameTable.Create(Self);
- FPostScriptTable    := TPascalTypePostscriptTable.Create(Self);
-
-end;
-
-destructor TPascalTypeScanner.Destroy;
-begin
- FreeAndNil(FHeaderTable);
- FreeAndNil(FHorizontalHeader);
- FreeAndNil(FMaximumProfile);
- FreeAndNil(FNameTable);
- FreeAndNil(FPostScriptTable);
- inherited;
-end;
 
 function TPascalTypeScanner.GetTableByTableClass(
   TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
@@ -384,9 +417,6 @@ end;
 procedure TPascalTypeScanner.LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry);
 var
   MemoryStream   : TMemoryStream;
-  {$IFDEF ChecksumTest}
-  Checksum       : Cardinal;
-  {$ENDIF}
   TableClass     : TCustomPascalTypeNamedTableClass;
 begin
  MemoryStream := TMemoryStream.Create;
@@ -399,14 +429,7 @@ begin
    MemoryStream.CopyFrom(Stream, 4 * ((TableEntry.Length + 3) div 4));
 
    {$IFDEF ChecksumTest}
-   // calculate checksum
-   if TableEntry.TableType = 'head'
-    then Checksum := TableEntry.CheckSum // CalculateHeadCheckSum(MemoryStream)
-    else Checksum := CalculateCheckSum(MemoryStream);
-
-   // check checksum
-   if (Checksum <> TableEntry.CheckSum)
-    then raise EPascalTypeError.CreateFmt(RCStrChecksumError, [TableEntry.TableType]);
+   ValidateChecksum(MemoryStream, TableEntry);
    {$ENDIF}
 
    // reset memory stream position
@@ -444,13 +467,8 @@ begin
  inherited;
 
  // create required tables
- FHeaderTable        := TPascalTypeHeaderTable.Create(Self);
- FHorizontalHeader   := TPascalTypeHorizontalHeaderTable.Create(Self);
  FHorizontalMetrics  := TPascalTypeHorizontalMetricsTable.Create(Self);
  FCharacterMap       := TPascalTypeCharacterMapTable.Create(Self);
- FMaximumProfile     := TPascalTypeMaximumProfileTable.Create(Self);
- FNameTable          := TPascalTypeNameTable.Create(Self);
- FPostScriptTable    := TPascalTypePostscriptTable.Create(Self);
 
  // create optional table list
  FOptionalTables := TObjectList.Create;
@@ -458,14 +476,10 @@ end;
 
 destructor TPascalTypeInterpreter.Destroy;
 begin
- FreeAndNil(FHeaderTable);
- FreeAndNil(FHorizontalHeader);
  FreeAndNil(FHorizontalMetrics);
  FreeAndNil(FCharacterMap);
- FreeAndNil(FMaximumProfile);
- FreeAndNil(FNameTable);
- FreeAndNil(FPostScriptTable);
  FreeAndNil(FOptionalTables);
+ FreeAndNil(FOS2Table);
  inherited;
 end;
 
@@ -476,6 +490,42 @@ begin
 
  // clear optional tables
  FOptionalTables.Clear;
+
+ // eventually free OS/2 table
+ if Assigned(FOS2Table)
+  then FreeAndNil(FOS2Table);
+end;
+
+function TPascalTypeInterpreter.GetAdvanceWidth(GlyphIndex: Integer): Word;
+begin
+ with FHorizontalMetrics do
+  begin
+   if (GlyphIndex >= 0) and (GlyphIndex < HorizontalMetricCount)
+    then Result := HorizontalMetric[GlyphIndex].AdvanceWidth
+    else Result := HorizontalMetric[0].AdvanceWidth;
+  end;
+end;
+
+function TPascalTypeInterpreter.GetBoundingBox: TRect;
+begin
+ Result.Left   := HeaderTable.XMin;
+ Result.Top    := HeaderTable.YMax;
+ Result.Right  := HeaderTable.XMax;
+ Result.Bottom := HeaderTable.YMin;
+end;
+
+function TPascalTypeInterpreter.GetGlyphData(
+  Index: Integer): TCustomPascalTypeGlyphDataTable;
+var
+  GlyphDataTable : TTrueTypeFontGlyphDataTable;
+begin
+ // set default return value
+ Result := nil;
+
+ GlyphDataTable := TTrueTypeFontGlyphDataTable(GetTableByTableType('glyf'));
+ if Assigned(GlyphDataTable) then
+  if (Index >= 0) and (Index < GlyphDataTable.GlyphDataCount)
+   then Result := GlyphDataTable.GlyphData[Index];
 end;
 
 function TPascalTypeInterpreter.GetOptionalTable(
@@ -489,6 +539,16 @@ end;
 function TPascalTypeInterpreter.GetOptionalTableCount: Integer;
 begin
  Result := FOptionalTables.Count;
+end;
+
+function TPascalTypeInterpreter.GetPanose: TCustomPascalTypePanoseTable;
+begin
+ // default result
+ Result := nil;
+
+ if Assigned(FOS2Table) then
+  if Assigned(FOS2Table.Panose)
+   then Result := FOS2Table.Panose
 end;
 
 function TPascalTypeInterpreter.GetTableByTableType(
@@ -508,8 +568,13 @@ begin
  if ATableType = FPostScriptTable.TableType then Result := FPostScriptTable else
  for TableIndex := 0 to FOptionalTables.Count - 1 do
   with TCustomPascalTypeNamedTable(FOptionalTables[TableIndex]) do
-   if ATableType = TableType 
+   if ATableType = TableType
     then Result := TCustomPascalTypeNamedTable(FOptionalTables[TableIndex]);
+end;
+
+function TPascalTypeInterpreter.ContainsTable(TableType: TTableType): Boolean;
+begin
+ Result := GetTableByTableType(TableType) <> nil;
 end;
 
 function TPascalTypeInterpreter.GetTableByTableClass(
@@ -543,9 +608,6 @@ procedure TPascalTypeInterpreter.LoadTableFromStream(Stream: TStream;
   TableEntry: TPascalTypeDirectoryTableEntry);
 var
   MemoryStream   : TMemoryStream;
-  {$IFDEF ChecksumTest}
-  Checksum       : Cardinal;
-  {$ENDIF}
   TableClass     : TCustomPascalTypeNamedTableClass;
   CurrentTable   : TCustomPascalTypeNamedTable;
 begin
@@ -559,14 +621,7 @@ begin
    MemoryStream.CopyFrom(Stream, 4 * ((TableEntry.Length + 3) div 4));
 
    {$IFDEF ChecksumTest}
-   // calculate checksum
-   if TableEntry.TableType = 'head'
-    then Checksum := TableEntry.CheckSum // CalculateHeadCheckSum(MemoryStream)
-    else Checksum := CalculateCheckSum(MemoryStream);
-
-   // check checksum
-   if (Checksum <> TableEntry.CheckSum)
-    then raise EPascalTypeError.CreateFmt(RCStrChecksumError, [TableEntry.TableType]);
+   ValidateChecksum(MemoryStream, TableEntry);
    {$ENDIF}
 
    // reset memory stream position
@@ -592,6 +647,12 @@ begin
        if TableClass = TPascalTypeMaximumProfileTable then FMaximumProfile.Assign(CurrentTable) else
        if TableClass = TPascalTypeNameTable then FNameTable.Assign(CurrentTable) else
        if TableClass = TPascalTypeCharacterMapTable then FCharacterMap.Assign(CurrentTable) else
+       if TableClass = TPascalTypeOS2Table then
+        begin
+         FOS2Table := TPascalTypeOS2Table(CurrentTable);
+         CurrentTable := nil;
+        end
+       else
         begin
          FOptionalTables.Add(CurrentTable);
          CurrentTable := nil;
@@ -619,6 +680,12 @@ begin
       if Assigned(CurrentTable)
        then FreeAndNil(CurrentTable);
      end;
+    end
+   else
+    begin
+     CurrentTable := TPascalTypeUnknownTable.Create(Self, TableEntry.TableType);
+     CurrentTable.LoadFromStream(Stream);
+     FOptionalTables.Add(CurrentTable);
     end;
 
   finally

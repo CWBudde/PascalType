@@ -37,7 +37,13 @@ interface
 {$R Default.res}
 
 uses
-  Windows, Classes, SysUtils, Graphics, PT_Types, PT_Interpreter;
+
+{$IFDEF LCL}
+  LCLIntf, LCLType, LMessages,
+{$ELSE}
+  Windows,
+{$ENDIF}
+  Classes, SysUtils, Graphics, PT_Types, PT_Interpreter;
 
 type
   TFontStyle = (ptBold, ptItalic);

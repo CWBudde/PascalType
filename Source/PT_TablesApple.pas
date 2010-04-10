@@ -57,6 +57,58 @@ type
 
   // table 'acnt'
 
+  TCustomPascalTypeAccentAttachmentDescriptionTable = class(TCustomPascalTypeTable)
+  private
+    FPrimaryGlyphIndex : Word; // Primary glyph index number.
+  protected
+    class function GetIsFormat1: Boolean; virtual; abstract;
+    procedure ResetToDefaults; override;
+    procedure AssignTo(Dest: TPersistent); override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    property IsFormat1: Boolean read GetIsFormat1;
+  end;
+
+  TPascalTypeAccentAttachmentDescriptionFormat0Table = class(TCustomPascalTypeAccentAttachmentDescriptionTable)
+  private
+    FPrimaryAttachmentPoint : Byte; // Primary attachment control point number.
+    FSecondaryInfoIndex     : Byte; // Secondary attachment control point number.
+  protected
+    class function GetIsFormat1: Boolean; override;
+    procedure ResetToDefaults; override;
+    procedure AssignTo(Dest: TPersistent); override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+  TPascalTypeAccentAttachmentDescriptionFormat1Table = class(TCustomPascalTypeAccentAttachmentDescriptionTable)
+  private
+    FExtensionOffset   : Word; // Byte offset to the beginning of the extensions subtable.
+  protected
+    class function GetIsFormat1: Boolean; override;
+    procedure ResetToDefaults; override;
+    procedure AssignTo(Dest: TPersistent); override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+(*
+  TAccentAttachmentExtention = packed record
+    Components             : uint1; // Value = 0 indicates that there are more components. Value = 1 indicates that this is the last component.
+    SecondaryInfoIndex     : uint7; // numberComponents]	Secondary information index for the first component.
+    PrimaryAttachmentPoint : uint8; // numberComponents]	Primary attachment control point for the first component.
+  end;
+
+  TAccentAttachmentSecondaryData = packed record
+    SecondaryGlyphIndex            : Word; // Secondary glyph index. A maximum of 255 entries are allowed.
+    SecondaryGlyphAttachmentNumber : Byte; // Secondary glyph attachment index number.
+  end;
+*)
+
   // not entirely implemented, for more details see
   // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6acnt.html
   TPascalTypeAccentAttachmentTable = class(TCustomPascalTypeNamedVersionTable)
@@ -365,7 +417,6 @@ type
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
-  published
   public
     constructor Create(Interpreter: IPascalTypeInterpreter); override;
     destructor Destroy; override;
@@ -374,22 +425,31 @@ type
   end;
 
   TFeatureSubtableRecord = packed record
-    FeatureType    : Word; // The feature type.
-    FeatureSetting : Word; // The feature selector.
+    FeatureType    : Word;     // The feature type.
+    FeatureSetting : Word;     // The feature selector.
     EnableFlags    : Cardinal; // The OR’ed enable flags.
     DisableFlags   : Cardinal; // The AND’ed disable flags.
   end;
 
   TPascalTypeGlyphMetamorphosisChainTable = class(TCustomPascalTypeTable)
   private
-    FDefaultFlags    : Cardinal; // The default sub-feature flags for this chain.
+    FDefaultFlags : Cardinal; // The default sub-feature flags for this chain.
+    FFeatureArray : array of TFeatureSubtableRecord;
+    procedure SetDefaultFlags(const Value: Cardinal);
+    function GetFeatureCount: Cardinal;
+    function GetFeature(Index: Cardinal): TFeatureSubtableRecord;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
+    procedure DefaultFlagsChanged; virtual;
   public
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
+
+    property DefaultFlags: Cardinal read FDefaultFlags write SetDefaultFlags;
+    property FeatureCount: Cardinal read GetFeatureCount;
+    property Feature[Index: Cardinal]: TFeatureSubtableRecord read GetFeature;
   end;
 
   // not entirely implemented, for more details see
@@ -477,41 +537,54 @@ type
 
 
   // table 'trak'
+  TTrackTableEntryRecord = packed record
+    Track     : TFixedPoint; //Track value for this record.
+    NameIndex : Word; //The 'name' table index for this track (a short word or phrase like "loose" or "very tight"). NameIndex has a value greater than 255 and less than 32768.
+    Offset    : Word; //Offset from start of tracking table to per-size tracking values for this track.
+  end;
 
-(*
-  TPascalTypeTrackingTable = class(TCustomPascalTypeTable)
+  TPascalTypeTrackingDataTable = class(TCustomPascalTypeTable)
   private
-    nTracks         : uint16; // Number of separate tracks included in this table.
-    nSizes          : uint16; // Number of point sizes included in this table.
-    sizeTableOffset : uint32; // Offset from start of the tracking table to the start of the size subtable.
-    trackTable[]    : trackTableEntry; // Array[nTracks] of TrackTableEntry records.
-    sizeTable[]     : fixed32; // Array[nSizes] of size values.
+    FTrackTable      : array of TTrackTableEntryRecord; // Array[nTracks] of TrackTableEntry records.
+    FSizeTable       : array of TFixedPoint; // Array[nSizes] of size values.
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
   public
-    class function GetTableType: TTableType; override;
-
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
   end;
-*)
 
   // not entirely implemented, for more details see
   // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6trak.html
   TPascalTypeTrackingTable = class(TCustomPascalTypeNamedVersionTable)
   private
-    FFormat : Word; // Format of the tracking table (set to 0).
+    FFormat     : Word; // Format of the tracking table (set to 0).
+    FHorizontal : TPascalTypeTrackingDataTable;
+    FVertical   : TPascalTypeTrackingDataTable;
+    procedure SetHorizontal(const Value: TPascalTypeTrackingDataTable);
+    procedure SetVertical(const Value: TPascalTypeTrackingDataTable);
+    procedure SetFormat(const Value: Word);
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
+    procedure FormatChanged; virtual;
+    procedure HorizontalChanged; virtual;
+    procedure VerticalChanged; virtual;
   public
+    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    destructor Destroy; override;
+
     class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
+
+    property Format: Word read FFormat write SetFormat;
+    property Horizontal: TPascalTypeTrackingDataTable read FHorizontal write SetHorizontal;
+    property Vertical: TPascalTypeTrackingDataTable read FVertical write SetVertical;
   end;
 
 
@@ -540,6 +613,9 @@ implementation
 
 uses
   SysUtils, PT_ResourceStrings;
+
+resourcestring
+  RCStrGlyphIndexOrderError = 'Last glyph index is smaller than first!';
 
 
 var
@@ -609,6 +685,170 @@ begin
 end;
 
 
+{ TCustomPascalTypeAccentAttachmentDescriptionTable }
+
+procedure TCustomPascalTypeAccentAttachmentDescriptionTable.AssignTo(
+  Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TCustomPascalTypeAccentAttachmentDescriptionTable(Dest) do
+   begin
+    FPrimaryGlyphIndex := Self.FPrimaryGlyphIndex;
+   end
+ else inherited;
+end;
+
+procedure TCustomPascalTypeAccentAttachmentDescriptionTable.ResetToDefaults;
+begin
+ inherited;
+ FPrimaryGlyphIndex := 0;
+end;
+
+procedure TCustomPascalTypeAccentAttachmentDescriptionTable.LoadFromStream(
+  Stream: TStream);
+var
+  Value16 : Word;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   Value16 := ReadSwappedWord(Stream);
+   FPrimaryGlyphIndex := (Value16 and $7FFF);
+
+   {$IFDEF Ambigious Exceptions}
+   if not ((Value16 and $8000) <> 0) = IsFormat1)
+    then raise EPascalTypeError.Create('Format mismatch!');
+   {$ENDIF}
+  end;
+end;
+
+procedure TCustomPascalTypeAccentAttachmentDescriptionTable.SaveToStream(
+  Stream: TStream);
+var
+  Value16 : Word;
+begin
+ inherited;
+
+ // build value containing both format and glyph index and write to stream
+ Value16 := Word(GetIsFormat1) + (FPrimaryGlyphIndex shr 1);
+ WriteSwappedWord(Stream, Value16);
+end;
+
+
+{ TPascalTypeAccentAttachmentDescriptionFormat0Table }
+
+procedure TPascalTypeAccentAttachmentDescriptionFormat0Table.AssignTo(
+  Dest: TPersistent);
+begin
+ inherited;
+ if Dest is Self.ClassType then
+  with TPascalTypeAccentAttachmentDescriptionFormat0Table(Dest) do
+   begin
+    FPrimaryAttachmentPoint := Self.FPrimaryAttachmentPoint;
+    FSecondaryInfoIndex     := Self.FSecondaryInfoIndex;
+   end;
+end;
+
+class function TPascalTypeAccentAttachmentDescriptionFormat0Table.GetIsFormat1: Boolean;
+begin
+ Result := False;
+end;
+
+procedure TPascalTypeAccentAttachmentDescriptionFormat0Table.ResetToDefaults;
+begin
+ inherited;
+ FPrimaryAttachmentPoint := 0;
+ FSecondaryInfoIndex := 0;
+end;
+
+procedure TPascalTypeAccentAttachmentDescriptionFormat0Table.LoadFromStream(
+  Stream: TStream);
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // read primary attachment point
+   Read(FPrimaryAttachmentPoint, 1);
+
+   // read secondary info index
+   Read(FSecondaryInfoIndex, 1);
+  end;
+end;
+
+procedure TPascalTypeAccentAttachmentDescriptionFormat0Table.SaveToStream(
+  Stream: TStream);
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // write primary attachment point
+   Write(FPrimaryAttachmentPoint, 1);
+
+   // write secondary info index
+   Write(FSecondaryInfoIndex, 1);
+  end;
+end;
+
+
+{ TPascalTypeAccentAttachmentDescriptionFormat1Table }
+
+procedure TPascalTypeAccentAttachmentDescriptionFormat1Table.AssignTo(
+  Dest: TPersistent);
+begin
+ inherited;
+ if Dest is Self.ClassType then
+  with TPascalTypeAccentAttachmentDescriptionFormat1Table(Dest)
+   do FExtensionOffset := Self.FExtensionOffset;
+end;
+
+class function TPascalTypeAccentAttachmentDescriptionFormat1Table.GetIsFormat1: Boolean;
+begin
+ Result := True;
+end;
+
+procedure TPascalTypeAccentAttachmentDescriptionFormat1Table.ResetToDefaults;
+begin
+ inherited;
+ FExtensionOffset := 0;
+end;
+
+procedure TPascalTypeAccentAttachmentDescriptionFormat1Table.LoadFromStream(
+  Stream: TStream);
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // read extension offset
+   FExtensionOffset := ReadSwappedWord(Stream);
+  end;
+end;
+
+procedure TPascalTypeAccentAttachmentDescriptionFormat1Table.SaveToStream(
+  Stream: TStream);
+begin
+ inherited;
+
+ // write extension offset
+ WriteSwappedWord(Stream, FExtensionOffset);
+end;
+
+
 { TPascalTypeAccentAttachmentTable }
 
 procedure TPascalTypeAccentAttachmentTable.AssignTo(Dest: TPersistent);
@@ -637,16 +877,22 @@ end;
 
 procedure TPascalTypeAccentAttachmentTable.LoadFromStream(Stream: TStream);
 var
-  Value32    : Cardinal;
-  DescOffset : Cardinal;
-  ExtOffset  : Cardinal;
-  SecOffset  : Cardinal;
-  Value16    : Word;
+  StartPos    : Int64;
+  GlyphIndex  : Cardinal;
+  DescOffset  : Cardinal;
+  ExtOffset   : Cardinal;
+  SecOffset   : Cardinal;
+  Description : TCustomPascalTypeAccentAttachmentDescriptionTable;
+  Value16     : Word;
+  Format      : Byte;
 begin
  inherited;
 
  with Stream do
   begin
+   // remember start position
+   StartPos := Position;
+
    // read first glyph
    Read(Value16, SizeOf(Word));
    FFirstAccentGlyphIndex := Swap16(Value16);
@@ -657,20 +903,46 @@ begin
 
    {$IFDEF AmbigiousExceptions}
    if FLastAccentGlyphIndex < FFirstAccentGlyphIndex
-    then raise EPascalTypeError.Create('Last glyph index is smaller than first!');
+    then raise EPascalTypeError.Create(RCStrGlyphIndexOrderError);
    {$ENDIF}
 
    // read description offset
-   Read(Value32, SizeOf(Cardinal));
-   DescOffset := Swap32(Value32);
+   DescOffset := ReadSwappedCardinal(Stream);
 
    // read extension offset
-   Read(Value32, SizeOf(Cardinal));
-   ExtOffset := Swap32(Value32);
+   ExtOffset := ReadSwappedCardinal(Stream);
 
    // read secondary offset
-   Read(Value32, SizeOf(Cardinal));
-   SecOffset := Swap32(Value32);
+   SecOffset := ReadSwappedCardinal(Stream);
+
+
+   // locate description subtable position
+   Position := StartPos + DescOffset;
+   for GlyphIndex := 0 to (FLastAccentGlyphIndex - FFirstAccentGlyphIndex) - 1 do
+    begin
+     Read(Format, 1);
+     Seek(0, soFromBeginning);
+
+     // identify format
+     if (Format and $80) <> 0
+      then Description := TPascalTypeAccentAttachmentDescriptionFormat0Table.Create
+      else Description := TPascalTypeAccentAttachmentDescriptionFormat1Table.Create;
+
+     // read description from stream
+     Description.LoadFromStream(Stream);
+    end;
+
+
+   // locate extention subtable position
+   Position := StartPos + ExtOffset;
+
+   // TODO: read extention
+
+
+   // locate secondary data subtable position
+   Position := StartPos + SecOffset;
+
+   // TODO: read secondary data
   end;
 end;
 
@@ -1393,6 +1665,10 @@ var
   FeatureNameCount : Word;
   FeatureNameIndex : Word;
   AppleFeature     : TPascalTypeAppleFeatureTable;
+  {$IFDEF AmbigiousExceptions}
+  Value32          : Cardinal;
+  Value16          : Word;
+  {$ENDIF}
 begin
  inherited;
 
@@ -1697,6 +1973,7 @@ begin
   with TPascalTypeGlyphMetamorphosisChainTable(Dest) do
    begin
     FDefaultFlags := Self.FDefaultFlags;
+    FFeatureArray := Self.FFeatureArray;
    end;
 end;
 
@@ -1704,6 +1981,20 @@ procedure TPascalTypeGlyphMetamorphosisChainTable.ResetToDefaults;
 begin
  inherited;
  FDefaultFlags := 0;
+ SetLength(FFeatureArray, 0);
+end;
+
+function TPascalTypeGlyphMetamorphosisChainTable.GetFeature(
+  Index: Cardinal): TFeatureSubtableRecord;
+begin
+ if (Index < Cardinal(Length(FFeatureArray)))
+  then Result := FFeatureArray[Index]
+  else raise Exception.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+end;
+
+function TPascalTypeGlyphMetamorphosisChainTable.GetFeatureCount: Cardinal;
+begin
+ Result := Length(FFeatureArray);
 end;
 
 procedure TPascalTypeGlyphMetamorphosisChainTable.LoadFromStream(
@@ -1711,8 +2002,9 @@ procedure TPascalTypeGlyphMetamorphosisChainTable.LoadFromStream(
 var
   StartPosition     : Int64;
   ChainLength       : Cardinal; // The length of the chain in bytes, including this header.
-  FeatureEntryCount : Word;     // The number of entries in the chain's feature subtable.
   SubtableCount     : Word;     // The number of subtables in the chain.
+  FeatureIndex      : Word;
+  SubtableIndex     : Word;
 begin
  inherited;
 
@@ -1731,14 +2023,42 @@ begin
    // read chain length
    ChainLength := ReadSwappedCardinal(Stream);
 
+   {$IFDEF AmbigiousExceptions}
+   // check if chain length is a multiple of 4
+   if (ChainLength mod 4) <> 0
+    then raise EPascalTypeError.Create(RCStrWrongChainLength);
+   {$ENDIF}
+
    // read feature entry count
-   FeatureEntryCount := ReadSwappedWord(Stream);
+   SetLength(FFeatureArray, ReadSwappedWord(Stream));
 
    // read subtable count
    SubtableCount := ReadSwappedWord(Stream);
 
+   for FeatureIndex := 0 to Length(FFeatureArray) - 1 do
+    with FFeatureArray[FeatureIndex] do
+     begin
+      // read feature type
+      FeatureType := ReadSwappedWord(Stream);
+
+      // read feature setting
+      FeatureSetting := ReadSwappedWord(Stream);
+
+      // read enable flags
+      EnableFlags := ReadSwappedCardinal(Stream);
+
+      // read disable flags
+      DisableFlags := ReadSwappedCardinal(Stream);
+     end;
+
    // jump to end of this table
    Position := StartPosition + ChainLength;
+
+   // read subtables
+   for SubtableIndex := 0 to SubtableCount - 1 do
+    begin
+     // yet TODO!!!
+    end;
   end;
 end;
 
@@ -1751,6 +2071,21 @@ begin
    // write default flags
    WriteSwappedCardinal(Stream, FDefaultFlags);
   end;
+end;
+
+procedure TPascalTypeGlyphMetamorphosisChainTable.SetDefaultFlags(
+  const Value: Cardinal);
+begin
+ if FDefaultFlags <> Value then
+  begin
+   FDefaultFlags := Value;
+   DefaultFlagsChanged;
+  end;
+end;
+
+procedure TPascalTypeGlyphMetamorphosisChainTable.DefaultFlagsChanged;
+begin
+ Changed;
 end;
 
 
@@ -1802,7 +2137,6 @@ end;
 procedure TPascalTypeGlyphMetamorphosisTable.SaveToStream(Stream: TStream);
 var
   ChainIndex : Cardinal;
-  ChainTable : TPascalTypeGlyphMetamorphosisChainTable;
 begin
  inherited;
 
@@ -1844,7 +2178,7 @@ end;
 function TPascalTypeExtendedGlyphMetamorphosisChainTable.GetFeature(
   Index: Cardinal): TFeatureSubtableRecord;
 begin
- if (Index < Length(FFeatureArray))
+ if (Index < Cardinal(Length(FFeatureArray)))
   then Result := FFeatureArray[Index]
   else raise Exception.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
@@ -1861,6 +2195,7 @@ var
   ChainLength       : Cardinal; // The length of the chain in bytes, including this header.
   SubtableCount     : Cardinal; // The number of subtables in the chain.
   FeatureIndex      : Cardinal;
+  SubtableIndex     : Cardinal;
 begin
  inherited;
 
@@ -1909,6 +2244,12 @@ begin
 
    // jump to end of this table
    Position := StartPosition + ChainLength;
+
+   // read subtables
+   for SubtableIndex := 0 to SubtableCount - 1 do
+    begin
+     // yet TODO!!!
+    end;
   end;
 end;
 
@@ -2041,6 +2382,91 @@ begin
 end;
 
 
+{ TPascalTypeTrackingDataTable }
+
+procedure TPascalTypeTrackingDataTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TPascalTypeTrackingDataTable(Dest) do
+   begin
+    FTrackTable := Self.FTrackTable;
+    FSizeTable := Self.FSizeTable;
+   end else inherited;
+end;
+
+procedure TPascalTypeTrackingDataTable.ResetToDefaults;
+begin
+ inherited;
+ SetLength(FTrackTable, 0);
+ SetLength(FSizeTable, 0);
+end;
+
+procedure TPascalTypeTrackingDataTable.LoadFromStream(Stream: TStream);
+var
+  StartPos        : Int64;
+  SizeTableOffset : Cardinal; // Offset from start of the tracking table to the start of the size subtable.
+  RecordIndex     : Integer;
+begin
+ inherited;
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 8 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // remember start position
+   StartPos := Position;
+
+   // read length of track table
+   SetLength(FTrackTable, ReadSwappedWord(Stream));
+
+   // read length of track table
+   SetLength(FSizeTable, ReadSwappedWord(Stream));
+
+   // read size table offset
+   SizeTableOffset := ReadSwappedWord(Stream);
+
+   // check (minimum) table size
+   if Position + 8 * Length(FTrackTable) + 4 * Length(FSizeTable) > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   for RecordIndex := 0 to Length(FTrackTable) - 1 do
+    with FTrackTable[RecordIndex] do
+     begin
+      // read track
+      Track := TFixedPoint(ReadSwappedCardinal(Stream));
+
+      // read name index
+      NameIndex := ReadSwappedWord(Stream);
+
+      {$IFDEF AmbigiousExceptions}
+      if NameIndex <= 256
+       then raise EPascalTypeError.Create('NameIndex should be >= 256!');
+      {$ENDIF}
+
+      // read offset
+      Offset := ReadSwappedWord(Stream);
+     end;
+
+   // locate size table position
+   Position := StartPos + SizeTableOffset;
+
+   for RecordIndex := 0 to Length(FSizeTable) - 1 do
+    begin
+     // read value
+     FSizeTable[RecordIndex] := TFixedPoint(ReadSwappedCardinal(Stream));
+    end;
+  end;
+end;
+
+procedure TPascalTypeTrackingDataTable.SaveToStream(Stream: TStream);
+begin
+ inherited;
+
+ raise EPascalTypeError.Create(RCStrNotImplemented);
+end;
+
+
 { TPascalTypeTrackingTable }
 
 procedure TPascalTypeTrackingTable.AssignTo(Dest: TPersistent);
@@ -2054,6 +2480,21 @@ begin
    end;
 end;
 
+constructor TPascalTypeTrackingTable.Create(
+  Interpreter: IPascalTypeInterpreter);
+begin
+ FHorizontal := TPascalTypeTrackingDataTable.Create;
+ FVertical   := TPascalTypeTrackingDataTable.Create;
+ inherited;
+end;
+
+destructor TPascalTypeTrackingTable.Destroy;
+begin
+ FreeAndNil(FHorizontal);
+ FreeAndNil(FVertical);
+ inherited;
+end;
+
 class function TPascalTypeTrackingTable.GetTableType: TTableType;
 begin
  Result := 'trak';
@@ -2063,10 +2504,13 @@ procedure TPascalTypeTrackingTable.ResetToDefaults;
 begin
  inherited;
  FFormat := 0;
+ FHorizontal.ResetToDefaults;
+ FVertical.ResetToDefaults;
 end;
 
 procedure TPascalTypeTrackingTable.LoadFromStream(Stream: TStream);
 var
+  StartPos    : Int64;
   HorizOffset : Word; // Offset from start of tracking table to TrackData for horizontal text (or 0 if none).
   VertOffset  : Word; // Offset from start of tracking table to TrackData for vertical text (or 0 if none).
 begin
@@ -2077,6 +2521,9 @@ begin
    // check (minimum) table size
    if Position + 8 > Size
     then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // remember start position
+   StartPos := Position;
 
    // read format
    FFormat := ReadSwappedWord(Stream);
@@ -2095,6 +2542,18 @@ begin
    // skip reserved
    Seek(2, soFromCurrent);
    {$ENDIF}
+
+   // locate horizontal track table data
+   Position := StartPos + HorizOffset;
+
+   // load horizontal tracking table data from stream
+   FHorizontal.LoadFromStream(Stream);
+
+   // locate vertical track table data
+   Position := StartPos + VertOffset;
+
+   // load vertical tracking table data from stream
+   FVertical.LoadFromStream(Stream);
   end;
 end;
 
@@ -2102,6 +2561,50 @@ procedure TPascalTypeTrackingTable.SaveToStream(Stream: TStream);
 begin
  inherited;
  raise EPascalTypeError.Create(RCStrNotImplemented);
+end;
+
+procedure TPascalTypeTrackingTable.SetFormat(const Value: Word);
+begin
+ if FFormat <> Value then
+  begin
+   FFormat := Value;
+   FormatChanged;
+  end;
+end;
+
+procedure TPascalTypeTrackingTable.SetHorizontal(
+  const Value: TPascalTypeTrackingDataTable);
+begin
+ if FHorizontal <> Value then
+  begin
+   FHorizontal := Value;
+   HorizontalChanged;
+  end;
+end;
+
+procedure TPascalTypeTrackingTable.SetVertical(
+  const Value: TPascalTypeTrackingDataTable);
+begin
+ if FVertical <> Value then
+  begin
+   FVertical := Value;
+   VerticalChanged;
+  end;
+end;
+
+procedure TPascalTypeTrackingTable.FormatChanged;
+begin
+ Changed;
+end;
+
+procedure TPascalTypeTrackingTable.HorizontalChanged;
+begin
+ Changed;
+end;
+
+procedure TPascalTypeTrackingTable.VerticalChanged;
+begin
+ Changed;
 end;
 
 
@@ -2130,9 +2633,27 @@ begin
 end;
 
 procedure TPascalTypeZapfTable.LoadFromStream(Stream: TStream);
+var
+  StartPos  : Int64;
+  ExtraInfo : Cardinal;          // Offset from start of table to start of extra info space (added to groupOffset and featOffset in GlyphInfo)
+  Offsets   : array of Cardinal; // Array of offsets, indexed by glyphcode, from start of table to GlyphInfo structure for a glyph
 begin
  inherited;
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 4 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
+   // remember start position
+   StartPos := Position;
+
+   // read extra info offset
+   ExtraInfo := ReadSwappedCardinal(Stream);
+
+
+
+  end;
 end;
 
 procedure TPascalTypeZapfTable.SaveToStream(Stream: TStream);
@@ -2185,6 +2706,7 @@ begin
    end;
 // raise EPascalTypeError.Create('Unknown Table Class: ' + TableType);
 end;
+
 
 
 initialization

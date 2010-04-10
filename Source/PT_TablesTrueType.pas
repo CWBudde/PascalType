@@ -115,7 +115,7 @@ type
     property InstructionCount: Integer read GetInstructionCount;
   end;
 
-  TCustomTrueTypeFontGlyphData = class(TCustomPascalTypeInterfaceTable)
+  TCustomTrueTypeFontGlyphData = class(TCustomPascalTypeGlyphDataTable)
   private
     procedure SetNumberOfContours(const Value: SmallInt);
     procedure SetXMax(const Value: SmallInt);
@@ -164,8 +164,8 @@ type
   TTrueTypeFontGlyphDataClass = class of TCustomTrueTypeFontGlyphData;
 
   TContourPointRecord = record
-    XPos  : Integer;
-    YPos  : Integer;
+    XPos  : SmallInt;
+    YPos  : SmallInt;
     Flags : Byte;
   end;
 
@@ -176,10 +176,14 @@ type
     function GetPointCount: Integer;
     procedure SetPoint(Index: Integer; const Value: TContourPointRecord);
     procedure SetPointCount(const Value: Integer);
+    function GetIsClockwise: Boolean;
+    function GetArea: Integer;
   protected
     procedure AssignTo(Dest: TPersistent); override;
     procedure PointCountChanged; virtual;
   public
+    property Area: Integer read GetArea;
+    property IsClockwise: Boolean read GetIsClockwise;
     property Point[Index : Integer]: TContourPointRecord read GetPoint write SetPoint;
     property PointCount: Integer read GetPointCount write SetPointCount;
   end;
@@ -536,15 +540,14 @@ var
   GlyphIndex     : Integer;
 begin
  GlyphDataTable := TTrueTypeFontGlyphDataTable(FInterpreter.GetTableByTableType('glyf'));
- if not Assigned(GlyphDataTable)
-  then Result := -1
-  else
-   for GlyphIndex := 0 to GlyphDataTable.GlyphDataCount - 1 do
-    if GlyphDataTable.GlyphData[GlyphIndex] = Self then
-     begin
-      Result := GlyphIndex;
-      Exit;
-     end;
+ Result := -1;
+ if Assigned(GlyphDataTable) then
+  for GlyphIndex := 0 to GlyphDataTable.GlyphDataCount - 1 do
+   if GlyphDataTable.GlyphData[GlyphIndex] = Self then
+    begin
+     Result := GlyphIndex;
+     Exit;
+    end;
 end;
 
 procedure TCustomTrueTypeFontGlyphData.GlyphIndexChanged;
@@ -718,6 +721,27 @@ begin
 
    end
   else inherited;
+end;
+
+function TPascalTypeTrueTypeContour.GetArea: Integer;
+var
+  PointIndex : Integer;
+begin
+
+ if Length(FPoints) < 3 then
+  begin
+   Result := 0;
+   Exit;
+  end;
+
+ Result := (FPoints[0].XPos * FPoints[1].YPos - FPoints[1].XPos * FPoints[0].YPos) div 2;
+ for PointIndex := 1 to Length(FPoints) - 2
+  do Result := Result * (FPoints[0].XPos * FPoints[1].YPos - FPoints[1].XPos * FPoints[0].YPos);
+end;
+
+function TPascalTypeTrueTypeContour.GetIsClockwise: Boolean;
+begin
+ Result := Area >= 0;
 end;
 
 function TPascalTypeTrueTypeContour.GetPoint(Index: Integer): TContourPointRecord;
@@ -1268,17 +1292,16 @@ var
   SubGlyphIndex  : Integer;
   GlyphScanIndex : Integer;
 begin
+ Result := 0;
  GlyphDataTable := TTrueTypeFontGlyphDataTable(FInterpreter.GetTableByTableType('glyf'));
- if not Assigned(GlyphDataTable)
-  then Result := 0
-  else
-   for SubGlyphIndex := 0 to GetGlyphCount - 1 do
-    for GlyphScanIndex := 0 to GlyphDataTable.GetGlyphDataCount - 1 do
-     if GlyphScanIndex = Glyph[SubGlyphIndex].FGlyphIndex then
-      begin
-       Result := Result + GlyphDataTable.GlyphData[GlyphScanIndex].ContourCount;
-       Break;
-      end;
+ if Assigned(GlyphDataTable) then
+  for SubGlyphIndex := 0 to GetGlyphCount - 1 do
+   for GlyphScanIndex := 0 to GlyphDataTable.GetGlyphDataCount - 1 do
+    if GlyphScanIndex = Glyph[SubGlyphIndex].FGlyphIndex then
+     begin
+      Result := Result + GlyphDataTable.GlyphData[GlyphScanIndex].ContourCount;
+      Break;
+     end;
 end;
 
 function TTrueTypeFontCompositeGlyphData.GetGlyphCount: Integer;
