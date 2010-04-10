@@ -41,20 +41,20 @@ begin
 
    with NameTable do
     begin
-     for StrIndex := 0 to NameRecordCount - 1 do
+     for StrIndex := 0 to NameSubtableCount - 1 do
       begin
-       case NameRecord[StrIndex].PlatformID of
+       case NameSubtable[StrIndex].PlatformID of
         piUnicode: Continue;
         piApple: Continue;
        end;
 
-       Assert(NameRecord[StrIndex] is TTrueTypeFontNamePlatformMicrosoft);
-       with TTrueTypeFontNamePlatformMicrosoft(NameRecord[StrIndex]) do
+       Assert(NameSubtable[StrIndex] is TTrueTypeFontNamePlatformMicrosoft);
+       with TTrueTypeFontNamePlatformMicrosoft(NameSubtable[StrIndex]) do
         if (LanguageID <> SysLocale.DefaultLCID) and
            (LanguageID <> 1033)
          then Continue;
 
-       case NameRecord[StrIndex].NameID of
+       case NameSubtable[StrIndex].NameID of
         niCopyrightNotice    : Str := 'Copyright Notice';
         niFamily             : Str := 'Family';
         niSubfamily          : Str := 'Subfamily';
@@ -79,7 +79,7 @@ begin
         niFontSpecific       : Str := 'Font Specific';
        end;
 
-       Writeln(Str + ': ' + NameRecord[StrIndex].Name);
+       Writeln(Str + ': ' + NameSubtable[StrIndex].Name);
       end;
     end;
   finally

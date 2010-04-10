@@ -35,7 +35,8 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Classes, Contnrs, Sysutils, PT_Types, PT_Interpreter, PT_Tables;
+  Classes, Contnrs, Sysutils, PT_Types, PT_Interpreter, PT_Tables,
+  PT_CharacterMap;
 
 type
   TPointSingle = packed record

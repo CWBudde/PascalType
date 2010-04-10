@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <PersonalityInfo>
+    <Option>
+      <Option Name="Personality">Default.Personality</Option>
+      <Option Name="ProjectType"></Option>
+      <Option Name="Version">1.0</Option>
+      <Option Name="GUID">{D955D313-3AE6-4B3C-AD44-826596C8F3DD}</Option>
+    </Option>
+  </PersonalityInfo>
+  <Default.Personality>
+    
+    <Projects>
+      <Projects Name="FontInfo.exe">Command Line\FontInfo.bdsproj</Projects>
+      <Projects Name="PascalTypeTest.exe">DUnit Test\PascalTypeTest.bdsproj</Projects>
+      <Projects Name="FontExplorer.exe">Font Explorer\FontExplorer.bdsproj</Projects>
+      <Projects Name="CompareGDI.exe">GDI call comparison\CompareGDI.bdsproj</Projects>
+      <Projects Name="RenderDemo.exe">Render Demo\RenderDemo.bdsproj</Projects>
+      <Projects Name="Targets">FontInfo.exe PascalTypeTest.exe FontExplorer.exe CompareGDI.exe RenderDemo.exe</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+</BorlandProject>
