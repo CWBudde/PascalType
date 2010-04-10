@@ -1092,7 +1092,7 @@ end;
 procedure TOpenTypeBaselineScriptListTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -1168,7 +1168,7 @@ end;
 procedure TOpenTypeAxisTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -1282,7 +1282,7 @@ end;
 procedure TOpenTypeBaselineTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -1953,7 +1953,7 @@ end;
 procedure TOpenTypeScriptListTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -2484,7 +2484,7 @@ end;
 procedure TOpenTypeLookupTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 procedure TOpenTypeLookupTable.SetLookupFlag(const Value: Word);
@@ -2619,7 +2619,7 @@ end;
 procedure TOpenTypeLookupListTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -2878,7 +2878,7 @@ procedure TCustomOpenTypeJustificationLanguageSystemTable.SaveToStream(
   Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 

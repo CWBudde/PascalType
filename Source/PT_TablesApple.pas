@@ -54,6 +54,23 @@ type
     property Version: TFixedPoint read FVersion write SetVersion;
   end;
 
+  TCustomPascalTypeBinarySearchingTable = class(TCustomPascalTypeTable)
+  private
+    FUnitSize      : Word; // Size of a lookup unit for this search in bytes.
+    FnUnits        : Word; // Number of units of the preceding size to be searched.
+    FSearchRange   : Word; // The value of unitSize times the largest power of 2 that is less than or equal to the value of nUnits.
+    FEntrySelector : Word; // The log base 2 of the largest power of 2 less than or equal to the value of nUnits.
+    FRangeShift    : Word; // The value of unitSize times the difference of the value of nUnits minus the largest power of 2 less than or equal to the value of nUnits.
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+
 
   // table 'acnt'
 
@@ -170,15 +187,46 @@ type
 
   // not entirely implemented, for more details see
   // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6bsln.html
-  TPascalTypeBaselineTable = class(TCustomPascalTypeNamedVersionTable)
+
+  TCustomPascalTypeBaselinePartTable = class(TCustomPascalTypeTable)
+  end;
+
+  TPascalTypeBaselinePartFormat0Table = class(TCustomPascalTypeBaselinePartTable)
   private
-    FFormat          : Word; // Format of the baseline table. Only one baseline format may be selected for the font.
-    FDefaultBaseline : Word; // Default baseline value for all glyphs. This value can be from 0 through 31.
+    FDeltas : array [0..31] of Word;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
   public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+  TPascalTypeBaselinePartFormat1Table = class(TPascalTypeBaselinePartFormat0Table)
+  private
+//    FLookupTable : TLookupTable;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+  TPascalTypeBaselineTable = class(TCustomPascalTypeNamedVersionTable)
+  private
+    FFormat          : Word; // Format of the baseline table. Only one baseline format may be selected for the font.
+    FDefaultBaseline : Word; // Default baseline value for all glyphs. This value can be from 0 through 31.
+    FBaselinePart    : TCustomPascalTypeBaselinePartTable;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+    destructor Destroy; override;
+    
     class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -304,9 +352,6 @@ type
     property Code: TNonAlphabeticCode read GetCode write SetCode;
   end;
 
-
-  // not entirely implemented, for more details see
-  // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6fdsc.html
   TPascalTypeFontDescriptionTable = class(TCustomPascalTypeNamedVersionTable)
   private
     FDescritors : TObjectList;
@@ -364,10 +409,27 @@ type
 
 
   // table 'fvar'
+  TVariationAxisRecord = packed record
+    AxisTag      : TTableType;  // Axis name.
+    MinValue     : TFixedPoint; // The minimum style coordinate for the axis.
+    DefaultValue : TFixedPoint; // The default style coordinate for the axis.
+    MaxValue     : TFixedPoint; // The maximum style coordinate for the axis.
+    Flags        : Word;        // Set to zero.
+    NameID       : Word;        // The designation in the 'name' table.
+  end;
+
+  TVariationInstancesRecord = packed record
+    NameID      : Word;        // The name of the defined instance coordinate. Similar to the nameID in the variation axis record, this identifies a name in the font's 'name' table.
+    Flags       : Word;        // Set to zero.
+    Coordinates : array of TFixedPoint; // This is the coordinate of the defined instance.
+  end;
 
   // not entirely implemented, for more details see
   // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6fvar.html
   TPascalTypeFontVariationTable = class(TCustomPascalTypeNamedVersionTable)
+  private
+    FVariationAxes : array of TVariationAxisRecord;
+    FInstances     : array of TVariationInstancesRecord;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -394,8 +456,25 @@ type
     FExtraShadow    : SmallInt; // Extra space required when the font is shadowed.
     FExtraCondensed : SmallInt; // Extra space required when the font is condensed.
     FExtraExtended  : SmallInt; // Extra space required when the font is extended.
+    procedure SetExtraBold(const Value: SmallInt);
+    procedure SetExtraCondensed(const Value: SmallInt);
+    procedure SetExtraExtended(const Value: SmallInt);
+    procedure SetExtraItalic(const Value: SmallInt);
+    procedure SetExtraOutline(const Value: SmallInt);
+    procedure SetExtraPlain(const Value: SmallInt);
+    procedure SetExtraShadow(const Value: SmallInt);
+    procedure SetExtraUnderline(const Value: SmallInt); 
   protected
     procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ExtraBoldChanged; virtual;
+    procedure ExtraCondensedChanged; virtual;
+    procedure ExtraExtendedChanged; virtual;
+    procedure ExtraItalicChanged; virtual;
+    procedure ExtraOutlineChanged; virtual;
+    procedure ExtraPlainChanged; virtual;
+    procedure ExtraShadowChanged; virtual;
+    procedure ExtraUnderlineChanged; virtual;
 
     procedure ResetToDefaults; override;
   public
@@ -403,6 +482,15 @@ type
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
+
+    property ExtraPlain: SmallInt read FExtraPlain write SetExtraPlain;
+    property ExtraBold: SmallInt read FExtraBold write SetExtraBold;
+    property ExtraItalic: SmallInt read FExtraItalic write SetExtraItalic;
+    property ExtraUnderline: SmallInt read FExtraUnderline write SetExtraUnderline;
+    property ExtraOutline: SmallInt read FExtraOutline write SetExtraOutline;
+    property ExtraShadow: SmallInt read FExtraShadow write SetExtraShadow;
+    property ExtraCondensed: SmallInt read FExtraCondensed write SetExtraCondensed;
+    property ExtraExtended: SmallInt read FExtraExtended write SetExtraExtended;
   end;
 
 
@@ -523,7 +611,7 @@ type
   TPascalTypeGlyphPropertiesTable = class(TCustomPascalTypeNamedVersionTable)
   private
     FFormat  : Word; // Format of the tracking table (set to 0).
-    FDefault : Word; // properties 	Default properties applied to a glyph if that glyph is not present in the lookup table.
+    FDefault : Word; // Default properties applied to a glyph if that glyph is not present in the lookup table.
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -589,15 +677,30 @@ type
 
 
   // table 'Zapf'
-
-  // not entirely implemented, for more details see
-  // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6Zapf.html
-  TPascalTypeZapfTable = class(TCustomPascalTypeNamedVersionTable)
+  TPascalTypeZapfGlyphInfoTable = class(TCustomPascalTypeTable)
+  private
+    FUnicodeCodePoints : array of Word; // Unicode code points for this glyph
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
   public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
+  // not entirely implemented, for more details see
+  // http://developer.apple.com/fonts/TTRefMan/RM06/Chap6Zapf.html
+  TPascalTypeZapfTable = class(TCustomPascalTypeNamedVersionTable)
+  private
+    FGlyphInfos : array of TPascalTypeZapfGlyphInfoTable;
+    procedure ClearGlyphInfos;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ResetToDefaults; override;
+  public
+    destructor Destroy; override;
     class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -616,6 +719,11 @@ uses
 
 resourcestring
   RCStrGlyphIndexOrderError = 'Last glyph index is smaller than first!';
+  RCStrUnknownBaselinePart = 'Unknown baseline part!';
+  RCStrTooManySizePairs = 'More than two size pairs are not supported';
+  RCStrTooFewSizePairs = 'At least 2 size pairs are are mandatory!';
+  RCStrUnknownAxisSize = 'Unknown axis size';
+  RCStrInstanceSizeTooSmall = 'Instance size too small';
 
 
 var
@@ -682,6 +790,65 @@ end;
 procedure TCustomPascalTypeNamedVersionTable.VersionChanged;
 begin
  Changed;
+end;
+
+
+{ TCustomPascalTypeBinarySearchingTable }
+
+procedure TCustomPascalTypeBinarySearchingTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TCustomPascalTypeBinarySearchingTable(Dest) do
+   begin
+    FUnitSize      := Self.FUnitSize;
+    FnUnits        := Self.FnUnits;
+    FSearchRange   := Self.FSearchRange;
+    FEntrySelector := Self.FEntrySelector;
+    FRangeShift    := Self.FRangeShift;
+   end
+ else inherited;
+end;
+
+procedure TCustomPascalTypeBinarySearchingTable.ResetToDefaults;
+begin
+ inherited;
+ FUnitSize      := 0;
+ FnUnits        := 0;
+ FSearchRange   := 0;
+ FEntrySelector := 0;
+ FRangeShift    := 0;
+end;
+
+procedure TCustomPascalTypeBinarySearchingTable.LoadFromStream(Stream: TStream);
+begin
+ inherited;
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 10 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // read unit size
+   FUnitSize := ReadSwappedWord(Stream);
+
+   // read unit count
+   FnUnits := ReadSwappedWord(Stream);
+
+   // read search range
+   FSearchRange := ReadSwappedWord(Stream);
+
+   // read entry selector
+   FEntrySelector := ReadSwappedWord(Stream);
+
+   // read range shift
+   FRangeShift := ReadSwappedWord(Stream);
+  end;
+end;
+
+procedure TCustomPascalTypeBinarySearchingTable.SaveToStream(Stream: TStream);
+begin
+ inherited;
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -1108,6 +1275,80 @@ begin
 end;
 
 
+{ TPascalTypeBaselinePartFormat0Table }
+
+procedure TPascalTypeBaselinePartFormat0Table.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TPascalTypeBaselinePartFormat0Table(Dest) do
+   begin
+    FDeltas := Self.FDeltas;
+   end
+ else inherited;  
+end;
+
+procedure TPascalTypeBaselinePartFormat0Table.ResetToDefaults;
+begin
+ inherited;
+end;
+
+procedure TPascalTypeBaselinePartFormat0Table.LoadFromStream(Stream: TStream);
+var
+  DeltaIndex : Word;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check if table is complete
+   if Position + 64 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // read 32 delta values (a value of 0 means no delta ;-)
+   for DeltaIndex := 0 to Length(FDeltas) - 1
+    do FDeltas[DeltaIndex] := ReadSwappedWord(Stream);
+  end;
+end;
+
+procedure TPascalTypeBaselinePartFormat0Table.SaveToStream(Stream: TStream);
+begin
+ inherited;
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
+end;
+
+
+{ TPascalTypeBaselinePartFormat1Table }
+
+procedure TPascalTypeBaselinePartFormat1Table.AssignTo(Dest: TPersistent);
+begin
+ inherited;
+
+ if Dest is Self.ClassType then
+  with TPascalTypeBaselinePartFormat1Table(Dest) do
+   begin
+
+   end;
+end;
+
+procedure TPascalTypeBaselinePartFormat1Table.ResetToDefaults;
+begin
+ inherited;
+
+end;
+
+procedure TPascalTypeBaselinePartFormat1Table.LoadFromStream(Stream: TStream);
+begin
+ inherited;
+
+end;
+
+procedure TPascalTypeBaselinePartFormat1Table.SaveToStream(Stream: TStream);
+begin
+ inherited;
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
+end;
+
+
 { TPascalTypeBaselineTable }
 
 procedure TPascalTypeBaselineTable.AssignTo(Dest: TPersistent);
@@ -1117,8 +1358,15 @@ begin
  if Dest is Self.ClassType then
   with TPascalTypeBaselineTable(Dest) do
    begin
-
+    FFormat          := Self.FFormat;
+    FDefaultBaseline := Self.FDefaultBaseline;
    end;
+end;
+
+destructor TPascalTypeBaselineTable.Destroy;
+begin
+ FreeAndNil(FBaselinePart);
+ inherited;
 end;
 
 class function TPascalTypeBaselineTable.GetTableType: TTableType;
@@ -1152,6 +1400,14 @@ begin
    // read default baseline
    Read(Value16, SizeOf(Word));
    FDefaultBaseline := Swap16(Value16);
+
+   case FFormat of
+    0 : FBaselinePart := TPascalTypeBaselinePartFormat0Table.Create;
+    1 : FBaselinePart := TPascalTypeBaselinePartFormat1Table.Create;
+    2 : raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
+    3 : raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
+    else raise EPascalTypeError.Create(RCStrUnknownBaselinePart);
+   end;
   end;
 end;
 
@@ -1164,6 +1420,10 @@ begin
 
  // write default baseline
  WriteSwappedWord(Stream, FDefaultBaseline);
+
+ // write baseline part to stream
+ if Assigned(FBaselinePart)
+  then FBaselinePart.SaveToStream(Stream);
 end;
 
 
@@ -1304,7 +1564,7 @@ end;
 procedure TPascalTypeBitmapDataTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -1620,7 +1880,7 @@ end;
 procedure TPascalTypeAppleFeatureTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -1711,7 +1971,7 @@ end;
 procedure TPascalTypeFeatureTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -1724,7 +1984,7 @@ begin
  if Dest is Self.ClassType then
   with TPascalTypeFontVariationTable(Dest) do
    begin
-
+    FVariationAxes := Self.FVariationAxes;
    end;
 end;
 
@@ -1740,26 +2000,133 @@ begin
 end;
 
 procedure TPascalTypeFontVariationTable.LoadFromStream(Stream: TStream);
-(*
 var
+  StartPos       : Int64;
   OffsetToData   : Word; // Offset in bytes from the beginning of the table to the beginning of the first axis data.
   CountSizePairs : Word; // Axis + instance = 2.
-  AxisCount      : Word; // The number of style axes in this font.
+  AxisIndex      : Word;
   AxisSize       : Word; // The number of bytes in each gxFontVariationAxis record. Set to 20 bytes.
-  InstanceCount  : Word; // The number of named instances for the font found in the sfntInstance array.
-  InstanceSize   : Word; // The number of bytes in each gxFontInstance array. InstanceSize = axisCount * sizeof(gxShortFrac).
-  Axis           : array of sfntVariationAxis; // The font variation axis array.
-  Instance       : array of sfntInstance; // The instance array.
- *)
+  InstIndex      : Word;
+  InstSize       : Word; // The number of bytes in each gxFontInstance array. InstanceSize = axisCount * sizeof(gxShortFrac).
 begin
  inherited;
 
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 12 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // remember start position
+   StartPos := Position;
+
+   // read offset to data
+   OffsetToData := ReadSwappedWord(Stream);
+
+   // read size pair count
+   CountSizePairs := ReadSwappedWord(Stream);
+
+   // check size pair count
+   if CountSizePairs < 2
+    then raise EPascalTypeError.Create(RCStrTooFewSizePairs);
+
+   {$IFDEF AmbigiousExceptions}
+   // ambigious size pair count check
+   if CountSizePairs > 2
+    then raise EPascalTypeError.Create(RCStrTooManySizePairs);
+   {$ENDIF}
+
+   // read axis count
+   SetLength(FVariationAxes, ReadSwappedWord(Stream));
+
+   // read axis size
+   AxisSize := ReadSwappedWord(Stream);
+
+   // check axis size
+   if AxisSize < 20
+    then raise EPascalTypeError.Create(RCStrUnknownAxisSize);
+
+   {$IFDEF AmbigiousExceptions}
+   // ambigious axis size check
+   if AxisSize > 20
+    then raise EPascalTypeError.Create(RCStrUnknownAxisSize);
+   {$ENDIF}
+
+   // read instance count
+   SetLength(FInstances, ReadSwappedWord(Stream));
+
+   // read instance size
+   InstSize := ReadSwappedWord(Stream);
+
+   // check instance size
+   if InstSize < (4 + Length(FVariationAxes) * 4)
+    then raise EPascalTypeError.Create(RCStrInstanceSizeTooSmall);
+
+   {$IFDEF AmbigiousExceptions}
+   // ambigious instance size check
+   if InstSize > (4 + Length(FVariationAxes) * 4)
+    then raise EPascalTypeError.Create(RCStrInstanceSizeTooSmall);
+   {$ENDIF}
+
+   // locate data
+   Position := StartPos + OffsetToData;
+
+   // check (minimum) table size
+   if Position + Length(FVariationAxes) * AxisSize + Length(FInstances) * InstSize > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // read data
+   for AxisIndex := 0 to Length(FVariationAxes) - 1 do
+    with FVariationAxes[AxisIndex] do
+     begin
+      // read axis tag
+      Read(AxisTag, 4);
+
+      // read minimum style coordinate for the axis
+      MinValue := TFixedPoint(ReadSwappedCardinal(Stream));
+
+      // read default style coordinate for the axis
+      DefaultValue := TFixedPoint(ReadSwappedCardinal(Stream));
+
+      // read maximum style coordinate for the axis
+      MaxValue := TFixedPoint(ReadSwappedCardinal(Stream));
+
+      // read flags (set to 0!)
+      Flags := ReadSwappedWord(Stream);
+
+      {$IFDEF AmbigiousExceptions}
+      // ambigious axis size check
+      if Flags <> 0
+       then raise EPascalTypeError.Create(RCStrReservedValueError);
+      {$ENDIF}
+
+      // read name ID
+      NameID := ReadSwappedWord(Stream);
+     end;
+
+   for InstIndex := 0 to Length(FInstances) - 1 do
+    with FInstances[AxisIndex] do
+     begin
+      // read name ID
+      NameID := ReadSwappedWord(Stream);
+
+      // read flags (set to 0!)
+      Flags := ReadSwappedWord(Stream);
+
+      // set coordinate count
+      SetLength(Coordinates, Length(FVariationAxes));
+
+      // read coordinates
+      for AxisIndex := 0 to Length(FVariationAxes) - 1
+       do Coordinates[AxisIndex] := TFixedPoint(ReadSwappedCardinal(Stream));
+     end;
+  end;
 end;
 
 procedure TPascalTypeFontVariationTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -1924,6 +2291,122 @@ begin
 
  // write extra extended
  WriteSwappedWord(Stream, FExtraExtended);
+end;
+
+procedure TPascalTypeHorizontalStyleTable.ExtraBoldChanged;
+begin
+ Changed;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.ExtraCondensedChanged;
+begin
+ Changed;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.ExtraExtendedChanged;
+begin
+ Changed;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.ExtraItalicChanged;
+begin
+ Changed;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.ExtraOutlineChanged;
+begin
+ Changed;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.ExtraPlainChanged;
+begin
+ Changed;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.ExtraShadowChanged;
+begin
+ Changed;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.ExtraUnderlineChanged;
+begin
+ Changed;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.SetExtraBold(const Value: SmallInt);
+begin
+ if FExtraBold <> Value then
+  begin
+   FExtraBold := Value;
+   ExtraBoldChanged;
+  end;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.SetExtraCondensed(
+  const Value: SmallInt);
+begin
+ if FExtraCondensed <> Value then
+  begin
+   FExtraCondensed := Value;
+   ExtraCondensedChanged;
+  end;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.SetExtraExtended(
+  const Value: SmallInt);
+begin
+ if FExtraExtended <> Value then
+  begin
+   FExtraExtended := Value;
+   ExtraExtendedChanged;
+  end;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.SetExtraItalic(const Value: SmallInt);
+begin
+ if FExtraItalic <> Value then
+  begin
+   FExtraItalic := Value;
+   ExtraItalicChanged;
+  end;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.SetExtraOutline(
+  const Value: SmallInt);
+begin
+ if FExtraOutline <> Value then
+  begin
+   FExtraOutline := Value;
+   ExtraOutlineChanged;
+  end;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.SetExtraPlain(const Value: SmallInt);
+begin
+ if FExtraPlain <> Value then
+  begin
+   FExtraPlain := Value;
+   ExtraPlainChanged;
+  end;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.SetExtraShadow(const Value: SmallInt);
+begin
+ if FExtraShadow <> Value then
+  begin
+   FExtraShadow := Value;
+   ExtraShadowChanged;
+  end;
+end;
+
+procedure TPascalTypeHorizontalStyleTable.SetExtraUnderline(
+  const Value: SmallInt);
+begin
+ if FExtraUnderline <> Value then
+  begin
+   FExtraUnderline := Value;
+   ExtraUnderlineChanged;
+  end;
 end;
 
 
@@ -2257,7 +2740,7 @@ procedure TPascalTypeExtendedGlyphMetamorphosisChainTable.SaveToStream(
   Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 procedure TPascalTypeExtendedGlyphMetamorphosisChainTable.SetDefaultFlags(
@@ -2328,7 +2811,7 @@ end;
 procedure TPascalTypeExtendedGlyphMetamorphosisTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -2341,7 +2824,7 @@ begin
  if Dest is Self.ClassType then
   with TPascalTypeOpticalBoundsTable(Dest) do
    begin
-
+    FFormat := Self.FFormat;
    end;
 end;
 
@@ -2353,6 +2836,7 @@ end;
 procedure TPascalTypeOpticalBoundsTable.ResetToDefaults;
 begin
  inherited;
+ FFormat := 0;
 end;
 
 procedure TPascalTypeOpticalBoundsTable.LoadFromStream(Stream: TStream);
@@ -2378,7 +2862,7 @@ end;
 procedure TPascalTypeOpticalBoundsTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -2463,7 +2947,7 @@ procedure TPascalTypeTrackingDataTable.SaveToStream(Stream: TStream);
 begin
  inherited;
 
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -2560,7 +3044,7 @@ end;
 procedure TPascalTypeTrackingTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 procedure TPascalTypeTrackingTable.SetFormat(const Value: Word);
@@ -2608,7 +3092,81 @@ begin
 end;
 
 
+{ TPascalTypeZapfGlyphInfoTable }
+
+procedure TPascalTypeZapfGlyphInfoTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TPascalTypeZapfGlyphInfoTable(Dest) do
+   begin
+    FUnicodeCodePoints := Self.FUnicodeCodePoints
+   end
+ else inherited;
+end;
+
+procedure TPascalTypeZapfGlyphInfoTable.ResetToDefaults;
+begin
+ inherited;
+ SetLength(FUnicodeCodePoints, 0);
+end;
+
+procedure TPascalTypeZapfGlyphInfoTable.LoadFromStream(Stream: TStream);
+var
+  StartPos       : Int64;
+  GroupOffset    : Cardinal; // Byte offset from start of extraInfo to GroupInfo or GroupInfoGroup for this glyph, or 0xFFFFFFFF if none
+  FeatOffset     : Cardinal; // Byte offset from start of extraInfo to FeatureInfo for this glyph, or 0xFFFFFFFF if none
+  UnicodeIndex   : Word;
+  KindNameCount  : Word;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 10 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // remember start position
+   StartPos := Position;
+
+   // read group offset
+   GroupOffset := ReadSwappedCardinal(Stream);
+
+   // read feature offset
+   FeatOffset := ReadSwappedCardinal(Stream);
+
+   // read number of 16bit unicode values
+   SetLength(FUnicodeCodePoints, ReadSwappedWord(Stream));
+
+   // check (minimum) table size
+   if Position + 2 * Length(FUnicodeCodePoints) > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // read unicode code points
+   for UnicodeIndex := 0 to Length(FUnicodeCodePoints) - 1
+    do FUnicodeCodePoints[UnicodeIndex] := ReadSwappedWord(Stream);
+
+   // read kind name count
+   KindNameCount := ReadSwappedWord(Stream);
+
+   // ... TODO ... (see http://developer.apple.com/fonts/TTRefMan/RM06/Chap6Zapf.html)
+  end;
+end;
+
+procedure TPascalTypeZapfGlyphInfoTable.SaveToStream(Stream: TStream);
+begin
+ inherited;
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
+end;
+
+
 { TPascalTypeZapfTable }
+
+destructor TPascalTypeZapfTable.Destroy;
+begin
+ ClearGlyphInfos;
+ inherited;
+end;
 
 procedure TPascalTypeZapfTable.AssignTo(Dest: TPersistent);
 begin
@@ -2629,14 +3187,24 @@ end;
 procedure TPascalTypeZapfTable.ResetToDefaults;
 begin
  inherited;
+ ClearGlyphInfos;
+end;
 
+procedure TPascalTypeZapfTable.ClearGlyphInfos;
+var
+  GlyphIndex : Integer;
+begin
+ for GlyphIndex := 0 to Length(FGlyphInfos) - 1
+  do FreeAndNil(FGlyphInfos[GlyphIndex]);
 end;
 
 procedure TPascalTypeZapfTable.LoadFromStream(Stream: TStream);
 var
-  StartPos  : Int64;
-  ExtraInfo : Cardinal;          // Offset from start of table to start of extra info space (added to groupOffset and featOffset in GlyphInfo)
-  Offsets   : array of Cardinal; // Array of offsets, indexed by glyphcode, from start of table to GlyphInfo structure for a glyph
+  StartPos   : Int64;
+  MaxProfile : TPascalTypeMaximumProfileTable;
+  GlyphIndex : Integer;
+  ExtraInfo  : Cardinal;          // Offset from start of table to start of extra info space (added to groupOffset and featOffset in GlyphInfo)
+  Offsets    : array of Cardinal; // Array of offsets, indexed by glyphcode, from start of table to GlyphInfo structure for a glyph
 begin
  inherited;
  with Stream do
@@ -2651,15 +3219,42 @@ begin
    // read extra info offset
    ExtraInfo := ReadSwappedCardinal(Stream);
 
+   // get maximum profile table
+   MaxProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableType('maxp'));
+   Assert(Assigned(MaxProfile));
 
+   // set length of offset array
+   SetLength(Offsets, MaxProfile.NumGlyphs);
 
+   // read glyph info offsets
+   for GlyphIndex := 0 to Length(Offsets) - 1
+    do Offsets[GlyphIndex] := ReadSwappedCardinal(Stream);
+
+   // set glyph info array length
+   SetLength(FGlyphInfos, Length(Offsets));
+
+   // load glyph info
+   for GlyphIndex := 0 to Length(Offsets) - 1 do
+    begin
+     // locate glyph info
+     Position := StartPos + Offsets[GlyphIndex];
+
+     // create glyph info table for current glyph index
+     FGlyphInfos[GlyphIndex] := TPascalTypeZapfGlyphInfoTable.Create;
+
+     // load glyph info from stream
+     FGlyphInfos[GlyphIndex].LoadFromStream(Stream);
+    end;
+
+   // locate extra info
+   Position := StartPos + ExtraInfo;
   end;
 end;
 
 procedure TPascalTypeZapfTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -2706,7 +3301,6 @@ begin
    end;
 // raise EPascalTypeError.Create('Unknown Table Class: ' + TableType);
 end;
-
 
 
 initialization

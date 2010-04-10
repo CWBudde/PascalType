@@ -1410,13 +1410,13 @@ end;
 procedure TPascalTypeKerningFormat2SubTable.LoadFromStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 procedure TPascalTypeKerningFormat2SubTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 

@@ -269,7 +269,7 @@ end;
 procedure TPascalTypeEmbeddedBitmapDataTable.SaveToStream(Stream: TStream);
 begin
  inherited;
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 

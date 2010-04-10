@@ -2465,7 +2465,7 @@ end;
 
 procedure TPascalTypeFormat12CharacterMap.SaveToStream(Stream: TStream);
 begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -3667,7 +3667,7 @@ end;
 
 procedure TPascalTypeNameTable.SaveToStream(Stream: TStream);
 begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 procedure TPascalTypeNameTable.SetFormat(const Value: Word);
@@ -6666,7 +6666,7 @@ end;
 
 procedure TPascalTypePostscriptVersion2Table.SaveToStream(Stream: TStream);
 begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 

@@ -456,7 +456,7 @@ end;
 
 procedure TPascalTypeScanner.SaveToStream(Stream: TStream);
 begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 

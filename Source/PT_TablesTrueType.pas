@@ -1082,7 +1082,7 @@ end;
 
 procedure TTrueTypeFontSimpleGlyphData.SaveToStream(Stream: TStream);
 begin
- raise EPascalTypeError.Create(RCStrNotImplemented);
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
@@ -1207,7 +1207,8 @@ end;
 
 procedure TPascalTypeCompositeGlyph.SaveToStream(Stream: TStream);
 begin
-
+ inherited;
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 procedure TPascalTypeCompositeGlyph.SetFlags(const Value: Word);

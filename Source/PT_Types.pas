@@ -40,6 +40,7 @@ uses
 type
   EPascalTypeError = class(Exception);
   EPascalTypeTableIncomplete = class(EPascalTypeError);
+  EPascalTypeNotImplemented = class(EPascalTypeError);
 
   {$IFDEF ValidateEveryReadOperation}
   EPascalTypeStremReadError = class(EPascalTypeTableIncomplete);
