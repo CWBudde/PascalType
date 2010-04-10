@@ -346,8 +346,9 @@ type
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
-  published
+
     property Version: TFixedPoint read FVersion write SetVersion;
+  published
     property NumGlyphs: Word read FNumGlyphs write SetNumGlyphs;
     property MaxPoints: Word read FMaxPoints write SetMaxPoints;
     property MaxContours: Word read FMaxContours write SetMaxContours;
@@ -417,8 +418,8 @@ type
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
-  published
     property Version: TFixedPoint read FVersion write SetVersion;
+  published
     property Ascent: SmallInt read FAscent write SetAscent;
     property Descent: SmallInt read FDescent write SetDescent;
     property LineGap: SmallInt read FLineGap write SetLineGap;

@@ -128,6 +128,10 @@ type
     property GlyphData[Index: Integer]: TCustomPascalTypeGlyphDataTable read GetGlyphData;
 
     property OptionalTable[Index: Integer]: TCustomPascalTypeNamedTable read GetOptionalTable;
+
+    // redirected properties
+    property Panose: TCustomPascalTypePanoseTable read GetPanose;
+    property BoundingBox: TRect read GetBoundingBox;
   published
     // required tables
     property HeaderTable;
@@ -141,10 +145,6 @@ type
 
     property TableCount: Integer read GetTableCount;
     property OptionalTableCount: Integer read GetOptionalTableCount;
-
-    // redirected properties
-    property Panose: TCustomPascalTypePanoseTable read GetPanose;
-    property BoundingBox: TRect read GetBoundingBox;
   end;
 
 implementation

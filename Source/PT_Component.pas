@@ -34,7 +34,7 @@ interface
 
 {$I PT_Compiler.inc}
 
-{$R Default.res}
+{$R ..\Resource\Default.res}
 
 uses
 
@@ -72,7 +72,9 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
+(*
     function GetTextExtent(AText: string): TSize;
+*)
     function GetTextHeight(AText: string): Integer;
     function GetTextMetrics(var ATextMetrics: TTextMetric): Boolean;
     function GetTextWidth(AText: string): Integer;
@@ -143,23 +145,24 @@ end;
 
 function TCustomPascalType.GetName: WideString;
 var
-  NameRecordIndex : Integer;
+  NameSubtableIndex : Integer;
 begin
  Result := '';
 
  with FInterpreter.NameTable do
   begin
-   for NameRecordIndex := 0 to NameRecordCount - 1 do
-    if NameRecord[NameRecordIndex].NameID = niFullName then
+   for NameSubtableIndex := 0 to NameSubtableCount - 1 do
+    if NameSubtable[NameSubtableIndex].NameID = niFullName then
      begin
-      Result := NameRecord[NameRecordIndex].Name;
+      Result := NameSubtable[NameSubtableIndex].Name;
       Exit;
      end else
-    if NameRecord[NameRecordIndex].NameID = niFamily
-     then Result := NameRecord[NameRecordIndex].Name;
+    if NameSubtable[NameSubtableIndex].NameID = niFamily
+     then Result := NameSubtable[NameSubtableIndex].Name;
   end;
 end;
 
+{
 function TCustomPascalType.GetTextExtent(AText: string): TSize;
 (*
 var
@@ -196,15 +199,16 @@ begin
   Result.cy := Result.cy div 64;
 *)
 end;
+}
 
 function TCustomPascalType.GetTextHeight(AText: string): Integer;
 begin
- with GetTextExtent(AText) do Result := cy;
+// with GetTextExtent(AText) do Result := cy;
 end;
 
 function TCustomPascalType.GetTextWidth(AText: string): Integer;
 begin
- with GetTextExtent(AText) do Result := cx;
+ // with GetTextExtent(AText) do Result := cx;
 end;
 
 (*
