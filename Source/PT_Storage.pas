@@ -111,6 +111,7 @@ type
     function GetGlyphData(Index: Integer): TCustomPascalTypeGlyphDataTable;
     function GetPanose: TCustomPascalTypePanoseTable;
     function GetBoundingBox: TRect;
+    function GetGlyphCount: Word;
   protected
     function GetTableByTableType(ATableType: TTableType): TCustomPascalTypeNamedTable; override;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
@@ -132,6 +133,7 @@ type
     // redirected properties
     property Panose: TCustomPascalTypePanoseTable read GetPanose;
     property BoundingBox: TRect read GetBoundingBox;
+    property GlyphCount: Word read GetGlyphCount;
   published
     // required tables
     property HeaderTable;
@@ -512,6 +514,11 @@ begin
  Result.Top    := HeaderTable.YMax;
  Result.Right  := HeaderTable.XMax;
  Result.Bottom := HeaderTable.YMin;
+end;
+
+function TPascalTypeStorage.GetGlyphCount: Word;
+begin
+ Result := FMaximumProfile.NumGlyphs;
 end;
 
 function TPascalTypeStorage.GetGlyphData(

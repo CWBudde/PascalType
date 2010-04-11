@@ -147,15 +147,15 @@ type
     FMaxWidth : Byte;
     FWidths   : array of Byte;
     function GetWidth(Index: Integer): Byte;
+    function GetWidthCount: Integer;
     procedure SetMaxWidth(const Value: Byte);
     procedure Setppem(const Value: Byte);
-    procedure MaxWidthChanged;
-    procedure ppemChanged;
-    function GetWidthCount: Integer;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ResetToDefaults; override;
+    procedure MaxWidthChanged; virtual;
+    procedure ppemChanged; virtual;
   public
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;

@@ -2700,9 +2700,10 @@ end;
 
 procedure TPascalTypeHorizontalMetricsTable.LoadFromStream(Stream: TStream);
 var
-  HorHead  : TPascalTypeHorizontalHeaderTable;
-  MaxProf  : TPascalTypeMaximumProfileTable;
-  MtxIndex : Integer;
+  HorHead   : TPascalTypeHorizontalHeaderTable;
+  MaxProf   : TPascalTypeMaximumProfileTable;
+  LastWidth : SmallInt;
+  MtxIndex  : Integer;
 begin
  inherited;
 
@@ -2718,6 +2719,10 @@ begin
  // set length of horizontal metrics
  SetLength(FHorizontalMetrics, MaxProf.NumGlyphs);
 
+ // set last width to maximum advance width (only used when the width is not
+ // stored as pairs as for monospaced fonts with glyphs accidentially deleted)
+ LastWidth := HorHead.AdvanceWidthMax;
+
  with Stream do
   begin
    for MtxIndex := 0 to HorHead.NumOfLongHorMetrics - 1 do
@@ -2728,14 +2733,19 @@ begin
 
       // read left side bearing
       Bearing := ReadSwappedSmallInt(Stream);
+
+      // remember last width
+      LastWidth := AdvanceWidth;
      end;
 
    for MtxIndex := HorHead.NumOfLongHorMetrics to Length(FHorizontalMetrics)  - 1 do
     with FHorizontalMetrics[MtxIndex] do
      begin
-      // read advance width / left side bearing at once
-      AdvanceWidth := ReadSwappedSmallInt(Stream);
-      Bearing := AdvanceWidth;
+      // read left side bearing
+      Bearing := ReadSwappedSmallInt(Stream);
+
+      // use advance width from last entry (useful for monospaced fonts) 
+      AdvanceWidth := LastWidth;
      end;
   end;
 end;
