@@ -3,7 +3,7 @@ program FontInfo;
 {$APPTYPE CONSOLE}
 
 uses
-  PT_Types, PT_Tables, PT_TablesOptional, PT_Interpreter,
+  PT_Types, PT_Tables, PT_TablesOptional, PT_Storage,
   SysUtils, Math;
 
 resourcestring
@@ -21,7 +21,7 @@ begin
    Exit;
   end;
 
- with TPascalTypeScanner.Create do
+ with TPascalTypeStorageScan.Create do
   try
    try
     LoadFromFile(FileName);

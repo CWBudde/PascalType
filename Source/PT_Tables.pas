@@ -41,7 +41,7 @@ type
   TCustomPascalTypeNamedTable = class;
   TCustomPascalTypeNamedTableClass = class of TCustomPascalTypeNamedTable;
 
-  IPascalTypeInterpreter = interface(IUnknown)
+  IPascalTypeStorage = interface(IUnknown)
   ['{A990D67B-BC60-4DA4-9D90-3C1D30AEC003}']
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
@@ -61,9 +61,9 @@ type
 
   TCustomPascalTypeInterfaceTable = class(TCustomPascalTypeTable)
   protected
-    FInterpreter : IPascalTypeInterpreter;
+    FStorage : IPascalTypeStorage;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); reintroduce; virtual;
+    constructor Create(Storage: IPascalTypeStorage); reintroduce; virtual;
   end;
 
   TCustomPascalTypeGlyphDataTable = class(TCustomPascalTypeInterfaceTable);
@@ -89,7 +89,7 @@ type
     procedure ResetToDefaults; override;
     class function GetTableType: TTableType; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter;
+    constructor Create(Storage: IPascalTypeStorage;
       TableTye: TTableType); reintroduce; virtual;
     destructor Destroy; override;
 
@@ -1175,7 +1175,7 @@ type
     procedure SuperscriptOffsetYChanged; virtual;
     procedure SuperscriptSizeYChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -1447,9 +1447,9 @@ end;
 { TCustomPascalTypeInterfaceTable }
 
 constructor TCustomPascalTypeInterfaceTable.Create(
-  Interpreter: IPascalTypeInterpreter);
+  Storage: IPascalTypeStorage);
 begin
- FInterpreter := Interpreter;
+ FStorage := Storage;
  inherited Create;
 end;
 
@@ -1464,12 +1464,12 @@ end;
 
 { TPascalTypeUnknownTable }
 
-constructor TPascalTypeUnknownTable.Create(Interpreter: IPascalTypeInterpreter;
+constructor TPascalTypeUnknownTable.Create(Storage: IPascalTypeStorage;
   TableTye: TTableType);
 begin
  FTableType := TableTye; 
  FStream := TMemoryStream.Create;
- inherited Create(Interpreter);
+ inherited Create(Storage);
 end;
 
 destructor TPascalTypeUnknownTable.Destroy;
@@ -2706,9 +2706,9 @@ var
 begin
  inherited;
 
- HorHead := TPascalTypeHorizontalHeaderTable(FInterpreter.GetTableByTableType('hhea'));
+ HorHead := TPascalTypeHorizontalHeaderTable(FStorage.GetTableByTableType('hhea'));
  Assert(Assigned(HorHead));
- MaxProf := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableType('maxp'));
+ MaxProf := TPascalTypeMaximumProfileTable(FStorage.GetTableByTableType('maxp'));
  Assert(Assigned(MaxProf));
 
  // check if vertical metrics header is available
@@ -2748,7 +2748,7 @@ begin
  inherited;
 
  // locate horizontal header
- HorHead := TPascalTypeHorizontalHeaderTable(FInterpreter.GetTableByTableType('hhea'));
+ HorHead := TPascalTypeHorizontalHeaderTable(FStorage.GetTableByTableType('hhea'));
 
  // check if vertical metrics header is available
  if HorHead = nil
@@ -4910,7 +4910,7 @@ end;
 
 { TPascalTypeOS2Table }
 
-constructor TPascalTypeOS2Table.Create(Interpreter: IPascalTypeInterpreter);
+constructor TPascalTypeOS2Table.Create(Storage: IPascalTypeStorage);
 begin
  FPanose := TPascalTypeDefaultPanoseTable.Create;
  FUnicodeRangeTable := TPascalTypeUnicodeRangeTable.Create;
@@ -5169,7 +5169,7 @@ begin
    FWindowsDescent := ReadSwappedWord(Stream);
 
    {$IFDEF AmbigiousExceptions}
-   HorizontalHeader := TPascalTypeHorizontalHeaderTable(FInterpreter.GetTableByTableType('hhea'));
+   HorizontalHeader := TPascalTypeHorizontalHeaderTable(FStorage.GetTableByTableType('hhea'));
    Assert(Assigned(HorizontalHeader));
    with HorizontalHeader do
     begin

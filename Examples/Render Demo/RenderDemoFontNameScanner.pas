@@ -3,17 +3,17 @@ unit RenderDemoFontNameScanner;
 interface
 
 uses
-  Windows, Classes, SysUtils, PT_Types, PT_Interpreter, PT_Tables;
+  Windows, Classes, SysUtils, PT_Types, PT_Storage, PT_Tables;
 
 type
   TFontScannedEvent = procedure(Sender: TObject; FileName: TFilename;
-    Font: TCustomPascalTypeInterpreter) of object;
+    Font: TCustomPascalTypeStorage) of object;
 
-  TFontNameScanner = class(TThread)
+  TFontNameStorageScan = class(TThread)
   private
     FOnFontName  : TFontScannedEvent;
     FCurrentFile : TFileName;
-    FScanner     : TPascalTypeScanner;
+    FStorageScan : TPascalTypeStorageScan;
     procedure FontScanned;
   protected
     procedure Execute; override;
@@ -23,17 +23,17 @@ type
 
 implementation
 
-{ TFontNameScanner }
+{ TFontNameStorageScan }
 
-procedure TFontNameScanner.Execute;
+procedure TFontNameStorageScan.Execute;
 var
   SR : TSearchRec;
 begin
  if FindFirst('*.ttf', faAnyFile, SR) = 0 then
   try
    repeat
-    FScanner := TPascalTypeScanner.Create;
-    with FScanner do
+    FStorageScan := TPascalTypeStorageScan.Create;
+    with FStorageScan do
      try
       // store current file
       FCurrentFile := SR.Name;
@@ -55,10 +55,10 @@ begin
   end;
 end;
 
-procedure TFontNameScanner.FontScanned;
+procedure TFontNameStorageScan.FontScanned;
 begin
  if Assigned(FOnFontName)
-  then FOnFontName(Self, FCurrentFile, FScanner);
+  then FOnFontName(Self, FCurrentFile, FStorageScan);
 end;
 
 end.

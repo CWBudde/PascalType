@@ -88,7 +88,7 @@ type
     procedure FlagsChanged; virtual;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -180,7 +180,7 @@ type
     procedure ResetToDefaults; override;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -296,7 +296,7 @@ type
 
     procedure VersionChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -457,7 +457,7 @@ type
     procedure ResetToDefaults; override;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -572,7 +572,7 @@ type
 implementation
 
 uses
-  Math, SysUtils, PT_ResourceStrings;
+  Math, SysUtils, PT_Math, PT_ResourceStrings;
 
 
 { TPascalTypeDigitalSignatureBlock }
@@ -1050,7 +1050,7 @@ var
 begin
  inherited;
 
- MaxProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableType('maxp'));
+ MaxProfile := TPascalTypeMaximumProfileTable(FStorage.GetTableByTableType('maxp'));
 
  with Stream do
   begin
@@ -1128,7 +1128,7 @@ end;
 { TPascalTypeHorizontalDeviceMetricsTable }
 
 constructor TPascalTypeHorizontalDeviceMetricsTable.Create(
-  Interpreter: IPascalTypeInterpreter);
+  Storage: IPascalTypeStorage);
 begin
  FSubtables := TObjectList.Create;
  inherited;
@@ -1213,7 +1213,7 @@ begin
      Position := OffsetPosition + RecordIndex * SizeDeviceRecord;
 
      // create subtable entry
-     SubTableRecord := TPascalTypeHorizontalDeviceMetricsSubTable.Create(FInterpreter);
+     SubTableRecord := TPascalTypeHorizontalDeviceMetricsSubTable.Create(FStorage);
 
      // load subtable entry from stream
      SubTableRecord.LoadFromStream(Stream);
@@ -2313,7 +2313,7 @@ end;
 
 { TPascalTypeVerticalDeviceMetricsTable }
 
-constructor TPascalTypeVerticalDeviceMetricsTable.Create(Interpreter: IPascalTypeInterpreter);
+constructor TPascalTypeVerticalDeviceMetricsTable.Create(Storage: IPascalTypeStorage);
 begin
  FGroups := TObjectList.Create;
  inherited;
@@ -2856,8 +2856,8 @@ begin
  inherited;
 
  // locate vertical metrics header
- VerticalHeader := TPascalTypeVerticalHeaderTable(FInterpreter.GetTableByTableClass(TPascalTypeVerticalHeaderTable));
- MaximumProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableType('maxp'));
+ VerticalHeader := TPascalTypeVerticalHeaderTable(FStorage.GetTableByTableClass(TPascalTypeVerticalHeaderTable));
+ MaximumProfile := TPascalTypeMaximumProfileTable(FStorage.GetTableByTableType('maxp'));
  Assert(Assigned(MaximumProfile));
 
  // check if vertical metrics header is available
@@ -2897,7 +2897,7 @@ begin
  inherited;
 
  // locate vertical metrics header
- VerticalHeader := TPascalTypeVerticalHeaderTable(FInterpreter.GetTableByTableClass(TPascalTypeVerticalHeaderTable));
+ VerticalHeader := TPascalTypeVerticalHeaderTable(FStorage.GetTableByTableClass(TPascalTypeVerticalHeaderTable));
 
  // check if vertical metrics header is available
  if VerticalHeader = nil

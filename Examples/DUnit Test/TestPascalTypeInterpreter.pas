@@ -34,14 +34,14 @@ interface
 
 uses
   Windows, TestFramework, Classes, Contnrs, SysUtils, PT_Types, PT_Tables,
-  PT_TablesOptional, PT_TablesOpenType, PT_TablesApple, PT_Interpreter,
+  PT_TablesOptional, PT_TablesOpenType, PT_TablesApple, PT_Storage,
   PT_CharacterMap, PT_Windows;
 
 type
-  // Test methods for class TTrueTypeFontInterpreter
-  TTestPascalTypeScanner = class(TTestCase)
+  // Test methods for class TTrueTypeFontStorage
+  TTestPascalTypeStorageScan = class(TTestCase)
   strict private
-    FPascalTypeScanner : TPascalTypeScanner;
+    FPascalTypeStorageScan : TPascalTypeStorageScan;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -50,10 +50,10 @@ type
     procedure TestScanWindowsFonts;
   end;
 
-  // Test methods for class TTrueTypeFontInterpreter
-  TTestPascalTypeInterpreter = class(TTestCase)
+  // Test methods for class TTrueTypeFontStorage
+  TTestPascalTypeStorage = class(TTestCase)
   strict private
-    FPascalTypeInterpreter : TPascalTypeInterpreter;
+    FPascalTypeStorage : TPascalTypeStorage;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -68,21 +68,21 @@ implementation
 uses
   Dialogs;
 
-{ TTestPascalTypeScanner }
+{ TTestPascalTypeStorageScan }
 
-procedure TTestPascalTypeScanner.SetUp;
+procedure TTestPascalTypeStorageScan.SetUp;
 begin
  inherited;
- FPascalTypeScanner := TPascalTypeScanner.Create;
+ FPascalTypeStorageScan := TPascalTypeStorageScan.Create;
 end;
 
-procedure TTestPascalTypeScanner.TearDown;
+procedure TTestPascalTypeStorageScan.TearDown;
 begin
- FreeAndNil(FPascalTypeScanner);
+ FreeAndNil(FPascalTypeStorageScan);
  inherited;
 end;
 
-procedure TTestPascalTypeScanner.TestScanLocalFonts;
+procedure TTestPascalTypeStorageScan.TestScanLocalFonts;
 var
   SR      : TSearchRec;
   Succeed : Boolean;
@@ -92,7 +92,7 @@ begin
    repeat
     Succeed := True;
     try
-     FPascalTypeScanner.LoadFromFile(SR.Name)
+     FPascalTypeStorageScan.LoadFromFile(SR.Name)
     except
      on e: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
      else Succeed := False;
@@ -104,7 +104,7 @@ begin
   end;
 end;
 
-procedure TTestPascalTypeScanner.TestScanWindowsFonts;
+procedure TTestPascalTypeStorageScan.TestScanWindowsFonts;
 var
   SR          : TSearchRec;
   Succeed     : Boolean;
@@ -116,7 +116,7 @@ begin
    repeat
     Succeed := True;
     try
-     FPascalTypeScanner.LoadFromFile(SR.Name);
+     FPascalTypeStorageScan.LoadFromFile(SR.Name);
     except
      on e: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
 //     on e: Exception do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
@@ -131,21 +131,21 @@ end;
 
 
 
-{ TTestPascalTypeInterpreter }
+{ TTestPascalTypeStorage }
 
-procedure TTestPascalTypeInterpreter.SetUp;
+procedure TTestPascalTypeStorage.SetUp;
 begin
  inherited;
- FPascalTypeInterpreter := TPascalTypeInterpreter.Create;
+ FPascalTypeStorage := TPascalTypeStorage.Create;
 end;
 
-procedure TTestPascalTypeInterpreter.TearDown;
+procedure TTestPascalTypeStorage.TearDown;
 begin
- FreeAndNil(FPascalTypeInterpreter);
+ FreeAndNil(FPascalTypeStorage);
  inherited;
 end;
 
-procedure TTestPascalTypeInterpreter.TestInterpreteLocalFonts;
+procedure TTestPascalTypeStorage.TestInterpreteLocalFonts;
 var
   SR          : TSearchRec;
   Succeed     : Boolean;
@@ -155,7 +155,7 @@ begin
    repeat
     Succeed := True;
     try
-     FPascalTypeInterpreter.LoadFromFile(SR.Name)
+     FPascalTypeStorage.LoadFromFile(SR.Name)
     except
      on e: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
      else Succeed := False;
@@ -167,7 +167,7 @@ begin
   end;
 end;
 
-procedure TTestPascalTypeInterpreter.TestInterpreteWindowsFonts;
+procedure TTestPascalTypeStorage.TestInterpreteWindowsFonts;
 var
   SR          : TSearchRec;
   Succeed     : Boolean;
@@ -179,7 +179,7 @@ begin
    repeat
     Succeed := True;
     try
-     FPascalTypeInterpreter.LoadFromFile(SR.Name)
+     FPascalTypeStorage.LoadFromFile(SR.Name)
     except
      on e: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
      else Succeed := False;
@@ -191,17 +191,17 @@ begin
   end;
 end;
 
-procedure TTestPascalTypeInterpreter.TestWriteFont;
+procedure TTestPascalTypeStorage.TestWriteFont;
 var
   ResourceStream : TResourceStream;
   TempStream     : TMemoryStream;
 begin
  ResourceStream := TResourceStream.Create(HInstance, 'Default', 'TTFFONT');
  try
-  FPascalTypeInterpreter.LoadFromStream(ResourceStream);
+  FPascalTypeStorage.LoadFromStream(ResourceStream);
   TempStream := TMemoryStream.Create;
   try
-   FPascalTypeInterpreter.SaveToStream(TempStream);
+   FPascalTypeStorage.SaveToStream(TempStream);
   finally
    FreeAndNil(TempStream);
   end;
@@ -212,7 +212,7 @@ end;
 
 initialization
   // Register all test cases
-  RegisterTest(TTestPascalTypeScanner.Suite);
-  RegisterTest(TTestPascalTypeInterpreter.Suite);
+  RegisterTest(TTestPascalTypeStorageScan.Suite);
+  RegisterTest(TTestPascalTypeStorage.Suite);
 
 end.

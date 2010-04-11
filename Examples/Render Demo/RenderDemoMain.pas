@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, PT_Types, PT_RasterizerGDI, PT_Interpreter, PT_Tables,
+  StdCtrls, ExtCtrls, PT_Types, PT_FontEngineGDI, PT_Storage, PT_Tables,
   PT_Windows, RenderDemoFontNameScanner;
 
 {$I ..\..\Source\PT_Compiler.inc}  
@@ -21,7 +21,7 @@ type
     EdText: TEdit;
     LbFont: TLabel;
     LbFontSize: TLabel;
-    LbRasterizer: TLabel;
+    LbFontEngine: TLabel;
     LbText: TLabel;
     PaintBox: TPaintBox;
     PnText: TPanel;
@@ -38,15 +38,15 @@ type
     procedure RbPascalTypeClick(Sender: TObject);
     procedure RbWindowsClick(Sender: TObject);
   private
-    FRasterizer  : TPascalTypeRasterizerGDI;
-    FFontScanner : TFontNameScanner;
+    FFontEngine  : TPascalTypeFontEngineGDI;
+    FFontScanner : TFontNameStorageScan;
     FFontArray   : array of TFontNameFile;
     FBitmap      : TBitmap;
     FText        : string;
     FFontSize    : Integer;
     FFontName    : string;
     procedure FontScannedHandler(Sender: TObject; FontFileName: TFilename;
-      Font: TCustomPascalTypeInterpreter);
+      Font: TCustomPascalTypeStorage);
     procedure SetText(const Value: string);
     procedure SetFontSize(const Value: Integer);
     procedure SetFontName(const Value: string);
@@ -78,14 +78,14 @@ begin
  // create bitmap buffer
  FBitmap := TBitmap.Create;
 
- // create rasterizer
- FRasterizer := TPascalTypeRasterizerGDI.Create;
+ // create FontEngine
+ FFontEngine := TPascalTypeFontEngineGDI.Create;
 
  // set initial properties
  FBitmap.Canvas.Font.Size := StrToInt(CbFontSize.Text);
- FRasterizer.FontSize := StrToInt(CbFontSize.Text);
+ FFontEngine.FontSize := StrToInt(CbFontSize.Text);
 
- FFontScanner := TFontNameScanner.Create(True);
+ FFontScanner := TFontNameStorageScan.Create(True);
  with FFontScanner do
   begin
    OnFontScanned := FontScannedHandler;
@@ -95,8 +95,8 @@ end;
 
 procedure TFmRenderDemo.FormDestroy(Sender: TObject);
 begin
- // free rasterizer
- FreeAndNil(FRasterizer);
+ // free FontEngine
+ FreeAndNil(FFontEngine);
 
  with FFontScanner do
   begin
@@ -140,7 +140,7 @@ begin
  for FontIndex := 0 to Length(FFontArray) - 1 do
   if FFontArray[FontIndex].FullFontName = FFontName then
    begin
-    FRasterizer.LoadFromFile(FFontArray[FontIndex].FileName);
+    FFontEngine.LoadFromFile(FFontArray[FontIndex].FileName);
     Break;
    end;
 
@@ -150,7 +150,7 @@ end;
 procedure TFmRenderDemo.FontSizeChanged;
 begin
  FBitmap.Canvas.Font.Size := FFontSize;
- FRasterizer.FontSize := FFontSize;
+ FFontEngine.FontSize := FFontSize;
  RenderText;
 end;
 
@@ -184,7 +184,7 @@ begin
     end;
 
    if RbPascalType.Checked
-    then FRasterizer.RenderText(FText, Canvas, 0, 0);
+    then FFontEngine.RenderText(FText, Canvas, 0, 0);
   end;
  PaintBox.Invalidate;
 end;
@@ -234,7 +234,7 @@ begin
 end;
 
 procedure TFmRenderDemo.FontScannedHandler(Sender: TObject; FontFileName: TFilename;
-  Font: TCustomPascalTypeInterpreter);
+  Font: TCustomPascalTypeStorage);
 var
   CurrentFontName : string;
 begin

@@ -11,19 +11,19 @@
 { Enable this option, if you want to check even reserved values and other
   not mandatory values.
   * Default: Enabled }
-{-$DEFINE AmbigiousExceptions}
+{$DEFINE AmbigiousExceptions}
 
 { If enabled every single read operation is validated to ensure all bytes
   queried could be readed entirely. While this guarantee to identify problems
   that would be hidden otherwise it is quite slow for the typical use.
   * Default: Disabled }
-{-$DEFINE ValidateEveryReadOperation}
+{$DEFINE ValidateEveryReadOperation}
 
 { This compiler switch enables the checksum test for each table. To ensure the
   font file is valid this should be enabled. However some older fonts contain
   invalid checksums, which will result in an exception.
   * Default: Enabled }
-{-$DEFINE ChecksumTest}
+{$DEFINE ChecksumTest}
 
 { Enable this option, if you want to enable using floating points where
   applicable. If this is disabled you may be able to use this library on
@@ -41,4 +41,4 @@
   to be incomplete by this library. The optional features won't be available,
   but loading of the fonts should still be possible.
   * Default: Disabled }
-{$DEFINE IgnoreIncompleteOptionalTables}
+{-$DEFINE IgnoreIncompleteOptionalTables}

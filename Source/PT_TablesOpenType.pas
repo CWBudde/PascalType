@@ -251,7 +251,7 @@ type
     procedure LookupOrderChanged; virtual;
     procedure ReqFeatureIndexChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -283,7 +283,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -314,7 +314,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -337,7 +337,7 @@ type
     procedure ResetToDefaults; override;
     procedure FeatureParamsChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -360,7 +360,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -438,7 +438,7 @@ type
     procedure LookupTypeChanged; virtual;
     procedure MarkFilteringSetChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -462,7 +462,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -485,7 +485,7 @@ type
     procedure ResetToDefaults; override;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -526,7 +526,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -566,7 +566,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -601,7 +601,7 @@ type
     procedure ResetToDefaults; override;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -1505,9 +1505,9 @@ end;
 
 { TCustomOpenTypeLanguageSystemTable }
 
-constructor TCustomOpenTypeLanguageSystemTable.Create(Interpreter: IPascalTypeInterpreter);
+constructor TCustomOpenTypeLanguageSystemTable.Create(Storage: IPascalTypeStorage);
 begin
- inherited Create(Interpreter);
+ inherited Create(Storage);
 end;
 
 destructor TCustomOpenTypeLanguageSystemTable.Destroy;
@@ -1660,10 +1660,10 @@ end;
 { TCustomOpenTypeScriptTable }
 
 constructor TCustomOpenTypeScriptTable.Create(
-  Interpreter: IPascalTypeInterpreter);
+  Storage: IPascalTypeStorage);
 begin
  FLanguageSystemTables := TObjectList.Create;
- inherited Create(Interpreter);
+ inherited Create(Storage);
 end;
 
 destructor TCustomOpenTypeScriptTable.Destroy;
@@ -1699,7 +1699,7 @@ begin
     if Assigned(Self.FDefaultLangSys) then
      begin
       if not Assigned(FDefaultLangSys)
-       then FDefaultLangSys := TOpenTypeDefaultLanguageSystemTable.Create(FInterpreter);
+       then FDefaultLangSys := TOpenTypeDefaultLanguageSystemTable.Create(FStorage);
 
       FDefaultLangSys.Assign(Self.FDefaultLangSys);
      end else
@@ -1754,7 +1754,7 @@ begin
      Position := StartPos + DefaultLangSys;
 
      if not Assigned(FDefaultLangSys)
-      then FDefaultLangSys := TOpenTypeDefaultLanguageSystemTable.Create(FInterpreter);
+      then FDefaultLangSys := TOpenTypeDefaultLanguageSystemTable.Create(FStorage);
 
      FDefaultLangSys.LoadFromStream(Stream);
     end else
@@ -1771,7 +1771,7 @@ begin
      if Assigned(LangTableClass) then
       begin
        // create language table entry
-       LangTable := LangTableClass.Create(FInterpreter);
+       LangTable := LangTableClass.Create(FStorage);
 
        // set position
        Position := StartPos + LangSysRecords[LangSysIndex].Offset;
@@ -1854,10 +1854,10 @@ end;
 
 { TOpenTypeScriptListTable }
 
-constructor TOpenTypeScriptListTable.Create(Interpreter: IPascalTypeInterpreter);
+constructor TOpenTypeScriptListTable.Create(Storage: IPascalTypeStorage);
 begin
  FLangSysList := TObjectList.Create;
- inherited Create(Interpreter);
+ inherited Create(Storage);
 end;
 
 destructor TOpenTypeScriptListTable.Destroy;
@@ -1935,7 +1935,7 @@ begin
      if Assigned(ScriptTableClass) then
       begin
        // create language system entry
-       ScriptTable := ScriptTableClass.Create(FInterpreter);
+       ScriptTable := ScriptTableClass.Create(FStorage);
 
        // set position to actual script list entry
        Position := StartPos + ScriptList[ScriptIndex].Offset;
@@ -1959,7 +1959,7 @@ end;
 
 { TCustomOpenTypeFeatureTable }
 
-constructor TCustomOpenTypeFeatureTable.Create(Interpreter: IPascalTypeInterpreter);
+constructor TCustomOpenTypeFeatureTable.Create(Storage: IPascalTypeStorage);
 begin
  inherited;
 end;
@@ -2059,7 +2059,7 @@ end;
 
 { TOpenTypeFeatureListTable }
 
-constructor TOpenTypeFeatureListTable.Create(Interpreter: IPascalTypeInterpreter);
+constructor TOpenTypeFeatureListTable.Create(Storage: IPascalTypeStorage);
 begin
  FFeatureList := TObjectList.Create;
  inherited;
@@ -2139,7 +2139,7 @@ begin
      if Assigned(FeatureClass) then
       begin
        // create language system entry
-       FeatureTable := FeatureClass.Create(FInterpreter);
+       FeatureTable := FeatureClass.Create(FStorage);
 
        // set position to actual script list entry
        Position := StartPos + FeatureList[FeatureIndex].Offset;
@@ -2372,7 +2372,7 @@ end;
 
 { TOpenTypeLookupTable }
 
-constructor TOpenTypeLookupTable.Create(Interpreter: IPascalTypeInterpreter);
+constructor TOpenTypeLookupTable.Create(Storage: IPascalTypeStorage);
 begin
  FSubtableList := TObjectList.Create;
  inherited;
@@ -2532,7 +2532,7 @@ end;
 
 { TOpenTypeLookupListTable }
 
-constructor TOpenTypeLookupListTable.Create(Interpreter: IPascalTypeInterpreter);
+constructor TOpenTypeLookupListTable.Create(Storage: IPascalTypeStorage);
 begin
  FLookupList := TObjectList.Create;
  inherited;
@@ -2602,7 +2602,7 @@ begin
    for LookupIndex := 0 to Length(LookupList) - 1 do
     begin
      // create language system entry
-     LookupTable := TOpenTypeLookupTable.Create(FInterpreter);
+     LookupTable := TOpenTypeLookupTable.Create(FStorage);
 
      // set position to actual script list entry
      Position := StartPos + LookupList[LookupIndex];
@@ -2625,11 +2625,11 @@ end;
 
 { TCustomOpenTypeCommonTable }
 
-constructor TCustomOpenTypeCommonTable.Create(Interpreter: IPascalTypeInterpreter);
+constructor TCustomOpenTypeCommonTable.Create(Storage: IPascalTypeStorage);
 begin
- FScriptListTable := TOpenTypeScriptListTable.Create(Interpreter);
- FFeatureListTable := TOpenTypeFeatureListTable.Create(Interpreter);
- FLookupListTable := TOpenTypeLookupListTable.Create(Interpreter);
+ FScriptListTable := TOpenTypeScriptListTable.Create(Storage);
+ FFeatureListTable := TOpenTypeFeatureListTable.Create(Storage);
+ FLookupListTable := TOpenTypeLookupListTable.Create(Storage);
  inherited;
 end;
 
@@ -2835,9 +2835,9 @@ end;
 { TCustomOpenTypeJustificationLanguageSystemTable }
 
 constructor TCustomOpenTypeJustificationLanguageSystemTable.Create(
-  Interpreter: IPascalTypeInterpreter);
+  Storage: IPascalTypeStorage);
 begin
- inherited Create(Interpreter);
+ inherited Create(Storage);
 end;
 
 destructor TCustomOpenTypeJustificationLanguageSystemTable.Destroy;
@@ -2897,10 +2897,10 @@ end;
 
 { TCustomOpenTypeJustificationScriptTable }
 
-constructor TCustomOpenTypeJustificationScriptTable.Create(Interpreter: IPascalTypeInterpreter);
+constructor TCustomOpenTypeJustificationScriptTable.Create(Storage: IPascalTypeStorage);
 begin
  FLanguageSystemTables := TObjectList.Create;
- inherited Create(Interpreter);
+ inherited Create(Storage);
 end;
 
 destructor TCustomOpenTypeJustificationScriptTable.Destroy;
@@ -3007,7 +3007,7 @@ begin
      Position := StartPos + DefaultLangSys;
 
      if not Assigned(FDefaultLangSys)
-      then FDefaultLangSys := TOpenTypeJustificationLanguageSystemTable.Create(FInterpreter);
+      then FDefaultLangSys := TOpenTypeJustificationLanguageSystemTable.Create(FStorage);
 
      FDefaultLangSys.LoadFromStream(Stream);
     end else
@@ -3024,7 +3024,7 @@ begin
      if Assigned(LangTableClass) then
       begin
        // create language table entry
-       LangTable := LangTableClass.Create(FInterpreter);
+       LangTable := LangTableClass.Create(FStorage);
 
        // set position
        Position := StartPos + LangSysRecords[LangSysIndex].Offset;
@@ -3215,7 +3215,7 @@ begin
     with Directory[DirIndex] do
      begin
       // TODO: Find matching justification script by tag!!!
-      Script := TOpenTypeJustificationScriptTable.Create(FInterpreter);
+      Script := TOpenTypeJustificationScriptTable.Create(FStorage);
 
       // jump to the right position
       Position := StartPos + Offset;

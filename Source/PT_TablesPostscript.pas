@@ -68,7 +68,7 @@ type
     procedure ResetToDefaults; override;
     procedure AssignTo(Dest: TPersistent); override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -231,7 +231,7 @@ end;
 { TPascalTypeCompactFontFormatTable }
 
 constructor TPascalTypeCompactFontFormatTable.Create(
-  Interpreter: IPascalTypeInterpreter);
+  Storage: IPascalTypeStorage);
 begin
  FNameTable := TPascalTypePostscriptNameIndexTable.Create;
  inherited;

@@ -9,7 +9,10 @@
         <Filename Value="project1"/>
       </Target>
       <SearchPaths>
-        <OtherUnitFiles Value="C:\Users\Christian Budde\Projects\Pascal Type\Source\"/>
+        <IncludeFiles Value="..\Source\"/>
+        <OtherUnitFiles Value="..\Source\;..\Resource\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+        <SrcPath Value="..\Source\;..\Resource\"/>
       </SearchPaths>
       <Parsing>
         <SyntaxOptions>
@@ -125,6 +128,9 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)/"/>
+    </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
     </PublishOptions>

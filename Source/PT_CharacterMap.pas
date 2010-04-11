@@ -136,7 +136,7 @@ type
 implementation
 
 uses
-  Math, PT_ResourceStrings;
+  Math, PT_Math, PT_ResourceStrings;
 
 { TPascalTypeFormat0CharacterMap }
 

@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, PT_Types, PT_Interpreter, PT_RasterizerGDI;
+  StdCtrls, PT_Types, PT_Storage, PT_FontEngineGDI;
 
 type
   TFmComparison = class(TForm)
@@ -21,7 +21,7 @@ type
     procedure BtCompareGetOutlineTextMetricsClick(Sender: TObject);
     procedure BtCompareTextExtentPoint32Click(Sender: TObject);
   private
-    FRasterizer      : TPascalTypeRasterizerGDI;
+    FFontEngine      : TPascalTypeFontEngineGDI;
     FCurrentFontSize : Integer;
     procedure TextMetricToMemo(TextMetric: TTextMetricW; Memo: TMemo);
     procedure OutlineTextMetricToMemo(TextMetric: TOutlineTextmetricW; Memo: TMemo);
@@ -38,7 +38,7 @@ var
 implementation
 
 uses
-  PT_Windows, PT_Rasterizer;
+  PT_Windows, PT_FontEngine;
 
 {$R *.dfm}
 
@@ -47,11 +47,11 @@ begin
  // locate font directory
  SetCurrentDir(GetFontDirectory);
 
- // create rasterizer
- FRasterizer := TPascalTypeRasterizerGDI.Create;
+ // create FontEngine
+ FFontEngine := TPascalTypeFontEngineGDI.Create;
 
  // load font: Arial
- FRasterizer.LoadFromFile('arialbi.ttf');
+ FFontEngine.LoadFromFile('arialbi.ttf');
 
  FCurrentFontSize := 8;
  CompareGetTextMetrics;
@@ -59,7 +59,7 @@ end;
 
 procedure TFmComparison.FormDestroy(Sender: TObject);
 begin
- FreeAndNil(FRasterizer);
+ FreeAndNil(FFontEngine);
 end;
 
 procedure TFmComparison.BtCompareGetOutlineTextMetricsClick(Sender: TObject);
@@ -101,8 +101,8 @@ begin
   end;
  TextMetricToMemo(TextMetricGDI, MemoGDI);
 
- FRasterizer.FontSize := FCurrentFontSize;
- FRasterizer.GetTextMetricsW(TextMetricPT);
+ FFontEngine.FontSize := FCurrentFontSize;
+ FFontEngine.GetTextMetricsW(TextMetricPT);
  TextMetricToMemo(TextMetricPT, MemoPT);
 end;
 
@@ -218,12 +218,12 @@ begin
    FreeAndNil(Font);
   end;
 
- FRasterizer.FontSize := FCurrentFontSize;
- BufferSize := FRasterizer.GetOutlineTextMetricsW(0, nil);
+ FFontEngine.FontSize := FCurrentFontSize;
+ BufferSize := FFontEngine.GetOutlineTextMetricsW(0, nil);
  GetMem(BufferPT, BufferSize);
  FillChar(BufferPT^, BufferSize, 0);
  try
-  FRasterizer.GetOutlineTextMetricsW(Buffersize, TextMetricPT);
+  FFontEngine.GetOutlineTextMetricsW(Buffersize, TextMetricPT);
   OutlineTextMetricToMemo(TextMetricPT^, MemoPT);
  finally
   Dispose(BufferPT);
@@ -302,7 +302,7 @@ var
 
   procedure TestPT;
   begin
-   if FRasterizer.GetTextExtentPoint32W(Str, TextSizePT) then
+   if FFontEngine.GetTextExtentPoint32W(Str, TextSizePT) then
     begin
      MemoPT.Lines.Add('"' + Str + '" Size X: ' + IntToStr(TextSizePT.cx));
      MemoPT.Lines.Add('"' + Str + '" Size Y: ' + IntToStr(TextSizePT.cy));
@@ -334,7 +334,7 @@ begin
 
  // PascalType
  MemoPT.Clear;
- FRasterizer.FontSize := FCurrentFontSize;
+ FFontEngine.FontSize := FCurrentFontSize;
  Str := '_'; TestPT;
  Str := '.'; TestPT;
  Str := 'x'; TestPT;

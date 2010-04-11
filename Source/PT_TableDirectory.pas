@@ -142,7 +142,7 @@ type
 implementation
 
 uses
-  PT_ResourceStrings, Math;
+  Math, PT_Math, PT_ResourceStrings;
 
 function SortTableEntryByOffset(Item1, Item2: Pointer): Integer;
 begin

@@ -50,7 +50,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -75,7 +75,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -144,7 +144,7 @@ type
     procedure YMaxChanged; virtual;
     procedure YMinChanged; virtual;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); reintroduce; virtual;
+    constructor Create(Storage: IPascalTypeStorage); reintroduce; virtual;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -212,10 +212,7 @@ type
     FFlags      : Word; // Component flag
     FGlyphIndex : Word; // Glyph index of component
     FArgument   : array [0..1] of Integer;
-    {$IFDEF UseFloatingPoint}
-    FScale      : array of Single;
-    {$ELSE}
-    {$ENDIF}
+    FScale      : TSmallScaleMatrix;
     procedure SetFlags(const Value: Word);
     procedure SetGlyphIndex(const Value: Word);
   protected
@@ -488,7 +485,7 @@ var
   Value16    : Word;
   MaxProfile : TPascalTypeMaximumProfileTable;
 begin
- MaxProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableType('maxp'));
+ MaxProfile := TPascalTypeMaximumProfileTable(FStorage.GetTableByTableType('maxp'));
  Assert(Assigned(MaxProfile));
 
  with Stream do
@@ -524,10 +521,10 @@ end;
 
 { TCustomTrueTypeFontGlyphData }
 
-constructor TCustomTrueTypeFontGlyphData.Create(Interpreter: IPascalTypeInterpreter);
+constructor TCustomTrueTypeFontGlyphData.Create(Storage: IPascalTypeStorage);
 begin
- FInstructions := TTrueTypeFontGlyphInstructionTable.Create(Interpreter);
- inherited Create(Interpreter);
+ FInstructions := TTrueTypeFontGlyphInstructionTable.Create(Storage);
+ inherited Create(Storage);
 end;
 
 destructor TCustomTrueTypeFontGlyphData.Destroy;
@@ -541,7 +538,7 @@ var
   GlyphDataTable : TTrueTypeFontGlyphDataTable;
   GlyphIndex     : Integer;
 begin
- GlyphDataTable := TTrueTypeFontGlyphDataTable(FInterpreter.GetTableByTableType('glyf'));
+ GlyphDataTable := TTrueTypeFontGlyphDataTable(FStorage.GetTableByTableType('glyf'));
  Result := -1;
  if Assigned(GlyphDataTable) then
   for GlyphIndex := 0 to GlyphDataTable.GlyphDataCount - 1 do
@@ -585,7 +582,7 @@ var
   MaxProfile : TPascalTypeMaximumProfileTable;
 begin
  // get maximum profile
- MaxProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableClass(TPascalTypeMaximumProfileTable));
+ MaxProfile := TPascalTypeMaximumProfileTable(FStorage.GetTableByTableClass(TPascalTypeMaximumProfileTable));
 
  with Stream do
   begin
@@ -865,7 +862,7 @@ begin
  inherited;
 
  // get maximum profile
- MaxProfile := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableClass(TPascalTypeMaximumProfileTable));
+ MaxProfile := TPascalTypeMaximumProfileTable(FStorage.GetTableByTableClass(TPascalTypeMaximumProfileTable));
 
  // check if glyph contains any information at all
  if FNumberOfContours = 0
@@ -1115,8 +1112,10 @@ end;
 procedure TPascalTypeCompositeGlyph.LoadFromStream(Stream: TStream);
 var
   Argument : array [0..1] of SmallInt;
+{$IFDEF UseFloatingPoint}
 const
-  CFixedPoint2Dot14Scale : Single = 1 / 16384;  
+  CFixedPoint2Dot14Scale : Single = 1 / 16384;
+{$ENDIF}
 begin
  inherited;
 
@@ -1148,11 +1147,17 @@ begin
 
    if (FFlags and 8) <> 0 then
     begin
-     // one dimensional scale
-     SetLength(FScale, 1);
-
      // read scale
-     FScale[0] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$IFDEF UseFloatingPoint}
+     FScale[0, 0] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$ELSE}
+     FScale[0, 0] := ReadSwappedSmallInt(Stream);
+     {$ENDIF}
+
+     // set other values implicitly
+     FScale[0, 1] := 0;
+     FScale[1, 0] := 0;
+     FScale[1, 1] := FScale[0, 0];
 
      {$IFDEF AmbigiousExceptions}
      // make sure the reserved flag is set to 0
@@ -1164,14 +1169,23 @@ begin
     end else
    if (FFlags and (1 shl 6)) <> 0 then
     begin
-     // one dimensional scale
-     SetLength(FScale, 2);
-
      // read x-scale
-     FScale[0] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$IFDEF UseFloatingPoint}
+     FScale[0, 0] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$ELSE}
+     FScale[0, 0] := ReadSwappedSmallInt(Stream);
+     {$ENDIF}
 
      // read y-scale
-     FScale[1] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$IFDEF UseFloatingPoint}
+     FScale[1, 1] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$ELSE}
+     FScale[1, 1] := ReadSwappedSmallInt(Stream);
+     {$ENDIF}
+
+     // set other values implicitly
+     FScale[0, 1] := 0;
+     FScale[1, 0] := 0;
 
      {$IFDEF AmbigiousExceptions}
      // make sure the reserved flag is set to 0
@@ -1183,20 +1197,33 @@ begin
     end else
    if (FFlags and (1 shl 7)) <> 0 then
     begin
-     // one dimensional scale
-     SetLength(FScale, 4);
-
      // read x-scale
-     FScale[0] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$IFDEF UseFloatingPoint}
+     FScale[0, 0] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$ELSE}
+     FScale[0, 0] := ReadSwappedSmallInt(Stream);
+     {$ENDIF}
 
      // read scale01
-     FScale[1] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$IFDEF UseFloatingPoint}
+     FScale[0, 1] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$ELSE}
+     FScale[0, 1] := ReadSwappedSmallInt(Stream);
+     {$ENDIF}
 
      // read scale10
-     FScale[2] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$IFDEF UseFloatingPoint}
+     FScale[1, 0] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$ELSE}
+     FScale[1, 0] := ReadSwappedSmallInt(Stream);
+     {$ENDIF}
 
      // read y-scale
-     FScale[3] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$IFDEF UseFloatingPoint}
+     FScale[1, 1] := ReadSwappedSmallInt(Stream) * CFixedPoint2Dot14Scale;
+     {$ELSE}
+     FScale[1, 1] := ReadSwappedSmallInt(Stream);
+     {$ENDIF}
 
      {$IFDEF AmbigiousExceptions}
      // make sure the reserved flag is set to 0
@@ -1298,7 +1325,7 @@ var
   GlyphScanIndex : Integer;
 begin
  Result := 0;
- GlyphDataTable := TTrueTypeFontGlyphDataTable(FInterpreter.GetTableByTableType('glyf'));
+ GlyphDataTable := TTrueTypeFontGlyphDataTable(FStorage.GetTableByTableType('glyf'));
  if Assigned(GlyphDataTable) then
   for SubGlyphIndex := 0 to GetGlyphCount - 1 do
    for GlyphScanIndex := 0 to GlyphDataTable.GetGlyphDataCount - 1 do
@@ -1404,7 +1431,7 @@ begin
       GlyphClass := TTrueTypeFontGlyphDataClass(Self.FGlyphDataList[GlyphsIndex].ClassType);
 
       // eventually create the contour
-      FGlyphDataList[GlyphsIndex] := GlyphClass.Create(FInterpreter);
+      FGlyphDataList[GlyphsIndex] := GlyphClass.Create(FStorage);
 
       // assign contour
       FGlyphDataList[GlyphsIndex].Assign(Self.FGlyphDataList[GlyphsIndex]);
@@ -1457,7 +1484,7 @@ var
   Value16   : SmallInt;
 begin
  // get location table
- Locations := TTrueTypeFontLocationTable(FInterpreter.GetTableByTableType('loca'));
+ Locations := TTrueTypeFontLocationTable(FStorage.GetTableByTableType('loca'));
  if not Assigned(Locations)
   then raise EPascalTypeError.Create(RCStrNoIndexToLocationTable);
 
@@ -1489,8 +1516,8 @@ begin
 
      // read number of contours and create glyph data object
       if Value16 > 0
-       then FGlyphDataList[LocIndex] := TTrueTypeFontSimpleGlyphData.Create(FInterpreter)
-       else FGlyphDataList[LocIndex] := TTrueTypeFontCompositeGlyphData.Create(FInterpreter);
+       then FGlyphDataList[LocIndex] := TTrueTypeFontSimpleGlyphData.Create(FStorage)
+       else FGlyphDataList[LocIndex] := TTrueTypeFontCompositeGlyphData.Create(FStorage);
 
      try
       FGlyphDataList[LocIndex].LoadFromStream(Stream);
@@ -1561,11 +1588,11 @@ begin
  with Stream do
   begin
    // get header table
-   HeaderTable := TPascalTypeHeaderTable(FInterpreter.GetTableByTableType('head'));
+   HeaderTable := TPascalTypeHeaderTable(FStorage.GetTableByTableType('head'));
    Assert(Assigned(HeaderTable));
 
    // get maximum profile table
-   MaxProfTable := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableType('maxp'));
+   MaxProfTable := TPascalTypeMaximumProfileTable(FStorage.GetTableByTableType('maxp'));
    Assert(Assigned(MaxProfTable));
 
    case HeaderTable.IndexToLocationFormat of
@@ -1615,11 +1642,11 @@ begin
  with Stream do
   begin
    // get header table
-   HeaderTable := TPascalTypeHeaderTable(FInterpreter.GetTableByTableType('head'));
+   HeaderTable := TPascalTypeHeaderTable(FStorage.GetTableByTableType('head'));
    Assert(Assigned(HeaderTable));
 
    // get maximum profile table
-   MaxProfTable := TPascalTypeMaximumProfileTable(FInterpreter.GetTableByTableType('maxp'));
+   MaxProfTable := TPascalTypeMaximumProfileTable(FStorage.GetTableByTableType('maxp'));
    Assert(Assigned(MaxProfTable));
 
    // check whether the number of glyps matches the location array length

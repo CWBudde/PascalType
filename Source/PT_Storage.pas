@@ -1,4 +1,4 @@
-unit PT_Interpreter;
+unit PT_Storage;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -38,8 +38,8 @@ uses
   Classes, SysUtils, Types, Contnrs, PT_Types, PT_TableDirectory, PT_Tables;
 
 type
-  TCustomPascalTypeInterpreter = class(TInterfacedPersistent, IStreamPersist,
-    IPascalTypeInterpreter)
+  TCustomPascalTypeStorage = class(TInterfacedPersistent, IStreamPersist,
+    IPascalTypeStorage)
   private
     // required tables
     FHeaderTable        : TPascalTypeHeaderTable;
@@ -80,7 +80,7 @@ type
     property FontStyle: TFontStyles read GetFontStyle;
   end;
 
-  TPascalTypeScanner = class(TCustomPascalTypeInterpreter)
+  TPascalTypeStorageScan = class(TCustomPascalTypeStorage)
   protected
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; override;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
@@ -96,7 +96,7 @@ type
     property PostScriptTable;
   end;
 
-  TPascalTypeInterpreter = class(TCustomPascalTypeInterpreter)
+  TPascalTypeStorage = class(TCustomPascalTypeStorage)
   private
     // required tables
     FHorizontalMetrics : TPascalTypeHorizontalMetricsTable;
@@ -210,9 +210,9 @@ begin
 end;
 
 
-{ TCustomPascalTypeInterpreter }
+{ TCustomPascalTypeStorage }
 
-constructor TCustomPascalTypeInterpreter.Create;
+constructor TCustomPascalTypeStorage.Create;
 begin
  inherited;
  
@@ -224,7 +224,7 @@ begin
  FPostScriptTable    := TPascalTypePostscriptTable.Create(Self);
 end;
 
-destructor TCustomPascalTypeInterpreter.Destroy;
+destructor TCustomPascalTypeStorage.Destroy;
 begin
  FreeAndNil(FHeaderTable);
  FreeAndNil(FHorizontalHeader);
@@ -234,13 +234,13 @@ begin
  inherited;
 end;
 
-procedure TCustomPascalTypeInterpreter.DirectoryTableReaded(DirectoryTable: TPascalTypeDirectoryTable);
+procedure TCustomPascalTypeStorage.DirectoryTableReaded(DirectoryTable: TPascalTypeDirectoryTable);
 begin
  // optimize table read order
  DirectoryTable.TableList.SortByOffset;
 end;
 
-function TCustomPascalTypeInterpreter.GetFontName: string;
+function TCustomPascalTypeStorage.GetFontName: string;
 var
   NameSubTableIndex : Integer;
 begin
@@ -257,14 +257,14 @@ begin
        end;
 end;
 
-function TCustomPascalTypeInterpreter.GetFontStyle: TFontStyles;
+function TCustomPascalTypeStorage.GetFontStyle: TFontStyles;
 begin
  if msItalic in FHeaderTable.MacStyle then Result := [fsItalic] else Result := [];
  if msBold in FHeaderTable.MacStyle then Result := Result + [fsBold];
  if msUnderline in FHeaderTable.MacStyle then Result := Result + [fsUnderline];
 end;
 
-procedure TCustomPascalTypeInterpreter.LoadFromFile(FileName: TFileName);
+procedure TCustomPascalTypeStorage.LoadFromFile(FileName: TFileName);
 var
   FileStream : TFileStream;
 begin
@@ -276,7 +276,7 @@ begin
  end;
 end;
 
-procedure TCustomPascalTypeInterpreter.LoadFromStream(Stream: TStream);
+procedure TCustomPascalTypeStorage.LoadFromStream(Stream: TStream);
 var
   DirectoryTable   : TPascalTypeDirectoryTable;
   TableIndex       : Integer;
@@ -351,7 +351,7 @@ begin
   end;
 end;
 
-procedure TCustomPascalTypeInterpreter.SaveToFile(FileName: TFileName);
+procedure TCustomPascalTypeStorage.SaveToFile(FileName: TFileName);
 var
   FileStream : TFileStream;
 begin
@@ -366,7 +366,7 @@ begin
 end;
 
 {$IFDEF ChecksumTest}
-procedure TCustomPascalTypeInterpreter.ValidateChecksum(Stream: TStream;
+procedure TCustomPascalTypeStorage.ValidateChecksum(Stream: TStream;
   TableEntry: TPascalTypeDirectoryTableEntry);
 var
   Checksum : Cardinal;
@@ -390,9 +390,9 @@ end;
 {$ENDIF}
 
 
-{ TPascalTypeScanner }
+{ TPascalTypeStorageScan }
 
-function TPascalTypeScanner.GetTableByTableClass(
+function TPascalTypeStorageScan.GetTableByTableClass(
   TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
 begin
  if TableClass = FHeaderTable.ClassType then Result := FHeaderTable else
@@ -403,7 +403,7 @@ begin
   else Result := nil;
 end;
 
-function TPascalTypeScanner.GetTableByTableType(
+function TPascalTypeStorageScan.GetTableByTableType(
   TableType: TTableType): TCustomPascalTypeNamedTable;
 begin
  if TableType = FHeaderTable.TableType then Result := FHeaderTable else
@@ -414,7 +414,7 @@ begin
   else Result := nil;
 end;
 
-procedure TPascalTypeScanner.LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry);
+procedure TPascalTypeStorageScan.LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry);
 var
   MemoryStream   : TMemoryStream;
   TableClass     : TCustomPascalTypeNamedTableClass;
@@ -454,15 +454,15 @@ begin
   end;
 end;
 
-procedure TPascalTypeScanner.SaveToStream(Stream: TStream);
+procedure TPascalTypeStorageScan.SaveToStream(Stream: TStream);
 begin
  raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
-{ TPascalTypeInterpreter }
+{ TPascalTypeStorage }
 
-constructor TPascalTypeInterpreter.Create;
+constructor TPascalTypeStorage.Create;
 begin
  inherited;
 
@@ -474,7 +474,7 @@ begin
  FOptionalTables := TObjectList.Create;
 end;
 
-destructor TPascalTypeInterpreter.Destroy;
+destructor TPascalTypeStorage.Destroy;
 begin
  FreeAndNil(FHorizontalMetrics);
  FreeAndNil(FCharacterMap);
@@ -483,7 +483,7 @@ begin
  inherited;
 end;
 
-procedure TPascalTypeInterpreter.DirectoryTableReaded(
+procedure TPascalTypeStorage.DirectoryTableReaded(
   DirectoryTable: TPascalTypeDirectoryTable);
 begin
  inherited;
@@ -496,7 +496,7 @@ begin
   then FreeAndNil(FOS2Table);
 end;
 
-function TPascalTypeInterpreter.GetAdvanceWidth(GlyphIndex: Integer): Word;
+function TPascalTypeStorage.GetAdvanceWidth(GlyphIndex: Integer): Word;
 begin
  with FHorizontalMetrics do
   begin
@@ -506,7 +506,7 @@ begin
   end;
 end;
 
-function TPascalTypeInterpreter.GetBoundingBox: TRect;
+function TPascalTypeStorage.GetBoundingBox: TRect;
 begin
  Result.Left   := HeaderTable.XMin;
  Result.Top    := HeaderTable.YMax;
@@ -514,7 +514,7 @@ begin
  Result.Bottom := HeaderTable.YMin;
 end;
 
-function TPascalTypeInterpreter.GetGlyphData(
+function TPascalTypeStorage.GetGlyphData(
   Index: Integer): TCustomPascalTypeGlyphDataTable;
 var
   GlyphDataTable : TTrueTypeFontGlyphDataTable;
@@ -528,7 +528,7 @@ begin
    then Result := GlyphDataTable.GlyphData[Index];
 end;
 
-function TPascalTypeInterpreter.GetOptionalTable(
+function TPascalTypeStorage.GetOptionalTable(
   Index: Integer): TCustomPascalTypeNamedTable;
 begin
  if (Index >= 0) and (Index < FOptionalTables.Count)
@@ -536,12 +536,12 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TPascalTypeInterpreter.GetOptionalTableCount: Integer;
+function TPascalTypeStorage.GetOptionalTableCount: Integer;
 begin
  Result := FOptionalTables.Count;
 end;
 
-function TPascalTypeInterpreter.GetPanose: TCustomPascalTypePanoseTable;
+function TPascalTypeStorage.GetPanose: TCustomPascalTypePanoseTable;
 begin
  // default result
  Result := nil;
@@ -551,7 +551,7 @@ begin
    then Result := FOS2Table.Panose
 end;
 
-function TPascalTypeInterpreter.GetTableByTableType(
+function TPascalTypeStorage.GetTableByTableType(
   ATableType: TTableType): TCustomPascalTypeNamedTable;
 var
   TableIndex : Integer;
@@ -572,12 +572,12 @@ begin
     then Result := TCustomPascalTypeNamedTable(FOptionalTables[TableIndex]);
 end;
 
-function TPascalTypeInterpreter.ContainsTable(TableType: TTableType): Boolean;
+function TPascalTypeStorage.ContainsTable(TableType: TTableType): Boolean;
 begin
  Result := GetTableByTableType(TableType) <> nil;
 end;
 
-function TPascalTypeInterpreter.GetTableByTableClass(
+function TPascalTypeStorage.GetTableByTableClass(
   TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
 var
   TableIndex : Integer;
@@ -599,12 +599,12 @@ begin
     then Result := TCustomPascalTypeNamedTable(FOptionalTables[TableIndex]);
 end;
 
-function TPascalTypeInterpreter.GetTableCount: Integer;
+function TPascalTypeStorage.GetTableCount: Integer;
 begin
  Result := 7 + FOptionalTables.Count;
 end;
 
-procedure TPascalTypeInterpreter.LoadTableFromStream(Stream: TStream;
+procedure TPascalTypeStorage.LoadTableFromStream(Stream: TStream;
   TableEntry: TPascalTypeDirectoryTableEntry);
 var
   MemoryStream   : TMemoryStream;
@@ -693,7 +693,7 @@ begin
   end;
 end;
 
-procedure TPascalTypeInterpreter.SaveToStream(Stream: TStream);
+procedure TPascalTypeStorage.SaveToStream(Stream: TStream);
 var
   DirectoryTable : TPascalTypeDirectoryTable;
   TableIndex     : Integer;

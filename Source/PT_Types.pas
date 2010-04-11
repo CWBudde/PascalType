@@ -50,13 +50,29 @@ type
   EPascalTypeChecksumError = class(EPascalTypeError);
   {$ENDIF}
 
-
   TTableType = array [0..3] of AnsiChar;
 
   TFixedPoint = packed record
     Fract: Word;
     Value: SmallInt;
   end;
+
+  TF26Dot6 = type Integer;
+  TF2Dot14 = type SmallInt;
+
+  {$IFDEF UseFloatingPoint}
+  TScaleType = type Double;
+  {$ELSE}
+  TScaleType = type TF26Dot6;
+  {$ENDIF}
+
+  {$IFDEF UseFloatingPoint}
+  TSmallScaleType = type Single;
+  {$ELSE}
+  TSmallScaleType = type TF2Dot14;
+  {$ENDIF}
+
+  TSmallScaleMatrix = array [0..1, 0..1] of TSmallScaleType;
 
   TShortFrac = type SmallInt;
 
@@ -505,7 +521,6 @@ type
     vfFontRepackagers,
     vcVendorsOfUniqueTypefaces);
 
-function FloorLog2(Value: Cardinal): Cardinal;
 function VersionToString(Value: TFixedPoint): string;
 function FontHeaderTableFlagsToWord(Value: TFontHeaderTableFlags): Word;
 function WordToFontHeaderTableFlags(Value: Word): TFontHeaderTableFlags;
@@ -532,39 +547,6 @@ function FixedPointToNonAlphabeticCode(Value: TFixedPoint): TNonAlphabeticCode;
 function NonAlphabeticCodeToFixedPoint(Value: TNonAlphabeticCode): TFixedPoint;
 
 implementation
-
-function FloorLog2(Value: Cardinal): Cardinal;
-begin
- // check if Value is zero as log2(0) is undefined
- if (Value = 0)
-  then raise EPascalTypeError.Create('FloorLog2 Error');
-
- // set basic value
- Result := 0;
-
- if (Value >= 1 shl 16) then
-  begin
-   Value := Value shr 16;
-   Result := Result + 16;
-  end;
- if (Value >= 1 shl  8) then
-  begin
-   Value := Value shr  8;
-   Result := Result +  8;
-  end;
- if (Value >= 1 shl  4) then
-  begin
-   Value := Value shr  4;
-   Result := Result +  4;
-  end;
- if (Value >= 1 shl  2) then
-  begin
-   Value := Value shr  2;
-   Result := Result +  2;
-  end;
- if (Value >= 1 shl  1)
-  then Result := Result + 1;
-end;
 
 
 function VersionToString(Value: TFixedPoint): string;

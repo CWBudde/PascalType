@@ -15,8 +15,8 @@ uses
   {$IFDEF ShowOpenType}
   PT_TablesOpenType,
   {$ENDIF}
-  PT_TablesFontForge, PT_Interpreter, PT_ByteCodeInterpreter, PT_UnicodeNames,
-  PT_Rasterizer, PT_PanoseClassifications, PT_Windows, FE_FontHeader;
+  PT_TablesFontForge, PT_Storage, PT_ByteCodeInterpreter, PT_UnicodeNames,
+  PT_FontEngine, PT_PanoseClassifications, PT_Windows, FE_FontHeader;
 
 type
   TFmTTF = class(TForm)
@@ -116,7 +116,7 @@ type
     procedure TreeViewChange(Sender: TObject; Node: TTreeNode);
     procedure TreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
   private
-    FRasterizer   : TPascalTypeRasterizer;
+    FFontEngine   : TPascalTypeFontEngine;
     FCurrentGlyph : TBitmap;
     FFontSize     : Integer;
     Fppem         : Integer;
@@ -220,7 +220,7 @@ begin
  GetWindowsDirectory(PWindowsDir, MAX_PATH);
  AcFileOpen.Dialog.InitialDir := GetFontDirectory;
 
- FRasterizer := TPascalTypeRasterizer.Create;
+ FFontEngine := TPascalTypeFontEngine.Create;
 
  FCurrentGlyph := TBitmap.Create;
  FCurrentGlyph.PixelFormat := pf8bit;
@@ -230,8 +230,8 @@ end;
 
 procedure TFmTTF.FormDestroy(Sender: TObject);
 begin
- // free pascal type interpreter
- FreeAndNil(FRasterizer);
+ // free pascal type Storage
+ FreeAndNil(FFontEngine);
 
  // free current glyph display bitmap
  FreeAndNil(FCurrentGlyph);
@@ -247,7 +247,7 @@ end;
 procedure TFmTTF.FontSizeChanged;
 begin
  Fppem := FFontSize * PixelsPerInch div 72;
- FScaler := Fppem / FRasterizer.Interpreter.HeaderTable.UnitsPerEm;
+ FScaler := Fppem / FFontEngine.Storage.HeaderTable.UnitsPerEm;
 end;
 
 procedure TFmTTF.InitializeDefaultListView;
@@ -2741,7 +2741,7 @@ begin
    LineTo(FCurrentGlyph.Width, Center.Y);
 
    if GlyphIndex >= 0 then
-    with FRasterizer.Interpreter.HorizontalMetrics do
+    with FFontEngine.Storage.HorizontalMetrics do
      begin
       // use dotted style
       Pen.Style := psDot;
@@ -2868,7 +2868,7 @@ begin
     with TPascalTypeCompositeGlyph(Glyph[CompositeIndex]) do
      begin
       TextOut(Center.X, Center.Y + 8 * CompositeIndex, IntToStr(GlyphIndex));
-      //FRasterizer.Interpreter.
+      //FFontEngine.Storage.
      end;
 
    PaintBox.Invalidate;
@@ -3094,7 +3094,7 @@ begin
   begin
    SetCurrentDir(GetFontDirectory);
 
-   with TPascalTypeScanner.Create do
+   with TPascalTypeStorageScan.Create do
    try
     // scan installed fonts
     if FindFirst('*.ttf', faAnyFile, SR) = 0 then
@@ -3419,7 +3419,7 @@ begin
     QueryPerformanceCounter(Start);
 
     // load font file
-    FRasterizer.Interpreter.LoadFromStream(MemoryFileStream);
+    FFontEngine.Storage.LoadFromStream(MemoryFileStream);
 
     // query stop
     QueryPerformanceCounter(Stop);
@@ -3469,7 +3469,7 @@ begin
  QueryPerformanceCounter(Start);
 
  // load font file
- FRasterizer.Interpreter.LoadFromStream(Stream);
+ FFontEngine.Storage.LoadFromStream(Stream);
 
  // query stop
  QueryPerformanceCounter(Stop);
@@ -3515,7 +3515,7 @@ var
   Node, SubNode     : TTreeNode;
   SubSubNode        : TTreeNode;
 begin
- with FRasterizer.Interpreter, TreeView do
+ with FFontEngine.Storage, TreeView do
   begin
    // set width and height of current glyph bitmap
    FScaler := Fppem / HeaderTable.UnitsPerEm;

@@ -42,12 +42,12 @@ object FmRenderDemo: TFmRenderDemo
     Height = 13
     Caption = 'Size:'
   end
-  object LbRasterizer: TLabel
+  object LbFontEngine: TLabel
     Left = 8
     Top = 159
-    Width = 53
+    Width = 62
     Height = 13
-    Caption = 'Rasterizer:'
+    Caption = 'Font-Engine:'
   end
   object EdText: TEdit
     Left = 40
@@ -127,7 +127,7 @@ object FmRenderDemo: TFmRenderDemo
     end
   end
   object RbWindows: TRadioButton
-    Left = 67
+    Left = 76
     Top = 158
     Width = 62
     Height = 17
@@ -138,7 +138,7 @@ object FmRenderDemo: TFmRenderDemo
     OnClick = RbWindowsClick
   end
   object RbPascalType: TRadioButton
-    Left = 135
+    Left = 144
     Top = 158
     Width = 74
     Height = 17

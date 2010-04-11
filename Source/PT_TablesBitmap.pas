@@ -64,7 +64,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -85,7 +85,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -147,7 +147,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Interpreter: IPascalTypeInterpreter); override;
+    constructor Create(Storage: IPascalTypeStorage); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -229,7 +229,7 @@ end;
 { TPascalTypeEmbeddedBitmapDataTable }
 
 constructor TPascalTypeEmbeddedBitmapDataTable.Create(
-  Interpreter: IPascalTypeInterpreter);
+  Storage: IPascalTypeStorage);
 begin
   inherited;
 
@@ -276,7 +276,7 @@ end;
 { TPascalTypeEmbeddedBitmapLocationTable }
 
 constructor TPascalTypeEmbeddedBitmapLocationTable.Create(
-  Interpreter: IPascalTypeInterpreter);
+  Storage: IPascalTypeStorage);
 begin
  FBitmapSizeList := TObjectList.Create;
  inherited;
@@ -532,7 +532,7 @@ end;
 { TPascalTypeEmbeddedBitmapScalingTable }
 
 constructor TPascalTypeEmbeddedBitmapScalingTable.Create(
-  Interpreter: IPascalTypeInterpreter);
+  Storage: IPascalTypeStorage);
 begin
  FBitmapScaleList := TObjectList.Create;
  inherited;
