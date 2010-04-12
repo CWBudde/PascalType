@@ -35,7 +35,7 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Classes, Contnrs, SysUtils, PT_Types, PT_Tables;
+  Classes, Contnrs, SysUtils, PT_Types, PT_Classes, PT_Tables;
 
 type
   TPascalTypeFormat0CharacterMap = class(TCustomPascalTypeCharacterMap)

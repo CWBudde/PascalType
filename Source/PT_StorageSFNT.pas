@@ -1,4 +1,4 @@
-unit PT_Storage;
+unit PT_StorageSFNT;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -35,10 +35,11 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Classes, SysUtils, Types, Contnrs, PT_Types, PT_TableDirectory, PT_Tables;
+  Classes, SysUtils, Types, Contnrs, PT_Types, PT_Classes, PT_Tables,
+  PT_TableDirectory;
 
 type
-  TCustomPascalTypeStorage = class(TInterfacedPersistent, IStreamPersist,
+  TCustomPascalTypeStorageSFNT = class(TCustomPascalTypeStorage,
     IPascalTypeStorage)
   private
     // required tables
@@ -80,7 +81,7 @@ type
     property FontStyle: TFontStyles read GetFontStyle;
   end;
 
-  TPascalTypeStorageScan = class(TCustomPascalTypeStorage)
+  TPascalTypeStorageScan = class(TCustomPascalTypeStorageSFNT)
   protected
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; override;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
@@ -96,7 +97,7 @@ type
     property PostScriptTable;
   end;
 
-  TPascalTypeStorage = class(TCustomPascalTypeStorage)
+  TPascalTypeStorage = class(TCustomPascalTypeStorageSFNT)
   private
     // required tables
     FHorizontalMetrics : TPascalTypeHorizontalMetricsTable;
@@ -152,7 +153,7 @@ type
 implementation
 
 uses
-  PT_TablesTrueType, PT_ResourceStrings;
+  PT_Math, PT_TablesTrueType, PT_ResourceStrings;
 
 
 function CalculateCheckSum(Stream: TStream): Cardinal;
@@ -212,9 +213,9 @@ begin
 end;
 
 
-{ TCustomPascalTypeStorage }
+{ TCustomPascalTypeStorageSFNT }
 
-constructor TCustomPascalTypeStorage.Create;
+constructor TCustomPascalTypeStorageSFNT.Create;
 begin
  inherited;
  
@@ -226,7 +227,7 @@ begin
  FPostScriptTable    := TPascalTypePostscriptTable.Create(Self);
 end;
 
-destructor TCustomPascalTypeStorage.Destroy;
+destructor TCustomPascalTypeStorageSFNT.Destroy;
 begin
  FreeAndNil(FHeaderTable);
  FreeAndNil(FHorizontalHeader);
@@ -236,13 +237,13 @@ begin
  inherited;
 end;
 
-procedure TCustomPascalTypeStorage.DirectoryTableReaded(DirectoryTable: TPascalTypeDirectoryTable);
+procedure TCustomPascalTypeStorageSFNT.DirectoryTableReaded(DirectoryTable: TPascalTypeDirectoryTable);
 begin
  // optimize table read order
  DirectoryTable.TableList.SortByOffset;
 end;
 
-function TCustomPascalTypeStorage.GetFontName: string;
+function TCustomPascalTypeStorageSFNT.GetFontName: string;
 var
   NameSubTableIndex : Integer;
 begin
@@ -259,14 +260,14 @@ begin
        end;
 end;
 
-function TCustomPascalTypeStorage.GetFontStyle: TFontStyles;
+function TCustomPascalTypeStorageSFNT.GetFontStyle: TFontStyles;
 begin
  if msItalic in FHeaderTable.MacStyle then Result := [fsItalic] else Result := [];
  if msBold in FHeaderTable.MacStyle then Result := Result + [fsBold];
  if msUnderline in FHeaderTable.MacStyle then Result := Result + [fsUnderline];
 end;
 
-procedure TCustomPascalTypeStorage.LoadFromFile(FileName: TFileName);
+procedure TCustomPascalTypeStorageSFNT.LoadFromFile(FileName: TFileName);
 var
   FileStream : TFileStream;
 begin
@@ -278,7 +279,7 @@ begin
  end;
 end;
 
-procedure TCustomPascalTypeStorage.LoadFromStream(Stream: TStream);
+procedure TCustomPascalTypeStorageSFNT.LoadFromStream(Stream: TStream);
 var
   DirectoryTable   : TPascalTypeDirectoryTable;
   TableIndex       : Integer;
@@ -353,7 +354,7 @@ begin
   end;
 end;
 
-procedure TCustomPascalTypeStorage.SaveToFile(FileName: TFileName);
+procedure TCustomPascalTypeStorageSFNT.SaveToFile(FileName: TFileName);
 var
   FileStream : TFileStream;
 begin
@@ -368,7 +369,7 @@ begin
 end;
 
 {$IFDEF ChecksumTest}
-procedure TCustomPascalTypeStorage.ValidateChecksum(Stream: TStream;
+procedure TCustomPascalTypeStorageSFNT.ValidateChecksum(Stream: TStream;
   TableEntry: TPascalTypeDirectoryTableEntry);
 var
   Checksum : Cardinal;

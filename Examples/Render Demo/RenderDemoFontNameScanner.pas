@@ -3,7 +3,8 @@ unit RenderDemoFontNameScanner;
 interface
 
 uses
-  Windows, Classes, SysUtils, PT_Types, PT_Storage, PT_Tables;
+  Windows, Classes, SysUtils, PT_Types, PT_Classes, PT_Tables,
+  PT_Storage, PT_StorageSFNT;
 
 type
   TFontScannedEvent = procedure(Sender: TObject; FileName: TFilename;

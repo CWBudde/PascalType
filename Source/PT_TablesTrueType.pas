@@ -35,7 +35,7 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Classes, Contnrs, SysUtils, PT_Types, PT_Tables;
+  Classes, Contnrs, SysUtils, PT_Types, PT_Classes, PT_Tables;
 
 type
   // table 'cvt '
@@ -307,7 +307,7 @@ type
 implementation
 
 uses
-  PT_ResourceStrings;
+  PT_Math, PT_ResourceStrings;
 
 
 { TTrueTypeFontControlValueTable }

@@ -1,4 +1,4 @@
-unit PT_Math;
+unit PT_StorageEOT;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -35,102 +35,28 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  PT_Types;
+  Classes, SysUtils, Types, Contnrs, PT_Types, PT_TableDirectory, PT_Tables;
 
-// various swap functions for converting big-endian data  
-function Swap16(Value: Word): Word;
-function Swap32(Value: Cardinal): Cardinal;
-function Swap64(Value: Int64): Int64;
-
-// integer math
-function FloorLog2(Value: Cardinal): Cardinal;
-function Mul32To64(Value, Scale: Integer): Int64;
-function MulDiv(Value, Scale, Divisor: Integer): Integer;
+type
+  TEOTHeader = packed record
+    EotSize            : Cardinal;
+    FontDataSize       : Cardinal;
+    Version            : Cardinal;
+    Flags              : Cardinal;
+    FontPANOSE         : array [0..9] of Byte;
+    Charset            : Byte;
+    Italic             : Byte;
+    Weight             : Cardinal;
+    fsType             : Word;
+    MagicNumber        : Word;
+    UnicodeRange       : array [0..3] of Cardinal;
+    CodePageRange      : array [0..1] of Cardinal;
+    CheckSumAdjustment : Cardinal;
+    Reserved           : array [0..3] of Cardinal;
+    Padding1           : Word;
+  end;
 
 
 implementation
-
-function Swap16(Value: Word): Word;
-begin
- Result := Swap(Value);
-end;
-
-function Swap32(Value: Cardinal): Cardinal;
-type
-  TTwoWords = array [0..1] of Word;
-begin
- TTwoWords(Result)[1] := Swap(TTwoWords(Value)[0]);
- TTwoWords(Result)[0] := Swap(TTwoWords(Value)[1]);
-end;
-
-function Swap64(Value: Int64): Int64;
-type
-  TFourWords = array [0..3] of Word;
-begin
- TFourWords(Result)[3] := Swap(TFourWords(Value)[0]);
- TFourWords(Result)[2] := Swap(TFourWords(Value)[1]);
- TFourWords(Result)[1] := Swap(TFourWords(Value)[2]);
- TFourWords(Result)[0] := Swap(TFourWords(Value)[3]);
-end;
-
-function FloorLog2(Value: Cardinal): Cardinal;
-begin
- // check if Value is zero as log2(0) is undefined
- if (Value = 0)
-  then raise EPascalTypeError.Create('FloorLog2 Error');
-
- // set basic value
- Result := 0;
-
- if (Value >= 1 shl 16) then
-  begin
-   Value := Value shr 16;
-   Result := Result + 16;
-  end;
- if (Value >= 1 shl  8) then
-  begin
-   Value := Value shr  8;
-   Result := Result +  8;
-  end;
- if (Value >= 1 shl  4) then
-  begin
-   Value := Value shr  4;
-   Result := Result +  4;
-  end;
- if (Value >= 1 shl  2) then
-  begin
-   Value := Value shr  2;
-   Result := Result +  2;
-  end;
- if (Value >= 1 shl  1)
-  then Result := Result + 1;
-end;
-
-function Mul32To64(Value, Scale: Integer): Int64;
-begin
- Result := Value * Scale;
-end;
-
-function MulDiv(Value, Scale, Divisor: Integer): Integer;
-var
-  Sign : Integer;
-  Temp : Int64;
-begin
- Sign := Value;
- Value := Abs(Value);
-
- Sign := Sign xor Scale;
- Scale := Abs(Scale);
-
- Sign := Sign xor Divisor;
- Divisor := Abs(Divisor);
-
- Temp := Value * Scale;
- Divisor := Temp div Divisor;
-
- if Sign < 0
-  then Result := -Divisor
-  else Result := Divisor;
-end;
 
 end.

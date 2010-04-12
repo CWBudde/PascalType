@@ -35,7 +35,7 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Classes, Contnrs, PT_Types, PT_Tables;
+  Classes, Contnrs, PT_Types, PT_Classes, PT_Tables;
 
 type
   TCustomOpenTypeNamedTable = class(TCustomPascalTypeNamedTable)
@@ -645,7 +645,7 @@ var
 implementation
 
 uses
-  Math, SysUtils, PT_ResourceStrings, PT_TablesOpenTypeFeatures;
+  Math, SysUtils, PT_Math, PT_ResourceStrings, PT_TablesOpenTypeFeatures;
 
 
 { TCustomOpenTypeVersionedNamedTable }

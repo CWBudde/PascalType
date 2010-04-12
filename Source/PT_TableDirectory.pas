@@ -34,7 +34,7 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Classes, Contnrs, SysUtils, PT_Types, PT_Tables;
+  Classes, Contnrs, SysUtils, PT_Types, PT_Classes;
 
 type
   // TrueType Table Directory Entry type

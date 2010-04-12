@@ -35,47 +35,10 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Classes, Contnrs, SysUtils, PT_Types;
+  Classes, Contnrs, SysUtils, PT_Types, PT_Classes;
 
 type
-  TCustomPascalTypeNamedTable = class;
-  TCustomPascalTypeNamedTableClass = class of TCustomPascalTypeNamedTable;
-
-  IPascalTypeStorage = interface(IUnknown)
-  ['{A990D67B-BC60-4DA4-9D90-3C1D30AEC003}']
-    function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable;
-    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
-  end;
-
-  TCustomPascalTypeTable = class(TInterfacedPersistent, IStreamPersist)
-  protected
-    procedure Changed; virtual;
-
-    procedure ResetToDefaults; virtual; abstract;
-  public
-    constructor Create; virtual;
-
-    procedure LoadFromStream(Stream: TStream); virtual; abstract;
-    procedure SaveToStream(Stream: TStream); virtual; abstract;
-  end;
-
-  TCustomPascalTypeInterfaceTable = class(TCustomPascalTypeTable)
-  protected
-    FStorage : IPascalTypeStorage;
-  public
-    constructor Create(Storage: IPascalTypeStorage); reintroduce; virtual;
-  end;
-
   TCustomPascalTypeGlyphDataTable = class(TCustomPascalTypeInterfaceTable);
-
-  TCustomPascalTypeNamedTable = class(TCustomPascalTypeInterfaceTable)
-  protected
-    function GetInternalTableType: TTableType; virtual;
-    class function GetTableType: TTableType; virtual; abstract;
-  public
-    property TableType: TTableType read GetInternalTableType;
-  end;
-
 
   // Unknown Table
 
@@ -1298,21 +1261,6 @@ type
   end;
 
 
-// various swap functions for converting big-endian data  
-function Swap16(Value: Word): Word;
-function Swap32(Value: Cardinal): Cardinal;
-function Swap64(Value: Int64): Int64;
-
-// big-endian stream I/O
-function ReadSwappedWord(Stream: TStream): Word; {$IFDEF UseInline} inline; {$ENDIF}
-function ReadSwappedSmallInt(Stream: TStream): SmallInt; {$IFDEF UseInline} inline; {$ENDIF}
-function ReadSwappedCardinal(Stream: TStream): Cardinal; {$IFDEF UseInline} inline; {$ENDIF}
-function ReadSwappedInt64(Stream: TStream): Int64; {$IFDEF UseInline} inline; {$ENDIF}
-procedure WriteSwappedWord(Stream: TStream; Value : Word); {$IFDEF UseInline} inline; {$ENDIF}
-procedure WriteSwappedSmallInt(Stream: TStream; Value : SmallInt); {$IFDEF UseInline} inline; {$ENDIF}
-procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal); {$IFDEF UseInline} inline; {$ENDIF}
-procedure WriteSwappedInt64(Stream: TStream; Value: Int64); {$IFDEF UseInline} inline; {$ENDIF}
-
 procedure RegisterPascalTypeCharacterMap(CharacterMapClass: TCustomPascalTypeCharacterMapClass);
 procedure RegisterPascalTypeCharacterMaps(CharacterMapClasses: array of TCustomPascalTypeCharacterMapClass);
 function FindPascalTypeCharacterMapByFormat(Format: Word): TCustomPascalTypeCharacterMapClass;
@@ -1328,7 +1276,7 @@ function FindPascalTypeTableByType(TableType: TTableType): TCustomPascalTypeName
 implementation
 
 uses
-  Math, PT_ResourceStrings;
+  Math, PT_Math, PT_ResourceStrings;
 
 resourcestring
   RCStrUnknownCharacterMap = 'Unknown character map (%d)';
@@ -1337,129 +1285,6 @@ var
   GCharacterMapClasses : array of TCustomPascalTypeCharacterMapClass;
   GPanoseClasses : array of TCustomPascalTypePanoseClass;
   GTableClasses : array of TCustomPascalTypeNamedTableClass;
-
-function Swap16(Value: Word): Word;
-begin
- Result := Swap(Value);
-end;
-
-function Swap32(Value: Cardinal): Cardinal;
-type
-  TTwoWords = array [0..1] of Word;
-begin
- TTwoWords(Result)[1] := Swap(TTwoWords(Value)[0]);
- TTwoWords(Result)[0] := Swap(TTwoWords(Value)[1]);
-end;
-
-function Swap64(Value: Int64): Int64;
-type
-  TFourWords = array [0..3] of Word;
-begin
- TFourWords(Result)[3] := Swap(TFourWords(Value)[0]);
- TFourWords(Result)[2] := Swap(TFourWords(Value)[1]);
- TFourWords(Result)[1] := Swap(TFourWords(Value)[2]);
- TFourWords(Result)[0] := Swap(TFourWords(Value)[3]);
-end;
-
-function ReadSwappedWord(Stream: TStream): Word;
-begin
- {$IFDEF ValidateEveryReadOperation}
- if Stream.Read(Result, SizeOf(Word)) <> SizeOf(Word)
-  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
- {$ELSE}
- Stream.Read(Result, SizeOf(Word));
- {$ENDIF}
- Result := Swap16(Result);
-end;
-
-function ReadSwappedSmallInt(Stream: TStream): SmallInt;
-begin
- {$IFDEF ValidateEveryReadOperation}
- if Stream.Read(Result, SizeOf(SmallInt)) <> SizeOf(SmallInt)
-  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
- {$ELSE}
- Stream.Read(Result, SizeOf(SmallInt));
- {$ENDIF}
- Result := Swap16(Result);
-end;
-
-function ReadSwappedCardinal(Stream: TStream): Cardinal;
-begin
- {$IFDEF ValidateEveryReadOperation}
- if Stream.Read(Result, SizeOf(Cardinal)) <> SizeOf(Cardinal)
-  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
- {$ELSE}
- Stream.Read(Result, SizeOf(Cardinal));
- {$ENDIF}
- Result := Swap32(Result);
-end;
-
-function ReadSwappedInt64(Stream: TStream): Int64;
-begin
- {$IFDEF ValidateEveryReadOperation}
- if Stream.Read(Result, SizeOf(Int64)) <> SizeOf(Int64)
-  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
- {$ELSE}
- Stream.Read(Result, SizeOf(Int64));
- {$ENDIF}
- Result := Swap64(Result);
-end;
-
-procedure WriteSwappedWord(Stream: TStream; Value: Word);
-begin
- Value := Swap16(Value);
- Stream.Write(Value, SizeOf(Word));
-end;
-
-procedure WriteSwappedSmallInt(Stream: TStream; Value: SmallInt);
-begin
- Value := Swap16(Value);
- Stream.Write(Value, SizeOf(SmallInt));
-end;
-
-procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal);
-begin
- Value := Swap32(Value);
- Stream.Write(Value, SizeOf(Cardinal));
-end;
-
-procedure WriteSwappedInt64(Stream: TStream; Value: Int64);
-begin
- Value := Swap64(Value);
- Stream.Write(Value, SizeOf(Int64));
-end;
-
-
-{ TCustomPascalTypeTable }
-
-constructor TCustomPascalTypeTable.Create;
-begin
- ResetToDefaults;
- inherited Create;
-end;
-
-procedure TCustomPascalTypeTable.Changed;
-begin
- // nothing in here yet!
-end;
-
-
-{ TCustomPascalTypeInterfaceTable }
-
-constructor TCustomPascalTypeInterfaceTable.Create(
-  Storage: IPascalTypeStorage);
-begin
- FStorage := Storage;
- inherited Create;
-end;
-
-
-{ TCustomPascalTypeNamedTable }
-
-function TCustomPascalTypeNamedTable.GetInternalTableType: TTableType;
-begin
- Result := GetTableType;
-end;
 
 
 { TPascalTypeUnknownTable }

@@ -34,8 +34,8 @@ interface
 
 uses
   Windows, TestFramework, Classes, Contnrs, SysUtils, PT_Types, PT_Tables,
-  PT_TablesOptional, PT_TablesOpenType, PT_TablesApple, PT_Storage,
-  PT_CharacterMap, PT_Windows;
+  PT_CharacterMap, PT_TablesOptional, PT_TablesOpenType, PT_TablesApple,
+  PT_Storage, PT_StorageSFNT, PT_Windows;
 
 type
   // Test methods for class TTrueTypeFontStorage

@@ -35,7 +35,7 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Classes, Contnrs, PT_Types, PT_Tables, PT_TablesShared;
+  Classes, Contnrs, PT_Types, PT_Classes, PT_Tables, PT_TablesShared;
 
 type
   TCustomPascalTypeNamedVersionTable = class(TCustomPascalTypeNamedTable)
@@ -715,7 +715,7 @@ function FindDescriptionTagByType(TableType: TTableType): TPascalTypeTaggedValue
 implementation
 
 uses
-  SysUtils, PT_ResourceStrings;
+  SysUtils, PT_Math, PT_ResourceStrings;
 
 resourcestring
   RCStrGlyphIndexOrderError = 'Last glyph index is smaller than first!';

@@ -4,8 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, PT_Types, PT_FontEngineGDI, PT_Storage, PT_Tables,
-  PT_Windows, RenderDemoFontNameScanner;
+  StdCtrls, ExtCtrls, PT_Types, PT_Classes, PT_Tables, PT_Storage,
+  PT_StorageSFNT, PT_FontEngineGDI, PT_Windows, RenderDemoFontNameScanner;
 
 {$I ..\..\Source\PT_Compiler.inc}  
 
@@ -239,8 +239,8 @@ var
   CurrentFontName : string;
 begin
  // add font name to font combo box
- CurrentFontName := Font.FontName;
- CbFont.Items.Add(CurrentFontName);
+ CurrentFontName := TCustomPascalTypeStorageSFNT(Font).FontName;
+ CbFont.Items.Add(Cu rrentFontName);
 
  SetLength(FFontArray, Length(FFontArray) + 1);
  with FFontArray[Length(FFontArray) - 1] do

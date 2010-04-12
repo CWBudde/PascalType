@@ -35,7 +35,7 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Classes, Contnrs, Sysutils, PT_Types, PT_Storage, PT_Tables,
+  Classes, Contnrs, Sysutils, PT_Types, PT_Storage, PT_StorageSFNT, PT_Tables,
   PT_CharacterMap, PT_TablesOptional;
 
 type
@@ -265,6 +265,7 @@ end;
 procedure TCustomPascalTypeFontEngine.PrecalculateScaledGlyphs;
 var
   GlyphIndex : Integer;
+//  HDMXTable  : TPascalTypeHorizontalDeviceMetricsSubTable;
 begin
  ClearScaledGlyphs;
  with Storage do
@@ -281,8 +282,11 @@ begin
 
     if not (htfIntegerScaling in HeaderTable.Flags) then
      begin
-
+      // get scaling from 'hdmx' table here
      end;
+
+    // get glyph data
+    // GlyphData[GlyphIndex]
    end;
 end;
 

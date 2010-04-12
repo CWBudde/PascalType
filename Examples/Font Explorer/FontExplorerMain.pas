@@ -10,13 +10,14 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ComCtrls, StdCtrls, ExtCtrls, ToolWin, ActnList, StdActns, AppEvnts,
-  ImgList, PT_Types, PT_Tables, PT_TablesTrueType, PT_TablesOptional,
-  PT_TablesBitmap, PT_TablesApple, PT_TablesShared, PT_CharacterMap,
+  ImgList, PT_Types, PT_Classes, PT_Tables, PT_CharacterMap, PT_TablesTrueType,
+  PT_TablesOptional, PT_TablesBitmap, PT_TablesApple, PT_TablesShared,
   {$IFDEF ShowOpenType}
   PT_TablesOpenType,
   {$ENDIF}
-  PT_TablesFontForge, PT_Storage, PT_ByteCodeInterpreter, PT_UnicodeNames,
-  PT_FontEngine, PT_PanoseClassifications, PT_Windows, FE_FontHeader;
+  PT_TablesFontForge, PT_Storage, PT_StorageSFNT, PT_ByteCodeInterpreter,
+  PT_UnicodeNames, PT_FontEngine, PT_PanoseClassifications, PT_Windows, 
+  FE_FontHeader;
 
 type
   TFmTTF = class(TForm)
