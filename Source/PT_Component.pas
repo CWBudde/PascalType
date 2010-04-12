@@ -43,7 +43,7 @@ uses
 {$ELSE}
   Windows,
 {$ENDIF}
-  Classes, SysUtils, Graphics, PT_Types, PT_Interpreter;
+  Classes, SysUtils, Graphics, PT_Types, PT_Storage;
 
 type
   TFontStyle = (ptBold, ptItalic);
@@ -51,7 +51,7 @@ type
 
   TCustomPascalType = class(TComponent)
   private
-    FInterpreter   : TPascalTypeInterpreter;
+    FStorage       : TPascalTypeStorage;
     FUseKerning    : Boolean;
 
     FHeight        : Integer;
@@ -113,7 +113,7 @@ var
 constructor TCustomPascalType.Create(AOwner : TComponent);
 begin
  inherited;
- FInterpreter := TPascalTypeInterpreter.Create;
+ FStorage := TPascalTypeStorage.Create;
 
  // load default font
  LoadDefaultFont;
@@ -126,7 +126,7 @@ end;
 
 destructor TCustomPascalType.Destroy;
 begin
- FreeAndNil(FInterpreter);
+ FreeAndNil(FStorage);
  inherited;
 end;
 
@@ -136,7 +136,7 @@ var
 begin
  ResourceStream := TResourceStream.Create(HInstance, 'Default', 'TTFFONT');
  try
-  FInterpreter.LoadFromStream(ResourceStream);
+  FStorage.LoadFromStream(ResourceStream);
  finally
   FreeAndNil(ResourceStream);
  end;
@@ -149,7 +149,7 @@ var
 begin
  Result := '';
 
- with FInterpreter.NameTable do
+ with FStorage.NameTable do
   begin
    for NameSubtableIndex := 0 to NameSubtableCount - 1 do
     if NameSubtable[NameSubtableIndex].NameID = niFullName then
@@ -247,7 +247,7 @@ end;
 function TCustomPascalType.GetTextMetrics(var ATextMetrics: TTextMetric): Boolean;
 begin
  Result := False;
- if Assigned(FInterpreter) then
+ if Assigned(FStorage) then
   begin
 (*
    with ATextMetrics, FCheckFace^ do
@@ -269,7 +269,7 @@ var
 begin
  ResourceStream := TResourceStream.CreateFromID(hInstance, ID, PChar(ResType));
  try
-  FInterpreter.LoadFromStream(ResourceStream);
+  FStorage.LoadFromStream(ResourceStream);
  finally
   FreeAndNil(ResourceStream);
  end;
@@ -282,7 +282,7 @@ end;
 
 procedure TCustomPascalType.LoadFromStream(Stream: TStream);
 begin
- FInterpreter.LoadFromStream(Stream);
+ FStorage.LoadFromStream(Stream);
  UpdateFace;
 end;
 
