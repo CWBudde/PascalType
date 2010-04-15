@@ -43,7 +43,8 @@ uses
 {$ELSE}
   Windows,
 {$ENDIF}
-  Classes, SysUtils, Graphics, PT_Types, PT_Storage;
+  Classes, SysUtils, Graphics, PT_Types, PT_Storage, PT_StorageSFNT,
+  PT_FontEngine, PT_FontEngineGDI;
 
 type
   TFontStyle = (ptBold, ptItalic);
@@ -51,9 +52,8 @@ type
 
   TCustomPascalType = class(TComponent)
   private
-    FStorage       : TPascalTypeStorage;
+    FFontEngine    : TPascalTypeFontEngineGDI;
     FUseKerning    : Boolean;
-
     FHeight        : Integer;
     FPixelsPerInch : Integer;
     FOnFontChanged : TNotifyEvent;
@@ -113,7 +113,7 @@ var
 constructor TCustomPascalType.Create(AOwner : TComponent);
 begin
  inherited;
- FStorage := TPascalTypeStorage.Create;
+ FFontEngine := TPascalTypeFontEngineGDI.Create;
 
  // load default font
  LoadDefaultFont;
@@ -126,7 +126,7 @@ end;
 
 destructor TCustomPascalType.Destroy;
 begin
- FreeAndNil(FStorage);
+ FreeAndNil(FFontEngine);
  inherited;
 end;
 
@@ -136,7 +136,7 @@ var
 begin
  ResourceStream := TResourceStream.Create(HInstance, 'Default', 'TTFFONT');
  try
-  FStorage.LoadFromStream(ResourceStream);
+  FFontEngine.LoadFromStream(ResourceStream);
  finally
   FreeAndNil(ResourceStream);
  end;
@@ -144,22 +144,8 @@ end;
 
 
 function TCustomPascalType.GetName: WideString;
-var
-  NameSubtableIndex : Integer;
 begin
- Result := '';
-
- with FStorage.NameTable do
-  begin
-   for NameSubtableIndex := 0 to NameSubtableCount - 1 do
-    if NameSubtable[NameSubtableIndex].NameID = niFullName then
-     begin
-      Result := NameSubtable[NameSubtableIndex].Name;
-      Exit;
-     end else
-    if NameSubtable[NameSubtableIndex].NameID = niFamily
-     then Result := NameSubtable[NameSubtableIndex].Name;
-  end;
+ Result := FFontEngine.FontName;
 end;
 
 {
@@ -247,7 +233,7 @@ end;
 function TCustomPascalType.GetTextMetrics(var ATextMetrics: TTextMetric): Boolean;
 begin
  Result := False;
- if Assigned(FStorage) then
+ if Assigned(FFontEngine) then
   begin
 (*
    with ATextMetrics, FCheckFace^ do
@@ -269,7 +255,7 @@ var
 begin
  ResourceStream := TResourceStream.CreateFromID(hInstance, ID, PChar(ResType));
  try
-  FStorage.LoadFromStream(ResourceStream);
+  FFontEngine.LoadFromStream(ResourceStream);
  finally
   FreeAndNil(ResourceStream);
  end;
@@ -282,7 +268,7 @@ end;
 
 procedure TCustomPascalType.LoadFromStream(Stream: TStream);
 begin
- FStorage.LoadFromStream(Stream);
+ FFontEngine.LoadFromStream(Stream);
  UpdateFace;
 end;
 

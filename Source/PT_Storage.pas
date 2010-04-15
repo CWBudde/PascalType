@@ -37,6 +37,43 @@ interface
 uses
   Classes, SysUtils, Types, Contnrs, PT_Types, PT_TableDirectory, PT_Tables;
 
+type  
+  TCustomPascalTypeStorage = class(TInterfacedPersistent, IStreamPersist)
+  public
+    procedure LoadFromStream(Stream: TStream); virtual; abstract;
+    procedure SaveToStream(Stream: TStream); virtual; abstract;
+    procedure LoadFromFile(FileName: TFileName);
+    procedure SaveToFile(FileName: TFileName);
+  end;
+
 implementation
+
+{ TCustomPascalTypeStorage }
+
+procedure TCustomPascalTypeStorage.LoadFromFile(FileName: TFileName);
+var
+  FileStream : TFileStream;
+begin
+ FileStream := TFileStream.Create(FileName, fmOpenRead);
+ try
+  LoadFromStream(FileStream);
+ finally
+  FreeAndNil(FileStream);
+ end;
+end;
+
+procedure TCustomPascalTypeStorage.SaveToFile(FileName: TFileName);
+var
+  FileStream : TFileStream;
+begin
+ if FileExists(FileName)
+  then FileStream := TFileStream.Create(FileName, fmCreate)
+  else FileStream := TFileStream.Create(FileName, fmOpenWrite);
+ try
+  SaveToStream(FileStream);
+ finally
+  FreeAndNil(FileStream);
+ end;
+end;
 
 end.

@@ -88,6 +88,7 @@ type
     procedure SetPixelPerInchY(const Value: Integer);
     procedure SetFontHeight(const Value: Integer);
     function GetFontSize: Integer;
+    function GetFontName: string;
   protected
     function GetGlyphByCharacter(Character: Word): Integer; overload;
     function GetGlyphByCharacter(Character: WideChar): Integer; overload;
@@ -122,8 +123,9 @@ type
     procedure LoadFromFile(FileName: TFileName);
     procedure SaveToFile(FileName: TFileName);
 
-    property FontSize: Integer read GetFontSize write SetFontSize stored False;
+    property FontName: string read GetFontName;
     property FontHeight: Integer read FFontHeight write SetFontHeight default -11;
+    property FontSize: Integer read GetFontSize write SetFontSize stored False;
     property PixelPerInchX: Integer read FPixelPerInchX write SetPixelPerInchX default 96;
     property PixelPerInchY: Integer read FPixelPerInchY write SetPixelPerInchY default 96;
   end;
@@ -337,6 +339,11 @@ function TCustomPascalTypeFontEngine.GetAdvanceWidth(
   GlyphIndex: Integer): TScaleType;
 begin
  Result := RoundedScaleX(Storage.GetAdvanceWidth(GlyphIndex));
+end;
+
+function TCustomPascalTypeFontEngine.GetFontName: string;
+begin
+ Result := FStorage.FontName;
 end;
 
 function TCustomPascalTypeFontEngine.GetFontSize: Integer;

@@ -24,17 +24,18 @@ package PascalType_BDS2006;
 {$IMAGEBASE $4A0000}
 {$DESCRIPTION 'PascalType Package'}
 {$IMPLICITBUILD ON}
+{%RC '..\Resource\Default.rc'}
 
 requires
   designide,
   vcl,
   rtl;
 
-{%RC '..\Resource\Default.rc'}
-
 contains
   PT_Component in '..\Source\PT_Component.pas',
-  PT_Interpreter in '..\Source\PT_Interpreter.pas',
+  PT_Storage in '..\Source\PT_Storage.pas',
+  PT_StorageSFNT in '..\Source\PT_StorageSFNT.pas',
+  PT_StorageEOT in '..\Source\PT_StorageEOT.pas',
   PT_ResourceStrings in '..\Source\PT_ResourceStrings.pas',
   PT_Tables in '..\Source\PT_Tables.pas',
   PT_TablesOpenType in '..\Source\PT_TablesOpenType.pas',

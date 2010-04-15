@@ -35,8 +35,8 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Classes, SysUtils, Types, Contnrs, PT_Types, PT_Classes, PT_Tables,
-  PT_TableDirectory;
+  Classes, SysUtils, Types, Contnrs, PT_Types, PT_Classes, PT_Storage,
+  PT_Tables, PT_TableDirectory;
 
 type
   TCustomPascalTypeStorageSFNT = class(TCustomPascalTypeStorage,
@@ -64,10 +64,7 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
 
-    procedure LoadFromStream(Stream: TStream); virtual;
-    procedure SaveToStream(Stream: TStream); virtual; abstract;
-    procedure LoadFromFile(FileName: TFileName);
-    procedure SaveToFile(FileName: TFileName);
+    procedure LoadFromStream(Stream: TStream); override;
 
     // required tables
     property HeaderTable: TPascalTypeHeaderTable read FHeaderTable;
@@ -267,18 +264,6 @@ begin
  if msUnderline in FHeaderTable.MacStyle then Result := Result + [fsUnderline];
 end;
 
-procedure TCustomPascalTypeStorageSFNT.LoadFromFile(FileName: TFileName);
-var
-  FileStream : TFileStream;
-begin
- FileStream := TFileStream.Create(FileName, fmOpenRead);
- try
-  LoadFromStream(FileStream);
- finally
-  FreeAndNil(FileStream);
- end;
-end;
-
 procedure TCustomPascalTypeStorageSFNT.LoadFromStream(Stream: TStream);
 var
   DirectoryTable   : TPascalTypeDirectoryTable;
@@ -352,20 +337,6 @@ begin
   finally
    FreeAndNil(DirectoryTable);
   end;
-end;
-
-procedure TCustomPascalTypeStorageSFNT.SaveToFile(FileName: TFileName);
-var
-  FileStream : TFileStream;
-begin
- if FileExists(FileName)
-  then FileStream := TFileStream.Create(FileName, fmCreate)
-  else FileStream := TFileStream.Create(FileName, fmOpenWrite);
- try
-  SaveToStream(FileStream);
- finally
-  FreeAndNil(FileStream);
- end;
 end;
 
 {$IFDEF ChecksumTest}

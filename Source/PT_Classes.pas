@@ -47,12 +47,6 @@ type
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
   end;
 
-  TCustomPascalTypeStorage = class(TInterfacedPersistent, IStreamPersist)
-  public
-    procedure LoadFromStream(Stream: TStream); virtual; abstract;
-    procedure SaveToStream(Stream: TStream); virtual; abstract;
-  end;
-
   TCustomPascalTypeTable = class(TInterfacedPersistent, IStreamPersist)
   protected
     procedure Changed; virtual;

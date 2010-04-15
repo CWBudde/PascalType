@@ -240,7 +240,7 @@ var
 begin
  // add font name to font combo box
  CurrentFontName := TCustomPascalTypeStorageSFNT(Font).FontName;
- CbFont.Items.Add(Cu rrentFontName);
+ CbFont.Items.Add(CurrentFontName);
 
  SetLength(FFontArray, Length(FFontArray) + 1);
  with FFontArray[Length(FFontArray) - 1] do
