@@ -502,8 +502,12 @@ begin
    FVersion := ReadSwappedCardinal(Stream);
 
    // check for known scaler types (OSX and Windows)
-   if not ((Version = $74727565) or (Version = $00010000))
-    then raise EPascalTypeError.Create(RCStrUnknownVersion);
+   case Version of
+    $00010000 :;
+    $4F54544F :;
+    $74727565 :;
+    else raise EPascalTypeError.Create(RCStrUnknownVersion);
+   end;
 
    // read number of tables
    NumTables := ReadSwappedWord(Stream);
@@ -548,6 +552,21 @@ begin
       else FTableList.Add(TableEntry);
     end;
   end;
+
+ // check for required tables 
+ case Version of
+  $00010000 : if not Assigned(OS2TableEntry)
+   then raise EPascalTypeError.Create(RCStrNoOS2Table);
+  $74727565 :
+   begin
+    if not Assigned(FLocationDataEntry)
+     then raise EPascalTypeError.Create(RCStrNoIndexToLocationTable);
+    if not Assigned(FGlyphDataEntry)
+     then raise EPascalTypeError.Create(RCStrNoGlyphDataTable);
+   end;
+ end;
+
+
 end;
 
 procedure TPascalTypeDirectoryTable.SaveToStream(Stream: TStream);

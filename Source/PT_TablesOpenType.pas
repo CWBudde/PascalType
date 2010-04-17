@@ -251,7 +251,7 @@ type
     procedure LookupOrderChanged; virtual;
     procedure ReqFeatureIndexChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -283,7 +283,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -314,7 +314,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -337,7 +337,7 @@ type
     procedure ResetToDefaults; override;
     procedure FeatureParamsChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -360,7 +360,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -438,7 +438,7 @@ type
     procedure LookupTypeChanged; virtual;
     procedure MarkFilteringSetChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -462,7 +462,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -485,7 +485,7 @@ type
     procedure ResetToDefaults; override;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -526,7 +526,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -566,7 +566,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -601,7 +601,7 @@ type
     procedure ResetToDefaults; override;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -1505,7 +1505,7 @@ end;
 
 { TCustomOpenTypeLanguageSystemTable }
 
-constructor TCustomOpenTypeLanguageSystemTable.Create(Storage: IPascalTypeStorage);
+constructor TCustomOpenTypeLanguageSystemTable.Create(Storage: IPascalTypeStorageTable);
 begin
  inherited Create(Storage);
 end;
@@ -1660,7 +1660,7 @@ end;
 { TCustomOpenTypeScriptTable }
 
 constructor TCustomOpenTypeScriptTable.Create(
-  Storage: IPascalTypeStorage);
+  Storage: IPascalTypeStorageTable);
 begin
  FLanguageSystemTables := TObjectList.Create;
  inherited Create(Storage);
@@ -1854,7 +1854,7 @@ end;
 
 { TOpenTypeScriptListTable }
 
-constructor TOpenTypeScriptListTable.Create(Storage: IPascalTypeStorage);
+constructor TOpenTypeScriptListTable.Create(Storage: IPascalTypeStorageTable);
 begin
  FLangSysList := TObjectList.Create;
  inherited Create(Storage);
@@ -1959,7 +1959,7 @@ end;
 
 { TCustomOpenTypeFeatureTable }
 
-constructor TCustomOpenTypeFeatureTable.Create(Storage: IPascalTypeStorage);
+constructor TCustomOpenTypeFeatureTable.Create(Storage: IPascalTypeStorageTable);
 begin
  inherited;
 end;
@@ -2059,7 +2059,7 @@ end;
 
 { TOpenTypeFeatureListTable }
 
-constructor TOpenTypeFeatureListTable.Create(Storage: IPascalTypeStorage);
+constructor TOpenTypeFeatureListTable.Create(Storage: IPascalTypeStorageTable);
 begin
  FFeatureList := TObjectList.Create;
  inherited;
@@ -2372,7 +2372,7 @@ end;
 
 { TOpenTypeLookupTable }
 
-constructor TOpenTypeLookupTable.Create(Storage: IPascalTypeStorage);
+constructor TOpenTypeLookupTable.Create(Storage: IPascalTypeStorageTable);
 begin
  FSubtableList := TObjectList.Create;
  inherited;
@@ -2532,7 +2532,7 @@ end;
 
 { TOpenTypeLookupListTable }
 
-constructor TOpenTypeLookupListTable.Create(Storage: IPascalTypeStorage);
+constructor TOpenTypeLookupListTable.Create(Storage: IPascalTypeStorageTable);
 begin
  FLookupList := TObjectList.Create;
  inherited;
@@ -2625,7 +2625,7 @@ end;
 
 { TCustomOpenTypeCommonTable }
 
-constructor TCustomOpenTypeCommonTable.Create(Storage: IPascalTypeStorage);
+constructor TCustomOpenTypeCommonTable.Create(Storage: IPascalTypeStorageTable);
 begin
  FScriptListTable := TOpenTypeScriptListTable.Create(Storage);
  FFeatureListTable := TOpenTypeFeatureListTable.Create(Storage);
@@ -2835,7 +2835,7 @@ end;
 { TCustomOpenTypeJustificationLanguageSystemTable }
 
 constructor TCustomOpenTypeJustificationLanguageSystemTable.Create(
-  Storage: IPascalTypeStorage);
+  Storage: IPascalTypeStorageTable);
 begin
  inherited Create(Storage);
 end;
@@ -2897,7 +2897,7 @@ end;
 
 { TCustomOpenTypeJustificationScriptTable }
 
-constructor TCustomOpenTypeJustificationScriptTable.Create(Storage: IPascalTypeStorage);
+constructor TCustomOpenTypeJustificationScriptTable.Create(Storage: IPascalTypeStorageTable);
 begin
  FLanguageSystemTables := TObjectList.Create;
  inherited Create(Storage);

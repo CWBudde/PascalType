@@ -38,6 +38,17 @@ uses
   Classes, Contnrs, SysUtils, PT_Types, PT_Classes, PT_Tables;
 
 type
+  TPascalTypePostscriptDictDataTable = class(TCustomPascalTypeTable)
+  private
+    FData : array of Integer;
+  protected
+    procedure ResetToDefaults; override;
+    procedure AssignTo(Dest: TPersistent); override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+  end;
+
   TCustomPascalTypePostscriptIndexTable = class(TCustomPascalTypeTable)
   protected
     procedure ReadData(Index: Integer; Stream: TStream); virtual; abstract;
@@ -50,12 +61,48 @@ type
   TPascalTypePostscriptNameIndexTable = class(TCustomPascalTypePostscriptIndexTable)
   private
     FFontNames : array of string;
+    function GetFontName(Index: Integer): string;
+    function GetFontNameCount: Integer;
   protected
     procedure ResetToDefaults; override;
     procedure AssignTo(Dest: TPersistent); override;
 
     procedure ReadData(Index: Integer; Stream: TStream); override;
     procedure WriteData(Index: Integer; Stream: TStream); override;
+
+    property FontName[Index: Integer]: string read GetFontName;
+    property FontNameCount: Integer read GetFontNameCount;
+  end;
+
+  TCustomPascalTypePostscriptDictOperator = class(TCustomPascalTypeTable)
+  protected
+    class function GetEncoding: Byte; virtual; abstract;
+  public
+    property Encoding: Byte read GetEncoding;
+  end;
+
+  TPascalTypePostscriptVersionOperator = class(TCustomPascalTypePostscriptDictOperator)
+  protected
+    class function GetEncoding: Byte; override;
+  end;
+
+  TPascalTypePostscriptNoticeOperator = class(TCustomPascalTypePostscriptDictOperator)
+  protected
+    class function GetEncoding: Byte; override;
+  end;
+
+  TPascalTypePostscriptTopDictIndexTable = class(TCustomPascalTypePostscriptIndexTable)
+  private
+    FDict : array of TPascalTypePostscriptDictDataTable;
+    procedure ClearDict;
+  protected
+    procedure ResetToDefaults; override;
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ReadData(Index: Integer; Stream: TStream); override;
+    procedure WriteData(Index: Integer; Stream: TStream); override;
+  public
+    destructor Destroy; override;
   end;
 
   TPascalTypeCompactFontFormatTable = class(TCustomPascalTypeNamedTable)
@@ -64,16 +111,25 @@ type
     FVersionMinor : Byte; // Format minor version (starting at 0)
     FOffSize      : Byte; // Absolute offset(0) size
     FNameTable    : TPascalTypePostscriptNameIndexTable;
+    FTopDictTable : TPascalTypePostscriptTopDictIndexTable;
+    procedure SetVersionMajor(const Value: Byte);
+    procedure SetVersionMinor(const Value: Byte);
+    function GetFontName: string;
   protected
     procedure ResetToDefaults; override;
     procedure AssignTo(Dest: TPersistent); override;
+    procedure VersionChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
+
+    property VersionMajor: Byte read FVersionMajor write SetVersionMajor;
+    property VersionMinor: Byte read FVersionMinor write SetVersionMinor;
+    property FontName: string read GetFontName;
   end;
 
   TVertOriginYMetrics = packed record
@@ -102,6 +158,164 @@ implementation
 uses
   PT_ResourceStrings;
 
+resourcestring
+  RCStrCFFIndexFirstOffsetError = 'CFF Index: First Offset Error (%d)';
+
+
+{ TPascalTypePostscriptVersionOperator }
+
+class function TPascalTypePostscriptVersionOperator.GetEncoding: Byte;
+begin
+ Result := 0;
+end;
+
+
+{ TPascalTypePostscriptNoticeOperator }
+
+class function TPascalTypePostscriptNoticeOperator.GetEncoding: Byte;
+begin
+ Result := 1;
+end;
+
+
+{ TPascalTypePostscriptDictDataTable }
+
+procedure TPascalTypePostscriptDictDataTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TPascalTypePostscriptDictDataTable(Dest) do
+   begin
+    FData := Self.FData;
+   end
+ else inherited;
+end;
+
+procedure TPascalTypePostscriptDictDataTable.ResetToDefaults;
+begin
+ inherited;
+ SetLength(FData, 0);
+end;
+
+procedure TPascalTypePostscriptDictDataTable.LoadFromStream(Stream: TStream);
+var
+  Token  : Byte;
+  Data   : array [0..3] of Byte;
+  Value  : Integer;
+  Nibble : Byte;
+  str    : string;
+begin
+ inherited;
+
+ with Stream do
+  while Position < Size do
+   begin
+    // read token
+    Read(Token, 1);
+
+    // add element
+    SetLength(FData, Length(FData) + 1);
+
+    // read element data
+    case Token of
+            0 : ; // Version
+            1 : ; // Notice
+            2 : ; // FullName
+            3 : ; // FamilyName
+            4 : ; // Weight
+            5 : ; // FontBBox
+            6 : ; // BlueValues
+            7 : ; // OtherBlues
+            8 : ; // FamilyBlues
+            9 : ; // FamilyOtherBlues
+           10 : ; // StdHW
+           12 : begin
+                 // escape
+                 Read(Data[0], 1);
+                end;
+           11 : ; // StdVW
+           13 : ; // UniqueID
+           14 : ; // XUID
+           15 : ; // charset
+           16 : ; // Encoding
+           17 : ; // CharStrings
+           18 : ; // Private
+           19 : ; // Subrs
+           20 : ; // defaultWidthX
+           21 : ; // nominalWidthX
+           28 : begin
+                 Read(Data[0], 2);
+                 Value := (Data[0] shl 8) or Data[1];
+                end;
+           29 : begin
+                 Read(Data[0], 4);
+                 Value := (Data[0] shl 24) or (Data[1] shl 16) or
+                   (Data[2] shl 8) or Data[3];
+                end;
+           30 : begin
+                 // BCD (real number)
+
+                 // reset string
+                 str := '';
+
+                 repeat
+                  // read two nibbles
+                  Read(Data[0], 1);
+
+                  // get first nibble
+                  Nibble := Data[0] shr 4;
+
+                  case Nibble of
+                   0..9 : str := str + IntToStr(Nibble);
+                     $A : str := str + '.';
+                     $B : str := str + 'E';
+                     $C : str := str + 'E-';
+                     $E : str := str + '-';
+                     $F : Break;
+                   else raise EPascalTypeError.Create('CFF Error: Wrong Nibble found!');
+                  end;
+
+                  // get second nibble
+                  Nibble := Data[0] and $F;
+
+                  case Nibble of
+                   0..9 : str := str + IntToStr(Nibble);
+                     $A : str := str + '.';
+                     $B : str := str + 'E';
+                     $C : str := str + 'E-';
+                     $E : str := str + '-';
+                     $F : Break;
+                   else raise EPascalTypeError.Create('CFF Error: Wrong Nibble found!');
+                  end;
+
+                 until (Nibble = $F);
+                end;
+      32..246 : FData[Length(FData) - 1] := Token - 139;
+     247..250 : begin
+                 Read(Data[0], 1);
+                 Value := (Token - 247) shl 8 + Data[0] + 108;
+                end;
+     251..254 : begin
+                 Read(Data[0], 1);
+                 Value := -(Token - 251) shl 8 - Data[0] - 108
+                end;
+     else raise EPascalTypeError.Create('CFF Error: Wrong Token found!');
+    end;
+
+    // assign value
+    FData[Length(FData) - 1] := Value;
+   end;
+end;
+
+procedure TPascalTypePostscriptDictDataTable.SaveToStream(Stream: TStream);
+begin
+ inherited;
+
+ with Stream do
+  begin
+
+  end;
+end;
+
 
 { TCustomPascalTypePostscriptIndexTable }
 
@@ -119,6 +333,10 @@ begin
 
  with Stream do
   begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
    // read count
    Value16 := ReadSwappedWord(Stream);
 
@@ -152,7 +370,11 @@ begin
    OffStart := Position - 1;
 
    if Offsets[0] <> 1
-    then raise Exception.CreateFmt('CFF Index: First Offset Error (%d)', [Offsets[0]]);
+    then raise Exception.CreateFmt(RCStrCFFIndexFirstOffsetError, [Offsets[0]]);
+
+   // check (minimum) table size
+   if Position + Offsets[Length(Offsets) - 1] > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    MS := TMemoryStream.Create;
    try
@@ -166,6 +388,9 @@ begin
 
       // copy data to local stream
       MS.CopyFrom(Stream, Offsets[OffIndex + 1] - Offsets[OffIndex]);
+
+      // reset stream position
+      MS.Seek(0, soBeginning);
 
       // read data from memory stream
       ReadData(OffIndex, MS);
@@ -202,6 +427,19 @@ begin
  SetLength(FFontNames, 0);
 end;
 
+function TPascalTypePostscriptNameIndexTable.GetFontName(
+  Index: Integer): string;
+begin
+ if (Index >= 0) and (Index < Length(FFontNames))
+  then Result := FFontNames[Index]
+  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+end;
+
+function TPascalTypePostscriptNameIndexTable.GetFontNameCount: Integer;
+begin
+ Result := Length(FFontNames);
+end;
+
 procedure TPascalTypePostscriptNameIndexTable.ReadData(Index: Integer;
   Stream: TStream);
 begin
@@ -228,18 +466,77 @@ begin
 end;
 
 
+{ TPascalTypePostscriptTopDictIndexTable }
+
+destructor TPascalTypePostscriptTopDictIndexTable.Destroy;
+begin
+ ClearDict;
+ inherited;
+end;
+
+procedure TPascalTypePostscriptTopDictIndexTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TPascalTypePostscriptTopDictIndexTable(Dest) do
+   begin
+
+   end
+ else inherited;
+end;
+
+procedure TPascalTypePostscriptTopDictIndexTable.ResetToDefaults;
+begin
+ inherited;
+ ClearDict;
+ SetLength(FDict, 0);
+end;
+
+procedure TPascalTypePostscriptTopDictIndexTable.ClearDict;
+var
+  DictIndex : Integer;
+begin
+ for DictIndex := 0 to Length(FDict) - 1
+  do FreeAndNil(FDict[DictIndex]);
+end;
+
+procedure TPascalTypePostscriptTopDictIndexTable.ReadData(Index: Integer;
+  Stream: TStream);
+begin
+ // eventually extend font name array
+ if Index >= Length(FDict) then
+  begin
+   SetLength(FDict, Index + 1);
+   FDict[Length(FDict) - 1] := TPascalTypePostscriptDictDataTable.Create;
+  end;
+
+ // reset dict to default
+ FDict[Length(FDict) - 1].ResetToDefaults;
+
+ // load dict from stream
+ FDict[Length(FDict) - 1].LoadFromStream(Stream);
+end;
+
+procedure TPascalTypePostscriptTopDictIndexTable.WriteData(Index: Integer;
+  Stream: TStream);
+begin
+
+end;
+
+
 { TPascalTypeCompactFontFormatTable }
 
 constructor TPascalTypeCompactFontFormatTable.Create(
-  Storage: IPascalTypeStorage);
+  Storage: IPascalTypeStorageTable);
 begin
  FNameTable := TPascalTypePostscriptNameIndexTable.Create;
+ FTopDictTable := TPascalTypePostscriptTopDictIndexTable.Create;
  inherited;
 end;
 
 destructor TPascalTypeCompactFontFormatTable.Destroy;
 begin
  FreeAndNil(FNameTable);
+ FreeAndNil(FTopDictTable);
  inherited;
 end;
 
@@ -252,13 +549,21 @@ begin
     FVersionMinor := Self.FVersionMinor;
     FOffSize      := Self.FOffSize;
     FNameTable.Assign(Self.FNameTable);
+    FTopDictTable.AssignTo(Self.FTopDictTable);
    end
   else inherited;
 end;
 
+function TPascalTypeCompactFontFormatTable.GetFontName: string;
+begin
+ if FNameTable.FontNameCount > 0
+  then Result := FNameTable.FontName[0]
+  else Result := '';
+end;
+
 class function TPascalTypeCompactFontFormatTable.GetTableType: TTableType;
 begin
- Result := 'cff ';
+ Result := 'CFF ';
 end;
 
 procedure TPascalTypeCompactFontFormatTable.ResetToDefaults;
@@ -268,6 +573,7 @@ begin
  FVersionMinor := 0;
  FOffSize      := 0;
  FNameTable.ResetToDefaults;
+ FTopDictTable.ResetToDefaults;
 end;
 
 procedure TPascalTypeCompactFontFormatTable.LoadFromStream(Stream: TStream);
@@ -298,11 +604,14 @@ begin
    // read offset size
    Read(FOffSize, 1);
 
+   // go to name table position
    Position := StartPos + HeaderSize;
 
+   // read name table from stream
    FNameTable.LoadFromStream(Stream);
 
-   raise Exception.Create('not completely implemented!!!');
+   // read top dict table from stream
+   FTopDictTable.LoadFromStream(Stream);
   end;
 end;
 
@@ -326,7 +635,32 @@ begin
 
    // read offset size
    Write(FOffSize, 1);
+
+   raise Exception.Create(RCStrNotImplemented);
   end;
+end;
+
+procedure TPascalTypeCompactFontFormatTable.SetVersionMajor(const Value: Byte);
+begin
+ if FVersionMajor <> Value then
+  begin
+   FVersionMajor := Value;
+   VersionChanged;
+  end;
+end;
+
+procedure TPascalTypeCompactFontFormatTable.SetVersionMinor(const Value: Byte);
+begin
+ if FVersionMinor <> Value then
+  begin
+   FVersionMinor := Value;
+   VersionChanged;
+  end;
+end;
+
+procedure TPascalTypeCompactFontFormatTable.VersionChanged;
+begin
+ Changed;
 end;
 
 

@@ -50,11 +50,12 @@ type
     procedure AssignTo(Dest: TPersistent); override;
     function GetInternalTableType: TTableType; override;
     procedure ResetToDefaults; override;
-    class function GetTableType: TTableType; override;
   public
-    constructor Create(Storage: IPascalTypeStorage;
+    constructor Create(Storage: IPascalTypeStorageTable;
       TableTye: TTableType); reintroduce; virtual;
     destructor Destroy; override;
+
+    class function GetTableType: TTableType; override;
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
@@ -539,13 +540,14 @@ type
     procedure AssignTo(Dest: TPersistent); override;
     procedure ResetToDefaults; override;
 
-    class function GetFamilyType: Byte; virtual; abstract;
+    function GetInternalFamilyType: Byte; virtual;
   public
+    class function GetFamilyType: Byte; virtual; abstract;
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
     property Data[Index: Byte]: Byte read GetData write SetData;
-    property FamilyType: Byte read GetFamilyType;
+    property FamilyType: Byte read GetInternalFamilyType;
   end;
   TCustomPascalTypePanoseClass = class of TCustomPascalTypePanoseTable;
 
@@ -553,10 +555,11 @@ type
   private
     FFamilyType : Byte;
   protected
-    class function GetFamilyType: Byte; override;
+    function GetInternalFamilyType: Byte; override;
   public
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
+    class function GetFamilyType: Byte; override;
 
     property FamilyType: Byte read FFamilyType;
   end;
@@ -1138,7 +1141,7 @@ type
     procedure SuperscriptOffsetYChanged; virtual;
     procedure SuperscriptSizeYChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -1289,7 +1292,7 @@ var
 
 { TPascalTypeUnknownTable }
 
-constructor TPascalTypeUnknownTable.Create(Storage: IPascalTypeStorage;
+constructor TPascalTypeUnknownTable.Create(Storage: IPascalTypeStorageTable;
   TableTye: TTableType);
 begin
  FTableType := TableTye; 
@@ -3065,24 +3068,49 @@ begin
 end;
 
 procedure TPascalTypeMaximumProfileTable.LoadFromStream(Stream: TStream);
-var
-  Value32 : Cardinal;
 begin
  with Stream do
   begin
    // check (minimum) table size
-   if Position + $20 > Size
+   if Position + $6 > Size
     then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
-   Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
 
-   if Version.Value <> 1
+   {$IFDEF AmbigiousExceptions}
+   if Version.Value > 1
+    then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
+   {$ENDIF}
+
+   if (Version.Value = 0) and (Version.Fract < $5000)
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
 
    // read glyphs count
    FNumGlyphs := ReadSwappedWord(Stream);
+
+   // set post script values to maximum
+   if (Version.Value = 0) and (Version.Fract >= 5) then
+    begin
+     FMaxPoints := High(Word);
+     FMaxContours := High(Word);
+     FMaxCompositePoints := High(Word);
+     FMaxCompositeContours := High(Word);
+     FMaxZones := High(Word);
+     FMaxTwilightPoints := High(Word);
+     FMaxStorage := High(Word);
+     FMaxFunctionDefs := High(Word);
+     FMaxInstructionDefs := High(Word);
+     FMaxStackElements := High(Word);
+     FMaxSizeOfInstructions := High(Word);
+     FMaxComponentElements := High(Word);
+     FMaxComponentDepth := High(Word);
+     Exit;
+    end;
+
+   // check (minimum) table size
+   if Position + $1A > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read max points
    FMaxPoints := ReadSwappedWord(Stream);
@@ -3415,6 +3443,11 @@ begin
   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
+function TCustomPascalTypePanoseTable.GetInternalFamilyType: Byte;
+begin
+ Result := GetFamilyType;
+end;
+
 procedure TCustomPascalTypePanoseTable.SetData(Index: Byte; const Value: Byte);
 begin
  if Index in [0..8]
@@ -3438,6 +3471,11 @@ end;
 
 
 { TPascalTypeDefaultPanoseTable }
+
+function TPascalTypeDefaultPanoseTable.GetInternalFamilyType: Byte;
+begin
+ Result := FFamilyType; 
+end;
 
 class function TPascalTypeDefaultPanoseTable.GetFamilyType: Byte;
 begin
@@ -4745,7 +4783,7 @@ end;
 
 { TPascalTypeOS2Table }
 
-constructor TPascalTypeOS2Table.Create(Storage: IPascalTypeStorage);
+constructor TPascalTypeOS2Table.Create(Storage: IPascalTypeStorageTable);
 begin
  FPanose := TPascalTypeDefaultPanoseTable.Create;
  FUnicodeRangeTable := TPascalTypeUnicodeRangeTable.Create;

@@ -88,7 +88,7 @@ type
     procedure FlagsChanged; virtual;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -180,7 +180,7 @@ type
     procedure ResetToDefaults; override;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -296,7 +296,7 @@ type
 
     procedure VersionChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -457,7 +457,7 @@ type
     procedure ResetToDefaults; override;
     procedure VersionChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -1128,7 +1128,7 @@ end;
 { TPascalTypeHorizontalDeviceMetricsTable }
 
 constructor TPascalTypeHorizontalDeviceMetricsTable.Create(
-  Storage: IPascalTypeStorage);
+  Storage: IPascalTypeStorageTable);
 begin
  FSubtables := TObjectList.Create;
  inherited;
@@ -2313,7 +2313,7 @@ end;
 
 { TPascalTypeVerticalDeviceMetricsTable }
 
-constructor TPascalTypeVerticalDeviceMetricsTable.Create(Storage: IPascalTypeStorage);
+constructor TPascalTypeVerticalDeviceMetricsTable.Create(Storage: IPascalTypeStorageTable);
 begin
  FGroups := TObjectList.Create;
  inherited;

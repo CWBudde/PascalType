@@ -50,7 +50,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -75,7 +75,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -144,7 +144,7 @@ type
     procedure YMaxChanged; virtual;
     procedure YMinChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); reintroduce; virtual;
+    constructor Create(Storage: IPascalTypeStorageTable); reintroduce; virtual;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -521,7 +521,7 @@ end;
 
 { TCustomTrueTypeFontGlyphData }
 
-constructor TCustomTrueTypeFontGlyphData.Create(Storage: IPascalTypeStorage);
+constructor TCustomTrueTypeFontGlyphData.Create(Storage: IPascalTypeStorageTable);
 begin
  FInstructions := TTrueTypeFontGlyphInstructionTable.Create(Storage);
  inherited Create(Storage);

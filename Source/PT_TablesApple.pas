@@ -173,7 +173,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
   
     class function GetTableType: TTableType; override;
@@ -276,7 +276,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -362,7 +362,7 @@ type
   public
     class function GetTableType: TTableType; override;
 
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     procedure LoadFromStream(Stream: TStream); override;
@@ -398,7 +398,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -506,7 +506,7 @@ type
 
     procedure ResetToDefaults; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     property ChainCount: Cardinal read GetChainCount;
@@ -662,7 +662,7 @@ type
     procedure HorizontalChanged; virtual;
     procedure VerticalChanged; virtual;
   public
-    constructor Create(Storage: IPascalTypeStorage); override;
+    constructor Create(Storage: IPascalTypeStorageTable); override;
     destructor Destroy; override;
 
     class function GetTableType: TTableType; override;
@@ -1194,7 +1194,7 @@ end;
 
 { TPascalTypeAxisVariationTable }
 
-constructor TPascalTypeAxisVariationTable.Create(Storage: IPascalTypeStorage);
+constructor TPascalTypeAxisVariationTable.Create(Storage: IPascalTypeStorageTable);
 begin
  inherited Create(Storage);
  FSegments := TObjectList.Create;
@@ -1438,7 +1438,7 @@ end;
 { TPascalTypeBitmapLocationTable }
 
 constructor TPascalTypeBitmapLocationTable.Create(
-  Storage: IPascalTypeStorage);
+  Storage: IPascalTypeStorageTable);
 begin
  FBitmapSizeList := TObjectList.Create;
  inherited;
@@ -1718,7 +1718,7 @@ end;
 { TPascalTypeFontDescriptionTable }
 
 constructor TPascalTypeFontDescriptionTable.Create(
-  Storage: IPascalTypeStorage);
+  Storage: IPascalTypeStorageTable);
 begin
  FDescritors := TObjectList.Create;
  inherited;
@@ -1886,7 +1886,7 @@ end;
 
 { TPascalTypeFeatureTable }
 
-constructor TPascalTypeFeatureTable.Create(Storage: IPascalTypeStorage);
+constructor TPascalTypeFeatureTable.Create(Storage: IPascalTypeStorageTable);
 begin
  FFeatures := TObjectList.Create;
  inherited Create(Storage);
@@ -2413,7 +2413,7 @@ end;
 { TCustomPascalTypeGlyphMetamorphosisTable }
 
 constructor TCustomPascalTypeGlyphMetamorphosisTable.Create(
-  Storage: IPascalTypeStorage);
+  Storage: IPascalTypeStorageTable);
 begin
  FChains := TObjectList.Create;
  inherited;
@@ -2965,7 +2965,7 @@ begin
 end;
 
 constructor TPascalTypeTrackingTable.Create(
-  Storage: IPascalTypeStorage);
+  Storage: IPascalTypeStorageTable);
 begin
  FHorizontal := TPascalTypeTrackingDataTable.Create;
  FVertical   := TPascalTypeTrackingDataTable.Create;

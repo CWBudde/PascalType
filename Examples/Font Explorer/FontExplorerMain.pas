@@ -15,9 +15,9 @@ uses
   {$IFDEF ShowOpenType}
   PT_TablesOpenType,
   {$ENDIF}
-  PT_TablesFontForge, PT_Storage, PT_StorageSFNT, PT_ByteCodeInterpreter,
-  PT_UnicodeNames, PT_FontEngine, PT_PanoseClassifications, PT_Windows, 
-  FE_FontHeader;
+  PT_TablesPostscript, PT_TablesFontForge, PT_ByteCodeInterpreter, PT_Storage,
+  PT_StorageSFNT, PT_UnicodeNames, PT_FontEngine, PT_PanoseClassifications,
+  PT_Windows, FE_FontHeader;
 
 type
   TFmTTF = class(TForm)
@@ -171,6 +171,7 @@ type
     procedure DisplayPCL5Table(PCL5Table: TPascalTypePCL5Table);
     procedure DisplayPostscriptTable(PostscriptTable: TPascalTypePostscriptTable);
     procedure DisplayPostscriptV2Table(PostscriptTable: TPascalTypePostscriptVersion2Table);
+    procedure DisplayPostscriptCFFTable(CFFTable: TPascalTypeCompactFontFormatTable);
     procedure DisplayVerticalDeviceMetricsTable(VerticalDeviceMetricsTable: TPascalTypeVerticalDeviceMetricsTable);
     procedure DisplayVerticalHeader(VerticalHeaderTable: TPascalTypeVerticalHeaderTable);
 
@@ -2956,6 +2957,22 @@ begin
   end;
 end;
 
+procedure TFmTTF.DisplayPostscriptCFFTable(CFFTable: TPascalTypeCompactFontFormatTable);
+begin
+ with CFFTable do
+  begin
+   InitializeDefaultListView;
+
+   // add Version
+   ListViewData(['Version', IntToStr(VersionMajor) + '.' + IntToStr(VersionMinor)]);
+
+   // add Version
+   ListViewData(['Fontname', FontName]);
+
+   ListView.BringToFront;
+  end;
+end;
+
 procedure TFmTTF.DisplayPostscriptTable(
   PostscriptTable: TPascalTypePostscriptTable);
 begin
@@ -3218,6 +3235,10 @@ begin
    // Postscript Table
    if TObject(Node.Data) is TPascalTypePostscriptTable
     then DisplayPostscriptTable(TPascalTypePostscriptTable(Node.Data)) else
+
+   // Postscript Compact Font Format Table
+   if TObject(Node.Data) is TPascalTypeCompactFontFormatTable
+    then DisplayPostscriptCFFTable(TPascalTypeCompactFontFormatTable(Node.Data)) else
 
    // Name Table
    if TObject(Node.Data) is TPascalTypeNameTable then

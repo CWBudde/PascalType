@@ -40,7 +40,7 @@ uses
 
 type
   TCustomPascalTypeStorageSFNT = class(TCustomPascalTypeStorage,
-    IPascalTypeStorage)
+    IPascalTypeStorageTable)
   private
     // required tables
     FHeaderTable        : TPascalTypeHeaderTable;
@@ -48,8 +48,11 @@ type
     FMaximumProfile     : TPascalTypeMaximumProfileTable;
     FNameTable          : TPascalTypeNameTable;
     FPostScriptTable    : TPascalTypePostscriptTable;
-    function GetFontName: string;
+    function GetFontName: WideString;
     function GetFontStyle: TFontStyles;
+    function GetFontFamilyName: WideString;
+    function GetFontSubFamilyName: WideString;
+    function GetFontVersion: WideString;
   protected
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; virtual; abstract;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; virtual; abstract;
@@ -74,8 +77,11 @@ type
     property PostScriptTable: TPascalTypePostscriptTable read FPostScriptTable;
 
     // basic properties
-    property FontName: string read GetFontName;
+    property FontFamilyName: WideString read GetFontFamilyName;
+    property FontName: WideString read GetFontName;
     property FontStyle: TFontStyles read GetFontStyle;
+    property FontSubFamilyName: WideString read GetFontSubFamilyName;
+    property FontVersion: WideString read GetFontVersion;
   end;
 
   TPascalTypeStorageScan = class(TCustomPascalTypeStorageSFNT)
@@ -240,7 +246,58 @@ begin
  DirectoryTable.TableList.SortByOffset;
 end;
 
-function TCustomPascalTypeStorageSFNT.GetFontName: string;
+function TCustomPascalTypeStorageSFNT.GetFontFamilyName: WideString;
+var
+  NameSubTableIndex : Integer;
+begin
+ with FNameTable do
+  for NameSubTableIndex := 0 to NameSubTableCount - 1 do
+   with NameSubTable[NameSubTableIndex] do
+    {$IFDEF MSWINDOWS}
+    if PlatformID = piMicrosoft then
+    {$ENDIF}
+      if NameID = niFamily then
+       begin
+        Result := Name;
+        Exit;
+       end;
+end;
+
+function TCustomPascalTypeStorageSFNT.GetFontSubFamilyName: WideString;
+var
+  NameSubTableIndex : Integer;
+begin
+ with FNameTable do
+  for NameSubTableIndex := 0 to NameSubTableCount - 1 do
+   with NameSubTable[NameSubTableIndex] do
+    {$IFDEF MSWINDOWS}
+    if PlatformID = piMicrosoft then
+    {$ENDIF}
+      if NameID = niSubfamily then
+       begin
+        Result := Name;
+        Exit;
+       end;
+end;
+
+function TCustomPascalTypeStorageSFNT.GetFontVersion: WideString;
+var
+  NameSubTableIndex : Integer;
+begin
+ with FNameTable do
+  for NameSubTableIndex := 0 to NameSubTableCount - 1 do
+   with NameSubTable[NameSubTableIndex] do
+    {$IFDEF MSWINDOWS}
+    if PlatformID = piMicrosoft then
+    {$ENDIF}
+      if NameID = niVersion then
+       begin
+        Result := Name;
+        Exit;
+       end;
+end;
+
+function TCustomPascalTypeStorageSFNT.GetFontName: WideString;
 var
   NameSubTableIndex : Integer;
 begin

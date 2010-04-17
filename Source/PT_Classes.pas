@@ -41,10 +41,15 @@ type
   TCustomPascalTypeNamedTable = class;
   TCustomPascalTypeNamedTableClass = class of TCustomPascalTypeNamedTable;
 
-  IPascalTypeStorage = interface(IUnknown)
+  IPascalTypeStorageTable = interface(IUnknown)
   ['{A990D67B-BC60-4DA4-9D90-3C1D30AEC003}']
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
+  end;
+
+  IPascalTypeStorageChange = interface(IUnknown)
+  ['{4C10BAEF-04DB-42D0-9A6C-5FE155E80AEB}']
+    procedure Changed;
   end;
 
   TCustomPascalTypeTable = class(TInterfacedPersistent, IStreamPersist)
@@ -61,9 +66,10 @@ type
 
   TCustomPascalTypeInterfaceTable = class(TCustomPascalTypeTable)
   protected
-    FStorage : IPascalTypeStorage;
+    FStorage : IPascalTypeStorageTable;
+    procedure Changed; override;
   public
-    constructor Create(Storage: IPascalTypeStorage); reintroduce; virtual;
+    constructor Create(Storage: IPascalTypeStorageTable); reintroduce; virtual;
   end;
 
   TCustomPascalTypeNamedTable = class(TCustomPascalTypeInterfaceTable)
@@ -168,14 +174,21 @@ end;
 
 procedure TCustomPascalTypeTable.Changed;
 begin
- // nothing in here yet!
+ // nothing here yet
 end;
 
 
 { TCustomPascalTypeInterfaceTable }
 
+procedure TCustomPascalTypeInterfaceTable.Changed;
+begin
+ inherited;
+// if FStorage is IPascalTypeStorageChange
+//  then (FStorage as IPascalTypeStorageChange).Changed;
+end;
+
 constructor TCustomPascalTypeInterfaceTable.Create(
-  Storage: IPascalTypeStorage);
+  Storage: IPascalTypeStorageTable);
 begin
  FStorage := Storage;
  inherited Create;
