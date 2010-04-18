@@ -2963,11 +2963,20 @@ begin
   begin
    InitializeDefaultListView;
 
-   // add Version
+   // add version
    ListViewData(['Version', IntToStr(VersionMajor) + '.' + IntToStr(VersionMinor)]);
 
-   // add Version
+   // add font name
    ListViewData(['Fontname', FontName]);
+
+   // add version string
+   ListViewData(['Version as string', VersionString]);
+
+   // add full name string
+   ListViewData(['Full name as string', FullNameString]);
+
+   // add family name string
+   ListViewData(['Family name as string', FamilyNameString]);
 
    ListView.BringToFront;
   end;

@@ -38,17 +38,6 @@ uses
   Classes, Contnrs, SysUtils, PT_Types, PT_Classes, PT_Tables;
 
 type
-  TPascalTypePostscriptDictDataTable = class(TCustomPascalTypeTable)
-  private
-    FData : array of Integer;
-  protected
-    procedure ResetToDefaults; override;
-    procedure AssignTo(Dest: TPersistent); override;
-  public
-    procedure LoadFromStream(Stream: TStream); override;
-    procedure SaveToStream(Stream: TStream); override;
-  end;
-
   TCustomPascalTypePostscriptIndexTable = class(TCustomPascalTypeTable)
   protected
     procedure ReadData(Index: Integer; Stream: TStream); virtual; abstract;
@@ -74,27 +63,86 @@ type
     property FontNameCount: Integer read GetFontNameCount;
   end;
 
-  TCustomPascalTypePostscriptDictOperator = class(TCustomPascalTypeTable)
+  TPascalTypePostscriptStringIndexTable = class(TCustomPascalTypePostscriptIndexTable)
+  private
+    FStrings : array of string;
+    function GetString(Index: Integer): string;
+    function GetStringCount: Integer;
   protected
-    class function GetEncoding: Byte; virtual; abstract;
+    procedure ResetToDefaults; override;
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure ReadData(Index: Integer; Stream: TStream); override;
+    procedure WriteData(Index: Integer; Stream: TStream); override;
+
+    property StringItem[Index: Integer]: string read GetString;
+    property StringCount: Integer read GetStringCount;
+  end;
+
+  TCustomPascalTypePostscriptDictOperator = class(TPersistent)
+  protected
+    class function GetOperator: Byte; virtual; abstract;
+    procedure AssignTo(Dest: TPersistent); override;
   public
-    property Encoding: Byte read GetEncoding;
+    property DictOperator: Byte read GetOperator;
+  end;
+  TPascalTypePostscriptDictOperatorClass = class of TCustomPascalTypePostscriptDictOperator;
+
+  TCustomPascalTypePostscriptDictOperand = class(TPersistent)
+  protected
+    function GetAsInteger: Integer; virtual; abstract;
+    function GetAsString: string; virtual; abstract;
+    function GetAsSingle: Single; virtual; abstract;
+  public
+    property AsInteger: Integer read GetAsInteger;
+    property AsSingle: Single read GetAsSingle;
+    property AsString: string read GetAsString;
   end;
 
-  TPascalTypePostscriptVersionOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptDictPair = class(TCustomPascalTypeTable)
+  private
+    FOperands     : array of TCustomPascalTypePostscriptDictOperand;
+    FDictOperator : TCustomPascalTypePostscriptDictOperator;
+    function GetOperand(Index: Integer): TCustomPascalTypePostscriptDictOperand;
+    function GetOperandCount: Integer;
+    procedure ClearOperands;
   protected
-    class function GetEncoding: Byte; override;
+    procedure AssignTo(Dest: TPersistent); override;
+    procedure ResetToDefaults; override;
+  public
+    destructor Destroy; override;
+    procedure AddOperand(Operand: TCustomPascalTypePostscriptDictOperand);
+
+    property DictOperator: TCustomPascalTypePostscriptDictOperator read FDictOperator write FDictOperator;
+    property OperandCount: Integer read GetOperandCount;
+    property Operand[Index: Integer]: TCustomPascalTypePostscriptDictOperand read GetOperand;
   end;
 
-  TPascalTypePostscriptNoticeOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptDictDataTable = class(TCustomPascalTypeTable)
+  private
+    FData : array of TPascalTypePostscriptDictPair;
   protected
-    class function GetEncoding: Byte; override;
+    procedure ResetToDefaults; override;
+    procedure AssignTo(Dest: TPersistent); override;
+    function GetStringIndex(const Index: Integer): Integer;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    property VersionStringIndex: Integer index 0 read GetStringIndex;
+    property NoticeStringIndex: Integer index 1 read GetStringIndex;
+    property FullNameStringIndex: Integer index 2 read GetStringIndex;
+    property FamilyNameStringIndex: Integer index 3 read GetStringIndex;
+    property WeightStringIndex: Integer index 4 read GetStringIndex;
+
+//    property CopyrightStringIndex: Integer read GetStringIndex;
   end;
 
   TPascalTypePostscriptTopDictIndexTable = class(TCustomPascalTypePostscriptIndexTable)
   private
     FDict : array of TPascalTypePostscriptDictDataTable;
     procedure ClearDict;
+    function GetStringIndex(Index: Integer; DictIndex: Integer): Integer;
   protected
     procedure ResetToDefaults; override;
     procedure AssignTo(Dest: TPersistent); override;
@@ -103,6 +151,12 @@ type
     procedure WriteData(Index: Integer; Stream: TStream); override;
   public
     destructor Destroy; override;
+
+    property VersionStringIndex[DictIndex: Integer]: Integer index 0 read GetStringIndex;
+    property NoticeStringIndex[DictIndex: Integer]: Integer index 1 read GetStringIndex;
+    property FullNameStringIndex[DictIndex: Integer]: Integer index 2 read GetStringIndex;
+    property FamilyNameStringIndex[DictIndex: Integer]: Integer index 3 read GetStringIndex;
+    property WeightStringIndex[DictIndex: Integer]: Integer index 4 read GetStringIndex;
   end;
 
   TPascalTypeCompactFontFormatTable = class(TCustomPascalTypeNamedTable)
@@ -112,9 +166,16 @@ type
     FOffSize      : Byte; // Absolute offset(0) size
     FNameTable    : TPascalTypePostscriptNameIndexTable;
     FTopDictTable : TPascalTypePostscriptTopDictIndexTable;
+    FStringTable  : TPascalTypePostscriptStringIndexTable;
+    FGlobalTable  : TPascalTypePostscriptStringIndexTable;
     procedure SetVersionMajor(const Value: Byte);
     procedure SetVersionMinor(const Value: Byte);
     function GetFontName: string;
+    function GetFamilyNameString: string;
+    function GetFullNameString: string;
+    function GetNoticeString: string;
+    function GetVersionString: string;
+    function GetWeightStringIndex: string;
   protected
     procedure ResetToDefaults; override;
     procedure AssignTo(Dest: TPersistent); override;
@@ -130,6 +191,12 @@ type
     property VersionMajor: Byte read FVersionMajor write SetVersionMajor;
     property VersionMinor: Byte read FVersionMinor write SetVersionMinor;
     property FontName: string read GetFontName;
+
+    property VersionString: string read GetVersionString;
+    property NoticeString: string read GetNoticeString;
+    property FullNameString: string read GetFullNameString;
+    property FamilyNameString: string read GetFamilyNameString;
+    property WeightStringIndex: string read GetWeightStringIndex;
   end;
 
   TVertOriginYMetrics = packed record
@@ -153,28 +220,486 @@ type
     procedure SaveToStream(Stream: TStream); override;
   end;
 
+// operators
+procedure RegisterOperator(OperatorClass: TPascalTypePostscriptDictOperatorClass);
+procedure RegisterOperators(OperatorClasses: array of TPascalTypePostscriptDictOperatorClass);
+function FindOperatorByEncoding(Encoding: Byte): TPascalTypePostscriptDictOperatorClass;
+
 implementation
 
 uses
-  PT_ResourceStrings;
+  PT_ResourceStrings, PT_TablesPostscriptOperators, PT_TablesPostscriptOperands;
 
-resourcestring
-  RCStrCFFIndexFirstOffsetError = 'CFF Index: First Offset Error (%d)';
+var
+  GOperatorClasses : array of TPascalTypePostscriptDictOperatorClass;
 
-
-{ TPascalTypePostscriptVersionOperator }
-
-class function TPascalTypePostscriptVersionOperator.GetEncoding: Byte;
+function GetStandardString(Index: Word): string;
 begin
- Result := 0;
+ case Index of
+    0 : Result := '.notdef';
+    1 : Result := 'space';
+    2 : Result := 'exclam';
+    3 : Result := 'quotedbl';
+    4 : Result := 'numbersign';
+    5 : Result := 'dollar';
+    6 : Result := 'percent';
+    7 : Result := 'ampersand';
+    8 : Result := 'quoteright';
+    9 : Result := 'parenleft';
+   10 : Result := 'parenright';
+   11 : Result := 'asterisk';
+   12 : Result := 'plus';
+   13 : Result := 'comma';
+   14 : Result := 'hyphen';
+   15 : Result := 'period';
+   16 : Result := 'slash';
+   17 : Result := 'zero';
+   18 : Result := 'one';
+   19 : Result := 'two';
+   20 : Result := 'three';
+   21 : Result := 'four';
+   22 : Result := 'five';
+   23 : Result := 'six';
+   24 : Result := 'seven';
+   25 : Result := 'eight';
+   26 : Result := 'nine';
+   27 : Result := 'colon';
+   28 : Result := 'semicolon';
+   29 : Result := 'less';
+   30 : Result := 'equal';
+   31 : Result := 'greater';
+   32 : Result := 'question';
+   33 : Result := 'at';
+   34 : Result := 'A';
+   35 : Result := 'B';
+   36 : Result := 'C';
+   37 : Result := 'D';
+   38 : Result := 'E';
+   39 : Result := 'F';
+   40 : Result := 'G';
+   41 : Result := 'H';
+   42 : Result := 'I';
+   43 : Result := 'J';
+   44 : Result := 'K';
+   45 : Result := 'L';
+   46 : Result := 'M';
+   47 : Result := 'N';
+   48 : Result := 'O';
+   49 : Result := 'P';
+   50 : Result := 'Q';
+   51 : Result := 'R';
+   52 : Result := 'S';
+   53 : Result := 'T';
+   54 : Result := 'U';
+   55 : Result := 'V';
+   56 : Result := 'W';
+   57 : Result := 'X';
+   58 : Result := 'Y';
+   59 : Result := 'Z';
+   60 : Result := 'bracketleft';
+   61 : Result := 'backslash';
+   62 : Result := 'bracketright';
+   63 : Result := 'asciicircum';
+   64 : Result := 'underscore';
+   65 : Result := 'quoteleft';
+   66 : Result := 'a';
+   67 : Result := 'b';
+   68 : Result := 'c';
+   69 : Result := 'd';
+   70 : Result := 'e';
+   71 : Result := 'f';
+   72 : Result := 'g';
+   73 : Result := 'h';
+   74 : Result := 'i';
+   75 : Result := 'j';
+   76 : Result := 'k';
+   77 : Result := 'l';
+   78 : Result := 'm';
+   79 : Result := 'n';
+   80 : Result := 'o';
+   81 : Result := 'p';
+   82 : Result := 'q';
+   83 : Result := 'r';
+   84 : Result := 's';
+   85 : Result := 't';
+   86 : Result := 'u';
+   87 : Result := 'v';
+   88 : Result := 'w';
+   89 : Result := 'x';
+   90 : Result := 'y';
+   91 : Result := 'z';
+   92 : Result := 'braceleft';
+   93 : Result := 'bar';
+   94 : Result := 'braceright';
+   95 : Result := 'asciitilde';
+   96 : Result := 'exclamdown';
+   97 : Result := 'cent';
+   98 : Result := 'sterling';
+   99 : Result := 'fraction';
+  100 : Result := 'yen';
+  101 : Result := 'florin';
+  102 : Result := 'section';
+  103 : Result := 'currency';
+  104 : Result := 'quotesingle';
+  105 : Result := 'quotedblleft';
+  106 : Result := 'guillemotleft';
+  107 : Result := 'guilsinglleft';
+  108 : Result := 'guilsinglright';
+  109 : Result := 'fi';
+  110 : Result := 'fl';
+  111 : Result := 'endash';
+  112 : Result := 'dagger';
+  113 : Result := 'daggerdbl';
+  114 : Result := 'periodcentered';
+  115 : Result := 'paragraph';
+  116 : Result := 'bullet';
+  117 : Result := 'quotesinglbase';
+  118 : Result := 'quotedblbase';
+  119 : Result := 'quotedblright';
+  120 : Result := 'guillemotright';
+  121 : Result := 'ellipsis';
+  122 : Result := 'perthousand';
+  123 : Result := 'questiondown';
+  124 : Result := 'grave';
+  125 : Result := 'acute';
+  126 : Result := 'circumflex';
+  127 : Result := 'tilde';
+  128 : Result := 'macron';
+  129 : Result := 'breve';
+  130 : Result := 'dotaccent';
+  131 : Result := 'dieresis';
+  132 : Result := 'ring';
+  133 : Result := 'cedilla';
+  134 : Result := 'hungarumlaut';
+  135 : Result := 'ogonek';
+  136 : Result := 'caron';
+  137 : Result := 'emdash';
+  138 : Result := 'AE';
+  139 : Result := 'ordfeminine';
+  140 : Result := 'Lslash';
+  141 : Result := 'Oslash';
+  142 : Result := 'OE';
+  143 : Result := 'ordmasculine';
+  144 : Result := 'ae';
+  145 : Result := 'dotlessi';
+  146 : Result := 'lslash';
+  147 : Result := 'oslash';
+  148 : Result := 'oe';
+  149 : Result := 'germandbls';
+  150 : Result := 'onesuperior';
+  151 : Result := 'logicalnot';
+  152 : Result := 'mu';
+  153 : Result := 'trademark';
+  154 : Result := 'Eth';
+  155 : Result := 'onehalf';
+  156 : Result := 'plusminus';
+  157 : Result := 'Thorn';
+  158 : Result := 'onequarter';
+  159 : Result := 'divide';
+  160 : Result := 'brokenbar';
+  161 : Result := 'degree';
+  162 : Result := 'thorn';
+  163 : Result := 'threequarters';
+  164 : Result := 'twosuperior';
+  165 : Result := 'registered';
+  166 : Result := 'minus';
+  167 : Result := 'eth';
+  168 : Result := 'multiply';
+  169 : Result := 'threesuperior';
+  170 : Result := 'copyright';
+  171 : Result := 'Aacute';
+  172 : Result := 'Acircumflex';
+  173 : Result := 'Adieresis';
+  174 : Result := 'Agrave';
+  175 : Result := 'Aring';
+  176 : Result := 'Atilde';
+  177 : Result := 'Ccedilla';
+  178 : Result := 'Eacute';
+  179 : Result := 'Ecircumflex';
+  180 : Result := 'Edieresis';
+  181 : Result := 'Egrave';
+  182 : Result := 'Iacute';
+  183 : Result := 'Icircumflex';
+  184 : Result := 'Idieresis';
+  185 : Result := 'Igrave';
+  186 : Result := 'Ntilde';
+  187 : Result := 'Oacute';
+  188 : Result := 'Ocircumflex';
+  189 : Result := 'Odieresis';
+  190 : Result := 'Ograve';
+  191 : Result := 'Otilde';
+  192 : Result := 'Scaron';
+  193 : Result := 'Uacute';
+  194 : Result := 'Ucircumflex';
+  195 : Result := 'Udieresis';
+  196 : Result := 'Ugrave';
+  197 : Result := 'Yacute';
+  198 : Result := 'Ydieresis';
+  199 : Result := 'Zcaron';
+  200 : Result := 'aacute';
+  201 : Result := 'acircumflex';
+  202 : Result := 'adieresis';
+  203 : Result := 'agrave';
+  204 : Result := 'aring';
+  205 : Result := 'atilde';
+  206 : Result := 'ccedilla';
+  207 : Result := 'eacute';
+  208 : Result := 'ecircumflex';
+  209 : Result := 'edieresis';
+  210 : Result := 'egrave';
+  211 : Result := 'iacute';
+  212 : Result := 'icircumflex';
+  213 : Result := 'idieresis';
+  214 : Result := 'igrave';
+  215 : Result := 'ntilde';
+  216 : Result := 'oacute';
+  217 : Result := 'ocircumflex';
+  218 : Result := 'odieresis';
+  219 : Result := 'ograve';
+  220 : Result := 'otilde';
+  221 : Result := 'scaron';
+  222 : Result := 'uacute';
+  223 : Result := 'ucircumflex';
+  224 : Result := 'udieresis';
+  225 : Result := 'ugrave';
+  226 : Result := 'yacute';
+  227 : Result := 'ydieresis';
+  228 : Result := 'zcaron';
+  229 : Result := 'exclamsmall';
+  230 : Result := 'Hungarumlautsmall';
+  231 : Result := 'dollaroldstyle';
+  232 : Result := 'dollarsuperior';
+  233 : Result := 'ampersandsmall';
+  234 : Result := 'Acutesmall';
+  235 : Result := 'parenleftsuperior';
+  236 : Result := 'parenrightsuperior';
+  237 : Result := 'twodotenleader';
+  238 : Result := 'onedotenleader';
+  239 : Result := 'zerooldstyle';
+  240 : Result := 'oneoldstyle';
+  241 : Result := 'twooldstyle';
+  242 : Result := 'threeoldstyle';
+  243 : Result := 'fouroldstyle';
+  244 : Result := 'fiveoldstyle';
+  245 : Result := 'sixoldstyle';
+  246 : Result := 'sevenoldstyle';
+  247 : Result := 'eightoldstyle';
+  248 : Result := 'nineoldstyle';
+  249 : Result := 'commasuperior';
+  250 : Result := 'threequartersemdash';
+  251 : Result := 'periodsuperior';
+  252 : Result := 'questionsmall';
+  253 : Result := 'asuperior';
+  254 : Result := 'bsuperior';
+  255 : Result := 'centsuperior';
+  256 : Result := 'dsuperior';
+  257 : Result := 'esuperior';
+  258 : Result := 'isuperior';
+  259 : Result := 'lsuperior';
+  260 : Result := 'msuperior';
+  261 : Result := 'nsuperior';
+  262 : Result := 'osuperior';
+  263 : Result := 'rsuperior';
+  264 : Result := 'ssuperior';
+  265 : Result := 'tsuperior';
+  266 : Result := 'ff';
+  267 : Result := 'ffi';
+  268 : Result := 'ffl';
+  269 : Result := 'parenleftinferior';
+  270 : Result := 'parenrightinferior';
+  271 : Result := 'Circumflexsmall';
+  272 : Result := 'hyphensuperior';
+  273 : Result := 'Gravesmall';
+  274 : Result := 'Asmall';
+  275 : Result := 'Bsmall';
+  276 : Result := 'Csmall';
+  277 : Result := 'Dsmall';
+  278 : Result := 'Esmall';
+  279 : Result := 'Fsmall';
+  280 : Result := 'Gsmall';
+  281 : Result := 'Hsmall';
+  282 : Result := 'Ismall';
+  283 : Result := 'Jsmall';
+  284 : Result := 'Ksmall';
+  285 : Result := 'Lsmall';
+  286 : Result := 'Msmall';
+  287 : Result := 'Nsmall';
+  288 : Result := 'Osmall';
+  289 : Result := 'Psmall';
+  290 : Result := 'Qsmall';
+  291 : Result := 'Rsmall';
+  292 : Result := 'Ssmall';
+  293 : Result := 'Tsmall';
+  294 : Result := 'Usmall';
+  295 : Result := 'Vsmall';
+  296 : Result := 'Wsmall';
+  297 : Result := 'Xsmall';
+  298 : Result := 'Ysmall';
+  299 : Result := 'Zsmall';
+  300 : Result := 'colonmonetary';
+  301 : Result := 'onefitted';
+  302 : Result := 'rupiah';
+  303 : Result := 'Tildesmall';
+  304 : Result := 'exclamdownsmall';
+  305 : Result := 'centoldstyle';
+  306 : Result := 'Lslashsmall';
+  307 : Result := 'Scaronsmall';
+  308 : Result := 'Zcaronsmall';
+  309 : Result := 'Dieresissmall';
+  310 : Result := 'Brevesmall';
+  311 : Result := 'Caronsmall';
+  312 : Result := 'Dotaccentsmall';
+  313 : Result := 'Macronsmall';
+  314 : Result := 'figuredash';
+  315 : Result := 'hypheninferior';
+  316 : Result := 'Ogoneksmall';
+  317 : Result := 'Ringsmall';
+  318 : Result := 'Cedillasmall';
+  319 : Result := 'questiondownsmall';
+  320 : Result := 'oneeighth';
+  321 : Result := 'threeeighths';
+  322 : Result := 'fiveeighths';
+  323 : Result := 'seveneighths';
+  324 : Result := 'onethird';
+  325 : Result := 'twothirds';
+  326 : Result := 'zerosuperior';
+  327 : Result := 'foursuperior';
+  328 : Result := 'fivesuperior';
+  329 : Result := 'sixsuperior';
+  330 : Result := 'sevensuperior';
+  331 : Result := 'eightsuperior';
+  332 : Result := 'ninesuperior';
+  333 : Result := 'zeroinferior';
+  334 : Result := 'oneinferior';
+  335 : Result := 'twoinferior';
+  336 : Result := 'threeinferior';
+  337 : Result := 'fourinferior';
+  338 : Result := 'fiveinferior';
+  339 : Result := 'sixinferior';
+  340 : Result := 'seveninferior';
+  341 : Result := 'eightinferior';
+  342 : Result := 'nineinferior';
+  343 : Result := 'centinferior';
+  344 : Result := 'dollarinferior';
+  345 : Result := 'periodinferior';
+  346 : Result := 'commainferior';
+  347 : Result := 'Agravesmall';
+  348 : Result := 'Aacutesmall';
+  349 : Result := 'Acircumflexsmall';
+  350 : Result := 'Atildesmall';
+  351 : Result := 'Adieresissmall';
+  352 : Result := 'Aringsmall';
+  353 : Result := 'AEsmall';
+  354 : Result := 'Ccedillasmall';
+  355 : Result := 'Egravesmall';
+  356 : Result := 'Eacutesmall';
+  357 : Result := 'Ecircumflexsmall';
+  358 : Result := 'Edieresissmall';
+  359 : Result := 'Igravesmall';
+  360 : Result := 'Iacutesmall';
+  361 : Result := 'Icircumflexsmall';
+  362 : Result := 'Idieresissmall';
+  363 : Result := 'Ethsmall';
+  364 : Result := 'Ntildesmall';
+  365 : Result := 'Ogravesmall';
+  366 : Result := 'Oacutesmall';
+  367 : Result := 'Ocircumflexsmall';
+  368 : Result := 'Otildesmall';
+  369 : Result := 'Odieresissmall';
+  370 : Result := 'OEsmall';
+  371 : Result := 'Oslashsmall';
+  372 : Result := 'Ugravesmall';
+  373 : Result := 'Uacutesmall';
+  374 : Result := 'Ucircumflexsmall';
+  375 : Result := 'Udieresissmall';
+  376 : Result := 'Yacutesmall';
+  377 : Result := 'Thornsmall';
+  378 : Result := 'Ydieresissmall';
+  379 : Result := '001.000';
+  380 : Result := '001.001';
+  381 : Result := '001.002';
+  382 : Result := '001.003';
+  383 : Result := 'Black';
+  384 : Result := 'Bold';
+  385 : Result := 'Book';
+  386 : Result := 'Light';
+  387 : Result := 'Medium';
+  388 : Result := 'Regular';
+  389 : Result := 'Roman';
+  390 : Result := 'Semibold';
+ end;
 end;
 
 
-{ TPascalTypePostscriptNoticeOperator }
+{ TPascalTypePostscriptDictPair }
 
-class function TPascalTypePostscriptNoticeOperator.GetEncoding: Byte;
+procedure TPascalTypePostscriptDictPair.AddOperand(
+  Operand: TCustomPascalTypePostscriptDictOperand);
 begin
- Result := 1;
+ if Operand = nil
+  then raise EPascalTypeError.Create(RCStrNoOperandSpecified);
+
+ SetLength(FOperands, Length(FOperands) + 1);
+
+ FOperands[Length(FOperands) - 1] := Operand;
+end;
+
+procedure TPascalTypePostscriptDictPair.AssignTo(Dest: TPersistent);
+var
+  OpIndex : Integer;
+begin
+ if Dest is Self.ClassType then
+  with TPascalTypePostscriptDictPair(Dest) do
+   begin
+    SetLength(FOperands, Length(Self.FOperands));
+    for OpIndex := 0 to Length(FOperands) - 1 do
+     begin
+      FOperands[OpIndex] := TCustomPascalTypePostscriptDictOperand(Self.FOperands[OpIndex].ClassType.Create);
+      FOperands[OpIndex].Assign(Self.FOperands[OpIndex]);
+     end;
+
+    FDictOperator := TCustomPascalTypePostscriptDictOperator(Self.FDictOperator.ClassType.Create);
+    FDictOperator.Assign(Self.FDictOperator);
+   end
+ else inherited;
+end;
+
+procedure TPascalTypePostscriptDictPair.ResetToDefaults;
+begin
+ inherited;
+
+ if Assigned(FDictOperator)
+  then FreeAndNil(FDictOperator);
+
+ ClearOperands;
+ SetLength(FOperands, 0);
+end;
+
+procedure TPascalTypePostscriptDictPair.ClearOperands;
+var
+  OperandIndex : Integer;
+begin
+ for OperandIndex := 0 to Length(FOperands) - 1
+  do FreeAndNil(FOperands);  
+end;
+
+destructor TPascalTypePostscriptDictPair.Destroy;
+begin
+ ClearOperands;
+ inherited;
+end;
+
+function TPascalTypePostscriptDictPair.GetOperand(
+  Index: Integer): TCustomPascalTypePostscriptDictOperand;
+begin
+ if (Index >= 0) and (Index < Length(FOperands))
+  then Result := FOperands[Index]
+  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+end;
+
+function TPascalTypePostscriptDictPair.GetOperandCount: Integer;
+begin
+ Result := Length(FOperands);
 end;
 
 
@@ -196,15 +721,38 @@ begin
  SetLength(FData, 0);
 end;
 
+function TPascalTypePostscriptDictDataTable.GetStringIndex(
+  const Index: Integer): Integer;
+var
+  DictIndex : Integer;
+begin
+ for DictIndex := 0 to Length(FData) - 1 do
+  with FData[DictIndex] do
+   if Assigned(DictOperator) then
+    if DictOperator.GetOperator = Index then
+     if OperandCount > 0 then
+      begin
+       Result := Operand[0].AsInteger;
+       Exit;
+      end;
+ raise EPascalTypeError.Create('String index not found');
+end;
+
 procedure TPascalTypePostscriptDictDataTable.LoadFromStream(Stream: TStream);
 var
-  Token  : Byte;
-  Data   : array [0..3] of Byte;
-  Value  : Integer;
-  Nibble : Byte;
-  str    : string;
+  DictOp   : TCustomPascalTypePostscriptDictOperator;
+  Operands : array of TCustomPascalTypePostscriptDictOperand;
+  OpIndex  : Integer;
+  Data     : array [0..3] of Byte;
+  Value    : Integer;
+  str      : string;
+  Nibble   : Byte;
+  Token    : Byte;
 begin
  inherited;
+
+ // initialize DictOp variable
+ DictOp := nil;
 
  with Stream do
   while Position < Size do
@@ -212,44 +760,120 @@ begin
     // read token
     Read(Token, 1);
 
-    // add element
-    SetLength(FData, Length(FData) + 1);
+    // eventually increase value list length
+    if Token in [28..30, 32..254]
+     then SetLength(Operands, Length(Operands) + 1);
+
+    // eventually free operator
+    if Assigned(DictOp)
+     then FreeAndNil(DictOp);
 
     // read element data
     case Token of
-            0 : ; // Version
-            1 : ; // Notice
-            2 : ; // FullName
-            3 : ; // FamilyName
-            4 : ; // Weight
-            5 : ; // FontBBox
-            6 : ; // BlueValues
-            7 : ; // OtherBlues
-            8 : ; // FamilyBlues
-            9 : ; // FamilyOtherBlues
-           10 : ; // StdHW
+            0 : begin
+                 // Version
+                 DictOp := TPascalTypePostscriptVersionOperator.Create;
+                end;
+            1 : begin
+                 // Notice
+                 DictOp := TPascalTypePostscriptNoticeOperator.Create;
+                end;
+            2 : begin
+                 // FullName
+                 DictOp := TPascalTypePostscriptFullNameOperator.Create;
+                end;
+            3 : begin
+                 // FamilyName
+                 DictOp := TPascalTypePostscriptFamilyNameOperator.Create;
+                end;
+            4 : begin
+                 // Weight
+                 DictOp := TPascalTypePostscriptWeightOperator.Create;
+                end;
+            5 : begin
+                 // FontBBox
+                 DictOp := TPascalTypePostscriptFontBBoxOperator.Create;
+                end;
+            6 : begin
+                 // BlueValues
+                 DictOp := TPascalTypePostscriptBlueValuesOperator.Create;
+                end;
+            7 : begin
+                 // OtherBlues
+                 DictOp := TPascalTypePostscriptOtherBluesOperator.Create;
+                end;
+            8 : begin
+                 // FamilyBlues
+                 DictOp := TPascalTypePostscriptFamilyBluesOperator.Create;
+                end;
+            9 : begin
+                 // FamilyOtherBlues
+                 DictOp := TPascalTypePostscriptFamilyOtherBluesOperator.Create;
+                end;
+           10 : begin
+                // StdHW
+                DictOp := TPascalTypePostscriptStdHWOperator.Create;
+               end;
+           11 : begin
+                // StdVW
+                DictOp := TPascalTypePostscriptStdVWOperator.Create;
+               end;
            12 : begin
                  // escape
                  Read(Data[0], 1);
+                 DictOp := TPascalTypePostscriptEscapeOperator.Create;
+                 TPascalTypePostscriptEscapeOperator(DictOp).OpCode := Data[0];
                 end;
-           11 : ; // StdVW
-           13 : ; // UniqueID
-           14 : ; // XUID
-           15 : ; // charset
-           16 : ; // Encoding
-           17 : ; // CharStrings
-           18 : ; // Private
-           19 : ; // Subrs
-           20 : ; // defaultWidthX
-           21 : ; // nominalWidthX
+           13 : begin
+                // UniqueID
+                DictOp := TPascalTypePostscriptUniqueIDOperator.Create;
+               end;
+           14 : begin
+                // XUID
+                DictOp := TPascalTypePostscriptXUIDOperator.Create;
+               end;
+           15 : begin
+                // charset
+                DictOp := TPascalTypePostscriptCharsetOperator.Create;
+               end;
+           16 : begin
+                // Encoding
+                DictOp := TPascalTypePostscriptEncodingOperator.Create;
+               end;
+           17 : begin
+                // CharStrings
+                DictOp := TPascalTypePostscriptCharStringOperator.Create;
+               end;
+           18 : begin
+                // Private
+                DictOp := TPascalTypePostscriptPrivateOperator.Create;
+               end;
+           19 : begin
+                // Subrs
+                DictOp := TPascalTypePostscriptSubrsOperator.Create;
+               end;
+           20 : begin
+                // defaultWidthX
+                DictOp := TPascalTypePostscriptDefaultWidthXOperator.Create;
+               end;
+           21 : begin
+                // nominalWidthX
+                DictOp := TPascalTypePostscriptNominalWidthXOperator.Create;
+               end;
            28 : begin
                  Read(Data[0], 2);
                  Value := (Data[0] shl 8) or Data[1];
+
+                 Operands[Length(Operands) - 1] := TPascalTypePostscriptOperandSmallInt.Create;
+                 TPascalTypePostscriptOperandSmallInt(Operands[Length(Operands) - 1]).Value := Value;
                 end;
            29 : begin
                  Read(Data[0], 4);
                  Value := (Data[0] shl 24) or (Data[1] shl 16) or
                    (Data[2] shl 8) or Data[3];
+
+                 Operands[Length(Operands) - 1] := TPascalTypePostscriptOperandInteger.Create;
+                 TPascalTypePostscriptOperandInteger(Operands[Length(Operands) - 1]).Value := Value;
                 end;
            30 : begin
                  // BCD (real number)
@@ -271,7 +895,7 @@ begin
                      $C : str := str + 'E-';
                      $E : str := str + '-';
                      $F : Break;
-                   else raise EPascalTypeError.Create('CFF Error: Wrong Nibble found!');
+                   else raise EPascalTypeError.Create(RCStrCFFErrorWrongNibble);
                   end;
 
                   // get second nibble
@@ -284,26 +908,69 @@ begin
                      $C : str := str + 'E-';
                      $E : str := str + '-';
                      $F : Break;
-                   else raise EPascalTypeError.Create('CFF Error: Wrong Nibble found!');
+                   else raise EPascalTypeError.Create(RCStrCFFErrorWrongNibble);
                   end;
 
                  until (Nibble = $F);
+
+                 Operands[Length(Operands) - 1] := TPascalTypePostscriptOperandBCD.Create;
+                 TPascalTypePostscriptOperandBCD(Operands[Length(Operands) - 1]).Value := str;
                 end;
-      32..246 : FData[Length(FData) - 1] := Token - 139;
+      32..246 : begin
+                 Value := Token - 139;
+
+                 Operands[Length(Operands) - 1] := TPascalTypePostscriptOperandShortInt.Create;
+                 TPascalTypePostscriptOperandShortInt(Operands[Length(Operands) - 1]).Value := Value;
+                end;
      247..250 : begin
                  Read(Data[0], 1);
                  Value := (Token - 247) shl 8 + Data[0] + 108;
+
+                 Operands[Length(Operands) - 1] := TPascalTypePostscriptOperandComposite.Create;
+                 TPascalTypePostscriptOperandComposite(Operands[Length(Operands) - 1]).Value := Value;
                 end;
      251..254 : begin
                  Read(Data[0], 1);
-                 Value := -(Token - 251) shl 8 - Data[0] - 108
+                 Value := -(Token - 251) shl 8 - Data[0] - 108;
+
+                 Operands[Length(Operands) - 1] := TPascalTypePostscriptOperandComposite.Create;
+                 TPascalTypePostscriptOperandComposite(Operands[Length(Operands) - 1]).Value := Value;
                 end;
-     else raise EPascalTypeError.Create('CFF Error: Wrong Token found!');
+     else raise EPascalTypeError.Create(RCStrCFFErrorWrongToken);
     end;
 
-    // assign value
-    FData[Length(FData) - 1] := Value;
+
+    if Token in [0..21] then
+     begin
+      // add element
+      SetLength(FData, Length(FData) + 1);
+
+      // assign value
+      FData[Length(FData) - 1] := TPascalTypePostscriptDictPair.Create;
+
+      // assign dict operator
+      FData[Length(FData) - 1].DictOperator := DictOp;
+
+      // assign operands
+      for OpIndex := 0 to Length(Operands) - 1
+       do FData[Length(FData) - 1].AddOperand(Operands[OpIndex]);
+
+      // reset operand list length to zero
+      SetLength(Operands, 0);
+
+      // clear operator pointer
+      DictOp := nil;
+     end;
    end;
+
+ // eventually free operand items
+ for OpIndex := 0 to Length(Operands) - 1 do
+  if Assigned(Operands[OpIndex])
+   then Operands[OpIndex].Free;
+
+ // free dictionary operator
+ if Assigned(DictOp)
+  then DictOp := nil;
 end;
 
 procedure TPascalTypePostscriptDictDataTable.SaveToStream(Stream: TStream);
@@ -314,6 +981,8 @@ begin
   begin
 
   end;
+
+ raise EPascalTypeError.Create(RCStrNotImplemented); 
 end;
 
 
@@ -466,6 +1135,66 @@ begin
 end;
 
 
+{ TPascalTypePostscriptStringIndexTable }
+
+procedure TPascalTypePostscriptStringIndexTable.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TPascalTypePostscriptStringIndexTable(Dest) do
+   begin
+    FStrings := Self.FStrings;
+   end
+  else inherited;
+end;
+
+procedure TPascalTypePostscriptStringIndexTable.ResetToDefaults;
+begin
+ inherited;
+ SetLength(FStrings, 0);
+end;
+
+function TPascalTypePostscriptStringIndexTable.GetString(
+  Index: Integer): string;
+begin
+ if (Index >= 0) then
+  if Index <= 391 then Result := GetStandardString(Index) else
+  if Index - 391 < Length(FStrings)
+   then Result := FStrings[Index - 391]
+   else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index])
+  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);  
+end;
+
+function TPascalTypePostscriptStringIndexTable.GetStringCount: Integer;
+begin
+ Result := Length(FStrings);
+end;
+
+procedure TPascalTypePostscriptStringIndexTable.ReadData(Index: Integer;
+  Stream: TStream);
+begin
+ // eventually extend font String array
+ if Index >= Length(FStrings)
+  then SetLength(FStrings, Index + 1);
+
+ // set length of string
+ SetLength(FStrings[Index], Stream.Size);
+
+ // read actual string
+ Stream.Read(FStrings[Index][1], Stream.Size);
+end;
+
+procedure TPascalTypePostscriptStringIndexTable.WriteData(Index: Integer;
+  Stream: TStream);
+begin
+ // check if index exceeds the list
+ if (Index < 0) or (Index >= Length(FStrings))
+  then raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+
+ // read actual string
+ Stream.Write(FStrings[Index][1], Length(FStrings[Index]));
+end;
+
+
 { TPascalTypePostscriptTopDictIndexTable }
 
 destructor TPascalTypePostscriptTopDictIndexTable.Destroy;
@@ -474,12 +1203,33 @@ begin
  inherited;
 end;
 
+function TPascalTypePostscriptTopDictIndexTable.GetStringIndex(
+  Index: Integer; DictIndex: Integer): Integer;
+begin
+ if (DictIndex >= 0) and (DictIndex < Length(FDict))
+  then Result := FDict[DictIndex].GetStringIndex(Index)
+  else raise EPascalTypeError.CreateFmt(RCStrIndexOutOfBounds, [DictIndex]);
+end;
+
 procedure TPascalTypePostscriptTopDictIndexTable.AssignTo(Dest: TPersistent);
+var
+  DictIndex : Integer;
 begin
  if Dest is Self.ClassType then
   with TPascalTypePostscriptTopDictIndexTable(Dest) do
    begin
+    // clear existing dictionary entries
+    ClearDict;
 
+    // set length of new dictionary
+    SetLength(FDict, Length(Self.FDict));
+
+    // create and assign dictionary entries
+    for DictIndex := 0 to Length(FDict) - 1 do
+     begin
+      FDict[DictIndex] := TPascalTypePostscriptDictDataTable.Create;
+      FDict[DictIndex].Assign(Self.FDict[DictIndex]);
+     end;
    end
  else inherited;
 end;
@@ -502,15 +1252,13 @@ end;
 procedure TPascalTypePostscriptTopDictIndexTable.ReadData(Index: Integer;
   Stream: TStream);
 begin
- // eventually extend font name array
+ // eventually extend font name array or reset dict to default
  if Index >= Length(FDict) then
   begin
    SetLength(FDict, Index + 1);
    FDict[Length(FDict) - 1] := TPascalTypePostscriptDictDataTable.Create;
-  end;
-
- // reset dict to default
- FDict[Length(FDict) - 1].ResetToDefaults;
+  end
+ else FDict[Length(FDict) - 1].ResetToDefaults;
 
  // load dict from stream
  FDict[Length(FDict) - 1].LoadFromStream(Stream);
@@ -530,6 +1278,8 @@ constructor TPascalTypeCompactFontFormatTable.Create(
 begin
  FNameTable := TPascalTypePostscriptNameIndexTable.Create;
  FTopDictTable := TPascalTypePostscriptTopDictIndexTable.Create;
+ FStringTable := TPascalTypePostscriptStringIndexTable.Create;
+ FGlobalTable := TPascalTypePostscriptStringIndexTable.Create;
  inherited;
 end;
 
@@ -537,6 +1287,8 @@ destructor TPascalTypeCompactFontFormatTable.Destroy;
 begin
  FreeAndNil(FNameTable);
  FreeAndNil(FTopDictTable);
+ FreeAndNil(FStringTable);
+ FreeAndNil(FGlobalTable);
  inherited;
 end;
 
@@ -550,6 +1302,8 @@ begin
     FOffSize      := Self.FOffSize;
     FNameTable.Assign(Self.FNameTable);
     FTopDictTable.AssignTo(Self.FTopDictTable);
+    FStringTable.AssignTo(Self.FStringTable);
+    FGlobalTable.AssignTo(Self.FGlobalTable);
    end
   else inherited;
 end;
@@ -566,6 +1320,76 @@ begin
  Result := 'CFF ';
 end;
 
+function TPascalTypeCompactFontFormatTable.GetFamilyNameString: string;
+var
+  StringIndex : Integer;
+begin
+ Result := '';
+
+ try
+  StringIndex := FTopDictTable.FamilyNameStringIndex[0];
+  Result := FStringTable.StringItem[StringIndex];
+ except
+  // do nothing;
+ end;
+end;
+
+function TPascalTypeCompactFontFormatTable.GetFullNameString: string;
+var
+  StringIndex : Integer;
+begin
+ Result := '';
+
+ try
+  StringIndex := FTopDictTable.FullNameStringIndex[0];
+  Result := FStringTable.StringItem[StringIndex];
+ except
+  // do nothing;
+ end;
+end;
+
+function TPascalTypeCompactFontFormatTable.GetNoticeString: string;
+var
+  StringIndex : Integer;
+begin
+ Result := '';
+
+ try
+  StringIndex := FTopDictTable.NoticeStringIndex[0];
+  Result := FStringTable.StringItem[StringIndex];
+ except
+  // do nothing;
+ end;
+end;
+
+function TPascalTypeCompactFontFormatTable.GetVersionString: string;
+var
+  StringIndex : Integer;
+begin
+ Result := '';
+
+ try
+  StringIndex := FTopDictTable.VersionStringIndex[0];
+  Result := FStringTable.StringItem[StringIndex];
+ except
+  // do nothing;
+ end;
+end;
+
+function TPascalTypeCompactFontFormatTable.GetWeightStringIndex: string;
+var
+  StringIndex : Integer;
+begin
+ Result := '';
+
+ try
+  StringIndex := FTopDictTable.WeightStringIndex[0];
+  Result := FStringTable.StringItem[StringIndex];
+ except
+  // do nothing;
+ end;
+end;
+
 procedure TPascalTypeCompactFontFormatTable.ResetToDefaults;
 begin
  inherited;
@@ -574,6 +1398,8 @@ begin
  FOffSize      := 0;
  FNameTable.ResetToDefaults;
  FTopDictTable.ResetToDefaults;
+ FStringTable.ResetToDefaults;
+ FGlobalTable.ResetToDefaults;
 end;
 
 procedure TPascalTypeCompactFontFormatTable.LoadFromStream(Stream: TStream);
@@ -612,6 +1438,12 @@ begin
 
    // read top dict table from stream
    FTopDictTable.LoadFromStream(Stream);
+
+   // read string table from stream
+   FStringTable.LoadFromStream(Stream);
+
+   // read global sub-string table from stream
+   FGlobalTable.LoadFromStream(Stream);
   end;
 end;
 
@@ -757,6 +1589,62 @@ begin
   end;
 end;
 
+
+////////////////////////////////////////////////////////////////////////////////
+
+function IsOperatorClassRegistered(OperatorClass: TPascalTypePostscriptDictOperatorClass): Boolean;
+var
+  OperatorClassIndex : Integer;
+begin
+ Result := False;
+ for OperatorClassIndex := 0 to Length(GOperatorClasses) - 1 do
+  if GOperatorClasses[OperatorClassIndex] = OperatorClass then
+   begin
+    Result := True;
+    Exit;
+   end;
+end;
+
+procedure RegisterOperator(OperatorClass: TPascalTypePostscriptDictOperatorClass);
+begin
+ Assert(IsOperatorClassRegistered(OperatorClass) = False);
+ SetLength(GOperatorClasses, Length(GOperatorClasses) + 1);
+ GOperatorClasses[Length(GOperatorClasses) - 1] := OperatorClass;
+end;
+
+procedure RegisterOperators(OperatorClasses: array of TPascalTypePostscriptDictOperatorClass);
+var
+  OperatorClassIndex : Integer;
+begin
+ for OperatorClassIndex := 0 to Length(OperatorClasses) - 1
+  do RegisterOperator(OperatorClasses[OperatorClassIndex]);
+end;
+
+function FindOperatorByEncoding(Encoding: Byte): TPascalTypePostscriptDictOperatorClass;
+var
+  OperatorClassIndex : Integer;
+begin
+ Result := nil;
+ for OperatorClassIndex := 0 to Length(GOperatorClasses) - 1 do
+  if GOperatorClasses[OperatorClassIndex].GetOperator = Encoding then
+   begin
+    Result := GOperatorClasses[OperatorClassIndex];
+    Exit;
+   end;
+// raise EPascalTypeError.Create('Unknown Table Class: ' + TableType);
+end;
+
+{ TCustomPascalTypePostscriptDictOperator }
+
+procedure TCustomPascalTypePostscriptDictOperator.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TCustomPascalTypePostscriptDictOperator(Dest) do
+   if GetOperator = Self.GetOperator
+    then
+    else inherited
+  else inherited;
+end;
 
 initialization
   RegisterPascalTypeTables([TPascalTypeCompactFontFormatTable,

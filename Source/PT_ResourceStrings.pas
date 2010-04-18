@@ -35,12 +35,17 @@ interface
 {$I PT_Compiler.inc}
 
 resourcestring
+  RCStrAddendumTableUndefined = 'Addendum Table undefined!';
+  RCStrCFFErrorWrongNibble = 'CFF Error: Wrong Nibble found!';
+  RCStrCFFErrorWrongToken = 'CFF Error: Wrong Token found!';
+  RCStrCFFIndexFirstOffsetError = 'CFF Index: First Offset Error (%d)';
   RCStrCharMapError = 'Error in character map';
   RCStrCharMapErrorEndCount = 'Error in Character Map: wrong end count (%d)';
   RCStrCharMapErrorIdDelta = 'Error in Character Map: wrong ID delta (%d)';
   RCStrCharMapErrorReserved = 'Error in Character Map: wrong reserved value (%d)';
   RCStrCharMapErrorStartCount = 'Error in Character Map: wrong start count (%d)';
   RCStrChecksumError = 'Checksum error at table ''%s''';
+  RCStrCodePageRangeTableUndefined = 'Code Page Range Table undefined!';
   RCStrCompositeGlyphFlagError = 'Composite Glyph Flag Error';
   RCStrErrorInKerningSubTable = 'Error in kerning subtable format 0';
   RCStrGlyphDataFlagRepeatError = 'Flag repeat error: %d / %d';
@@ -60,6 +65,7 @@ resourcestring
   RCStrNoMagic = 'There is no magic in it!';
   RCStrNoMaximumProfileTable = 'Maximum profile table not found!';
   RCStrNoNameTable = 'Name table not found!';
+  RCStrNoOperandSpecified = 'No operand specified';
   RCStrNoOS2Table = 'OS/2 table not found!';
   RCStrNoPostscriptTable = 'Postscript table not found!';
   RCStrNotImplemented = 'not implemented';
@@ -88,8 +94,6 @@ resourcestring
   RCStrWrongMajorVersion = 'Wrong major version (%d)';
   RCStrWrongRangeShift = 'Wrong range shift!';
   RCStrWrongSearchRange = 'Wrong search range!';
-  RCStrCodePageRangeTableUndefined = 'Code Page Range Table undefined!';
-  RCStrAddendumTableUndefined = 'Addendum Table undefined!';
   {$IFDEF ValidateEveryReadOperation}
   RCStrStreamReadError = 'Stream read error!';
   {$ENDIF}
