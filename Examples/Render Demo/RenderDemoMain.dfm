@@ -1,6 +1,6 @@
 object FmRenderDemo: TFmRenderDemo
-  Left = 270
-  Top = 140
+  Left = 322
+  Top = 97
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'PascalType Render Demo'
@@ -64,7 +64,6 @@ object FmRenderDemo: TFmRenderDemo
     Width = 154
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 1
     OnChange = CbFontChange
   end
@@ -79,7 +78,6 @@ object FmRenderDemo: TFmRenderDemo
     Font.Height = -11
     Font.Name = 'MS Sans Serif'
     Font.Style = []
-    ItemHeight = 13
     ItemIndex = 8
     ParentFont = False
     TabOrder = 2

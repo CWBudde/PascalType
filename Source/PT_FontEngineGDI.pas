@@ -119,11 +119,11 @@ begin
     tmDigitizedAspectY := PixelPerInchY;
 
     if WideChar(UnicodeFirstCharacterIndex) < #$FF
-     then tmFirstChar := Char(UnicodeFirstCharacterIndex)
+     then tmFirstChar := AnsiChar(UnicodeFirstCharacterIndex)
      else tmFirstChar := #$FF;
 
     if WideChar(UnicodeLastCharacterIndex) < #$FF
-     then tmLastChar := Char(UnicodeLastCharacterIndex)
+     then tmLastChar := AnsiChar(UnicodeLastCharacterIndex)
      else tmLastChar := #$FF;
 
     tmItalic := Integer(fsfItalic in FontSelectionFlags);

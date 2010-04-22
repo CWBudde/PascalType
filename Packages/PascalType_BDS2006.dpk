@@ -1,6 +1,5 @@
 package PascalType_BDS2006;
 
-{$R *.res}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
@@ -32,18 +31,24 @@ requires
   rtl;
 
 contains
+  PT_CharacterMap in '..\Source\PT_CharacterMap.pas',
+  PT_Classes in '..\Source\PT_Classes.pas',
   PT_Component in '..\Source\PT_Component.pas',
-  PT_Storage in '..\Source\PT_Storage.pas',
-  PT_StorageSFNT in '..\Source\PT_StorageSFNT.pas',
-  PT_StorageEOT in '..\Source\PT_StorageEOT.pas',
+  PT_FontEngine in '..\Source\PT_FontEngine.pas',
+  PT_FontEngineGDI in '..\Source\PT_FontEngineGDI.pas',
+  PT_Math in '..\Source\PT_Math.pas',
   PT_ResourceStrings in '..\Source\PT_ResourceStrings.pas',
+  PT_Storage in '..\Source\PT_Storage.pas',
+  PT_StorageEOT in '..\Source\PT_StorageEOT.pas',
+  PT_StorageSFNT in '..\Source\PT_StorageSFNT.pas',
+  PT_TableDirectory in '..\Source\PT_TableDirectory.pas',
   PT_Tables in '..\Source\PT_Tables.pas',
   PT_TablesOpenType in '..\Source\PT_TablesOpenType.pas',
   PT_TablesOpenTypeFeatures in '..\Source\PT_TablesOpenTypeFeatures.pas',
   PT_TablesOpenTypeLanguages in '..\Source\PT_TablesOpenTypeLanguages.pas',
   PT_TablesOpenTypeScripts in '..\Source\PT_TablesOpenTypeScripts.pas',
   PT_TablesOptional in '..\Source\PT_TablesOptional.pas',
+  PT_TablesTrueType in '..\Source\PT_TablesTrueType.pas',
   PT_Types in '..\Source\PT_Types.pas';
 
 end.
-

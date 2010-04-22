@@ -33,8 +33,9 @@ requires
 contains
   PT_ByteCodeInterpreter in '..\Source\PT_ByteCodeInterpreter.pas',
   PT_Component in '..\Source\PT_Component.pas',
-  PT_Interpreter in '..\Source\PT_Interpreter.pas',
-  PT_Rasterizer in '..\Source\PT_Rasterizer.pas',
+  PT_Storage in '..\Source\PT_Storage.pas',
+  PT_FontEngine in '..\Source\PT_FontEngine.pas',
+  PT_FontEngineGDI in '..\Source\PT_FontEngineGDI.pas',
   PT_ResourceStrings in '..\Source\PT_ResourceStrings.pas',
   PT_TableDirectory in '..\Source\PT_TableDirectory.pas',
   PT_Tables in '..\Source\PT_Tables.pas',

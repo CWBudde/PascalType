@@ -99,7 +99,7 @@ type
     property AsString: string read GetAsString;
   end;
 
-  TPascalTypePostscriptDictPair = class(TCustomPascalTypeTable)
+  TPascalTypePostscriptDictPair = class(TPersistent)
   private
     FOperands     : array of TCustomPascalTypePostscriptDictOperand;
     FDictOperator : TCustomPascalTypePostscriptDictOperator;
@@ -108,7 +108,7 @@ type
     procedure ClearOperands;
   protected
     procedure AssignTo(Dest: TPersistent); override;
-    procedure ResetToDefaults; override;
+    procedure Clear; virtual;
   public
     destructor Destroy; override;
     procedure AddOperand(Operand: TCustomPascalTypePostscriptDictOperand);
@@ -664,7 +664,7 @@ begin
  else inherited;
 end;
 
-procedure TPascalTypePostscriptDictPair.ResetToDefaults;
+procedure TPascalTypePostscriptDictPair.Clear;
 begin
  inherited;
 
