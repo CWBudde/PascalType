@@ -3427,8 +3427,8 @@ procedure TCustomPascalTypePanoseTable.AssignTo(Dest: TPersistent);
 begin
  if Dest is Self.ClassType then
   with TCustomPascalTypePanoseTable(Dest)
-   do FData := Self.FData;
- inherited;
+   do FData := Self.FData
+  else inherited;
 end;
 
 procedure TCustomPascalTypePanoseTable.ResetToDefaults;

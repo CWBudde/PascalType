@@ -255,7 +255,6 @@ begin
    CbFont.ItemIndex := CbFont.Items.Count - 1;
    FontName := CurrentFontName;
   end;
-
 end;
 
 end.

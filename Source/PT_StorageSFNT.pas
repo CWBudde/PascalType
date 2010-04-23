@@ -53,6 +53,7 @@ type
     function GetFontFamilyName: WideString;
     function GetFontSubFamilyName: WideString;
     function GetFontVersion: WideString;
+    function GetUniqueIdentifier: WideString;
   protected
     function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; virtual; abstract;
     function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; virtual; abstract;
@@ -82,6 +83,7 @@ type
     property FontStyle: TFontStyles read GetFontStyle;
     property FontSubFamilyName: WideString read GetFontSubFamilyName;
     property FontVersion: WideString read GetFontVersion;
+    property UniqueIdentifier: WideString read GetUniqueIdentifier;
   end;
 
   TPascalTypeStorageScan = class(TCustomPascalTypeStorageSFNT)
@@ -255,6 +257,8 @@ begin
    with NameSubTable[NameSubTableIndex] do
     {$IFDEF MSWINDOWS}
     if PlatformID = piMicrosoft then
+    {$ELSE}
+    if PlatformID = piUnicode then
     {$ENDIF}
       if NameID = niFamily then
        begin
@@ -272,12 +276,18 @@ begin
    with NameSubTable[NameSubTableIndex] do
     {$IFDEF MSWINDOWS}
     if PlatformID = piMicrosoft then
+    {$ELSE}
+    if PlatformID = piUnicode then
     {$ENDIF}
-      if NameID = niSubfamily then
-       begin
-        Result := Name;
-        Exit;
-       end;
+     if NameID = niSubfamily then
+      begin
+       Result := Name;
+       {$IFDEF MSWINDOWS}
+       if LanguageID = 1033 then Exit;
+       {$ELSE}
+       Exit;
+       {$ENDIF}
+      end;
 end;
 
 function TCustomPascalTypeStorageSFNT.GetFontVersion: WideString;
@@ -289,12 +299,41 @@ begin
    with NameSubTable[NameSubTableIndex] do
     {$IFDEF MSWINDOWS}
     if PlatformID = piMicrosoft then
+    {$ELSE}
+    if PlatformID = piUnicode then
     {$ENDIF}
-      if NameID = niVersion then
-       begin
-        Result := Name;
-        Exit;
-       end;
+     if NameID = niVersion then
+      begin
+       Result := Name;
+       {$IFDEF MSWINDOWS}
+       if LanguageID = 1033 then Exit;
+       {$ELSE}
+       Exit;
+       {$ENDIF}
+      end;
+end;
+
+function TCustomPascalTypeStorageSFNT.GetUniqueIdentifier: WideString;
+var
+  NameSubTableIndex : Integer;
+begin
+ with FNameTable do
+  for NameSubTableIndex := 0 to NameSubTableCount - 1 do
+   with NameSubTable[NameSubTableIndex] do
+    {$IFDEF MSWINDOWS}
+    if PlatformID = piMicrosoft then
+    {$ELSE}
+    if PlatformID = piUnicode then
+    {$ENDIF}
+     if NameID = niUniqueIdentifier then
+      begin
+       Result := Name;
+       {$IFDEF MSWINDOWS}
+       if LanguageID = 1033 then Exit;
+       {$ELSE}
+       Exit;
+       {$ENDIF}
+      end;
 end;
 
 function TCustomPascalTypeStorageSFNT.GetFontName: WideString;
@@ -306,11 +345,17 @@ begin
    with NameSubTable[NameSubTableIndex] do
     {$IFDEF MSWINDOWS}
     if PlatformID = piMicrosoft then
+    {$ELSE}
+    if PlatformID = piUnicode then
     {$ENDIF}
-      if NameID = niFullName then
-       begin
-        Result := Name;
-        Exit;
+     if NameID = niFullName then
+      begin
+       Result := Name;
+       {$IFDEF MSWINDOWS}
+       if LanguageID = 1033 then Exit;
+       {$ELSE}
+       Exit;
+       {$ENDIF}
        end;
 end;
 

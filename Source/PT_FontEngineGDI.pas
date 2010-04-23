@@ -60,10 +60,18 @@ type
     function GetTextExtentPoint32W(Text: WideString; var Size: TSize): Boolean;
   end;
 
+function ConvertLocalPointerToGlobalPointer(Local, Base: Pointer): Pointer;
+
 implementation
 
 uses
-  Math;
+  Math, PT_StorageSFNT;
+
+function ConvertLocalPointerToGlobalPointer(Local, Base: Pointer): Pointer;
+begin
+ Result := Pointer(Integer(Base) + Integer(Local));
+end;
+
 
 { TPascalTypeFontEngineGDI }
 
@@ -386,17 +394,39 @@ end;
 
 function TPascalTypeFontEngineGDI.GetOutlineTextMetricsW(
   Buffersize: Cardinal; OutlineTextMetric: Pointer): Cardinal;
+var
+  FamilyNameStr : WideString;
+  FaceNameStr   : WideString;
+  StyleNameStr  : WideString;
+  FullNameStr   : WideString;
 begin
+ // check if OS/2 table exists (as it is not necessary in the true type spec
+ if not Assigned(Storage.OS2Table) then
+  begin
+   Result := 0;
+   FillChar(OutlineTextMetric^, Buffersize, 0);
+   Exit;
+  end;
+
+ // get font string information
+ with Storage, OS2Table do
+  begin
+   FamilyNameStr := FontFamilyName + #0;
+   FaceNameStr   := FontName + #0;
+   StyleNameStr  := FontSubFamilyName + #0;
+   FullNameStr   := UniqueIdentifier + #0;
+  end;
+
  // check if OutlineTextMetric buffer is passed, if not return the necessary size
  if OutlineTextMetric = nil then
   begin
-   Result := SizeOf(TOutlineTextmetricW);
+   Result := SizeOf(TOutlineTextmetricW) + 2 * (Length(FamilyNameStr) +
+     Length(FaceNameStr) + Length(StyleNameStr) + Length(FullNameStr));
    Exit;
   end;
 
  // check if OS/2 table exists (as it is not necessary in the true type spec
- if not Assigned(Storage.OS2Table) or
-    (Buffersize < SizeOf(TOutlineTextmetricW)) then
+ if (Buffersize < SizeOf(TOutlineTextmetricW)) then
   begin
    Result := 0;
    if Buffersize < SizeOf(TOutlineTextmetricW)
@@ -407,7 +437,8 @@ begin
 
  with Storage, OS2Table, POutlineTextmetricW(OutlineTextMetric)^ do
   begin
-   otmSize := SizeOf(TOutlineTextmetricW);
+   otmSize := SizeOf(TOutlineTextmetricW) + 2 * (Length(FamilyNameStr) +
+     Length(FaceNameStr) + Length(StyleNameStr) + Length(FullNameStr));
 
    // get text metrics
    GetTextMetricsW(otmTextMetrics);
@@ -467,8 +498,8 @@ begin
 
    // copy panose data
    Panose := Storage.Panose;
-   if Assigned(Panose) then
-    with otmPanoseNumber, Panose do
+   if Assigned(Storage.Panose) then
+    with otmPanoseNumber, Storage.Panose do
      begin
       bFamilyType      := FamilyType;
       bSerifStyle      := Data[0];
@@ -484,10 +515,16 @@ begin
     else Exit;
 
    // do not fill strings yet
-   otmpFamilyName := nil;
-   otmpFaceName := nil;
-   otmpStyleName := nil;
-   otmpFullName := nil;
+   otmpFamilyName := PAnsiChar(SizeOf(TOutlineTextmetricW));
+   otmpFaceName := PAnsiChar(SizeOf(TOutlineTextmetricW) + 2 * Length(FamilyNameStr));
+   otmpStyleName := PAnsiChar(SizeOf(TOutlineTextmetricW) + 2 * (Length(FamilyNameStr) + Length(FaceNameStr)));
+   otmpFullName := PAnsiChar(SizeOf(TOutlineTextmetricW) + 2 * (Length(FamilyNameStr) + Length(FaceNameStr) + Length(StyleNameStr)));
+
+   // copy string data
+   StrPCopy(ConvertLocalPointerToGlobalPointer(otmpFamilyName, OutlineTextMetric), FamilyNameStr);
+   StrPCopy(ConvertLocalPointerToGlobalPointer(otmpFaceName, OutlineTextMetric), FaceNameStr);
+   StrPCopy(ConvertLocalPointerToGlobalPointer(otmpStyleName, OutlineTextMetric), StyleNameStr);
+   StrPCopy(ConvertLocalPointerToGlobalPointer(otmpFullName, OutlineTextMetric), FullNameStr);
 
    Result := 0;
   end;

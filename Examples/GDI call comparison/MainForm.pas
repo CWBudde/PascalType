@@ -205,10 +205,10 @@ begin
     GetOutlineTextMetricsW(DC, Buffersize, TextMetricGDI);
     with TextMetricGDI^ do
      begin
-      if Integer(otmpFamilyName) <> 0 then otmpFamilyName := PWChar(Integer(TextMetricGDI) + Integer(otmpFamilyName));
-      if Integer(otmpFaceName) <> 0 then otmpFaceName := PWChar(Integer(TextMetricGDI) + Integer(otmpFaceName));
-      if Integer(otmpStyleName) <> 0 then otmpStyleName := PWChar(Integer(TextMetricGDI) + Integer(otmpStyleName));
-      if Integer(otmpFullName) <> 0 then otmpFullName := PWChar(Integer(TextMetricGDI) + Integer(otmpFullName));
+      if Integer(otmpFamilyName) <> 0 then otmpFamilyName := PAnsiChar(Integer(TextMetricGDI) + Integer(otmpFamilyName));
+      if Integer(otmpFaceName) <> 0 then otmpFaceName := PAnsiChar(Integer(TextMetricGDI) + Integer(otmpFaceName));
+      if Integer(otmpStyleName) <> 0 then otmpStyleName := PAnsiChar(Integer(TextMetricGDI) + Integer(otmpStyleName));
+      if Integer(otmpFullName) <> 0 then otmpFullName := PAnsiChar(Integer(TextMetricGDI) + Integer(otmpFullName));
      end;
     OutlineTextMetricToMemo(TextMetricGDI^, MemoGDI);
    finally
@@ -224,6 +224,13 @@ begin
  FillChar(BufferPT^, BufferSize, 0);
  try
   FFontEngine.GetOutlineTextMetricsW(Buffersize, TextMetricPT);
+  with TextMetricPT^ do
+   begin
+    if Integer(otmpFamilyName) <> 0 then otmpFamilyName := ConvertLocalPointerToGlobalPointer(otmpFamilyName, TextMetricPT);
+    if Integer(otmpFaceName) <> 0 then otmpFaceName := ConvertLocalPointerToGlobalPointer(otmpFaceName, TextMetricPT);
+    if Integer(otmpStyleName) <> 0 then otmpStyleName := ConvertLocalPointerToGlobalPointer(otmpStyleName, TextMetricPT);
+    if Integer(otmpFullName) <> 0 then otmpFullName := ConvertLocalPointerToGlobalPointer(otmpFullName, TextMetricPT);
+   end;
   OutlineTextMetricToMemo(TextMetricPT^, MemoPT);
  finally
   Dispose(BufferPT);
@@ -274,10 +281,10 @@ begin
    Memo.Lines.Add('Underscore Size: ' + IntToStr(otmsUnderscoreSize));
    Memo.Lines.Add('Underscore Position: ' + IntToStr(otmsUnderscorePosition));
 
-   Memo.Lines.Add('Family Name: ' + otmpFamilyName);
-   Memo.Lines.Add('Face Name: ' + otmpFaceName);
-   Memo.Lines.Add('Style Name: ' + otmpStyleName);
-   Memo.Lines.Add('Full Name: ' + otmpFullName);
+   Memo.Lines.Add('Family Name: ' + PWideChar(otmpFamilyName));
+   Memo.Lines.Add('Face Name: ' + PWideChar(otmpFaceName));
+   Memo.Lines.Add('Style Name: ' + PWideChar(otmpStyleName));
+   Memo.Lines.Add('Full Name: ' + PWideChar(otmpFullName));
   end;
 end;
 

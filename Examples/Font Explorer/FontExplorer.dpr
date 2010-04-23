@@ -3,13 +3,12 @@ program FontExplorer;
 {$I PT_Compiler.inc}
 {$R '..\..\Resource\Default.res' '..\..\Resource\Default.rc'}
 
-// if the first 3 units are missing feel free to download the according library
+// if the first 2 units are missing feel free to download the according library
 // or simply remove them from the uses section without major problems
 
 uses
   FastMM4,
   FastMove,
-  RTLVCLOptimize,
   Forms,
   PT_ByteCodeInterpreter in '..\..\Source\PT_ByteCodeInterpreter.pas',
   PT_CharacterMap in '..\..\Source\PT_CharacterMap.pas',
