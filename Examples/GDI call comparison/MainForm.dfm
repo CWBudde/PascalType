@@ -71,7 +71,7 @@ object FmComparison: TFmComparison
     TabOrder = 3
     OnClick = BtCompareGetOutlineTextMetricsClick
   end
-  object BtCompareTextExtentPoint32: TButton
+  object BtCompareGetTextExtentPoint32: TButton
     Left = 335
     Top = 445
     Width = 170
@@ -79,6 +79,16 @@ object FmComparison: TFmComparison
     Anchors = [akLeft, akBottom]
     Caption = 'Compare Get&TextExtentPoint32'
     TabOrder = 4
-    OnClick = BtCompareTextExtentPoint32Click
+    OnClick = BtCompareGetTextExtentPoint32Click
+  end
+  object BtCompareGetGlyphOutline: TButton
+    Left = 511
+    Top = 445
+    Width = 63
+    Height = 25
+    Anchors = [akLeft, akBottom]
+    Caption = '&Glyph'
+    TabOrder = 5
+    OnClick = BtCompareGetGlyphOutlineClick
   end
 end

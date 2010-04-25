@@ -14,19 +14,23 @@ type
     MemoPT: TMemo;
     BtCompareGetTextMetrics: TButton;
     BtCompareGetOutlineTextMetrics: TButton;
-    BtCompareTextExtentPoint32: TButton;
+    BtCompareGetTextExtentPoint32: TButton;
+    BtCompareGetGlyphOutline: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtCompareGetTextMetricsClick(Sender: TObject);
     procedure BtCompareGetOutlineTextMetricsClick(Sender: TObject);
-    procedure BtCompareTextExtentPoint32Click(Sender: TObject);
+    procedure BtCompareGetTextExtentPoint32Click(Sender: TObject);
+    procedure BtCompareGetGlyphOutlineClick(Sender: TObject);
   private
     FFontEngine      : TPascalTypeFontEngineGDI;
     FCurrentFontSize : Integer;
     procedure TextMetricToMemo(TextMetric: TTextMetricW; Memo: TMemo);
     procedure OutlineTextMetricToMemo(TextMetric: TOutlineTextmetricW; Memo: TMemo);
+    procedure GlyphMetricToMemo(GlyphMetrics: TGlyphMetrics; Memo: TMemo);
   protected
-    procedure CompareOutlineTextMetrics;
+    procedure CompareGetGlyphOutline;
+    procedure CompareGetOutlineTextMetrics;
     procedure CompareGetTextMetrics;
     procedure CompareGetTextExtentPoint32;
   public
@@ -62,9 +66,14 @@ begin
  FreeAndNil(FFontEngine);
 end;
 
+procedure TFmComparison.BtCompareGetGlyphOutlineClick(Sender: TObject);
+begin
+ CompareGetGlyphOutline;
+end;
+
 procedure TFmComparison.BtCompareGetOutlineTextMetricsClick(Sender: TObject);
 begin
- CompareOutlineTextMetrics;
+ CompareGetOutlineTextMetrics;
 end;
 
 procedure TFmComparison.BtCompareGetTextMetricsClick(Sender: TObject);
@@ -73,7 +82,7 @@ begin
  FCurrentFontSize := FCurrentFontSize + 2;
 end;
 
-procedure TFmComparison.BtCompareTextExtentPoint32Click(Sender: TObject);
+procedure TFmComparison.BtCompareGetTextExtentPoint32Click(Sender: TObject);
 begin
  CompareGetTextExtentPoint32;
 end;
@@ -176,7 +185,7 @@ begin
   end;
 end;
 
-procedure TFmComparison.CompareOutlineTextMetrics;
+procedure TFmComparison.CompareGetOutlineTextMetrics;
 var
   BufferGDI     : Pointer;
   TextMetricGDI : POutlineTextmetricW absolute BufferGDI;
@@ -326,6 +335,7 @@ begin
    Style := [];
    Size := FCurrentFontSize;
 
+   Str := ''; TestGDI;
    Str := '_'; TestGDI;
    Str := '.'; TestGDI;
    Str := 'x'; TestGDI;
@@ -342,6 +352,7 @@ begin
  // PascalType
  MemoPT.Clear;
  FFontEngine.FontSize := FCurrentFontSize;
+ Str := ''; TestPT;
  Str := '_'; TestPT;
  Str := '.'; TestPT;
  Str := 'x'; TestPT;
@@ -351,6 +362,93 @@ begin
  Str := 'T.'; TestPT;
  Str := 'H.'; TestPT;
  Str := 'T."F.'; TestPT;
+end;
+
+procedure TFmComparison.CompareGetGlyphOutline;
+var
+  BufferGDI       : Pointer;
+  BufferPT        : Pointer;
+  Character       : WCHAR;
+  GlyphMetricsGDI : TGlyphMetrics;
+  GlyphMetricsPT  : TGlyphMetrics;
+  Font            : TFont;
+  DC              : HDC;
+  BufferSize      : Cardinal;
+  Transform       : TMat2;
+begin
+ // set transform
+ with Transform do
+  begin
+   eM11.value := 1;
+   eM12.value := 0;
+   eM21.value := 0;
+   eM22.value := 1;
+   eM11.fract := 0;
+   eM12.fract := 0;
+   eM21.fract := 0;
+   eM22.fract := 0;
+  end;
+
+ Character := 'A';
+
+ // GDI
+ Font := TFont.Create;
+ with Font do
+  try
+   Name := 'Arial';
+   Style := [Graphics.fsBold..Graphics.fsItalic];
+   Size := FCurrentFontSize;
+
+   DC := Self.Canvas.Handle;
+   SelectObject(DC, Font.Handle);
+
+   // determine buffer size
+   BufferSize := GetGlyphOutlineW(DC, Ord(Character), 0, GlyphMetricsGDI, 0,
+     nil, Transform);
+   GetMem(BufferGDI, BufferSize);
+   FillChar(BufferGDI^, BufferSize, 0);
+   try
+    GetGlyphOutlineW(DC, Ord(Character), 0, GlyphMetricsGDI, 0, nil, Transform);
+
+    GlyphMetricToMemo(GlyphMetricsGDI, MemoGDI)
+   finally
+    Dispose(BufferGDI);
+   end;
+  finally
+   FreeAndNil(Font);
+  end;
+
+ FFontEngine.FontSize := FCurrentFontSize;
+
+ // determine buffer size
+ BufferSize := FFontEngine.GetGlyphOutlineW(Ord(Character), 0, GlyphMetricsPT, 0,
+   nil, Transform);
+ GetMem(BufferPT, BufferSize);
+ FillChar(BufferPT^, BufferSize, 0);
+ try
+  FFontEngine.GetGlyphOutlineW(Ord(Character), 0, GlyphMetricsPT, 0, nil, Transform);
+
+  GlyphMetricToMemo(GlyphMetricsPT, MemoPT)
+ finally
+  Dispose(BufferPT);
+ end;
+end;
+
+procedure TFmComparison.GlyphMetricToMemo(GlyphMetrics: TGlyphMetrics; Memo: TMemo);
+var
+  str : string;
+begin
+ Memo.Clear;
+
+ with GlyphMetrics do
+  begin
+   Memo.Lines.Add('Black Box X: ' + IntToStr(gmBlackBoxX));
+   Memo.Lines.Add('Black Box Y: ' + IntToStr(gmBlackBoxY));
+   Memo.Lines.Add('Glyph Origin X: ' + IntToStr(gmptGlyphOrigin.X));
+   Memo.Lines.Add('Glyph Origin Y: ' + IntToStr(gmptGlyphOrigin.Y));
+   Memo.Lines.Add('Cell Inc X: ' + IntToStr(gmCellIncX));
+   Memo.Lines.Add('Cell Inc Y: ' + IntToStr(gmCellIncY));
+  end;
 end;
 
 end.

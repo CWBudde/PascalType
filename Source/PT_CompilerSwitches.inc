@@ -41,4 +41,4 @@
   to be incomplete by this library. The optional features won't be available,
   but loading of the fonts should still be possible.
   * Default: Disabled }
-{-$DEFINE IgnoreIncompleteOptionalTables}
+{$DEFINE IgnoreIncompleteOptionalTables}

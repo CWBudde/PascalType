@@ -104,6 +104,7 @@ type
     function RoundedScaleY(Value: Integer): Integer;
 
     function GetAdvanceWidth(GlyphIndex: Integer): TScaleType;
+    function GetKerning(Last, Next: Integer): TScaleType;
 
     procedure FontHeightChanged; virtual;
     procedure PixelPerInchXChanged; virtual;
@@ -385,6 +386,12 @@ function TCustomPascalTypeFontEngine.GetGlyphByCharacter(
   Character: AnsiChar): Integer;
 begin
  Result := GetGlyphByCharacter(Word(Character));
+end;
+
+function TCustomPascalTypeFontEngine.GetKerning(Last,
+  Next: Integer): TScaleType;
+begin
+ Result := RoundedScaleX(Storage.GetKerning(Last, Next));
 end;
 
 procedure TCustomPascalTypeFontEngine.SetFontSize(const Value: Integer);

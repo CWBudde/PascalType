@@ -48,7 +48,10 @@ type
     procedure RenderText(Text: string; Canvas: TCanvas; X, Y: Integer); overload; virtual;
 
     // GDI like functions
-    function GetGlyphOutline(Character: Cardinal; Format: TGetGlyphOutlineUnion;
+    function GetGlyphOutlineA(Character: Cardinal; Format: TGetGlyphOutlineUnion;
+      out GlyphMetrics: TGlyphMetrics; BufferSize: Cardinal; Buffer: Pointer;
+      const TransformationMatrix: TTransformationMatrix): Cardinal;
+    function GetGlyphOutlineW(Character: Cardinal; Format: TGetGlyphOutlineUnion;
       out GlyphMetrics: TGlyphMetrics; BufferSize: Cardinal; Buffer: Pointer;
       const TransformationMatrix: TTransformationMatrix): Cardinal;
 
@@ -548,24 +551,63 @@ var
   Advance    : TScaleType;
   GlyphIndex : Integer;
 begin
- CharIndex := 0;
- Result := False;
- Advance := 0;
- while CharIndex < Length(Text) do
+ Result := True;
+
+ if Length(Text) = 0 then
   begin
-   GlyphIndex := GetGlyphByCharacter(Text[CharIndex]);
-   Advance := Advance + GetAdvanceWidth(GlyphIndex);
-   Inc(CharIndex);
+   Size.cy := 0;
+   Size.cx := 0;
+   Exit;
   end;
 
- Size.cy := Abs(FontHeight);
- Size.cx := Round(Advance);
- Result := True;
+ try
+  GlyphIndex := GetGlyphByCharacter(Text[1]);
+  Advance := GetAdvanceWidth(GlyphIndex);
+  CharIndex := 2;
+
+  while CharIndex < Length(Text) do
+   begin
+    GlyphIndex := GetGlyphByCharacter(Text[CharIndex]);
+    Advance := Advance + GetAdvanceWidth(GlyphIndex);
+
+(*
+    Advance := Advance + GetKerningWidth(GlyphIndex);
+*)
+
+    Inc(CharIndex);
+   end;
+
+  Size.cy := Abs(FontHeight);
+  Size.cx := Round(Advance);
+ except
+  Result := False;
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function TPascalTypeFontEngineGDI.GetGlyphOutline(Character: Cardinal;
+function TPascalTypeFontEngineGDI.GetGlyphOutlineA(Character: Cardinal;
+  Format: TGetGlyphOutlineUnion; out GlyphMetrics: TGlyphMetrics;
+  BufferSize: Cardinal; Buffer: Pointer;
+  const TransformationMatrix: TTransformationMatrix): Cardinal;
+var
+  GlyphIndex: Integer;
+begin
+ // get glyph index
+ if (ggoGlyphIndex in Format.Flags)
+  then GlyphIndex := Character
+  else GlyphIndex := GetGlyphByCharacter(Character);
+
+(*
+ if Buffer = nil then
+  case Format.Format of
+
+
+  end;
+*)
+end;
+
+function TPascalTypeFontEngineGDI.GetGlyphOutlineW(Character: Cardinal;
   Format: TGetGlyphOutlineUnion; out GlyphMetrics: TGlyphMetrics;
   BufferSize: Cardinal; Buffer: Pointer;
   const TransformationMatrix: TTransformationMatrix): Cardinal;

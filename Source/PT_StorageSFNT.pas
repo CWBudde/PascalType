@@ -131,6 +131,7 @@ type
     procedure SaveToStream(Stream: TStream); override;
     function ContainsTable(TableType: TTableType): Boolean;
     function GetAdvanceWidth(GlyphIndex: Integer): Word;
+    function GetKerning(Last, Next: Integer): Word;
 
     property GlyphData[Index: Integer]: TCustomPascalTypeGlyphDataTable read GetGlyphData;
 
@@ -607,6 +608,14 @@ begin
  if Assigned(GlyphDataTable) then
   if (Index >= 0) and (Index < GlyphDataTable.GlyphDataCount)
    then Result := GlyphDataTable.GlyphData[Index];
+end;
+
+function TPascalTypeStorage.GetKerning(Last, Next: Integer): Word;
+//var
+//  KernTable : TPascalType
+begin
+ Result := 0;
+// GetTableByTableType()
 end;
 
 function TPascalTypeStorage.GetOptionalTable(
