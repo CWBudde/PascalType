@@ -613,16 +613,27 @@ function TPascalTypeFontEngineGDI.GetGlyphOutlineW(Character: Cardinal;
   const TransformationMatrix: TTransformationMatrix): Cardinal;
 var
   GlyphIndex: Integer;
+
 begin
  // get glyph index
  if (ggoGlyphIndex in Format.Flags)
   then GlyphIndex := Character
   else GlyphIndex := GetGlyphByCharacter(Character);
 
+ with GlyphMetrics do
+  begin
+   gmBlackBoxX := 0;
+   gmBlackBoxY := 0;
+   gmCellIncX := 0;
+   gmCellIncY := 0;
+   gmptGlyphOrigin.X := 0;
+   gmptGlyphOrigin.Y := 0;
+  end;
+
 (*
  if Buffer = nil then
   case Format.Format of
-
+   ggoBitmap
 
   end;
 *)

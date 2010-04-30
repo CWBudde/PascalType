@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, PT_Types, PT_Storage, PT_FontEngineGDI;
+  StdCtrls, PT_Types, PT_Storage, PT_FontEngineGDI, ExtCtrls, Menus;
 
 type
   TFmComparison = class(TForm)
@@ -12,22 +12,33 @@ type
     LbPascalType: TLabel;
     MemoGDI: TMemo;
     MemoPT: TMemo;
-    BtCompareGetTextMetrics: TButton;
-    BtCompareGetOutlineTextMetrics: TButton;
-    BtCompareGetTextExtentPoint32: TButton;
-    BtCompareGetGlyphOutline: TButton;
+    MainMenu: TMainMenu;
+    File1: TMenuItem;
+    MiSaveGDILog: TMenuItem;
+    MiSavePascalTypeLog: TMenuItem;
+    N1: TMenuItem;
+    MiExit: TMenuItem;
+    MiCompare: TMenuItem;
+    MiGetTextMetrics: TMenuItem;
+    MiGetOutlineTextMetrics: TMenuItem;
+    MiGetTextExtentPoint32: TMenuItem;
+    MiGetGlyphOutline: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure BtCompareGetTextMetricsClick(Sender: TObject);
-    procedure BtCompareGetOutlineTextMetricsClick(Sender: TObject);
-    procedure BtCompareGetTextExtentPoint32Click(Sender: TObject);
-    procedure BtCompareGetGlyphOutlineClick(Sender: TObject);
+    procedure MiExitClick(Sender: TObject);
+    procedure MiSaveGDILogClick(Sender: TObject);
+    procedure MiSavePascalTypeLogClick(Sender: TObject);
+    procedure MiGetTextMetricsClick(Sender: TObject);
+    procedure MiGetOutlineTextMetricsClick(Sender: TObject);
+    procedure MiGetTextExtentPoint32Click(Sender: TObject);
+    procedure MiGetGlyphOutlineClick(Sender: TObject);
   private
     FFontEngine      : TPascalTypeFontEngineGDI;
     FCurrentFontSize : Integer;
     procedure TextMetricToMemo(TextMetric: TTextMetricW; Memo: TMemo);
     procedure OutlineTextMetricToMemo(TextMetric: TOutlineTextmetricW; Memo: TMemo);
     procedure GlyphMetricToMemo(GlyphMetrics: TGlyphMetrics; Memo: TMemo);
+    procedure GlyphOutlineToMemo(Buffer: Pointer; Size: Integer; Memo: TMemo);
   protected
     procedure CompareGetGlyphOutline;
     procedure CompareGetOutlineTextMetrics;
@@ -45,6 +56,36 @@ uses
   PT_Windows, PT_FontEngine;
 
 {$R *.dfm}
+
+const
+  CIdentity: TTransformationMatrix = (
+    xx: (fract: 0; Value: 1);
+    xy: (fract: 0; Value: 0);
+    yx: (fract: 0; Value: 0);
+    yy: (fract: 0; Value: 1);
+  );
+
+  CFlipVertical: TTransformationMatrix = (
+    xx: (fract: 0; Value: 1);
+    xy: (fract: 0; Value: 0);
+    yx: (fract: 0; Value: 0);
+    yy: (fract: 0; Value: -1);
+  );
+
+  CIdentity2: TMat2 = (
+    eM11: (fract: 0; Value: 1);
+    eM12: (fract: 0; Value: 0);
+    eM21: (fract: 0; Value: 0);
+    eM22: (fract: 0; Value: 1);
+  );
+
+  CFlipVertical2: TMat2 = (
+    eM11: (fract: 0; Value: 1);
+    eM12: (fract: 0; Value: 0);
+    eM21: (fract: 0; Value: 0);
+    eM22: (fract: 0; Value: -1);
+  );
+
 
 procedure TFmComparison.FormCreate(Sender: TObject);
 begin
@@ -64,27 +105,6 @@ end;
 procedure TFmComparison.FormDestroy(Sender: TObject);
 begin
  FreeAndNil(FFontEngine);
-end;
-
-procedure TFmComparison.BtCompareGetGlyphOutlineClick(Sender: TObject);
-begin
- CompareGetGlyphOutline;
-end;
-
-procedure TFmComparison.BtCompareGetOutlineTextMetricsClick(Sender: TObject);
-begin
- CompareGetOutlineTextMetrics;
-end;
-
-procedure TFmComparison.BtCompareGetTextMetricsClick(Sender: TObject);
-begin
- CompareGetTextMetrics;
- FCurrentFontSize := FCurrentFontSize + 2;
-end;
-
-procedure TFmComparison.BtCompareGetTextExtentPoint32Click(Sender: TObject);
-begin
- CompareGetTextExtentPoint32;
 end;
 
 procedure TFmComparison.CompareGetTextMetrics;
@@ -113,6 +133,62 @@ begin
  FFontEngine.FontSize := FCurrentFontSize;
  FFontEngine.GetTextMetricsW(TextMetricPT);
  TextMetricToMemo(TextMetricPT, MemoPT);
+end;
+
+procedure TFmComparison.MiExitClick(Sender: TObject);
+begin
+ Close;
+end;
+
+procedure TFmComparison.MiGetGlyphOutlineClick(Sender: TObject);
+begin
+ CompareGetGlyphOutline;
+end;
+
+procedure TFmComparison.MiGetOutlineTextMetricsClick(Sender: TObject);
+begin
+ CompareGetOutlineTextMetrics;
+end;
+
+procedure TFmComparison.MiGetTextExtentPoint32Click(Sender: TObject);
+begin
+ CompareGetTextExtentPoint32;
+end;
+
+procedure TFmComparison.MiGetTextMetricsClick(Sender: TObject);
+begin
+ CompareGetTextMetrics;
+ FCurrentFontSize := FCurrentFontSize + 2;
+end;
+
+procedure TFmComparison.MiSaveGDILogClick(Sender: TObject);
+begin
+ with TSaveDialog.Create(Self) do
+  try
+   Filter := 'Log File (*.log)|*.log';
+   DefaultExt := '.log';
+   FileName := 'GDI.log';
+
+   if Execute
+    then MemoGDI.Lines.SaveToFile(FileName);
+  finally
+   Free;
+  end;
+end;
+
+procedure TFmComparison.MiSavePascalTypeLogClick(Sender: TObject);
+begin
+ with TSaveDialog.Create(Self) do
+  try
+   Filter := 'Log File (*.log)|*.log';
+   DefaultExt := '.log';
+   FileName := 'PascalType.log';
+
+   if Execute
+    then MemoPT.Lines.SaveToFile(FileName);
+  finally
+   Free;
+  end;
 end;
 
 procedure TFmComparison.TextMetricToMemo(TextMetric: TTextMetricW; Memo: TMemo);
@@ -247,10 +323,6 @@ begin
 end;
 
 procedure TFmComparison.OutlineTextMetricToMemo(TextMetric: TOutlineTextmetricW; Memo: TMemo);
-var
-  str  : string;
-  i    : Integer;
-  Wchr : PWChar;
 begin
  TextMetricToMemo(TextMetric.otmTextMetrics, Memo);
 
@@ -366,29 +438,16 @@ end;
 
 procedure TFmComparison.CompareGetGlyphOutline;
 var
-  BufferGDI       : Pointer;
-  BufferPT        : Pointer;
+  BufferGDI       : PTTPolygonHeader;
+  BufferPT        : PTTPolygonHeader;
   Character       : WCHAR;
   GlyphMetricsGDI : TGlyphMetrics;
   GlyphMetricsPT  : TGlyphMetrics;
   Font            : TFont;
   DC              : HDC;
   BufferSize      : Cardinal;
-  Transform       : TMat2;
+  Format          : TGetGlyphOutlineUnion;
 begin
- // set transform
- with Transform do
-  begin
-   eM11.value := 1;
-   eM12.value := 0;
-   eM21.value := 0;
-   eM22.value := 1;
-   eM11.fract := 0;
-   eM12.fract := 0;
-   eM21.fract := 0;
-   eM22.fract := 0;
-  end;
-
  Character := 'A';
 
  // GDI
@@ -403,14 +462,17 @@ begin
    SelectObject(DC, Font.Handle);
 
    // determine buffer size
-   BufferSize := GetGlyphOutlineW(DC, Ord(Character), 0, GlyphMetricsGDI, 0,
-     nil, Transform);
+   BufferSize := GetGlyphOutlineW(DC, Ord(Character), GGO_NATIVE, GlyphMetricsGDI, 0,
+     nil, CFlipVertical2);
    GetMem(BufferGDI, BufferSize);
    FillChar(BufferGDI^, BufferSize, 0);
    try
-    GetGlyphOutlineW(DC, Ord(Character), 0, GlyphMetricsGDI, 0, nil, Transform);
-
-    GlyphMetricToMemo(GlyphMetricsGDI, MemoGDI)
+    if GetGlyphOutlineW(DC, Ord(Character), GGO_NATIVE, GlyphMetricsGDI,
+      BufferSize, BufferGDI, CFlipVertical2) <> 0 then
+     begin
+      GlyphMetricToMemo(GlyphMetricsGDI, MemoGDI);
+      GlyphOutlineToMemo(BufferGDI, BufferSize, MemoGDI);
+     end;
    finally
     Dispose(BufferGDI);
    end;
@@ -420,13 +482,18 @@ begin
 
  FFontEngine.FontSize := FCurrentFontSize;
 
+ // set format
+ Format.Format := ggoMetrics;
+ Format.Flags := [];
+
  // determine buffer size
- BufferSize := FFontEngine.GetGlyphOutlineW(Ord(Character), 0, GlyphMetricsPT, 0,
-   nil, Transform);
+ BufferSize := FFontEngine.GetGlyphOutlineW(Ord(Character), Format, GlyphMetricsPT, 0,
+   nil, CFlipVertical);
  GetMem(BufferPT, BufferSize);
  FillChar(BufferPT^, BufferSize, 0);
  try
-  FFontEngine.GetGlyphOutlineW(Ord(Character), 0, GlyphMetricsPT, 0, nil, Transform);
+  FFontEngine.GetGlyphOutlineW(Ord(Character), Format, GlyphMetricsPT, 0, nil,
+    CFlipVertical);
 
   GlyphMetricToMemo(GlyphMetricsPT, MemoPT)
  finally
@@ -435,8 +502,6 @@ begin
 end;
 
 procedure TFmComparison.GlyphMetricToMemo(GlyphMetrics: TGlyphMetrics; Memo: TMemo);
-var
-  str : string;
 begin
  Memo.Clear;
 
@@ -448,6 +513,76 @@ begin
    Memo.Lines.Add('Glyph Origin Y: ' + IntToStr(gmptGlyphOrigin.Y));
    Memo.Lines.Add('Cell Inc X: ' + IntToStr(gmCellIncX));
    Memo.Lines.Add('Cell Inc Y: ' + IntToStr(gmCellIncY));
+  end;
+end;
+
+procedure TFmComparison.GlyphOutlineToMemo(Buffer: Pointer; Size: Integer; Memo: TMemo);
+var
+  J, K, S : Integer;
+  PBuffer : PTTPolygonHeader absolute Buffer;
+  PPCurve : PTTPolyCurve;
+  str     : string;
+begin
+ K := 0;
+
+ if PBuffer.dwType <> TT_POLYGON_TYPE then
+  begin
+   Memo.Lines.Add('Wrong format!');
+   Exit;
+  end;
+
+ with PBuffer.pfxStart do
+  begin
+   str := 'Start Point: ';
+   str := str + 'X = ' + FloatToStr(x.value + x.fract / (1 shl 16)) + '; ';
+   str := str + 'Y = ' + FloatToStr(y.value + y.fract / (1 shl 16));
+   Memo.Lines.Add(str);
+  end;
+
+ while Size > 0 do
+  begin
+   S := PBuffer.cb - SizeOf(TTTPolygonHeader);
+   Integer(PPCurve) := Integer(Buffer) + SizeOf(TTTPolygonHeader);
+
+   if S <= 0 then Exit;
+
+   Memo.Lines.Add('New Contour');
+
+   while S > 0 do
+    begin
+     case PPCurve.wType of
+      TT_PRIM_LINE:
+       begin
+        for J := 0 to PPCurve.cpfx - 1 do
+         with PPCurve.apfx[J] do
+          begin
+           str := 'Line Point: ';
+           str := str + 'X = ' + FloatToStr(x.value + x.fract / (1 shl 16)) + '; ';
+           str := str + 'Y = ' + FloatToStr(y.value + y.fract / (1 shl 16));
+           Memo.Lines.Add(str);
+          end;
+       end;
+      TT_PRIM_QSPLINE:
+       begin
+        for J := 0 to PPCurve.cpfx - 1 do
+         with PPCurve.apfx[J] do
+          begin
+           str := 'Spline Point: ';
+           str := str + 'X = ' + FloatToStr(x.value + x.fract / (1 shl 16)) + '; ';
+           str := str + 'Y = ' + FloatToStr(y.value + y.fract / (1 shl 16));
+           Memo.Lines.Add(str);
+          end;
+       end;
+     end;
+
+     K := (PPCurve.cpfx - 1) * SizeOf(TPointFX) + SizeOf(TTPolyCurve);
+     Dec(S, K);
+     Inc(Integer(PPCurve), K);
+    end;
+
+   Dec(Integer(PPCurve), K);
+   Dec(Size, PBuffer.cb);
+   Inc(Integer(PBuffer), PBuffer.cb);
   end;
 end;
 
