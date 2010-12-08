@@ -620,14 +620,14 @@ begin
   then GlyphIndex := Character
   else GlyphIndex := GetGlyphByCharacter(Character);
 
- with GlyphMetrics do
+ with GlyphMetrics, TCustomTrueTypeFontGlyphData(Storage.GlyphData[GlyphIndex]) do
   begin
-   gmBlackBoxX := 0;
-   gmBlackBoxY := 0;
-   gmCellIncX := 0;
+   gmptGlyphOrigin.X := RoundedScaleX(XMin);
+   gmptGlyphOrigin.Y := RoundedScaleX(YMin);
+   gmBlackBoxX := RoundedScaleX(XMax);
+   gmBlackBoxY := RoundedScaleX(YMax);
+   gmCellIncX := RoundedScaleX(XMax);
    gmCellIncY := 0;
-   gmptGlyphOrigin.X := 0;
-   gmptGlyphOrigin.Y := 0;
   end;
 
 (*

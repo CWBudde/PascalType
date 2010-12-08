@@ -3631,7 +3631,7 @@ begin
    if Assigned(OS2Table) then
     with TPascalTypeOS2Table(OS2Table) do
      begin
-      Node := Items.AddChildObject(Items[0], TableType, OS2Table);
+      Node := Items.AddChildObject(Items[0], string(TableType), OS2Table);
       Items.AddChildObject(Node, 'Panpose', Panose);
       Items.AddChildObject(Node, 'Unicode Range', UnicodeRange);
       if Assigned(CodePageRange)
@@ -3642,7 +3642,7 @@ begin
    for OptTableIndex := 0 to OptionalTableCount - 1 do
     with OptionalTable[OptTableIndex] do
      begin
-      Node := Items.AddChildObject(Items[0], TableType, OptionalTable[OptTableIndex]);
+      Node := Items.AddChildObject(Items[0], string(TableType), OptionalTable[OptTableIndex]);
 
       // digital signature
       if OptionalTable[OptTableIndex] is TPascalTypeDigitalSignatureTable then

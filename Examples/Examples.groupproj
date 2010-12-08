@@ -18,9 +18,6 @@
 			<Projects Include="Render Demo\RenderDemo.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="TTF2EOT\TTF2EOT.dproj">
-				<Dependencies/>
-			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -74,23 +71,14 @@
 		<Target Name="RenderDemo:Make">
 			<MSBuild Targets="Make" Projects="Render Demo\RenderDemo.dproj"/>
 		</Target>
-		<Target Name="TTF2EOT">
-			<MSBuild Projects="TTF2EOT\TTF2EOT.dproj"/>
-		</Target>
-		<Target Name="TTF2EOT:Clean">
-			<MSBuild Targets="Clean" Projects="TTF2EOT\TTF2EOT.dproj"/>
-		</Target>
-		<Target Name="TTF2EOT:Make">
-			<MSBuild Targets="Make" Projects="TTF2EOT\TTF2EOT.dproj"/>
-		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="FontInfo;PascalTypeTest;FontExplorer;CompareGDI;RenderDemo;TTF2EOT"/>
+			<CallTarget Targets="FontInfo;PascalTypeTest;FontExplorer;CompareGDI;RenderDemo"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="FontInfo:Clean;PascalTypeTest:Clean;FontExplorer:Clean;CompareGDI:Clean;RenderDemo:Clean;TTF2EOT:Clean"/>
+			<CallTarget Targets="FontInfo:Clean;PascalTypeTest:Clean;FontExplorer:Clean;CompareGDI:Clean;RenderDemo:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="FontInfo:Make;PascalTypeTest:Make;FontExplorer:Make;CompareGDI:Make;RenderDemo:Make;TTF2EOT:Make"/>
+			<CallTarget Targets="FontInfo:Make;PascalTypeTest:Make;FontExplorer:Make;CompareGDI:Make;RenderDemo:Make"/>
 		</Target>
 		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 	</Project>

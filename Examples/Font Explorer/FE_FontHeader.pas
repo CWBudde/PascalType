@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, JvExComCtrls, JvDateTimePicker;
+  StdCtrls, ComCtrls;
 
 type
   TFrameFontHeader = class(TFrame)

@@ -223,7 +223,6 @@ object FrameFontHeader: TFrameFontHeader
     Top = 23
     Width = 170
     Height = 21
-    ItemHeight = 13
     TabOrder = 1
     Text = 'Only strong left to right'
     Items.Strings = (

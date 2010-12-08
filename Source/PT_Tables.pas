@@ -38,8 +38,6 @@ uses
   Classes, Contnrs, SysUtils, PT_Types, PT_Classes;
 
 type
-  TCustomPascalTypeGlyphDataTable = class(TCustomPascalTypeInterfaceTable);
-
   // Unknown Table
 
   TPascalTypeUnknownTable = class(TCustomPascalTypeNamedTable)
@@ -62,6 +60,10 @@ type
 
     property Stream: TMemoryStream read FStream;
   end;
+
+  // glyph data prototype table
+
+  TCustomPascalTypeGlyphDataTable = class(TCustomPascalTypeInterfaceTable);
 
 
   // Header Table

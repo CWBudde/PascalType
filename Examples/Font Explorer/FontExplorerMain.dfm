@@ -97,7 +97,6 @@ object FmTTF: TFmTTF
         Font.Height = -11
         Font.Name = 'MS Sans Serif'
         Font.Style = []
-        ItemHeight = 13
         ItemIndex = 16
         ParentFont = False
         TabOrder = 0
@@ -136,7 +135,6 @@ object FmTTF: TFmTTF
       Font.Height = -13
       Font.Name = 'Courier New'
       Font.Style = []
-      ItemHeight = 16
       ParentFont = False
       TabOrder = 1
     end
@@ -149,17 +147,23 @@ object FmTTF: TFmTTF
       Constraints.MinHeight = 360
       Constraints.MinWidth = 370
       TabOrder = 3
+      ExplicitWidth = 484
+      ExplicitHeight = 440
       inherited LbFontDirection: TLabel
         Width = 88
+        ExplicitWidth = 88
       end
       inherited LbUnitsPerEm: TLabel
         Width = 59
+        ExplicitWidth = 59
       end
       inherited LbLowestRecPPEM: TLabel
         Width = 104
+        ExplicitWidth = 104
       end
       inherited LbCreated: TLabel
         Width = 37
+        ExplicitWidth = 37
       end
     end
   end
@@ -190,7 +194,7 @@ object FmTTF: TFmTTF
     object ToolBar: TToolBar
       Left = 9
       Top = 0
-      Width = 678
+      Width = 682
       Height = 22
       Caption = 'ToolBar'
       EdgeInner = esNone
@@ -444,7 +448,7 @@ object FmTTF: TFmTTF
     Left = 72
     Top = 32
     Bitmap = {
-      494C010111001400040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010111001800080010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000008484840084848400848484008484
       8400848484008484840084848400848484008484840084848400FFFFFF00C6C6
