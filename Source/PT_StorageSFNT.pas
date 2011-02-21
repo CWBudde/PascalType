@@ -411,7 +411,7 @@ begin
     then raise EPascalTypeError.Create(RCStrNoCharacterMapTable);
    LoadTableFromStream(Stream, CharacterMapDataEntry);
 
-   // TODO check if these are required by tables already read!!!
+   // TODO: check if these are required by tables already read!!!
    // read index to location table
    if Assigned(LocationDataEntry)
     then LoadTableFromStream(Stream, LocationDataEntry) else

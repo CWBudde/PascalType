@@ -1235,7 +1235,8 @@ begin
    // write num records
    WriteSwappedWord(Stream, FSubtables.Count);
 
-(* TODO
+(*
+   TODO: Write further TPascalTypeHorizontalDeviceMetricsTable properties
 
    // write device record size
    WriteSwappedWord(Stream, FSizeDeviceRecord);

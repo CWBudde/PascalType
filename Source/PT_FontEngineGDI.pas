@@ -35,8 +35,9 @@ interface
 {$I PT_Compiler.inc}
 
 uses
-  Windows, Classes, Contnrs, Sysutils, Graphics, PT_Types, PT_Storage,
-  PT_FontEngine, PT_Tables, PT_TablesTrueType;
+  {$IFDEF FPC}LCLIntf, LCLType, {$IFDEF MSWINDOWS} Windows, {$ENDIF}
+  {$ELSE}Windows, {$ENDIF} Classes, Contnrs, Sysutils, Graphics,
+  PT_Types, PT_Storage, PT_FontEngine, PT_Tables, PT_TablesTrueType;
 
 type
   TPascalTypeFontEngineGDI = class(TCustomPascalTypeFontEngine)
@@ -129,6 +130,15 @@ begin
     tmDigitizedAspectX := PixelPerInchX;
     tmDigitizedAspectY := PixelPerInchY;
 
+    {$IFDEF FPC}
+    if WideChar(UnicodeFirstCharacterIndex) < #$FF
+     then tmFirstChar := BCHAR(UnicodeFirstCharacterIndex)
+     else tmFirstChar := $FF;
+
+    if WideChar(UnicodeLastCharacterIndex) < #$FF
+     then tmLastChar := BCHAR(UnicodeLastCharacterIndex)
+     else tmLastChar := $FF;
+    {$ELSE}
     if WideChar(UnicodeFirstCharacterIndex) < #$FF
      then tmFirstChar := AnsiChar(UnicodeFirstCharacterIndex)
      else tmFirstChar := #$FF;
@@ -136,6 +146,7 @@ begin
     if WideChar(UnicodeLastCharacterIndex) < #$FF
      then tmLastChar := AnsiChar(UnicodeLastCharacterIndex)
      else tmLastChar := #$FF;
+    {$ENDIF}
 
     tmItalic := Integer(fsfItalic in FontSelectionFlags);
     tmUnderlined := Integer(fsfUnderscore in FontSelectionFlags);

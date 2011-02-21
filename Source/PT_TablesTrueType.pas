@@ -775,7 +775,7 @@ end;
 
 procedure TPascalTypeTrueTypeContour.PointCountChanged;
 begin
- // yet todo
+ // TODO: PointCountChanged;
 end;
 
 

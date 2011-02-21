@@ -543,8 +543,8 @@ type
     procedure ResetToDefaults; override;
 
     function GetInternalFamilyType: Byte; virtual;
-  public
     class function GetFamilyType: Byte; virtual; abstract;
+  public
     procedure LoadFromStream(Stream: TStream); override;
     procedure SaveToStream(Stream: TStream); override;
 
@@ -5990,7 +5990,7 @@ function TPascalTypePostscriptVersion2Table.GlyphIndexToString(
 begin
  if FGlyphNameIndex[GlyphIndex] < 258
   then Result := DefaultGlyphName(FGlyphNameIndex[GlyphIndex])
-  else Result := FNames[FGlyphNameIndex[GlyphIndex] - 258];
+  else Result := string(FNames[FGlyphNameIndex[GlyphIndex] - 258]);
 end;
 
 procedure TPascalTypePostscriptVersion2Table.AssignTo(Dest: TPersistent);

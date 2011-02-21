@@ -248,12 +248,12 @@ end;
 
 procedure TCustomPascalTypeFontEngine.PixelPerInchXChanged;
 begin
- // nothing todo here yet (trigger recalculation of cache here soon!)
+ // nothing in here yet (trigger recalculation of cache here soon!)
 end;
 
 procedure TCustomPascalTypeFontEngine.PixelPerInchYChanged;
 begin
- // nothing todo here yet (trigger recalculation of cache here soon!)
+ // nothing in here yet (trigger recalculation of cache here soon!)
 end;
 
 procedure TCustomPascalTypeFontEngine.ClearScaledGlyphs;

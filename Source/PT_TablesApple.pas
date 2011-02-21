@@ -677,9 +677,61 @@ type
 
 
   // table 'Zapf'
+  TCustomPascalTypeZapfKindName = class(TCustomPascalTypeTable);
+
+  TPascalTypeZapfKindNameString = class(TCustomPascalTypeZapfKindName)
+  private
+    FName : AnsiString;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+    procedure ResetToDefaults; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    property Name: AnsiString read FName write FName;
+  end;
+
+  TPascalTypeZapfKindNameBinary = class(TCustomPascalTypeZapfKindName)
+  private
+    FValue : Word;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+    procedure ResetToDefaults; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    property Value: Word read FValue write FValue;
+  end;
+
+  TZapfKindName = (zknUniversal = 0, zknApple = 1, zknAdobe = 2, zknAFII = 3,
+    zknUnicode = 4, zknCidJapanese = 64, zknCidTraditionamChinese = 65,
+    zknCidSimplifiedChinese = 66, zknCidKorean = 67, zknVersionHistory = 68,
+    zknDesignerShortName = 69, zknDesignerLongName = 70,
+    zknDesignerUsageNotes = 71, zknDesignerHistoricalNotes = 72);
+
+  TPascalTypeZapfKindName = class(TCustomPascalTypeTable)
+  private
+    FKindType : TZapfKindName;
+    FKindName : TCustomPascalTypeZapfKindName;
+    procedure SetKindName(const Value: TCustomPascalTypeZapfKindName);
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+
+    procedure KindNameChanged; virtual;
+    procedure ResetToDefaults; override;
+  public
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    property KindName: TCustomPascalTypeZapfKindName read FKindName write SetKindName;
+  end;
+
   TPascalTypeZapfGlyphInfoTable = class(TCustomPascalTypeTable)
   private
     FUnicodeCodePoints : array of Word; // Unicode code points for this glyph
+    FKindNames         : array of TPascalTypeZapfKindName;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -2540,7 +2592,7 @@ begin
    // read subtables
    for SubtableIndex := 0 to SubtableCount - 1 do
     begin
-     // yet TODO!!!
+     // TODO: Read further TPascalTypeGlyphMetamorphosisChainTable properties
     end;
   end;
 end;
@@ -2731,7 +2783,7 @@ begin
    // read subtables
    for SubtableIndex := 0 to SubtableCount - 1 do
     begin
-     // yet TODO!!!
+     // TODO: Read further TPascalTypeExtendedGlyphMetamorphosisChainTable properties
     end;
   end;
 end;
@@ -3117,6 +3169,7 @@ var
   FeatOffset     : Cardinal; // Byte offset from start of extraInfo to FeatureInfo for this glyph, or 0xFFFFFFFF if none
   UnicodeIndex   : Word;
   KindNameCount  : Word;
+  KindNameIndex  : Word;
 begin
  inherited;
 
@@ -3149,7 +3202,19 @@ begin
    // read kind name count
    KindNameCount := ReadSwappedWord(Stream);
 
-   // ... TODO ... (see http://developer.apple.com/fonts/TTRefMan/RM06/Chap6Zapf.html)
+   // set length kind names
+   SetLength(FKindNames, KindNameCount);
+
+   for KindNameIndex := 0 to KindNameCount - 1 do
+    begin
+     FKindNames[KindNameIndex] := TPascalTypeZapfKindName.Create;
+     FKindNames[KindNameIndex].LoadFromStream(Stream);
+    end;
+
+//   Assert(Position = StartPos + GroupOffset);
+
+   // TODO: Finish implementation of TPascalTypeZapfGlyphInfoTable (see http://developer.apple.com/fonts/TTRefMan/RM06/Chap6Zapf.html)
+
   end;
 end;
 
@@ -3157,6 +3222,192 @@ procedure TPascalTypeZapfGlyphInfoTable.SaveToStream(Stream: TStream);
 begin
  inherited;
  raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
+end;
+
+
+{ TPascalTypeZapfKindNameString }
+
+procedure TPascalTypeZapfKindNameString.AssignTo(Dest: TPersistent);
+begin
+ if Dest is Self.ClassType then
+  with TPascalTypeZapfKindNameString(Dest) do
+   begin
+    FName := Self.FName;
+   end
+ else inherited;
+end;
+
+procedure TPascalTypeZapfKindNameString.ResetToDefaults;
+begin
+ FName := '';
+
+ inherited;
+end;
+
+procedure TPascalTypeZapfKindNameString.LoadFromStream(Stream: TStream);
+var
+  CharCount : Byte;
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 1 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // read length of string
+   Read(CharCount, 1);
+
+   // set length of name
+   SetLength(FName, CharCount);
+
+   // read string
+   Read(FName[1], CharCount);
+  end;
+end;
+
+procedure TPascalTypeZapfKindNameString.SaveToStream(Stream: TStream);
+begin
+ inherited;
+
+ // save string to stream
+ Stream.Write(FName, Length(FName) + 1);
+end;
+
+
+{ TPascalTypeZapfKindNameBinary }
+
+procedure TPascalTypeZapfKindNameBinary.AssignTo(Dest: TPersistent);
+begin
+ inherited;
+
+ if Dest is Self.ClassType then
+  with TPascalTypeZapfKindNameBinary(Dest) do
+   begin
+    FValue := Self.FValue;
+   end
+ else inherited;
+end;
+
+procedure TPascalTypeZapfKindNameBinary.ResetToDefaults;
+begin
+ FValue := 0;
+
+ inherited;
+end;
+
+procedure TPascalTypeZapfKindNameBinary.LoadFromStream(Stream: TStream);
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 2 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   Read(FValue, 2);
+  end;
+end;
+
+procedure TPascalTypeZapfKindNameBinary.SaveToStream(Stream: TStream);
+begin
+ inherited;
+
+ Stream.Write(FValue, 2);
+end;
+
+
+{ TPascalTypeZapfKindName }
+
+procedure TPascalTypeZapfKindName.AssignTo(Dest: TPersistent);
+begin
+ inherited;
+
+ if Dest is Self.ClassType then
+  with TPascalTypeZapfKindName(Dest) do
+   begin
+    FKindType := Self.FKindType;
+    FKindName := Self.FKindName;
+   end
+ else inherited;
+end;
+
+procedure TPascalTypeZapfKindName.ResetToDefaults;
+begin
+ if Assigned(FKindName)
+  then FreeAndNil(FKindName);
+
+ inherited;
+end;
+
+procedure TPascalTypeZapfKindName.KindNameChanged;
+begin
+ if (FKindType in [zknUniversal..zknUniversal]) and
+   (not (FKindName is TPascalTypeZapfKindNameString))  then
+  begin
+   // eventually free current kind name object
+   if Assigned(FKindName) then FreeAndNil(FKindName);
+
+   // create new kind name object
+   FKindName := TPascalTypeZapfKindNameString.Create;
+  end;
+ if (FKindType in [zknCidJapanese..zknDesignerHistoricalNotes]) and
+   (not (FKindName is TPascalTypeZapfKindNameString)) then
+  begin
+   // eventually free current kind name object
+   if Assigned(FKindName) then FreeAndNil(FKindName);
+
+   // create new kind name object
+   FKindName := TPascalTypeZapfKindNameBinary.Create;
+  end;
+end;
+
+procedure TPascalTypeZapfKindName.LoadFromStream(Stream: TStream);
+begin
+ inherited;
+
+ with Stream do
+  begin
+   // check (minimum) table size
+   if Position + 1 > Size
+    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+
+   // read kind type
+   Read(FKindType, 1);
+
+   // eventually free current kind name object
+   if Assigned(FKindName)
+    then FreeAndNil(FKindName);
+
+   // eventually create kind name object
+   if FKindType in [zknUniversal..zknUniversal]
+    then FKindName := TPascalTypeZapfKindNameString.Create else
+   if FKindType in [zknCidJapanese..zknDesignerHistoricalNotes]
+    then FKindName := TPascalTypeZapfKindNameBinary.Create;
+
+   // eventually load kind name from stream
+   if Assigned(FKindName)
+    then FKindName.LoadFromStream(Stream);
+  end;
+end;
+
+procedure TPascalTypeZapfKindName.SaveToStream(Stream: TStream);
+begin
+ inherited;
+
+ raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
+end;
+
+procedure TPascalTypeZapfKindName.SetKindName(
+  const Value: TCustomPascalTypeZapfKindName);
+begin
+ if FKindName <> Value then
+  begin
+   FKindName := Value;
+   KindNameChanged;
+  end;
 end;
 
 
@@ -3169,13 +3420,17 @@ begin
 end;
 
 procedure TPascalTypeZapfTable.AssignTo(Dest: TPersistent);
+var
+  GlyphIndex : Integer;
 begin
  inherited;
 
  if Dest is Self.ClassType then
   with TPascalTypeZapfTable(Dest) do
    begin
-
+    SetLength(FGlyphInfos, Length(Self.FGlyphInfos));
+    for GlyphIndex := 0 to Length(FGlyphInfos) - 1
+     do FGlyphInfos[GlyphIndex].Assign(Self.FGlyphInfos[GlyphIndex]);
    end;
 end;
 
