@@ -71,70 +71,6 @@ type
   TPixel32Array = array [0..0] of TPixel32;
   PPixel32Array = ^TPixel32Array;
 
-
-  { Old definitions }
-
-  TRGB32 = packed record
-    R, G, B, A: Byte;
-  end;
-  PRGB32 = ^TRGB32;
-
-  TBGR32 = packed record
-    B, G, R, A: Byte;
-  end;
-  PBGR32 = ^TBGR32;
-
-  TRGB32Word = packed record
-    R, G, B, A: Word;
-  end;
-  PRGB32Word = ^TRGB32Word;
-
-  TRGB32Array = packed array[0..MaxInt div SizeOf(TRGB32) - 1] of TRGB32;
-  PRGB32Array = ^TRGB32Array;
-  TArrayOfRGB32 = array of TRGB32;
-
-  TBGR32Array = packed array[0..MaxInt div SizeOf(TBGR32) - 1] of TBGR32;
-  PBGR32Array = ^TBGR32Array;
-  TArrayOfBGR32 = array of TBGR32;
-
-  TRGB24 = packed record
-    R, G, B: Byte;
-  end;
-  PRGB24 = ^TRGB24;
-
-  TBGR24 = packed record
-    B, G, R: Byte;
-  end;
-  PBGR24 = ^TBGR24;
-
-  TRGB24Array = packed array[0..MaxInt div SizeOf(TRGB24) - 1] of TRGB24;
-  PRGB24Array = ^TRGB24Array;
-  TArrayOfRGB24 = array of TRGB24;
-
-  TBGR24Array = packed array[0..MaxInt div SizeOf(TBGR24) - 1] of TBGR24;
-  PBGR24Array = ^TBGR24Array;
-  TArrayOfBGR24 = array of TBGR24;
-
-  TRGB24Word = packed record
-    R, G, B : Word;
-  end;
-  PRGB24Word = ^TRGB24Word;
-
-  TRGB24WordArray = packed array[0..MaxInt div SizeOf(TRGB24Word) - 1] of TRGB24Word;
-  PRGB24WordArray = ^TRGB24WordArray;
-  TArrayOfRGB24Word = array of TRGB24Word;
-
-  TRGB32WordArray = packed array[0..MaxInt div SizeOf(TRGB32Word) - 1] of TRGB32Word;
-  PRGB32WordArray = ^TRGB32WordArray;
-  TArrayOfRGB32Word = array of TRGB32Word;
-
-(*
-  TGuiPointFloat = packed record
-    x: Single;
-    y: Single;
-  end;
-*)
-
 const
   // Some predefined color constants
   pxBlack32     : TPixel32 = (ARGB : $FF000000);
@@ -1170,64 +1106,6 @@ asm
   POP       EBX
 end;
 
-(*
-function MergePixelMMX(Foreground, Background: TPixel32): TPixel32;
-asm
-  TEST      EAX, $FF000000  // foreground completely transparent =>
-  JZ        @CopyPixel      // result = background
-  CMP       EAX, $FF000000  // foreground completely opaque =>
-  JNC       @Done           // result = foreground
-  TEST      EDX, $FF000000  // background completely transparent =>
-  JZ        @Done           // result = foreground
-
-  PXOR      MM7, MM7        // MM7  <-  00 00 00 00 00 00 00 00
-  MOVD      MM0, EAX        // MM0  <-  00 00 00 00 Fa Fr Fg Fb
-  MOVD      MM1, EDX        // MM1  <-  00 00 00 00 Ba Br Bg Bb
-  SHR       EAX, $18        // EAX  <-  00 00 00 Fa
-  SHR       EDX, $18        // EDX  <-  00 00 00 Ba
-  MOV       ECX, EDX        // ECX  <-  00 00 00 Ba
-//  IMUL
-
-  // Fa + Ba - Fa * Ba
-  // Fa * (1 - Ba) + Ba
-
-{
-  ROR       EDX, 24         // EDX  <-  Br Bg Bb Ba
-  MOVZX     ECX, DL         // ECX  <-  00 00 00 Ba
-  PUNPCKLBW MM0, MM7        // MM0  <-  00 Fa 00 Fr 00 Fg 00 Fb
-  SUB       EAX, $FF        // EAX  <-  (Fa - 1)
-  XOR       ECX, $FF        // ECX  <-  (1 - Ba)
-  IMUL      ECX, EAX        // ECX  <-  (Fa - 1) * (1 - Ba)  =  Ra - 1
-  IMUL      ECX, $8081      // ECX  <-  Xa 00 00 00
-  ADD       ECX, $8081*$FF*$FF
-  SHR       ECX, 15         // ECX  <-  Ra
-  MOV       DL, CH          // EDX  <-  Br Bg Bb Ra
-  ROR       EDX, 8          // EDX  <-  Ra Br Bg Bb
-  MOVD      MM1, EDX        // MM1  <-  Ra Br Bg Bb
-  PUNPCKLBW MM1, MM7        // MM1  <-  00 Ra 00 Br 00 Bg 00 Bb
-  SHL       EAX, 20         // EAX  <-  Fa 00 00
-  PSUBW     MM0, MM1        // MM0  <-  ** Da ** Dr ** Dg ** Db
-  ADD       EAX, $0FF01000
-  PSLLW     MM0, 4
-  XOR       EDX, EDX        // EDX  <-  00
-  DIV       EAX, ECX        // EAX  <-  Fa / Ra  =  Wa
-  MOVD      MM4, EAX        // MM3  <-  Wa
-//  PSHUFLW   MM4, MM4, $C0   // MM3  <-  00 00 ** Wa ** Wa ** Wa
-  PMULHW    MM0, MM4        // MM0  <-  00 00 ** Pr ** Pg ** Pb
-  PADDW     MM0, MM1        // MM0  <-  00 Ra 00 Rr 00 Rg 00 Rb
-  PACKUSWB  MM0, MM7        // MM0  <-  Ra Rr Rg Rb
-  MOVD      EAX, MM0
-}
-
-  RET
-
-@CopyPixel:
-  MOV       EAX, EDX
-
-@Done:
-end;
-*)
-
 
 { SSE2 }
 
@@ -1770,7 +1648,6 @@ begin
   begin
    Add(@BlendPixelLineNative);
    {$IFNDEF PUREPASCAL}
-//   Add(@BlendPixelLineMMX, [pfMMX]);
    Add(@BlendPixelLineSSE2, [pfSSE2]);
    {$ENDIF}
    RebindProcessorSpecific;
@@ -1827,10 +1704,6 @@ begin
  with BindingCombinePixelLine do
   begin
    Add(@CombinePixelLineNative);
-   {$IFNDEF PUREPASCAL}
-//   Add(@CombinePixelLineMMX, [pfMMX]);
-//   Add(@CombinePixelLineSSE2, [pfSSE2]);
-   {$ENDIF}
    RebindProcessorSpecific;
   end;
 
@@ -1857,10 +1730,6 @@ begin
  with BindingMergePixel do
   begin
    Add(@MergePixelNative);
-   {$IFNDEF PUREPASCAL}
-//   Add(@MergePixelMMX, [pfMMX]);
-//   Add(@MergePixelSSE2, [pfSSE2]);
-   {$ENDIF}
    RebindProcessorSpecific;
   end;
 
@@ -1871,10 +1740,6 @@ begin
  with BindingMergePixelInplace do
   begin
    Add(@MergePixelInplaceNative);
-   {$IFNDEF PUREPASCAL}
-//   Add(@MergePixelInplaceMMX, [pfMMX]);
-//   Add(@MergePixelInplaceSSE2, [pfSSE2]);
-   {$ENDIF}
    RebindProcessorSpecific;
   end;
 
@@ -1885,10 +1750,6 @@ begin
  with BindingMergeLine do
   begin
    Add(@MergeLineNative);
-   {$IFNDEF PUREPASCAL}
-//   Add(@MergeLineMMX, [pfMMX]);
-//   Add(@MergeLineSSE2, [pfSSE2]);
-   {$ENDIF}
    RebindProcessorSpecific;
   end;
 

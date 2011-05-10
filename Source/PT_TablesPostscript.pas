@@ -1605,6 +1605,21 @@ begin
    end;
 end;
 
+function CheckOperatorClassesValid: Boolean;
+var
+  TableClassBaseIndex : Integer;
+  TableClassIndex     : Integer;
+begin
+ Result := True;
+ for TableClassBaseIndex := 0 to Length(GOperatorClasses) - 1 do
+  for TableClassIndex := TableClassBaseIndex + 1 to Length(GOperatorClasses) - 1 do
+   if GOperatorClasses[TableClassBaseIndex] = GOperatorClasses[TableClassIndex] then
+    begin
+     Result := False;
+     Exit;
+    end;
+end;
+
 procedure RegisterOperator(OperatorClass: TPascalTypePostscriptDictOperatorClass);
 begin
  Assert(IsOperatorClassRegistered(OperatorClass) = False);
@@ -1616,8 +1631,10 @@ procedure RegisterOperators(OperatorClasses: array of TPascalTypePostscriptDictO
 var
   OperatorClassIndex : Integer;
 begin
+ SetLength(GOperatorClasses, Length(GOperatorClasses) + Length(OperatorClasses));
  for OperatorClassIndex := 0 to Length(OperatorClasses) - 1
-  do RegisterOperator(OperatorClasses[OperatorClassIndex]);
+  do GOperatorClasses[Length(GOperatorClasses) - Length(OperatorClasses) + OperatorClassIndex] := OperatorClasses[OperatorClassIndex];
+ Assert(CheckOperatorClassesValid);
 end;
 
 function FindOperatorByEncoding(Encoding: Byte): TPascalTypePostscriptDictOperatorClass;

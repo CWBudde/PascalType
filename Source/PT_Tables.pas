@@ -2754,7 +2754,7 @@ end;
 procedure TTrueTypeFontNamePlatformApple.ReadStringFromStream(Stream: TStream;
   Length: Word);
 var
-  str : string;
+  str : AnsiString;
 begin
  with Stream do
   begin
@@ -6023,7 +6023,13 @@ begin
    // load number of glyphs
    SetLength(FGlyphNameIndex, ReadSwappedWord(Stream));
 
-   // read glyph name index array
+   // read glyph name index array (with speed optimization)
+   if Stream is TMemoryStream then
+    begin
+     CopySwappedWord(PWord(Integer(TMemoryStream(Stream).Memory) + Position),
+       @FGlyphNameIndex[0], Length(FGlyphNameIndex));
+     Position := Position + 2 * Length(FGlyphNameIndex);
+    end else
    for GlyphIndex := 0 to Length(FGlyphNameIndex) - 1
     do FGlyphNameIndex[GlyphIndex] := ReadSwappedWord(Stream);
 
@@ -6058,6 +6064,21 @@ begin
    end;
 end;
 
+function CheckCharacterMapClassesValid: Boolean;
+var
+  CharacterMapClassBaseIndex : Integer;
+  CharacterMapClassIndex     : Integer;
+begin
+ Result := True;
+ for CharacterMapClassBaseIndex := 0 to Length(GCharacterMapClasses) - 1 do
+  for CharacterMapClassIndex := CharacterMapClassBaseIndex + 1 to Length(GCharacterMapClasses) - 1 do
+   if GCharacterMapClasses[CharacterMapClassBaseIndex] = GCharacterMapClasses[CharacterMapClassIndex] then
+    begin
+     Result := False;
+     Exit;
+    end;
+end;
+
 procedure RegisterPascalTypeCharacterMap(CharacterMapClass: TCustomPascalTypeCharacterMapClass);
 begin
  Assert(IsPascalTypeCharacterMapRegistered(CharacterMapClass) = False);
@@ -6069,8 +6090,10 @@ procedure RegisterPascalTypeCharacterMaps(CharacterMapClasses: array of TCustomP
 var
   CharacterMapClassIndex : Integer;
 begin
+ SetLength(GCharacterMapClasses, Length(GCharacterMapClasses) + Length(CharacterMapClasses));
  for CharacterMapClassIndex := 0 to Length(CharacterMapClasses) - 1
-  do RegisterPascalTypeCharacterMap(CharacterMapClasses[CharacterMapClassIndex]);
+  do GCharacterMapClasses[Length(GCharacterMapClasses) - Length(CharacterMapClasses) + CharacterMapClassIndex] := CharacterMapClasses[CharacterMapClassIndex];
+ Assert(CheckCharacterMapClassesValid);
 end;
 
 function FindPascalTypeCharacterMapByFormat(Format: Word): TCustomPascalTypeCharacterMapClass;
@@ -6148,6 +6171,21 @@ begin
    end;
 end;
 
+function CheckGlobalTableClassesValid: Boolean;
+var
+  TableClassBaseIndex : Integer;
+  TableClassIndex     : Integer;
+begin
+ Result := True;
+ for TableClassBaseIndex := 0 to Length(GTableClasses) - 1 do
+  for TableClassIndex := TableClassBaseIndex + 1 to Length(GTableClasses) - 1 do
+   if GTableClasses[TableClassBaseIndex] = GTableClasses[TableClassIndex] then
+    begin
+     Result := False;
+     Exit;
+    end;
+end;
+
 procedure RegisterPascalTypeTable(TableClass: TCustomPascalTypeNamedTableClass);
 begin
  Assert(IsPascalTypeTableRegistered(TableClass) = False);
@@ -6159,8 +6197,10 @@ procedure RegisterPascalTypeTables(TableClasses: array of TCustomPascalTypeNamed
 var
   TableClassIndex : Integer;
 begin
+ SetLength(GTableClasses, Length(GTableClasses) + Length(TableClasses));
  for TableClassIndex := 0 to Length(TableClasses) - 1
-  do RegisterPascalTypeTable(TableClasses[TableClassIndex]);
+  do GTableClasses[Length(GTableClasses) - Length(TableClasses) + TableClassIndex] := TableClasses[TableClassIndex];
+ Assert(CheckGlobalTableClassesValid);
 end;
 
 function FindPascalTypeTableByType(TableType: TTableType): TCustomPascalTypeNamedTableClass;

@@ -162,7 +162,49 @@ uses
   PT_Math, PT_TablesTrueType, PT_ResourceStrings;
 
 
-function CalculateCheckSum(Stream: TStream): Cardinal;
+{-$DEFINE PUREPASCAL}
+
+function CalculateCheckSum(Data: Pointer; Size: Integer): Cardinal; overload;
+{$IFDEF PUREPASCAL}
+var
+  I : Integer;
+begin
+ Result := Swap32(PCardinal(Data)^);
+ Inc(PCardinal(Data));
+
+ // read subsequent cardinals
+ for i := 1 to Size - 1 do
+  begin
+   Result := Result + Swap32(PCardinal(Data)^);
+   Inc(PCardinal(Data));
+  end;
+{$ELSE}
+asm
+ MOV     ECX, EDX
+ XOR     EDX, EDX
+ LEA     EAX, EAX + ECX * 4
+ NEG     ECX
+ JNL     @Done
+
+ PUSH    EBX
+
+@Start:
+ MOV     EBX, [EAX + ECX * 4].DWord
+ BSWAP   EBX
+ ADD     EDX, EBX
+
+ ADD     ECX, 1
+ JS      @Start
+
+ POP     EBX
+
+@Done:
+ MOV     EAX, EDX
+{$ENDIF}
+end;
+
+
+function CalculateCheckSum(Stream: TStream): Cardinal; overload;
 var
   I     : Integer;
   Value : Cardinal;
@@ -176,16 +218,21 @@ begin
    // set position to beginning of the stream
    Seek(0, soFromBeginning);
 
-   // read first cardinal
-   Read(Result, SizeOf(Cardinal));
-   Result := Swap32(Result);
+   if Stream is TMemoryStream
+    then Result := CalculateCheckSum(TMemoryStream(Stream).Memory, Size div 4)
+    else
+     begin
+      // read first cardinal
+      Read(Result, SizeOf(Cardinal));
+      Result := Swap32(Result);
 
-   // read subsequent cardinals
-   for i := 1 to (Size div 4) - 1 do
-    begin
-     Read(Value, SizeOf(Cardinal));
-     Result := Result + Swap32(Value);
-    end;
+      // read subsequent cardinals
+      for i := 1 to (Size div 4) - 1 do
+       begin
+        Read(Value, SizeOf(Cardinal));
+        Result := Result + Swap32(Value);
+       end;
+     end;
   end;
 end;
 

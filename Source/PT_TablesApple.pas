@@ -3528,6 +3528,21 @@ begin
    end;
 end;
 
+function CheckDescriptionTagsValid: Boolean;
+var
+  TableClassBaseIndex : Integer;
+  TableClassIndex     : Integer;
+begin
+ Result := True;
+ for TableClassBaseIndex := 0 to Length(GDescriptionTagClasses) - 1 do
+  for TableClassIndex := TableClassBaseIndex + 1 to Length(GDescriptionTagClasses) - 1 do
+   if GDescriptionTagClasses[TableClassBaseIndex] = GDescriptionTagClasses[TableClassIndex] then
+    begin
+     Result := False;
+     Exit;
+    end;
+end;
+
 procedure RegisterDescriptionTag(TableClass: TPascalTypeTaggedValueTableClass);
 begin
  Assert(IsTagRegistered(TableClass) = False);
@@ -3539,8 +3554,10 @@ procedure RegisterDescriptionTags(TableClasses: array of TPascalTypeTaggedValueT
 var
   TableClassIndex : Integer;
 begin
+ SetLength(GDescriptionTagClasses, Length(GDescriptionTagClasses) + Length(TableClasses));
  for TableClassIndex := 0 to Length(TableClasses) - 1
-  do RegisterDescriptionTag(TableClasses[TableClassIndex]);
+  do GDescriptionTagClasses[Length(GDescriptionTagClasses) - Length(TableClasses) + TableClassIndex] := TableClasses[TableClassIndex];
+ Assert(CheckDescriptionTagsValid);
 end;
 
 function FindDescriptionTagByType(TableType: TTableType): TPascalTypeTaggedValueTableClass;

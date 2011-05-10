@@ -89,6 +89,7 @@ procedure WriteSwappedWord(Stream: TStream; Value : Word); {$IFDEF UseInline} in
 procedure WriteSwappedSmallInt(Stream: TStream; Value : SmallInt); {$IFDEF UseInline} inline; {$ENDIF}
 procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal); {$IFDEF UseInline} inline; {$ENDIF}
 procedure WriteSwappedInt64(Stream: TStream; Value: Int64); {$IFDEF UseInline} inline; {$ENDIF}
+procedure CopySwappedWord(Source: PWord; Destination: PWord; Size: Integer);
 
 implementation
 
@@ -161,6 +162,18 @@ procedure WriteSwappedInt64(Stream: TStream; Value: Int64);
 begin
  Value := Swap64(Value);
  Stream.Write(Value, SizeOf(Int64));
+end;
+
+procedure CopySwappedWord(Source: PWord; Destination: PWord; Size: Integer);
+var
+  Cnt : Integer;
+begin
+ for Cnt := 0 to Size - 1 do
+  begin
+   Destination^ := Swap16(Source^);
+   Inc(Source);
+   Inc(Destination);
+  end;
 end;
 
 

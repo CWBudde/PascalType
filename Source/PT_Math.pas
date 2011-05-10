@@ -37,8 +37,8 @@ interface
 uses
   PT_Types;
 
-// various swap functions for converting big-endian data  
-function Swap16(Value: Word): Word;
+// various swap functions for converting big-endian data
+function Swap16(Value: Word): Word; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function Swap32(Value: Cardinal): Cardinal;
 function Swap64(Value: Int64): Int64;
 
@@ -50,17 +50,32 @@ function MulDiv(Value, Scale, Divisor: Integer): Integer;
 
 implementation
 
-function Swap16(Value: Word): Word;
+function Swap16(Value: Word): Word; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+{$IFDEF SUPPORTS_INLINE}
 begin
  Result := Swap(Value);
+{$ELSE}
+{$IFDEF PUREPASCAL}
+begin
+ Result := Swap(Value);
+{$ELSE}
+asm
+ XCHG AL, AH
+{$ENDIF}
+{$ENDIF}
 end;
 
 function Swap32(Value: Cardinal): Cardinal;
+{$IFDEF PUREPASCAL}
 type
   TTwoWords = array [0..1] of Word;
 begin
  TTwoWords(Result)[1] := Swap(TTwoWords(Value)[0]);
  TTwoWords(Result)[0] := Swap(TTwoWords(Value)[1]);
+{$ELSE}
+asm
+ BSWAP EAX
+{$ENDIF}
 end;
 
 function Swap64(Value: Int64): Int64;

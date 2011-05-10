@@ -3400,6 +3400,21 @@ begin
    end;
 end;
 
+function CheckFeatureClassesValid: Boolean;
+var
+  TableClassBaseIndex : Integer;
+  TableClassIndex     : Integer;
+begin
+ Result := True;
+ for TableClassBaseIndex := 0 to Length(GFeatureClasses) - 1 do
+  for TableClassIndex := TableClassBaseIndex + 1 to Length(GFeatureClasses) - 1 do
+   if GFeatureClasses[TableClassBaseIndex] = GFeatureClasses[TableClassIndex] then
+    begin
+     Result := False;
+     Exit;
+    end;
+end;
+
 procedure RegisterFeature(FeatureClass: TOpenTypeFeatureTableClass);
 begin
  Assert(IsFeatureClassRegistered(FeatureClass) = False);
@@ -3411,8 +3426,10 @@ procedure RegisterFeatures(FeaturesClasses: array of TOpenTypeFeatureTableClass)
 var
   FeaturesIndex : Integer;
 begin
+ SetLength(GFeatureClasses, Length(GFeatureClasses) + Length(FeaturesClasses));
  for FeaturesIndex := 0 to Length(FeaturesClasses) - 1
-  do RegisterFeature(FeaturesClasses[FeaturesIndex]);
+  do GFeatureClasses[Length(GFeatureClasses) - Length(FeaturesClasses) + FeaturesIndex] := FeaturesClasses[FeaturesIndex];
+ Assert(CheckFeatureClassesValid);
 end;
 
 function FindFeatureByType(TableType: TTableType): TOpenTypeFeatureTableClass;

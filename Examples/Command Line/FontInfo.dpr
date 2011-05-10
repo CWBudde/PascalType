@@ -3,8 +3,8 @@ program FontInfo;
 {$APPTYPE CONSOLE}
 
 uses
-  PT_Types, PT_Tables, PT_TablesOptional, PT_Storage, PT_StorageSFNT,
-  SysUtils, Math;
+  FastMM4, FastMove, SysUtils, Math,
+  PT_Types, PT_Tables, PT_TablesOptional, PT_Storage, PT_StorageSFNT;
 
 resourcestring
   RCStrUnknownFileFormat = 'Unknown file format!';
