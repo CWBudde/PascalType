@@ -12,8 +12,10 @@ uses
     PT_Tables, PT_TablesApple, PT_TablesBitmap, PT_TablesFontForge, 
     PT_TablesOpenType, PT_TablesOpenTypeFeatures, PT_TablesOpenTypeLanguages, 
     PT_TablesOpenTypeScripts, PT_TablesOptional, PT_TablesPostscript, 
-    PT_TablesShared, PT_TablesTrueType, PT_Types, PT_UnicodeNames, 
-    LazarusPackageIntf;
+    PT_TablesShared, PT_TablesTrueType, PT_Types, PT_UnicodeNames, PT_Windows, 
+    PT_Classes, PT_FontEngine, PT_FontEngineGDI, PT_Math, PT_Storage, 
+    PT_StorageEOT, PT_StorageSFNT, PT_TablesPostscriptOperands, 
+    PT_TablesPostscriptOperators, LazarusPackageIntf;
 
 implementation
 

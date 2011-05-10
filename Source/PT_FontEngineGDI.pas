@@ -313,8 +313,8 @@ begin
   begin
    Result := 0;
    if Buffersize < SizeOf(TOutlineTextmetricA)
-    then FillChar(OutlineTextMetric^, Buffersize, 0)
-    else FillChar(OutlineTextMetric^, SizeOf(TOutlineTextmetricW), 0);
+    then FillChar(OutlineTextMetric^, Buffersize, 0) else
+    FillChar(OutlineTextMetric^, SizeOf(TOutlineTextmetricW), 0);
    Exit;
   end;
 
