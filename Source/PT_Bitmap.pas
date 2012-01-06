@@ -812,8 +812,9 @@ procedure TPtPixelMapMemory.Draw(Bitmap: TBitmap; X, Y: Integer);
 var
   IndexX : Integer;
   IndexY : Integer;
-  Data24 : PRGB24Array;
+//  Data24 : PRGB24Array;
 begin
+(*
  if (Bitmap.Height <> 0) and (FDataPointer <> nil) then
   begin
    {$IFNDEF FPC}
@@ -847,6 +848,7 @@ begin
       then raise Exception.Create('Error');
    end;
   end;
+*)
 end;
 
 {$IFDEF MSWINDOWS}

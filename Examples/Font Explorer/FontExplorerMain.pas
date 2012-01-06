@@ -3108,7 +3108,7 @@ begin
    if TObject(ParentNode.Data) is TCustomPascalTypeNamedTable then
     with TCustomPascalTypeNamedTable(ParentNode.Data) do
      begin
-      StatusBar.SimpleText := 'Table ID: ' + TableType;
+      StatusBar.SimpleText := 'Table ID: ' + TableType.AsAnsiChar;
      end;
   end;
 end;

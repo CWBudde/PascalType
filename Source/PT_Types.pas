@@ -50,11 +50,65 @@ type
   EPascalTypeChecksumError = class(EPascalTypeError);
   {$ENDIF}
 
-  TTableType = array [0..3] of AnsiChar;
+  TTableType = record
+  {$IFDEF DELPHI10_UP}
+    constructor Create(const Value: Integer); overload;
+    constructor Create(const Value: AnsiString); overload;
+
+    class operator Equal(const Lhs, Rhs: TTableType): Boolean;
+    class operator NotEqual(const Lhs, Rhs: TTableType): Boolean;
+
+    class operator Implicit(const Value: AnsiString): TTableType;
+    class operator Implicit(const Value: Integer): TTableType;
+    class operator Explicit(const Value: TTableType): string;
+    class operator Explicit(const Value: TTableType): AnsiString;
+    class operator Explicit(const Value: TTableType): Integer;
+  {$ENDIF}
+  case Integer of
+    0: (AsCardinal : Cardinal);
+    1: (AsInteger  : Integer);
+    2: (AsAnsiChar : array [0..3] of AnsiChar);
+  end;
 
   TFixedPoint = packed record
-    Fract: Word;
-    Value: SmallInt;
+  {$IFDEF DELPHI10_UP}
+  public
+    constructor Create(const Fixed: Integer); overload;
+    constructor Create(const Fract: Word; Value: SmallInt); overload;
+
+    // operator overloads
+    class operator Equal(const Lhs, Rhs: TFixedPoint): Boolean;
+    class operator NotEqual(const Lhs, Rhs: TFixedPoint): Boolean;
+    class operator LessThan(const Lhs, Rhs: TFixedPoint): Boolean;
+    class operator LessThanOrEqual(const Lhs, Rhs: TFixedPoint): Boolean;
+    class operator GreaterThan(const Lhs, Rhs: TFixedPoint): Boolean;
+    class operator GreaterThanOrEqual(const Lhs, Rhs: TFixedPoint): Boolean;
+    class operator Negative(const Value: TFixedPoint): TFixedPoint;
+    class operator Positive(const Value: TFixedPoint): TFixedPoint;
+    class operator Add(const Lhs, Rhs: TFixedPoint): TFixedPoint;
+    class operator Subtract(const Lhs, Rhs: TFixedPoint): TFixedPoint;
+    class operator Multiply(const Lhs, Rhs: TFixedPoint): TFixedPoint;
+    class operator Divide(const Lhs, Rhs: TFixedPoint): TFixedPoint;
+    class operator Round(const Value: TFixedPoint): Integer;
+    class operator LeftShift(const Value: TFixedPoint; Shift: Byte): TFixedPoint;
+    class operator RightShift(const Value: TFixedPoint; Shift: Byte): TFixedPoint;
+
+    class function Zero: TFixedPoint; inline; static;
+    class function One: TFixedPoint; inline; static;
+    class function Two: TFixedPoint; inline; static;
+    class function Half: TFixedPoint; inline; static;
+
+    class operator Implicit(const Value: Single): TFixedPoint;
+    class operator Implicit(const Value: Double): TFixedPoint;
+    class operator Implicit(const Value: Integer): TFixedPoint;
+    class operator Explicit(const Value: TFixedPoint): Single;
+    class operator Explicit(const Value: TFixedPoint): Double;
+
+    function AsSingle: Single;
+  {$ENDIF}
+  case Integer of
+    0: (Fixed: Integer);
+    1: (Fract: Word; Value: SmallInt);
   end;
 
   TF26Dot6 = type Integer;
@@ -1462,5 +1516,286 @@ begin
  Result.Value := 0;
  Result.Fract := Word(Value);
 end;
+
+
+{$IFDEF DELPHI10_UP}
+
+{ TTableType }
+
+constructor TTableType.Create(const Value: Integer);
+begin
+  Self.AsInteger := Value;
+end;
+
+constructor TTableType.Create(const Value: AnsiString);
+begin
+  case Length(Value) of
+   0    : ;
+   1..4 : Move(Value[1], Self.AsAnsiChar[0], Length(Value));
+   else Move(Value[1], Self.AsAnsiChar[0], 4);
+  end;
+end;
+
+class operator TTableType.Equal(const Lhs, Rhs: TTableType): Boolean;
+begin
+  Result := Lhs.AsInteger = Rhs.AsInteger;
+end;
+
+class operator TTableType.Explicit(const Value: TTableType): string;
+begin
+  Result := string(Value.AsAnsiChar);
+end;
+
+class operator TTableType.Explicit(const Value: TTableType): AnsiString;
+begin
+  Result := Value.AsAnsiChar;
+end;
+
+class operator TTableType.Explicit(const Value: TTableType): Integer;
+begin
+  Result := Value.AsInteger;
+end;
+
+class operator TTableType.NotEqual(const Lhs, Rhs: TTableType): Boolean;
+begin
+  Result := Lhs.AsInteger <> Rhs.AsInteger;
+end;
+
+class operator TTableType.Implicit(const Value: AnsiString): TTableType;
+begin
+  case Length(Value) of
+   0    : ;
+   1..4 : Move(Value[1], Result.AsAnsiChar[0], Length(Value));
+   else Move(Value[1], Result.AsAnsiChar[0], 4);
+  end;
+end;
+
+class operator TTableType.Implicit(const Value: Integer): TTableType;
+begin
+  Result.AsInteger := Value;
+end;
+
+
+{ TFixedPoint }
+
+const
+  CFixedPointToFloat = 1 / $10000;
+
+constructor TFixedPoint.Create(const Fixed: Integer);
+begin
+  Self.Fixed := Fixed;
+end;
+
+constructor TFixedPoint.Create(const Fract: Word; Value: SmallInt);
+begin
+  Self.Fract := Fract;
+  Self.Value := Value;
+end;
+
+class operator TFixedPoint.Equal(const Lhs, Rhs: TFixedPoint): Boolean;
+begin
+  Result := Lhs.Fixed = Rhs.Fixed;
+end;
+
+class operator TFixedPoint.NotEqual(const Lhs, Rhs: TFixedPoint): Boolean;
+begin
+  Result := Lhs.Fixed <> Rhs.Fixed;
+end;
+
+class operator TFixedPoint.LessThan(const Lhs, Rhs: TFixedPoint): Boolean;
+begin
+  Result := Lhs.Fixed < Rhs.Fixed;
+end;
+
+class operator TFixedPoint.LessThanOrEqual(const Lhs, Rhs: TFixedPoint): Boolean;
+begin
+  Result := Lhs.Fixed <= Rhs.Fixed;
+end;
+
+class operator TFixedPoint.GreaterThan(const Lhs, Rhs: TFixedPoint): Boolean;
+begin
+  Result := Lhs.Fixed > Rhs.Fixed;
+end;
+
+class operator TFixedPoint.GreaterThanOrEqual(const Lhs, Rhs: TFixedPoint): Boolean;
+begin
+  Result := Lhs.Fixed >= Rhs.Fixed;
+end;
+
+class operator TFixedPoint.Negative(const Value: TFixedPoint): TFixedPoint;
+begin
+  Result.Fixed := -Value.Fixed;
+end;
+
+class operator TFixedPoint.Positive(const Value: TFixedPoint): TFixedPoint;
+begin
+  Result.Fixed := Abs(Value.Fixed);
+end;
+
+class operator TFixedPoint.Add(const Lhs, Rhs: TFixedPoint): TFixedPoint;
+begin
+  Result.Fixed := Lhs.Fixed + Rhs.Fixed;
+end;
+
+class operator TFixedPoint.Subtract(const Lhs, Rhs: TFixedPoint): TFixedPoint;
+begin
+  Result.Fixed := Lhs.Fixed - Rhs.Fixed;
+end;
+
+function FixedMul(A, B: TFixedPoint): TFixedPoint;
+{$IFDEF PUREPASCAL}
+var
+  IntResult : Integer absolute Result;
+begin
+  IntResult := Round(A.Fixed * CFixed16Dot16ToFloat * B.Fixed);
+{$ELSE}
+asm
+    {$IFDEF CPUx86_64}
+    MOV     EAX, A
+    IMUL    B
+    SHRD    EAX, EDX, 16
+    {$ELSE}
+    IMUL    B
+    SHRD    A, B, 16
+    {$ENDIF}
+{$ENDIF}
+end;
+
+function FixedDiv(A, B: TFixedPoint): TFixedPoint;
+{$IFDEF PUREPASCAL}
+var
+  IntResult : Integer absolute Result;
+begin
+  IntResult := Round(A.Fixed / B.Fixed * CFixed16Dot16One.Fixed);
+{$ELSE}
+asm
+    {$IFDEF CPUx86_64}
+    MOV     RAX, RCX
+    MOV     RCX, RDX
+    CDQ
+    SHLD    RDX, RAX, 16
+    SHL     RAX, 16
+    IDIV    RDX
+    {$ELSE}
+    MOV     ECX, B
+    CDQ
+    SHLD    B, A, 16
+    SHL     A, 16
+    IDIV    ECX
+    {$ENDIF}
+{$ENDIF}
+end;
+
+function FixedRound(Value: TFixedPoint): Integer;
+{$IFDEF PUREPASCAL}
+begin
+  Result := FixedRoundHalfUp(Value) - ((((Value.Fixed + $17FFF) and $1FFFF) + 1) shr 17);
+{$ELSE}
+asm
+    MOV     EDX, Value
+    ADD     Value, $8000
+    SAR     Value, 16
+    ADD     EDX, $17FFF
+    AND     EDX, $1FFFF
+    ADD     EDX, 1
+    SHR     EDX, $11
+    SUB     Value, EDX
+    {$IFDEF CPUx86_64}
+    MOV     Result, Value
+    {$ENDIF}
+{$ENDIF}
+end;
+
+function FixedRoundHalfUp(Value: TFixedPoint): Integer;
+{$IFDEF PUREPASCAL}
+begin
+  Value.Fixed := Value.Fixed + $8000;
+  Result := Integer((((Value.Fixed) shr 16) or -((Value.Fixed) shr 31) shl 16));
+{$ELSE}
+asm
+    ADD     Value, $8000
+    SAR     Value, 16
+    {$IFDEF CPUx86_64}
+    MOV     Result, Value
+    {$ENDIF}
+{$ENDIF}
+end;
+
+class operator TFixedPoint.Multiply(const Lhs, Rhs: TFixedPoint): TFixedPoint;
+begin
+  Result := FixedMul(Lhs, Rhs);
+end;
+
+class operator TFixedPoint.Divide(const Lhs, Rhs: TFixedPoint): TFixedPoint;
+begin
+  Result := FixedDiv(Lhs, Rhs);
+end;
+
+class operator TFixedPoint.Round(const Value: TFixedPoint): Integer;
+begin
+  Result := FixedRound(Value);
+end;
+
+class operator TFixedPoint.LeftShift(const Value: TFixedPoint; Shift: Byte): TFixedPoint;
+begin
+  Result.Fixed := Value.Fixed shl Shift;
+end;
+
+class operator TFixedPoint.RightShift(const Value: TFixedPoint; Shift: Byte): TFixedPoint;
+begin
+  Result.Fixed := Value.Fixed shr Shift;
+end;
+
+class function TFixedPoint.Zero: TFixedPoint;
+begin
+  Result.Fixed := $0;
+end;
+
+class function TFixedPoint.One: TFixedPoint;
+begin
+  Result.Fixed := $10000;
+end;
+
+class function TFixedPoint.Two: TFixedPoint;
+begin
+  Result.Fixed := $20000;
+end;
+
+class function TFixedPoint.Half: TFixedPoint;
+begin
+  Result.Fixed := $8000;
+end;
+
+class operator TFixedPoint.Implicit(const Value: Single): TFixedPoint;
+begin
+  Result.Fixed := Round(Value * $10000);
+end;
+
+class operator TFixedPoint.Implicit(const Value: Double): TFixedPoint;
+begin
+  Result.Fixed := Round(Value * $10000);
+end;
+
+class operator TFixedPoint.Implicit(const Value: Integer): TFixedPoint;
+begin
+  Result.Fixed := Value shl 16;
+end;
+
+class operator TFixedPoint.Explicit(const Value: TFixedPoint): Single;
+begin
+  Result := Value.Fixed * CFixedPointToFloat;
+end;
+
+class operator TFixedPoint.Explicit(const Value: TFixedPoint): Double;
+begin
+  Result := Value.Fixed * CFixedPointToFloat;
+end;
+
+function TFixedPoint.AsSingle: Single;
+begin
+  Result := Self.Fixed * CFixedPointToFloat;
+end;
+
+{$ENDIF}
 
 end.

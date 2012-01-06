@@ -221,7 +221,7 @@ procedure TPascalTypeDirectoryTableEntry.ResetToDefaults;
 begin
  with FDirectoryTableEntry do
   begin
-   TableType := #0#0#0#0;
+   TableType := 0;
    CheckSum  := 0;
    Offset    := 0;
    Length    := 0;

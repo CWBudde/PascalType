@@ -1285,12 +1285,24 @@ uses
 
 resourcestring
   RCStrUnknownCharacterMap = 'Unknown character map (%d)';
+  RCStrErrorAscender = 'Error: Typographic ascender should be equal to ' +
+    'the ascender defined in the horizontal header table';
+  RCStrErrorDescender = 'Error: Typographic descender should be equal to ' +
+    'the descender defined in the horizontal header table';
+  RCStrErrorLineGap = 'Error: Typographic line gap should be equal to the ' +
+    'line gap defined in the horizontal header table';
+  RCStrErrorWindowsAscender = 'Error: Windows ascender should be equal to ' +
+    'the ascender defined in the horizontal header table';
+  RCStrErrorWindowsDescender = 'Error: Windows descender should be equal to ' +
+    'the descender defined in the horizontal header table';
 
 var
   GCharacterMapClasses : array of TCustomPascalTypeCharacterMapClass;
   GPanoseClasses : array of TCustomPascalTypePanoseClass;
   GTableClasses : array of TCustomPascalTypeNamedTableClass;
 
+const
+  CHorizontalHeaderTableType: TTableType = (AsAnsiChar: 'hhea');
 
 { TPascalTypeUnknownTable }
 
@@ -1330,7 +1342,7 @@ end;
 
 class function TPascalTypeUnknownTable.GetTableType: TTableType;
 begin
- Result := '    ';
+ Result.AsInteger := 0;
 end;
 
 procedure TPascalTypeUnknownTable.ResetToDefaults;
@@ -2534,12 +2546,16 @@ var
   MaxProf   : TPascalTypeMaximumProfileTable;
   LastWidth : SmallInt;
   MtxIndex  : Integer;
+const
+  CMaxProfTableType: TTableType = (AsAnsiChar: 'maxp');
 begin
  inherited;
 
- HorHead := TPascalTypeHorizontalHeaderTable(FStorage.GetTableByTableType('hhea'));
+ HorHead := TPascalTypeHorizontalHeaderTable(FStorage.GetTableByTableType(
+   CHorizontalHeaderTableType));
  Assert(Assigned(HorHead));
- MaxProf := TPascalTypeMaximumProfileTable(FStorage.GetTableByTableType('maxp'));
+ MaxProf := TPascalTypeMaximumProfileTable(FStorage.GetTableByTableType(
+   CMaxProfTableType));
  Assert(Assigned(MaxProf));
 
  // check if vertical metrics header is available
@@ -2588,7 +2604,8 @@ begin
  inherited;
 
  // locate horizontal header
- HorHead := TPascalTypeHorizontalHeaderTable(FStorage.GetTableByTableType('hhea'));
+ HorHead := TPascalTypeHorizontalHeaderTable(FStorage.GetTableByTableType(
+   CHorizontalHeaderTableType));
 
  // check if vertical metrics header is available
  if HorHead = nil
@@ -2764,7 +2781,7 @@ begin
    // actually read the string
    SetLength(str, Length);
    Read(str[1], Length);
-   FNameString := str;
+   FNameString := WideString(str);
   end;
 end;
 
@@ -4884,7 +4901,7 @@ begin
  FStrikeoutSize := 0;
  FStrikeoutPosition := 0;
  FFontFamilyType := 0;
- FFontVendorID := #0#0#0#0;
+ FFontVendorID.AsInteger := 0;
  FFontSelection := 0;
  FUnicodeFirstCharIndex := 0;
  FUnicodeLastCharIndex := 0;
@@ -5044,28 +5061,29 @@ begin
    FWindowsDescent := ReadSwappedWord(Stream);
 
    {$IFDEF AmbigiousExceptions}
-   HorizontalHeader := TPascalTypeHorizontalHeaderTable(FStorage.GetTableByTableType('hhea'));
+   HorizontalHeader := TPascalTypeHorizontalHeaderTable(
+     FStorage.GetTableByTableType(CHorizontalHeaderTableType));
    Assert(Assigned(HorizontalHeader));
    with HorizontalHeader do
     begin
      if fsfUseTypoMetrics in FontSelectionFlags then
       begin
        if Abs(Ascent) <> Abs(FTypographicAscent)
-        then raise EPascalTypeError.Create('Error: Typographic ascender should be equal to the ascender defined in the horizontal header table');
+        then raise EPascalTypeError.Create(RCStrErrorAscender);
 
        if Abs(Descent) <> Abs(FTypographicDescent)
-        then raise EPascalTypeError.Create('Error: Typographic descender should be equal to the descender defined in the horizontal header table');
+        then raise EPascalTypeError.Create(RCStrErrorDescender);
 
        if Abs(LineGap) <> Abs(FTypographicLineGap)
-        then raise EPascalTypeError.Create('Error: Typographic line gap should be equal to the line gap defined in the horizontal header table');
+        then raise EPascalTypeError.Create(RCStrErrorLineGap);
       end
      else
       begin
        if Abs(Ascent) <> Abs(FWindowsAscent)
-        then raise EPascalTypeError.Create('Error: Windows ascender should be equal to the ascender defined in the horizontal header table');
+        then raise EPascalTypeError.Create(RCStrErrorWindowsAscender);
 
        if Abs(Descent) <> Abs(FDescent)
-        then raise EPascalTypeError.Create('Error: Windows descender should be equal to the descender defined in the horizontal header table');
+        then raise EPascalTypeError.Create(RCStrErrorWindowsDescender);
       end;
     end;
    {$ENDIF}

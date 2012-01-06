@@ -60,6 +60,11 @@ type
   public
     constructor Create; virtual;
 
+(*
+    procedure ReadFromStream(Stream: TStream; ChunkSize: Cardinal); virtual; abstract;
+    procedure WriteToStream(Stream: TStream); virtual; abstract;
+*)
+
     procedure LoadFromStream(Stream: TStream); virtual; abstract;
     procedure SaveToStream(Stream: TStream); virtual; abstract;
   end;
@@ -77,6 +82,8 @@ type
     function GetInternalTableType: TTableType; virtual;
   public
     class function GetTableType: TTableType; virtual; abstract;
+
+    procedure WriteTableTypeToStream(Stream: TStream); virtual;
     property TableType: TTableType read GetInternalTableType;
   end;
 
@@ -215,5 +222,13 @@ begin
  Result := GetTableType;
 end;
 
+procedure TCustomPascalTypeNamedTable.WriteTableTypeToStream(Stream: TStream);
+var
+  TableName: TTableType;
+begin
+  // store chunk name to memory stream
+  TableName := GetTableType;
+  Stream.Write(TableName, 4);
+end;
 
 end.
