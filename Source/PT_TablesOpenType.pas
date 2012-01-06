@@ -678,7 +678,7 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read version
-   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
+   FVersion.Fixed := ReadSwappedCardinal(Stream);
   end;
 end;
 
@@ -1321,7 +1321,7 @@ procedure TOpenTypeGlyphDefinitionTable.ResetToDefaults;
 const
   CGlyphDefinitionDefaultVersion : Cardinal = $10002;
 begin
- FVersion := TFixedPoint(CGlyphDefinitionDefaultVersion);
+ FVersion.Fixed := CGlyphDefinitionDefaultVersion;
  FAttachList := 0;
  FLigCaretList := 0;
 end;
@@ -2655,7 +2655,7 @@ procedure TCustomOpenTypeCommonTable.ResetToDefaults;
 const
   CGlyphPositionDefaultVersion : Cardinal = $10000;
 begin
- FVersion := TFixedPoint(CGlyphPositionDefaultVersion);
+ FVersion.Fixed := CGlyphPositionDefaultVersion;
  
  FScriptListTable.ResetToDefaults;
  FFeatureListTable.ResetToDefaults;
@@ -2677,7 +2677,7 @@ begin
     then raise Exception.Create(RCStrTableIncomplete);
 
    // read version
-   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
+   FVersion.Fixed := ReadSwappedCardinal(Stream);
 
    if Version.Value <> 1
     then raise Exception.Create(RCStrUnsupportedVersion);
@@ -3184,7 +3184,7 @@ begin
     then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
-   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
+   FVersion.Fixed := ReadSwappedCardinal(Stream);
 
    if Version.Value <> 1
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);

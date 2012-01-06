@@ -813,7 +813,7 @@ begin
 
    // read version
    Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion.Fixed := Swap32(Value32);
 
    if Version.Value < 1
     then raise EPascalTypeError.Create(RCStrUnsupportedVersion);
@@ -1654,7 +1654,7 @@ begin
 
    // read value
    Read(Value32, SizeOf(Cardinal));
-   FValue := TFixedPoint(Swap32(Value32));
+   FValue.Fixed := Swap32(Value32);
   end;
 end;
 
@@ -2135,13 +2135,13 @@ begin
       Read(AxisTag, 4);
 
       // read minimum style coordinate for the axis
-      MinValue := TFixedPoint(ReadSwappedCardinal(Stream));
+      MinValue.Fixed := ReadSwappedCardinal(Stream);
 
       // read default style coordinate for the axis
-      DefaultValue := TFixedPoint(ReadSwappedCardinal(Stream));
+      DefaultValue.Fixed := ReadSwappedCardinal(Stream);
 
       // read maximum style coordinate for the axis
-      MaxValue := TFixedPoint(ReadSwappedCardinal(Stream));
+      MaxValue.Fixed := ReadSwappedCardinal(Stream);
 
       // read flags (set to 0!)
       Flags := ReadSwappedWord(Stream);
@@ -2170,7 +2170,7 @@ begin
 
       // read coordinates
       for AxisIndex := 0 to Length(FVariationAxes) - 1
-       do Coordinates[AxisIndex] := TFixedPoint(ReadSwappedCardinal(Stream));
+       do Coordinates[AxisIndex].Fixed := ReadSwappedCardinal(Stream);
      end;
   end;
 end;
@@ -2970,7 +2970,7 @@ begin
     with FTrackTable[RecordIndex] do
      begin
       // read track
-      Track := TFixedPoint(ReadSwappedCardinal(Stream));
+      Track.Fixed := ReadSwappedCardinal(Stream);
 
       // read name index
       NameIndex := ReadSwappedWord(Stream);
@@ -2990,7 +2990,7 @@ begin
    for RecordIndex := 0 to Length(FSizeTable) - 1 do
     begin
      // read value
-     FSizeTable[RecordIndex] := TFixedPoint(ReadSwappedCardinal(Stream));
+     FSizeTable[RecordIndex].Fixed := ReadSwappedCardinal(Stream);
     end;
   end;
 end;

@@ -194,7 +194,7 @@ begin
     then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
-   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
+   FVersion.Fixed := ReadSwappedCardinal(Stream);
 
    if FVersion.Value < 2
     then raise EPascalTypeError.Create(RCStrUnknownVersion);

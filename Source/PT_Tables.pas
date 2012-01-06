@@ -1421,7 +1421,7 @@ begin
 
    // read version
    Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion.Fixed := Swap32(Value32);
 
    // check version
    if not (Version.Value = 1)
@@ -1429,7 +1429,7 @@ begin
 
    // read font revision
    Read(Value32, SizeOf(TFixedPoint));
-   FFontRevision := TFixedPoint(Swap32(Value32));
+   FFontRevision.Fixed := Swap32(Value32);
 
    // read check sum adjust
    Read(Value32, SizeOf(LongInt));
@@ -2222,7 +2222,7 @@ begin
 
    // read version
    Read(Value32, SizeOf(TFixedPoint));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion.Fixed := Swap32(Value32);
 
    // check version
    if not (Version.Value = 1)
@@ -3095,7 +3095,7 @@ begin
     then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
    // read version
-   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
+   FVersion.Fixed := ReadSwappedCardinal(Stream);
 
    {$IFDEF AmbigiousExceptions}
    if Version.Value > 1
@@ -5784,11 +5784,11 @@ begin
 
    // read format type
    Read(Value32, SizeOf(Cardinal));
-   FVersion := TFixedPoint(Swap32(Value32));
+   FVersion.Fixed := Swap32(Value32);
 
    // read italic angle
    Read(Value32, SizeOf(Cardinal));
-   FItalicAngle := TFixedPoint(Swap32(Value32));
+   FItalicAngle.Fixed := Swap32(Value32);
 
    // read underline position
    FUnderlinePosition := ReadSwappedWord(Stream);
