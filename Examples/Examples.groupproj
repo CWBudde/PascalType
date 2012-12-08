@@ -1,0 +1,84 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{4B31BA12-0F2B-4119-9814-F505252FD675}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="Command Line\FontInfo.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="DUnit Test\PascalTypeTest.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Font Explorer\FontExplorer.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="GDI call comparison\CompareGDI.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Render Demo\RenderDemo.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="FontInfo">
+			<MSBuild Projects="Command Line\FontInfo.dproj"/>
+		</Target>
+		<Target Name="FontInfo:Clean">
+			<MSBuild Targets="Clean" Projects="Command Line\FontInfo.dproj"/>
+		</Target>
+		<Target Name="FontInfo:Make">
+			<MSBuild Targets="Make" Projects="Command Line\FontInfo.dproj"/>
+		</Target>
+		<Target Name="PascalTypeTest">
+			<MSBuild Projects="DUnit Test\PascalTypeTest.dproj"/>
+		</Target>
+		<Target Name="PascalTypeTest:Clean">
+			<MSBuild Targets="Clean" Projects="DUnit Test\PascalTypeTest.dproj"/>
+		</Target>
+		<Target Name="PascalTypeTest:Make">
+			<MSBuild Targets="Make" Projects="DUnit Test\PascalTypeTest.dproj"/>
+		</Target>
+		<Target Name="FontExplorer">
+			<MSBuild Projects="Font Explorer\FontExplorer.dproj"/>
+		</Target>
+		<Target Name="FontExplorer:Clean">
+			<MSBuild Targets="Clean" Projects="Font Explorer\FontExplorer.dproj"/>
+		</Target>
+		<Target Name="FontExplorer:Make">
+			<MSBuild Targets="Make" Projects="Font Explorer\FontExplorer.dproj"/>
+		</Target>
+		<Target Name="CompareGDI">
+			<MSBuild Projects="GDI call comparison\CompareGDI.dproj"/>
+		</Target>
+		<Target Name="CompareGDI:Clean">
+			<MSBuild Targets="Clean" Projects="GDI call comparison\CompareGDI.dproj"/>
+		</Target>
+		<Target Name="CompareGDI:Make">
+			<MSBuild Targets="Make" Projects="GDI call comparison\CompareGDI.dproj"/>
+		</Target>
+		<Target Name="RenderDemo">
+			<MSBuild Projects="Render Demo\RenderDemo.dproj"/>
+		</Target>
+		<Target Name="RenderDemo:Clean">
+			<MSBuild Targets="Clean" Projects="Render Demo\RenderDemo.dproj"/>
+		</Target>
+		<Target Name="RenderDemo:Make">
+			<MSBuild Targets="Make" Projects="Render Demo\RenderDemo.dproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="FontInfo;PascalTypeTest;FontExplorer;CompareGDI;RenderDemo"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="FontInfo:Clean;PascalTypeTest:Clean;FontExplorer:Clean;CompareGDI:Clean;RenderDemo:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="FontInfo:Make;PascalTypeTest:Make;FontExplorer:Make;CompareGDI:Make;RenderDemo:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

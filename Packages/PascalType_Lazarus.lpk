@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="3">
+    <Name Value="PascalType_Lazarus"/>
+    <CompilerOptions>
+      <Version Value="10"/>
+      <PathDelim Value="\"/>
+      <Target>
+        <Filename Value="project1"/>
+      </Target>
+      <SearchPaths>
+        <IncludeFiles Value="..\Source"/>
+        <OtherUnitFiles Value="..\Source;..\Resource"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+        <SrcPath Value="..\Source;..\Resource"/>
+      </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <SyntaxMode Value="Delphi"/>
+          <CStyleOperator Value="False"/>
+          <IncludeAssertionCode Value="True"/>
+          <CPPInline Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
+      <Other>
+        <CompilerMessages>
+          <UseMsgFile Value="True"/>
+        </CompilerMessages>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Files Count="32">
+      <Item1>
+        <Filename Value="../Source/PT_ByteCodeInterpreter.pas"/>
+        <UnitName Value="PT_ByteCodeInterpreter"/>
+      </Item1>
+      <Item2>
+        <Filename Value="../Source/PT_CharacterMap.pas"/>
+        <UnitName Value="PT_CharacterMap"/>
+      </Item2>
+      <Item3>
+        <Filename Value="../Source/PT_Compiler.inc"/>
+        <Type Value="Include"/>
+      </Item3>
+      <Item4>
+        <Filename Value="../Source/PT_CompilerSwitches.inc"/>
+        <Type Value="Include"/>
+      </Item4>
+      <Item5>
+        <Filename Value="../Source/PT_Component.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="PT_Component"/>
+      </Item5>
+      <Item6>
+        <Filename Value="../Source/PT_PanoseClassifications.pas"/>
+        <UnitName Value="PT_PanoseClassifications"/>
+      </Item6>
+      <Item7>
+        <Filename Value="../Source/PT_ResourceStrings.pas"/>
+        <UnitName Value="PT_ResourceStrings"/>
+      </Item7>
+      <Item8>
+        <Filename Value="../Source/PT_TableDirectory.pas"/>
+        <UnitName Value="PT_TableDirectory"/>
+      </Item8>
+      <Item9>
+        <Filename Value="../Source/PT_Tables.pas"/>
+        <UnitName Value="PT_Tables"/>
+      </Item9>
+      <Item10>
+        <Filename Value="../Source/PT_TablesApple.pas"/>
+        <UnitName Value="PT_TablesApple"/>
+      </Item10>
+      <Item11>
+        <Filename Value="../Source/PT_TablesBitmap.pas"/>
+        <UnitName Value="PT_TablesBitmap"/>
+      </Item11>
+      <Item12>
+        <Filename Value="../Source/PT_TablesFontForge.pas"/>
+        <UnitName Value="PT_TablesFontForge"/>
+      </Item12>
+      <Item13>
+        <Filename Value="../Source/PT_TablesOpenType.pas"/>
+        <UnitName Value="PT_TablesOpenType"/>
+      </Item13>
+      <Item14>
+        <Filename Value="../Source/PT_TablesOpenTypeFeatures.pas"/>
+        <UnitName Value="PT_TablesOpenTypeFeatures"/>
+      </Item14>
+      <Item15>
+        <Filename Value="../Source/PT_TablesOpenTypeLanguages.pas"/>
+        <UnitName Value="PT_TablesOpenTypeLanguages"/>
+      </Item15>
+      <Item16>
+        <Filename Value="../Source/PT_TablesOpenTypeScripts.pas"/>
+        <UnitName Value="PT_TablesOpenTypeScripts"/>
+      </Item16>
+      <Item17>
+        <Filename Value="../Source/PT_TablesOptional.pas"/>
+        <UnitName Value="PT_TablesOptional"/>
+      </Item17>
+      <Item18>
+        <Filename Value="../Source/PT_TablesPostscript.pas"/>
+        <UnitName Value="PT_TablesPostscript"/>
+      </Item18>
+      <Item19>
+        <Filename Value="../Source/PT_TablesShared.pas"/>
+        <UnitName Value="PT_TablesShared"/>
+      </Item19>
+      <Item20>
+        <Filename Value="../Source/PT_TablesTrueType.pas"/>
+        <UnitName Value="PT_TablesTrueType"/>
+      </Item20>
+      <Item21>
+        <Filename Value="../Source/PT_Types.pas"/>
+        <UnitName Value="PT_Types"/>
+      </Item21>
+      <Item22>
+        <Filename Value="../Source/PT_UnicodeNames.pas"/>
+        <UnitName Value="PT_UnicodeNames"/>
+      </Item22>
+      <Item23>
+        <Filename Value="../Source/PT_Windows.pas"/>
+        <UnitName Value="PT_Windows"/>
+      </Item23>
+      <Item24>
+        <Filename Value="../Source/PT_Classes.pas"/>
+        <UnitName Value="PT_Classes"/>
+      </Item24>
+      <Item25>
+        <Filename Value="../Source/PT_FontEngine.pas"/>
+        <UnitName Value="PT_FontEngine"/>
+      </Item25>
+      <Item26>
+        <Filename Value="../Source/PT_FontEngineGDI.pas"/>
+        <UnitName Value="PT_FontEngineGDI"/>
+      </Item26>
+      <Item27>
+        <Filename Value="../Source/PT_Math.pas"/>
+        <UnitName Value="PT_Math"/>
+      </Item27>
+      <Item28>
+        <Filename Value="../Source/PT_Storage.pas"/>
+        <UnitName Value="PT_Storage"/>
+      </Item28>
+      <Item29>
+        <Filename Value="../Source/PT_StorageEOT.pas"/>
+        <UnitName Value="PT_StorageEOT"/>
+      </Item29>
+      <Item30>
+        <Filename Value="../Source/PT_StorageSFNT.pas"/>
+        <UnitName Value="PT_StorageSFNT"/>
+      </Item30>
+      <Item31>
+        <Filename Value="../Source/PT_TablesPostscriptOperands.pas"/>
+        <UnitName Value="PT_TablesPostscriptOperands"/>
+      </Item31>
+      <Item32>
+        <Filename Value="../Source/PT_TablesPostscriptOperators.pas"/>
+        <UnitName Value="PT_TablesPostscriptOperators"/>
+      </Item32>
+    </Files>
+    <Type Value="RunAndDesignTime"/>
+    <RequiredPkgs Count="1">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>

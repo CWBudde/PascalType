@@ -1,0 +1,48 @@
+package PascalType_D7;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $4A0000}
+{$DESCRIPTION 'PascalType Package'}
+{$IMPLICITBUILD ON}
+
+requires
+  designide,
+  vcl,
+  rtl;
+
+{%RC '..\Resource\Default.rc'}
+
+contains
+  PT_Component in '..\Source\PT_Component.pas',
+  PT_Storage in '..\Source\PT_Storage.pas',
+  PT_ResourceStrings in '..\Source\PT_ResourceStrings.pas',
+  PT_Tables in '..\Source\PT_Tables.pas',
+  PT_TablesOpenType in '..\Source\PT_TablesOpenType.pas',
+  PT_TablesOpenTypeFeatures in '..\Source\PT_TablesOpenTypeFeatures.pas',
+  PT_TablesOpenTypeLanguages in '..\Source\PT_TablesOpenTypeLanguages.pas',
+  PT_TablesOpenTypeScripts in '..\Source\PT_TablesOpenTypeScripts.pas',
+  PT_TablesOptional in '..\Source\PT_TablesOptional.pas',
+  PT_Types in '..\Source\PT_Types.pas';
+
+end.
+
