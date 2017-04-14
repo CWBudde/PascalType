@@ -38,7 +38,7 @@ uses
   Classes, SysUtils, Types, Contnrs, PT_Types, PT_Classes, PT_TableDirectory,
   PT_Tables;
 
-type  
+type
   TCustomPascalTypeStorage = class(TInterfacedPersistent, IStreamPersist,
     IPascalTypeStorageChange)
   private
@@ -60,34 +60,35 @@ implementation
 
 procedure TCustomPascalTypeStorage.Changed;
 begin
- if Assigned(FOnChanged)
-  then FOnChanged(Self);
+  if Assigned(FOnChanged) then
+    FOnChanged(Self);
 end;
 
 procedure TCustomPascalTypeStorage.LoadFromFile(FileName: TFileName);
 var
-  FileStream : TFileStream;
+  FileStream: TFileStream;
 begin
- FileStream := TFileStream.Create(FileName, fmOpenRead);
- try
-  LoadFromStream(FileStream);
- finally
-  FreeAndNil(FileStream);
- end;
+  FileStream := TFileStream.Create(FileName, fmOpenRead);
+  try
+    LoadFromStream(FileStream);
+  finally
+    FreeAndNil(FileStream);
+  end;
 end;
 
 procedure TCustomPascalTypeStorage.SaveToFile(FileName: TFileName);
 var
-  FileStream : TFileStream;
+  FileStream: TFileStream;
 begin
- if FileExists(FileName)
-  then FileStream := TFileStream.Create(FileName, fmCreate)
-  else FileStream := TFileStream.Create(FileName, fmOpenWrite);
- try
-  SaveToStream(FileStream);
- finally
-  FreeAndNil(FileStream);
- end;
+  if FileExists(FileName) then
+    FileStream := TFileStream.Create(FileName, fmCreate)
+  else
+    FileStream := TFileStream.Create(FileName, fmOpenWrite);
+  try
+    SaveToStream(FileStream);
+  finally
+    FreeAndNil(FileStream);
+  end;
 end;
 
 end.

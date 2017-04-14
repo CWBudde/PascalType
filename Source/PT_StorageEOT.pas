@@ -59,22 +59,22 @@ type
 
   TPascalTypeEmbeddedOpenType = class(TCustomPascalTypeStorage)
   private
-    FEotSize            : Cardinal;
-    FFontDataSize       : Cardinal;
-    FVersion            : Cardinal;
-    FFlags              : Cardinal;
-    FFontPanose         : array [0..9] of Byte;
-    FCharset            : Byte;
-    FItalic             : Byte;
-    FWeight             : Cardinal;
-    FSelectionType      : Word;
-    FMagicNumber        : Word;
-    FUnicodeRange       : array [0..3] of Cardinal;
-    FCodePageRange      : array [0..1] of Cardinal;
-    FCheckSumAdjustment : Cardinal;
-    FReserved           : array [0..3] of Cardinal;
-    FPadding1           : Word;
-    FStorageSFNT        : TPascalTypeStorage;
+    FEotSize           : Cardinal;
+    FFontDataSize      : Cardinal;
+    FVersion           : Cardinal;
+    FFlags             : Cardinal;
+    FFontPanose        : array [0..9] of Byte;
+    FCharset           : Byte;
+    FItalic            : Byte;
+    FWeight            : Cardinal;
+    FSelectionType     : Word;
+    FMagicNumber       : Word;
+    FUnicodeRange      : array [0..3] of Cardinal;
+    FCodePageRange     : array [0..1] of Cardinal;
+    FCheckSumAdjustment: Cardinal;
+    FReserved          : array [0..3] of Cardinal;
+    FPadding1          : Word;
+    FStorageSFNT       : TPascalTypeStorage;
     procedure SetCharset(const Value: Byte);
     procedure SetCheckSumAdjustment(const Value: Cardinal);
     procedure SetEotSize(const Value: Cardinal);
@@ -105,19 +105,20 @@ type
     property FontDataSize: Cardinal read FFontDataSize write SetFontDataSize;
     property Version: Cardinal read FVersion write SetVersion;
     property Flags: Cardinal read FFlags write SetFlags;
-//    property FontPanose: array [0..9] of Byte read FFontPanose write SetFontPanose;
+    // property FontPanose: array [0..9] of Byte read FFontPanose write SetFontPanose;
     property Charset: Byte read FCharset write SetCharset;
     property Italic: Byte read FItalic write SetItalic;
     property Weight: Cardinal read FWeight write SetWeight;
     property SelectionType: Word read FSelectionType write SetSelectionType;
     property MagicNumber: Word read FMagicNumber write SetMagicNumber;
-//    property UnicodeRange: array [0..3] of Cardinal read FUnicodeRange write SetUnicodeRange;
-//    property CodePageRange: array [0..1] of Cardinal read FCodePageRange write SetCodePageRange;
-    property CheckSumAdjustment: Cardinal read FCheckSumAdjustment write SetCheckSumAdjustment;
+    // property UnicodeRange: array [0..3] of Cardinal read FUnicodeRange write SetUnicodeRange;
+    // property CodePageRange: array [0..1] of Cardinal read FCodePageRange write SetCodePageRange;
+    property CheckSumAdjustment: Cardinal read FCheckSumAdjustment
+      write SetCheckSumAdjustment;
 
-    property StorageSFNT: TPascalTypeStorage read FStorageSFNT write SetStorageSFNT;
+    property StorageSFNT: TPascalTypeStorage read FStorageSFNT
+      write SetStorageSFNT;
   end;
-
 
 implementation
 
@@ -125,197 +126,197 @@ implementation
 
 procedure TPascalTypeEmbeddedOpenType.LoadFromStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   Read(FEotSize, SizeOf(Cardinal));
-   Read(FFontDataSize, SizeOf(Cardinal));
-   Read(FVersion, SizeOf(Cardinal));
-   Read(FFlags, SizeOf(Cardinal));
-   Read(FFontPanose, 10);
-   Read(FCharset, SizeOf(Byte));
-   Read(FItalic, SizeOf(Byte));
-   Read(FWeight, SizeOf(Cardinal));
-   Read(FSelectionType, SizeOf(Word));
-   Read(FMagicNumber, SizeOf(Word));
-   Read(FUnicodeRange, 4 * SizeOf(Cardinal));
-   Read(FCodePageRange, 2 * SizeOf(Cardinal));
-   Read(FCheckSumAdjustment, SizeOf(Cardinal));
-   Read(FReserved, 4 * SizeOf(Cardinal));
-   Read(FPadding1, SizeOf(Word));
+    Read(FEotSize, SizeOf(Cardinal));
+    Read(FFontDataSize, SizeOf(Cardinal));
+    Read(FVersion, SizeOf(Cardinal));
+    Read(FFlags, SizeOf(Cardinal));
+    Read(FFontPanose, 10);
+    Read(FCharset, SizeOf(Byte));
+    Read(FItalic, SizeOf(Byte));
+    Read(FWeight, SizeOf(Cardinal));
+    Read(FSelectionType, SizeOf(Word));
+    Read(FMagicNumber, SizeOf(Word));
+    Read(FUnicodeRange, 4 * SizeOf(Cardinal));
+    Read(FCodePageRange, 2 * SizeOf(Cardinal));
+    Read(FCheckSumAdjustment, SizeOf(Cardinal));
+    Read(FReserved, 4 * SizeOf(Cardinal));
+    Read(FPadding1, SizeOf(Word));
   end;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SaveToStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   Write(FEotSize, SizeOf(Cardinal));
-   Write(FFontDataSize, SizeOf(Cardinal));
-   Write(FVersion, SizeOf(Cardinal));
-   Write(FFlags, SizeOf(Cardinal));
-   Write(FFontPanose, 10);
-   Write(FCharset, SizeOf(Byte));
-   Write(FItalic, SizeOf(Byte));
-   Write(FWeight, SizeOf(Cardinal));
-   Write(FSelectionType, SizeOf(Word));
-   Write(FMagicNumber, SizeOf(Word));
-   Write(FUnicodeRange, 4 * SizeOf(Cardinal));
-   Write(FCodePageRange, 2 * SizeOf(Cardinal));
-   Write(FCheckSumAdjustment, SizeOf(Cardinal));
-   Write(FReserved, 4 * SizeOf(Cardinal));
-   Write(FPadding1, SizeOf(Word));
+    Write(FEotSize, SizeOf(Cardinal));
+    Write(FFontDataSize, SizeOf(Cardinal));
+    Write(FVersion, SizeOf(Cardinal));
+    Write(FFlags, SizeOf(Cardinal));
+    Write(FFontPanose, 10);
+    Write(FCharset, SizeOf(Byte));
+    Write(FItalic, SizeOf(Byte));
+    Write(FWeight, SizeOf(Cardinal));
+    Write(FSelectionType, SizeOf(Word));
+    Write(FMagicNumber, SizeOf(Word));
+    Write(FUnicodeRange, 4 * SizeOf(Cardinal));
+    Write(FCodePageRange, 2 * SizeOf(Cardinal));
+    Write(FCheckSumAdjustment, SizeOf(Cardinal));
+    Write(FReserved, 4 * SizeOf(Cardinal));
+    Write(FPadding1, SizeOf(Word));
   end;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SetCharset(const Value: Byte);
 begin
- if FCharset <> Value then
+  if FCharset <> Value then
   begin
-   FCharset := Value;
-   CharsetChanged;
+    FCharset := Value;
+    CharsetChanged;
   end;
 end;
 
-procedure TPascalTypeEmbeddedOpenType.SetCheckSumAdjustment(
-  const Value: Cardinal);
+procedure TPascalTypeEmbeddedOpenType.SetCheckSumAdjustment
+  (const Value: Cardinal);
 begin
- if FCheckSumAdjustment <> Value then
+  if FCheckSumAdjustment <> Value then
   begin
-   FCheckSumAdjustment := Value;
-   CheckSumAdjustmentChanged;
+    FCheckSumAdjustment := Value;
+    CheckSumAdjustmentChanged;
   end;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SetEotSize(const Value: Cardinal);
 begin
- if FEotSize <> Value then
+  if FEotSize <> Value then
   begin
-   FEotSize := Value;
-   EotSizeChanged;
+    FEotSize := Value;
+    EotSizeChanged;
   end;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SetFlags(const Value: Cardinal);
 begin
- if FFlags <> Value then
+  if FFlags <> Value then
   begin
-   FFlags := Value;
-   FlagsChanged;
+    FFlags := Value;
+    FlagsChanged;
   end;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SetFontDataSize(const Value: Cardinal);
 begin
- if FFontDataSize <> Value then
+  if FFontDataSize <> Value then
   begin
-   FFontDataSize := Value;
-   FontDataSizeChanged;
+    FFontDataSize := Value;
+    FontDataSizeChanged;
   end;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SetSelectionType(const Value: Word);
 begin
- if FSelectionType <> Value then
+  if FSelectionType <> Value then
   begin
-   FSelectionType := Value;
-   SelectionTypeChanged;
+    FSelectionType := Value;
+    SelectionTypeChanged;
   end;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SetItalic(const Value: Byte);
 begin
- if FItalic <> Value then
+  if FItalic <> Value then
   begin
-   FItalic := Value;
-   ItalicChanged;
+    FItalic := Value;
+    ItalicChanged;
   end;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SetMagicNumber(const Value: Word);
 begin
- if FMagicNumber <> Value then
+  if FMagicNumber <> Value then
   begin
-   FMagicNumber := Value;
-   MagicNumberChanged;
+    FMagicNumber := Value;
+    MagicNumberChanged;
   end;
 end;
 
-procedure TPascalTypeEmbeddedOpenType.SetStorageSFNT(
-  const Value: TPascalTypeStorage);
+procedure TPascalTypeEmbeddedOpenType.SetStorageSFNT
+  (const Value: TPascalTypeStorage);
 begin
- FStorageSFNT.Assign(Value);
+  FStorageSFNT.Assign(Value);
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SetVersion(const Value: Cardinal);
 begin
- if FVersion <> Value then
+  if FVersion <> Value then
   begin
-   FVersion := Value;
-   VersionChanged;
+    FVersion := Value;
+    VersionChanged;
   end;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SetWeight(const Value: Cardinal);
 begin
- if FWeight <> Value then
+  if FWeight <> Value then
   begin
-   FWeight := Value;
-   WeightChanged;
+    FWeight := Value;
+    WeightChanged;
   end;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.CharsetChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.CheckSumAdjustmentChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.EotSizeChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.FlagsChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.FontDataSizeChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.SelectionTypeChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.ItalicChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.MagicNumberChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.VersionChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeEmbeddedOpenType.WeightChanged;
 begin
- Changed;
+  Changed;
 end;
 
 end.

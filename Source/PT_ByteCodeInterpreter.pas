@@ -47,155 +47,156 @@ uses
 
 procedure ByteCodeToStrings(ByteCodeStream: TStream; Strings: TStrings);
 var
-  TempStr      : string;
-  Instruction  : Byte;
-  ParamCount   : Byte;
-  ParamIndex   : Byte;
-  ParamValue8  : Byte;
-  ParamValue16 : Word;
+  TempStr     : string;
+  Instruction : Byte;
+  ParamCount  : Byte;
+  ParamIndex  : Byte;
+  ParamValue8 : Byte;
+  ParamValue16: Word;
 begin
- with ByteCodeStream do
-  while Position < Size do
-   begin
-    // read instruction
-    Read(Instruction, 1);
+  with ByteCodeStream do
+    while Position < Size do
+    begin
+      // read instruction
+      Read(Instruction, 1);
 
-    // Instruction taking data from the instruction stream
-    TempStr := InstructionByteToString(Instruction);
+      // Instruction taking data from the instruction stream
+      TempStr := InstructionByteToString(Instruction);
 
-    case Instruction of
-     $40 :
-       begin
-        // read parameter count
-        Read(ParamCount, 1);
+      case Instruction of
+        $40:
+          begin
+            // read parameter count
+            Read(ParamCount, 1);
 
-        // check if parameter count is valid
-        if not (Position + ParamCount <= Size)
-         then raise Exception.Create(RCStrInvalidInstruction);
+            // check if parameter count is valid
+            if not(Position + ParamCount <= Size) then
+              raise Exception.Create(RCStrInvalidInstruction);
 
-        if ParamCount > 0 then
-         begin
-          // read first parameter value
-          Read(ParamValue8, 1);
+            if ParamCount > 0 then
+            begin
+              // read first parameter value
+              Read(ParamValue8, 1);
 
-          // add parameter value to temporary string
-          TempStr := TempStr + ' ' + IntToStr(ParamValue8);
+              // add parameter value to temporary string
+              TempStr := TempStr + ' ' + IntToStr(ParamValue8);
 
-          for ParamIndex := 1 to ParamCount - 1 do
-           begin
-            // read next parameter value
+              for ParamIndex := 1 to ParamCount - 1 do
+              begin
+                // read next parameter value
+                Read(ParamValue8, 1);
+
+                // add parameter value to temporary string
+                TempStr := TempStr + ', ' + IntToStr(ParamValue8);
+              end;
+            end;
+          end;
+        $41:
+          begin
+            // read parameter count
+            Read(ParamCount, 1);
+
+            // check if parameter count is valid
+            if not(Position + ParamCount <= Size) then
+              raise Exception.Create(RCStrInvalidInstruction);
+
+            if ParamCount > 0 then
+            begin
+              // read first parameter value
+              Read(ParamValue16, 2);
+
+              // add parameter value to temporary string
+              TempStr := TempStr + ' ' + IntToStr(Swap16(ParamValue16));
+
+              for ParamIndex := 1 to ParamCount - 1 do
+              begin
+                // read next parameter value
+                Read(ParamValue16, 2);
+
+                // add parameter value to temporary string
+                TempStr := TempStr + ', ' + IntToStr(Swap16(ParamValue16));
+              end;
+            end;
+          end;
+        $B0:
+          begin
+            // read parameter value
             Read(ParamValue8, 1);
 
             // add parameter value to temporary string
-            TempStr := TempStr + ', ' + IntToStr(ParamValue8);
-           end;
-         end;
-       end;
-     $41 :
-       begin
-        // read parameter count
-        Read(ParamCount, 1);
+            TempStr := TempStr + ' ' + IntToStr(ParamValue8);
+          end;
+        $B1..$B7:
+          begin
+            // read first parameter value
+            Read(ParamValue8, 1);
 
-        // check if parameter count is valid
-        if not (Position + ParamCount <= Size)
-         then raise Exception.Create(RCStrInvalidInstruction);
+            // add parameter value to temporary string
+            TempStr := TempStr + ' ' + IntToStr(ParamValue8);
 
-        if ParamCount > 0 then
-         begin
-          // read first parameter value
-          Read(ParamValue16, 2);
+            for ParamIndex := 0 to (Instruction - $B0) - 1 do
+            begin
+              // read next parameter value
+              Read(ParamValue8, 1);
 
-          // add parameter value to temporary string
-          TempStr := TempStr + ' ' + IntToStr(Swap16(ParamValue16));
-
-          for ParamIndex := 1 to ParamCount - 1 do
-           begin
-            // read next parameter value
+              // add parameter value to temporary string
+              TempStr := TempStr + ', ' + IntToStr(ParamValue8);
+            end;
+          end;
+        $B8:
+          begin
+            // read parameter value
             Read(ParamValue16, 2);
 
             // add parameter value to temporary string
-            TempStr := TempStr + ', ' + IntToStr(Swap16(ParamValue16));
-           end;
-         end;
-       end;
-     $B0 :
-       begin
-        // read parameter value
-        Read(ParamValue8, 1);
+            TempStr := TempStr + ' ' + IntToStr(Swap16(ParamValue16));
+          end;
+        $B9..$BF:
+          begin
+            // read first parameter value
+            Read(ParamValue16, 2);
 
-        // add parameter value to temporary string
-        TempStr := TempStr + ' ' + IntToStr(ParamValue8);
-       end;
-     $B1..$B7 :
-       begin
-        // read first parameter value
-        Read(ParamValue8, 1);
+            // add parameter value to temporary string
+            TempStr := TempStr + ' ' + IntToStr(Swap16(ParamValue16));
 
-        // add parameter value to temporary string
-        TempStr := TempStr + ' ' + IntToStr(ParamValue8);
+            for ParamIndex := 0 to (Instruction - $B8) - 1 do
+            begin
+              // read next parameter value
+              Read(ParamValue16, 2);
 
-        for ParamIndex := 0 to (Instruction - $B0) - 1 do
-         begin
-          // read next parameter value
-          Read(ParamValue8, 1);
+              // add parameter value to temporary string
+              TempStr := TempStr + ', ' + IntToStr(Swap16(ParamValue16));
+            end;
+          end;
+        $28, $83..$84, $8F..$AF:
+          raise EPascalTypeError.CreateFmt(RCStrUnknownOpcode, [Instruction]);
+      end;
 
-          // add parameter value to temporary string
-          TempStr := TempStr + ', ' + IntToStr(ParamValue8);
-         end;
-       end;
-     $B8 :
-       begin
-        // read parameter value
-        Read(ParamValue16, 2);
-
-        // add parameter value to temporary string
-        TempStr := TempStr + ' ' + IntToStr(Swap16(ParamValue16));
-       end;
-     $B9..$BF :
-       begin
-        // read first parameter value
-        Read(ParamValue16, 2);
-
-        // add parameter value to temporary string
-        TempStr := TempStr + ' ' + IntToStr(Swap16(ParamValue16));
-
-        for ParamIndex := 0 to (Instruction - $B8) - 1 do
-         begin
-          // read next parameter value
-          Read(ParamValue16, 2);
-
-          // add parameter value to temporary string
-          TempStr := TempStr + ', ' + IntToStr(Swap16(ParamValue16));
-         end;
-       end;
-     $28, $83..$84, $8F..$AF : raise EPascalTypeError.CreateFmt(RCStrUnknownOpcode, [Instruction]);
+      // add instruction to stream
+      Strings.Add(TempStr);
     end;
-
-    // add instruction to stream
-    Strings.Add(TempStr);
-   end;
 end;
 
 function ByteCodeToString(ByteCode: array of Byte): string;
 var
-  MS : TMemoryStream;
-  SL : TStringList;
+  MS: TMemoryStream;
+  SL: TStringList;
 begin
- MS := TMemoryStream.Create;
- try
-  MS.Read(ByteCode[0], Length(ByteCode));
-
-  SL := TStringList.Create;
+  MS := TMemoryStream.Create;
   try
-   ByteCodeToStrings(MS, SL);
-   Result := SL.Text;
-  finally
-   FreeAndNil(SL);
-  end;
+    MS.Read(ByteCode[0], Length(ByteCode));
 
- finally
-  FreeAndNil(MS);
- end;
+    SL := TStringList.Create;
+    try
+      ByteCodeToStrings(MS, SL);
+      Result := SL.Text;
+    finally
+      FreeAndNil(SL);
+    end;
+
+  finally
+    FreeAndNil(MS);
+  end;
 end;
 
 end.

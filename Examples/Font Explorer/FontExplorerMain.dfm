@@ -237,111 +237,111 @@ object FmTTF: TFmTTF
     Images = ToolbarImages
     Left = 8
     Top = 32
-    object MIFile: TMenuItem
+    object MiFile: TMenuItem
       Caption = '&File'
-      object MINew: TMenuItem
+      object MiNew: TMenuItem
         Caption = 'New'
         SubMenuImages = ToolbarImages
         Enabled = False
         ImageIndex = 0
       end
-      object MIOpen: TMenuItem
+      object MiOpen: TMenuItem
         Action = AcFileOpen
       end
-      object MIOpenFromInstalled: TMenuItem
+      object MiOpenFromInstalled: TMenuItem
         Caption = 'Open from installed...'
         OnClick = MIOpenFromInstalledClick
       end
       object MiOpenDefaultFonts: TMenuItem
         Caption = 'Open Default Fonts'
-        object MIInternal: TMenuItem
+        object MiInternal: TMenuItem
           Caption = '(internal)'
           OnClick = MIInternalClick
         end
         object N4: TMenuItem
           Caption = '-'
         end
-        object MIArial: TMenuItem
+        object MiArial: TMenuItem
           Caption = 'Arial'
-          object MIArialRegular: TMenuItem
+          object MiArialRegular: TMenuItem
             Caption = '&Regular'
             OnClick = MIArialRegularClick
           end
-          object MIArialBold: TMenuItem
+          object MiArialBold: TMenuItem
             Caption = '&Bold'
             OnClick = MIArialBoldClick
           end
-          object MIArialItalic: TMenuItem
+          object MiArialItalic: TMenuItem
             Caption = '&Italic'
             OnClick = MIArialItalicClick
           end
-          object MIArialBoldItalic: TMenuItem
+          object MiArialBoldItalic: TMenuItem
             Caption = 'B&old Italic'
             OnClick = MIArialBoldItalicClick
           end
         end
-        object MICourierNew: TMenuItem
+        object MiCourierNew: TMenuItem
           Caption = '&Courier New'
-          object MICourierRegular: TMenuItem
+          object MiCourierRegular: TMenuItem
             Caption = '&Regular'
             OnClick = MICourierRegularClick
           end
-          object MICourierNewBold: TMenuItem
+          object MiCourierNewBold: TMenuItem
             Caption = '&Bold'
             OnClick = MICourierNewBoldClick
           end
-          object MICourierNewItalic: TMenuItem
+          object MiCourierNewItalic: TMenuItem
             Caption = '&Italic'
             OnClick = MICourierNewItalicClick
           end
-          object MICourierNewBoldItalic: TMenuItem
+          object MiCourierNewBoldItalic: TMenuItem
             Caption = 'B&old Italic'
             OnClick = MICourierNewBoldItalicClick
           end
         end
-        object MITimesNewRoman: TMenuItem
+        object MiTimesNewRoman: TMenuItem
           Caption = '&Times New Roman'
-          object MITimesNewRomanRegular: TMenuItem
+          object MiTimesNewRomanRegular: TMenuItem
             Caption = '&Regular'
             OnClick = MITimesNewRomanRegularClick
           end
-          object MITimesNewRomanBold: TMenuItem
+          object MiTimesNewRomanBold: TMenuItem
             Caption = '&Bold'
             OnClick = MITimesNewRomanBoldClick
           end
-          object MITimesNewRomanItalic: TMenuItem
+          object MiTimesNewRomanItalic: TMenuItem
             Caption = '&Italic'
             OnClick = MITimesNewRomanItalicClick
           end
-          object MITimesNewRomanBoldItalic: TMenuItem
+          object MiTimesNewRomanBoldItalic: TMenuItem
             Caption = 'Bold Italic'
             OnClick = MITimesNewRomanBoldItalicClick
           end
         end
-        object MIWingdings: TMenuItem
+        object MiWingdings: TMenuItem
           Caption = 'Wingdings'
           OnClick = MIWingdingsClick
         end
       end
-      object MISave: TMenuItem
+      object MiSave: TMenuItem
         Caption = 'Save'
         Enabled = False
         ImageIndex = 2
       end
-      object MISaveAs: TMenuItem
+      object MiSaveAs: TMenuItem
         Action = AcFileSaveAs
         Enabled = False
       end
       object N1: TMenuItem
         Caption = '-'
       end
-      object MIExit: TMenuItem
+      object MiExit: TMenuItem
         Action = AcFileExit
       end
     end
-    object MIEdit: TMenuItem
+    object MiEdit: TMenuItem
       Caption = '&Edit'
-      object MIUndo: TMenuItem
+      object MiUndo: TMenuItem
         Action = AcEditUndo
         Caption = '&Undo'
         Hint = 'Undo|Undo the last action'
@@ -350,24 +350,24 @@ object FmTTF: TFmTTF
         Caption = '-'
         Enabled = False
       end
-      object MICut: TMenuItem
+      object MiCut: TMenuItem
         Action = AcEditCut
       end
       object MiCopy: TMenuItem
         Action = AcEditCopy
       end
-      object MIPaste: TMenuItem
+      object MiPaste: TMenuItem
         Action = AcEditPaste
       end
     end
-    object MIView: TMenuItem
+    object MiView: TMenuItem
       Caption = '&View'
-      object MIToolbar: TMenuItem
+      object MiToolbar: TMenuItem
         Caption = '&Toolbar'
         Checked = True
         OnClick = MIToolbarClick
       end
-      object MIStatusBar: TMenuItem
+      object MiStatusBar: TMenuItem
         Caption = '&Status Bar'
         Checked = True
         OnClick = MIStatusBarClick
@@ -376,10 +376,11 @@ object FmTTF: TFmTTF
         Caption = '-'
       end
     end
-    object MIHelp: TMenuItem
+    object MiHelp: TMenuItem
       Caption = '&Help'
-      object MIAbout: TMenuItem
+      object MiAbout: TMenuItem
         Caption = '&About'
+        OnClick = MiAboutClick
       end
     end
   end
@@ -442,7 +443,7 @@ object FmTTF: TFmTTF
     Left = 72
     Top = 32
     Bitmap = {
-      494C0101110018000C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010111001500040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000008484840084848400848484008484
       8400848484008484840084848400848484008484840084848400FFFFFF00C6C6

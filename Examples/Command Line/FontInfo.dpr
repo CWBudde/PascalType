@@ -3,113 +3,123 @@ program FontInfo;
 {$APPTYPE CONSOLE}
 
 uses
-  FastMM4, FastMove, SysUtils, Math,
+  {$IFDEF CPU32} FastMove, {$ENDIF}
+  FastMM4, SysUtils, Math,
   PT_Types, PT_Tables, PT_TablesOptional, PT_Storage, PT_StorageSFNT;
 
 resourcestring
   RCStrUnknownFileFormat = 'Unknown file format!';
+  RCStrVersion = 'Version';
+  RCStrFontRevision = 'Font Revision';
+  RCStrUnitsEm = 'Units / Em';
+  RCStrSmallestReadableSi = 'Smallest Readable Size in Pixels';
+  RCStrCreationDate = 'Creation Date';
+  RCStrModificationDate = 'Modification Date';
+  RCStrErrorReadingFile = 'Error reading file %s';
+  RCStrFileDoesNotExists = 'File %s does not exists';
 
 procedure LoadFontFile(FileName: TFilename);
 var
-  StrIndex : Integer;
-  Str      : string;
+  StrIndex: Integer;
+
+const
+  CNameIDs : array [TNameID] of string = ('Copyright Notice', 'Family',
+    'Subfamily', 'Unique Identifier', 'Full Name', 'Version', 'Postscript Name',
+    'Trademark', 'Vendor Name', 'Designer Name', 'Description', 'Vendor URL',
+    'Designer URL', 'License Description', 'License Information', 'Reserved',
+    'Preferred Family', 'Preferred Subfamily', 'Compatible Full', 'Sample Text',
+    'Future Expansion', 'Font Specific');
 
 begin
- if not FileExists(FileName) then
+  if not FileExists(FileName) then
   begin
-   Writeln('File ''' + ParamStr(0) + ''' does not exists');
-   Exit;
+    Writeln(Format(RCStrFileDoesNotExists, [FileName]));
+    Exit;
   end;
 
- with TPascalTypeStorageScan.Create do
-  try
-   try
-    LoadFromFile(FileName);
-   except
-    on E: EPascalTypeError do Writeln('Error reading file: ' + E.Message);
-   end;
+  with TPascalTypeStorageScan.Create do
+    try
+      try
+        LoadFromFile(FileName);
 
-   with HeaderTable do
-    begin
-     Writeln('Version: ' + FloatToStrF(Version.Value + Version.Fract / (1 shl 16), ffGeneral, 4, 4));
-     Writeln('Font Revision: ' + FloatToStrF(FontRevision.Value + FontRevision.Fract / (1 shl 16), ffGeneral, 4, 4));
-     Writeln('Units / Em: ' + IntToStr(UnitsPerEm));
-     Writeln('Smallest Readable Size in Pixels: ' + IntToStr(LowestRecPPEM));
-     Writeln('Creation Date: ' + DateTimeToStr(CreatedDate / 86400 + EncodeDate(1904, 1, 1)));
-     Writeln('Modification Date: ' + DateTimeToStr(ModifiedDate / 86400 + EncodeDate(1904, 1, 1)));
-    end;
+        Writeln(FileName);
+        Exit;
 
-   with NameTable do
-    begin
-     for StrIndex := 0 to NameSubtableCount - 1 do
-      begin
-       case NameSubtable[StrIndex].PlatformID of
-        piUnicode: Continue;
-        piApple: Continue;
-       end;
-
-       Assert(NameSubtable[StrIndex] is TTrueTypeFontNamePlatformMicrosoft);
-       with TTrueTypeFontNamePlatformMicrosoft(NameSubtable[StrIndex]) do
-        if (LanguageID <> SysLocale.DefaultLCID) and
-           (LanguageID <> 1033)
-         then Continue;
-
-       case NameSubtable[StrIndex].NameID of
-        niCopyrightNotice    : Str := 'Copyright Notice';
-        niFamily             : Str := 'Family';
-        niSubfamily          : Str := 'Subfamily';
-        niUniqueIdentifier   : Str := 'Unique Identifier';
-        niFullName           : Str := 'Full Name';
-        niVersion            : Str := 'Version';
-        niPostscriptName     : Str := 'Postscript Name';
-        niTrademark          : Str := 'Trademark';
-        niVendorName         : Str := 'Vendor Name';
-        niDesignerName       : Str := 'Designer Name';
-        niDescription        : Str := 'Description';
-        niVendorURL          : Str := 'Vendor URL';
-        niDesignerURL        : Str := 'Designer URL';
-        niLicenseDescription : Str := 'License Description';
-        niLicenseInformation : Str := 'License Information';
-        niReserved           : Str := 'Reserved';
-        niPreferredFamily    : Str := 'Preferred Family';
-        niPreferredSubfamily : Str := 'Preferred Subfamily';
-        niCompatibleFull     : Str := 'Compatible Full';
-        niSampleText         : Str := 'Sample Text';
-        niFutureExpansion    : Str := 'Future Expansion';
-        niFontSpecific       : Str := 'Font Specific';
-       end;
-
-       Writeln(Str + ': ' + NameSubtable[StrIndex].Name);
+      except
+        on E: EPascalTypeError do
+        begin
+          Writeln(Format(RCStrErrorReadingFile, [FileName]) + ': ' + E.Message);
+          Halt(1);
+        end;
       end;
+
+      with HeaderTable do
+      begin
+        Writeln(RCStrVersion + ': ' + FloatToStrF(Version.Value + Version.Fract /
+          (1 shl 16), ffGeneral, 4, 4));
+        Writeln(RCStrFontRevision + ': ' + FloatToStrF(FontRevision.Value +
+          FontRevision.Fract / (1 shl 16), ffGeneral, 4, 4));
+        Writeln(RCStrUnitsEm + ': ' + IntToStr(UnitsPerEm));
+        Writeln(RCStrSmallestReadableSi + ': ' + IntToStr(LowestRecPPEM));
+        Writeln(RCStrCreationDate + ': ' + DateTimeToStr(CreatedDate / 86400 +
+          EncodeDate(1904, 1, 1)));
+        Writeln(RCStrModificationDate + ': ' + DateTimeToStr(ModifiedDate / 86400 +
+          EncodeDate(1904, 1, 1)));
+      end;
+
+      with NameTable do
+      begin
+        for StrIndex := 0 to NameSubtableCount - 1 do
+        begin
+          case NameSubtable[StrIndex].PlatformID of
+            piUnicode:
+              Continue;
+            piApple:
+              Continue;
+          end;
+
+          Assert(NameSubtable[StrIndex] is TTrueTypeFontNamePlatformMicrosoft);
+          with TTrueTypeFontNamePlatformMicrosoft(NameSubtable[StrIndex]) do
+            if (LanguageID <> SysLocale.DefaultLCID) and (LanguageID <> 1033)
+            then
+              Continue;
+
+          Writeln(CNameIDs[NameSubtable[StrIndex].NameID] + ': ' +
+            NameSubtable[StrIndex].Name);
+        end;
+      end;
+    finally
+      Free;
     end;
-  finally
-   Free;
-  end;
 end;
 
-
 var
-  SR : TSearchRec;
-begin
- // show application information
- Writeln('PascalType Font Info');
- Writeln('--------------------');
- Writeln('');
+  SR: TSearchRec;
 
- if ParamStr(1) = '' then
+begin
+  // show application information
+  Writeln('PascalType Font Info');
+  Writeln('--------------------');
+  Writeln('');
+
+  if ParamStr(1) = '' then
   begin
-   Writeln('Usage: ' + ExtractFileName(ParamStr(0)) + ' TrueTypeFontFile' );
-   Exit;
+    Writeln('Usage: ' + ExtractFileName(ParamStr(0)) + ' TrueTypeFontFile');
+    Exit;
   end;
 
- if Pos('*', ParamStr(1)) > 0 then
-  if FindFirst(ParamStr(1), faAnyFile, SR) = 0 then
-   try
-    repeat
-     LoadFontFile(SR.Name);
-    until FindNext(SR) <> 0;
-   finally
-    FindClose(SR);
-   end else
- else LoadFontFile(ParamStr(1));
+  repeat
+    if Pos('*', ParamStr(1)) > 0 then
+      if FindFirst(ParamStr(1), faAnyFile, SR) = 0 then
+        try
+          repeat
+            LoadFontFile(ExtractFilePath(ParamStr(1)) + SR.Name);
+          until FindNext(SR) <> 0;
+        finally
+          FindClose(SR);
+        end
+      else
+    else
+      LoadFontFile(ParamStr(1));
+  until Random(200) = 1;
 end.

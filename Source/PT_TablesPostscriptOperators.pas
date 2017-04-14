@@ -39,116 +39,138 @@ uses
   PT_TablesPostscript;
 
 type
-  TPascalTypePostscriptVersionOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptVersionOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptNoticeOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptNoticeOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptFullNameOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptFullNameOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptFamilyNameOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptFamilyNameOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptWeightOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptWeightOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptFontBBoxOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptFontBBoxOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptBlueValuesOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptBlueValuesOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptOtherBluesOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptOtherBluesOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptFamilyBluesOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptFamilyBluesOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptFamilyOtherBluesOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptFamilyOtherBluesOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptStdHWOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptStdHWOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptStdVWOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptStdVWOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptEscapeOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptEscapeOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   private
-    FOpCode : Byte;
+    FOpCode: Byte;
   protected
     class function GetOperator: Byte; override;
   public
-    property Opcode: Byte read FOpCode write FOpCode; 
+    property Opcode: Byte read FOpCode write FOpCode;
   end;
 
-  TPascalTypePostscriptUniqueIDOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptUniqueIDOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptXUIDOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptXUIDOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptCharsetOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptCharsetOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptEncodingOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptEncodingOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptCharStringOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptCharStringOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptPrivateOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptPrivateOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptSubrsOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptSubrsOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptDefaultWidthXOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptDefaultWidthXOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
 
-  TPascalTypePostscriptNominalWidthXOperator = class(TCustomPascalTypePostscriptDictOperator)
+  TPascalTypePostscriptNominalWidthXOperator = class
+    (TCustomPascalTypePostscriptDictOperator)
   protected
     class function GetOperator: Byte; override;
   end;
@@ -159,177 +181,173 @@ implementation
 
 class function TPascalTypePostscriptVersionOperator.GetOperator: Byte;
 begin
- Result := 0;
+  Result := 0;
 end;
-
 
 { TPascalTypePostscriptNoticeOperator }
 
 class function TPascalTypePostscriptNoticeOperator.GetOperator: Byte;
 begin
- Result := 1;
+  Result := 1;
 end;
-
 
 { TPascalTypePostscriptFullNameOperator }
 
 class function TPascalTypePostscriptFullNameOperator.GetOperator: Byte;
 begin
- Result := 2;
+  Result := 2;
 end;
 
 { TPascalTypePostscriptFamilyNameOperator }
 
 class function TPascalTypePostscriptFamilyNameOperator.GetOperator: Byte;
 begin
- Result := 3;
+  Result := 3;
 end;
 
 { TPascalTypePostscriptWeightOperator }
 
 class function TPascalTypePostscriptWeightOperator.GetOperator: Byte;
 begin
- Result := 4;
+  Result := 4;
 end;
 
 { TPascalTypePostscriptFontBBoxOperator }
 
 class function TPascalTypePostscriptFontBBoxOperator.GetOperator: Byte;
 begin
- Result := 5;
+  Result := 5;
 end;
 
 { TPascalTypePostscriptBlueValuesOperator }
 
 class function TPascalTypePostscriptBlueValuesOperator.GetOperator: Byte;
 begin
- Result := 6;
+  Result := 6;
 end;
 
 { TPascalTypePostscriptOtherBluesOperator }
 
 class function TPascalTypePostscriptOtherBluesOperator.GetOperator: Byte;
 begin
- Result := 7;
+  Result := 7;
 end;
 
 { TPascalTypePostscriptFamilyBluesOperator }
 
 class function TPascalTypePostscriptFamilyBluesOperator.GetOperator: Byte;
 begin
- Result := 8;
+  Result := 8;
 end;
 
 { TPascalTypePostscriptFamilyOtherBluesOperator }
 
 class function TPascalTypePostscriptFamilyOtherBluesOperator.GetOperator: Byte;
 begin
- Result := 9;
+  Result := 9;
 end;
 
 { TPascalTypePostscriptStdHWOperator }
 
 class function TPascalTypePostscriptStdHWOperator.GetOperator: Byte;
 begin
- Result := 10;
+  Result := 10;
 end;
 
 { TPascalTypePostscriptStdVWOperator }
 
 class function TPascalTypePostscriptStdVWOperator.GetOperator: Byte;
 begin
- Result := 11;
+  Result := 11;
 end;
 
 { TPascalTypePostscriptEscapeOperator }
 
 class function TPascalTypePostscriptEscapeOperator.GetOperator: Byte;
 begin
- Result := 12;
+  Result := 12;
 end;
 
 { TPascalTypePostscriptUniqueIDOperator }
 
 class function TPascalTypePostscriptUniqueIDOperator.GetOperator: Byte;
 begin
- Result := 13;
+  Result := 13;
 end;
 
 { TPascalTypePostscriptXUIDOperator }
 
 class function TPascalTypePostscriptXUIDOperator.GetOperator: Byte;
 begin
- Result := 14;
+  Result := 14;
 end;
 
 { TPascalTypePostscriptCharsetOperator }
 
 class function TPascalTypePostscriptCharsetOperator.GetOperator: Byte;
 begin
- Result := 15;
+  Result := 15;
 end;
 
 { TPascalTypePostscriptEncodingOperator }
 
 class function TPascalTypePostscriptEncodingOperator.GetOperator: Byte;
 begin
- Result := 16;
+  Result := 16;
 end;
 
 { TPascalTypePostscriptCharStringOperator }
 
 class function TPascalTypePostscriptCharStringOperator.GetOperator: Byte;
 begin
- Result := 17;
+  Result := 17;
 end;
 
 { TPascalTypePostscriptPrivateOperator }
 
 class function TPascalTypePostscriptPrivateOperator.GetOperator: Byte;
 begin
- Result := 18;
+  Result := 18;
 end;
 
 { TPascalTypePostscriptSubrsOperator }
 
 class function TPascalTypePostscriptSubrsOperator.GetOperator: Byte;
 begin
- Result := 19;
+  Result := 19;
 end;
 
 { TPascalTypePostscriptDefaultWidthXOperator }
 
 class function TPascalTypePostscriptDefaultWidthXOperator.GetOperator: Byte;
 begin
- Result := 20;
+  Result := 20;
 end;
 
 { TPascalTypePostscriptNominalWidthXOperator }
 
 class function TPascalTypePostscriptNominalWidthXOperator.GetOperator: Byte;
 begin
- Result := 21;
+  Result := 21;
 end;
 
 initialization
-  RegisterOperators([TPascalTypePostscriptVersionOperator,
-    TPascalTypePostscriptNoticeOperator, TPascalTypePostscriptFullNameOperator,
-    TPascalTypePostscriptFamilyNameOperator,
-    TPascalTypePostscriptWeightOperator, TPascalTypePostscriptFontBBoxOperator,
-    TPascalTypePostscriptBlueValuesOperator,
-    TPascalTypePostscriptOtherBluesOperator,
-    TPascalTypePostscriptFamilyBluesOperator,
-    TPascalTypePostscriptFamilyOtherBluesOperator,
-    TPascalTypePostscriptStdHWOperator, TPascalTypePostscriptStdVWOperator,
-    TPascalTypePostscriptEscapeOperator, TPascalTypePostscriptUniqueIDOperator,
-    TPascalTypePostscriptXUIDOperator, TPascalTypePostscriptCharsetOperator,
-    TPascalTypePostscriptEncodingOperator,
-    TPascalTypePostscriptCharStringOperator,
-    TPascalTypePostscriptPrivateOperator, TPascalTypePostscriptSubrsOperator,
-    TPascalTypePostscriptDefaultWidthXOperator,
-    TPascalTypePostscriptNominalWidthXOperator]);
+
+RegisterOperators([TPascalTypePostscriptVersionOperator,
+  TPascalTypePostscriptNoticeOperator, TPascalTypePostscriptFullNameOperator,
+  TPascalTypePostscriptFamilyNameOperator, TPascalTypePostscriptWeightOperator,
+  TPascalTypePostscriptFontBBoxOperator,
+  TPascalTypePostscriptBlueValuesOperator,
+  TPascalTypePostscriptOtherBluesOperator,
+  TPascalTypePostscriptFamilyBluesOperator,
+  TPascalTypePostscriptFamilyOtherBluesOperator,
+  TPascalTypePostscriptStdHWOperator, TPascalTypePostscriptStdVWOperator,
+  TPascalTypePostscriptEscapeOperator, TPascalTypePostscriptUniqueIDOperator,
+  TPascalTypePostscriptXUIDOperator, TPascalTypePostscriptCharsetOperator,
+  TPascalTypePostscriptEncodingOperator,
+  TPascalTypePostscriptCharStringOperator, TPascalTypePostscriptPrivateOperator,
+  TPascalTypePostscriptSubrsOperator,
+  TPascalTypePostscriptDefaultWidthXOperator,
+  TPascalTypePostscriptNominalWidthXOperator]);
 
 end.
-
-
-

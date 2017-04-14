@@ -67,9 +67,9 @@ type
   TPascalTypeFontForgeTimeStampTable = class(TCustomPascalTypeNamedTable)
   private
     FVersion   : Cardinal; // currently 0x00000001
-    FTimeStamp : Int64;    // the date of the sources for fontforge
-    FCreation  : Int64;    // Not the creation date of the tt/ot file, but the date the sfd file was created. (not always accurate).
-    FLastMod   : Int64;    // Not the modification date of the file, but the time a glyph, etc. was last changed in the font database. (not always accurate)
+    FTimeStamp : Int64; // the date of the sources for fontforge
+    FCreation  : Int64; // Not the creation date of the tt/ot file, but the date the sfd file was created. (not always accurate).
+    FLastMod   : Int64; // Not the modification date of the file, but the time a glyph, etc. was last changed in the font database. (not always accurate)
     procedure SetCreation(const Value: Int64);
     procedure SetLast(const Value: Int64);
     procedure SetTimeStamp(const Value: Int64);
@@ -146,74 +146,74 @@ implementation
 uses
   PT_ResourceStrings;
 
-
 { TPascalTypeFontForgeX11BDFTable }
 
 procedure TPascalTypeFontForgeX11BDFTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TPascalTypeFontForgeTimeStampTable(Dest) do
-   begin
-    FVersion := Self.FVersion;
-   end
- else inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypeFontForgeTimeStampTable(Dest) do
+    begin
+      FVersion := Self.FVersion;
+    end
+  else
+    inherited;
 end;
 
 class function TPascalTypeFontForgeX11BDFTable.GetTableType: TTableType;
 begin
- Result := 'BDF ';
+  Result := 'BDF ';
 end;
 
 procedure TPascalTypeFontForgeX11BDFTable.ResetToDefaults;
 begin
- FVersion := 1;
- inherited;
+  FVersion := 1;
+  inherited;
 end;
 
 procedure TPascalTypeFontForgeX11BDFTable.LoadFromStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // check if table is complete
-   if Position + 8 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+    // check if table is complete
+    if Position + 8 > Size then
+      raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
-   // read version
-   FVersion := ReadSwappedWord(Stream);
+    // read version
+    FVersion := ReadSwappedWord(Stream);
   end;
 end;
 
 procedure TPascalTypeFontForgeX11BDFTable.SaveToStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // write version
-   WriteSwappedWord(Stream, FVersion);
+    // write version
+    WriteSwappedWord(Stream, FVersion);
 
-   // write strike-count
-   WriteSwappedWord(Stream, 0);
+    // write strike-count
+    WriteSwappedWord(Stream, 0);
 
-   // write offset
-   WriteSwappedCardinal(Stream, 0);
+    // write offset
+    WriteSwappedCardinal(Stream, 0);
   end;
 end;
 
 procedure TPascalTypeFontForgeX11BDFTable.SetVersion(const Value: Word);
 begin
- if FVersion <> Value then
+  if FVersion <> Value then
   begin
-   FVersion := Value;
-   VersionChanged;
+    FVersion := Value;
+    VersionChanged;
   end;
 end;
 
 procedure TPascalTypeFontForgeX11BDFTable.VersionChanged;
 begin
- Changed;
+  Changed;
 end;
 
 
@@ -221,133 +221,134 @@ end;
 
 procedure TPascalTypeFontForgeTimeStampTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TPascalTypeFontForgeTimeStampTable(Dest) do
-   begin
-    FVersion   := Self.FVersion;
-    FTimeStamp := Self.FTimeStamp;
-    FCreation  := Self.FCreation;
-    FLastMod   := Self.FLastMod;
-   end
- else inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypeFontForgeTimeStampTable(Dest) do
+    begin
+      FVersion := Self.FVersion;
+      FTimeStamp := Self.FTimeStamp;
+      FCreation := Self.FCreation;
+      FLastMod := Self.FLastMod;
+    end
+  else
+    inherited;
 end;
 
 class function TPascalTypeFontForgeTimeStampTable.GetTableType: TTableType;
 begin
- Result := 'FFTM';
+  Result := 'FFTM';
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.ResetToDefaults;
 begin
- inherited;
- FVersion   := 1;
- FTimeStamp := 0;
- FCreation  := 0;
- FLastMod   := 0;
+  inherited;
+  FVersion := 1;
+  FTimeStamp := 0;
+  FCreation := 0;
+  FLastMod := 0;
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.LoadFromStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // check if table is complete
-   if Position + 28 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+    // check if table is complete
+    if Position + 28 > Size then
+      raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
-   // read version
-   FVersion := ReadSwappedCardinal(Stream);
+    // read version
+    FVersion := ReadSwappedCardinal(Stream);
 
-   // read time stamp
-   FTimeStamp := ReadSwappedInt64(Stream);
+    // read time stamp
+    FTimeStamp := ReadSwappedInt64(Stream);
 
-   // read creation date
-   FCreation := ReadSwappedInt64(Stream);
+    // read creation date
+    FCreation := ReadSwappedInt64(Stream);
 
-   // read last modified date
-   FLastMod := ReadSwappedInt64(Stream);
+    // read last modified date
+    FLastMod := ReadSwappedInt64(Stream);
   end;
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.SaveToStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // check if table is complete
-   if Position + 28 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+    // check if table is complete
+    if Position + 28 > Size then
+      raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
-   // write version
-   WriteSwappedInt64(Stream, FVersion);
+    // write version
+    WriteSwappedInt64(Stream, FVersion);
 
-   // write time stamp
-   WriteSwappedInt64(Stream, FTimeStamp);
+    // write time stamp
+    WriteSwappedInt64(Stream, FTimeStamp);
 
-   // write creation date
-   WriteSwappedInt64(Stream, FCreation);
+    // write creation date
+    WriteSwappedInt64(Stream, FCreation);
 
-   // write last modified date
-   WriteSwappedInt64(Stream, FLastMod);
+    // write last modified date
+    WriteSwappedInt64(Stream, FLastMod);
   end;
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.SetCreation(const Value: Int64);
 begin
- if FCreation <> Value then
+  if FCreation <> Value then
   begin
-   FCreation := Value;
-   CreationChanged;
+    FCreation := Value;
+    CreationChanged;
   end;
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.SetLast(const Value: Int64);
 begin
- if FLastMod <> Value then
+  if FLastMod <> Value then
   begin
-   FLastMod := Value;
-   LastChanged;
+    FLastMod := Value;
+    LastChanged;
   end;
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.SetTimeStamp(const Value: Int64);
 begin
- if FTimeStamp <> Value then
+  if FTimeStamp <> Value then
   begin
-   FTimeStamp := Value;
-   TimeStampChanged;
+    FTimeStamp := Value;
+    TimeStampChanged;
   end;
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.SetVersion(const Value: Cardinal);
 begin
- if FVersion <> Value then
+  if FVersion <> Value then
   begin
-   FVersion := Value;
-   VersionChanged;
+    FVersion := Value;
+    VersionChanged;
   end;
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.CreationChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.LastChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.TimeStampChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeFontForgeTimeStampTable.VersionChanged;
 begin
- Changed;
+  Changed;
 end;
 
 
@@ -355,69 +356,69 @@ end;
 
 procedure TPascalTypeFontForgeExtensionTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TPascalTypeFontForgeTexTable(Dest) do
-   begin
-    FVersion := Self.FVersion;
-   end
- else inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypeFontForgeTexTable(Dest) do
+    begin
+      FVersion := Self.FVersion;
+    end
+  else
+    inherited;
 end;
 
 class function TPascalTypeFontForgeExtensionTable.GetTableType: TTableType;
 begin
- Result := 'PfEd';
+  Result := 'PfEd';
 end;
 
 procedure TPascalTypeFontForgeExtensionTable.ResetToDefaults;
 begin
- inherited;
- FVersion.Value := 1;
- FVersion.Fract := 0;
+  inherited;
+  FVersion.Value := 1;
+  FVersion.Fract := 0;
 end;
 
 procedure TPascalTypeFontForgeExtensionTable.LoadFromStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // check if table is complete
-   if Position + 8 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+    // check if table is complete
+    if Position + 8 > Size then
+      raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
-   // read version
-   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
+    // read version
+    FVersion.Fixed := ReadSwappedCardinal(Stream);
   end;
 end;
 
 procedure TPascalTypeFontForgeExtensionTable.SaveToStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // write version
-   WriteSwappedCardinal(Stream, Cardinal(FVersion));
+    // write version
+    WriteSwappedCardinal(Stream, Cardinal(FVersion));
 
-   // write count
-   WriteSwappedCardinal(Stream, 0);
+    // write count
+    WriteSwappedCardinal(Stream, 0);
   end;
 end;
 
-procedure TPascalTypeFontForgeExtensionTable.SetVersion(
-  const Value: TFixedPoint);
+procedure TPascalTypeFontForgeExtensionTable.SetVersion
+  (const Value: TFixedPoint);
 begin
- if (FVersion.Fract <> Value.Fract) or
-    (FVersion.Value <> Value.Value) then
+  if (FVersion.Fract <> Value.Fract) or (FVersion.Value <> Value.Value) then
   begin
-   FVersion := Value;
-   VersionChanged;
+    FVersion := Value;
+    VersionChanged;
   end;
 end;
 
 procedure TPascalTypeFontForgeExtensionTable.VersionChanged;
 begin
- Changed;
+  Changed;
 end;
 
 
@@ -425,73 +426,74 @@ end;
 
 procedure TPascalTypeFontForgeTexTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TPascalTypeFontForgeTexTable(Dest) do
-   begin
-    FVersion := Self.FVersion;
-   end
- else inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypeFontForgeTexTable(Dest) do
+    begin
+      FVersion := Self.FVersion;
+    end
+  else
+    inherited;
 end;
 
 procedure TPascalTypeFontForgeTexTable.ResetToDefaults;
 begin
- inherited;
- FVersion.Value := 1;
- FVersion.Fract := 0;
+  inherited;
+  FVersion.Value := 1;
+  FVersion.Fract := 0;
 end;
 
 class function TPascalTypeFontForgeTexTable.GetTableType: TTableType;
 begin
- Result := 'TEX ';
+  Result := 'TEX ';
 end;
 
 procedure TPascalTypeFontForgeTexTable.LoadFromStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // check if table is complete
-   if Position + 8 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+    // check if table is complete
+    if Position + 8 > Size then
+      raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
-   // read version
-   FVersion := TFixedPoint(ReadSwappedCardinal(Stream));
+    // read version
+    FVersion.Fixed := ReadSwappedCardinal(Stream);
   end;
 end;
 
 procedure TPascalTypeFontForgeTexTable.SaveToStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // write version
-   WriteSwappedCardinal(Stream, Cardinal(FVersion));
+    // write version
+    WriteSwappedCardinal(Stream, Cardinal(FVersion));
 
-   // write count
-   WriteSwappedCardinal(Stream, 0);
+    // write count
+    WriteSwappedCardinal(Stream, 0);
   end;
 end;
 
 procedure TPascalTypeFontForgeTexTable.SetVersion(const Value: TFixedPoint);
 begin
- if (FVersion.Fract <> Value.Fract) or
-    (FVersion.Value <> Value.Value) then
+  if (FVersion.Fract <> Value.Fract) or (FVersion.Value <> Value.Value) then
   begin
-   FVersion := Value;
-   VersionChanged;
+    FVersion := Value;
+    VersionChanged;
   end;
 end;
 
 procedure TPascalTypeFontForgeTexTable.VersionChanged;
 begin
- Changed;
+  Changed;
 end;
 
 initialization
-  RegisterPascalTypeTables([TPascalTypeFontForgeTimeStampTable,
-    TPascalTypeFontForgeExtensionTable, TPascalTypeFontForgeTexTable,
-    TPascalTypeFontForgeX11BDFTable]);
+
+RegisterPascalTypeTables([TPascalTypeFontForgeTimeStampTable,
+  TPascalTypeFontForgeExtensionTable, TPascalTypeFontForgeTexTable,
+  TPascalTypeFontForgeX11BDFTable]);
 
 end.

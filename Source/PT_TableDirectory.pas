@@ -221,10 +221,10 @@ procedure TPascalTypeDirectoryTableEntry.ResetToDefaults;
 begin
  with FDirectoryTableEntry do
   begin
-   TableType := 0;
-   CheckSum  := 0;
-   Offset    := 0;
-   Length    := 0;
+   TableType.AsCardinal := 0;
+   CheckSum := 0;
+   Offset := 0;
+   Length := 0;
   end;
 end;
 
@@ -257,7 +257,7 @@ end;
 
 procedure TPascalTypeDirectoryTableEntry.SetTableType(const Value: TTableType);
 begin
- if FDirectoryTableEntry.TableType <> Value then
+ if FDirectoryTableEntry.TableType.AsCardinal <> Value.AsCardinal then
   begin
    FDirectoryTableEntry.TableType := Value;
    TableTypeChanged;
@@ -309,7 +309,7 @@ var
 begin
  Result := nil;
  for Index := 0 to Count - 1 do
-  if Items[Index].TableType = TableType then
+  if Items[Index].TableType.AsCardinal = TableType.AsCardinal then
    begin
     Result := Items[Index];
     Exit;
@@ -447,36 +447,45 @@ begin
 end;
 
 procedure TPascalTypeDirectoryTable.ClearAndBuildRequiredEntries;
+var
+  TableType : TTableType;
 begin
  ResetToDefaults;
 
  // create head table entry
  FHeaderTable := TPascalTypeDirectoryTableEntry.Create;
- FHeaderTable.TableType := 'head';
+ TableType.AsAnsiChar := 'head';
+ FHeaderTable.TableType := TableType;
 
  // create maxp table entry
  FMaxProfileDataEntry := TPascalTypeDirectoryTableEntry.Create;
- FMaxProfileDataEntry.TableType := 'maxp';
+ TableType.AsAnsiChar := 'maxp';
+ FMaxProfileDataEntry.TableType := TableType;
 
  // create hhea table entry
  FHorHeaderDataEntry := TPascalTypeDirectoryTableEntry.Create;
- FHorHeaderDataEntry.TableType := 'hhea';
+ TableType.AsAnsiChar := 'hhea';
+ FHorHeaderDataEntry.TableType := TableType;
 
  // create hmtx table entry
  FHorMetricsDataEntry := TPascalTypeDirectoryTableEntry.Create;
- FHorMetricsDataEntry.TableType := 'hmtx';
+ TableType.AsAnsiChar := 'hmtx';
+ FHorMetricsDataEntry.TableType := TableType;
 
  // create cmap table entry
  FCharMapDataEntry := TPascalTypeDirectoryTableEntry.Create;
- FCharMapDataEntry.TableType := 'cmap';
+ TableType.AsAnsiChar := 'cmap';
+ FCharMapDataEntry.TableType := TableType;
 
  // create name table entry
  FNameDataEntry := TPascalTypeDirectoryTableEntry.Create;
- FNameDataEntry.TableType := 'name';
+ TableType.AsAnsiChar := 'name';
+ FNameDataEntry.TableType := TableType;
 
  // create post table entry
  FPostscriptDataEntry := TPascalTypeDirectoryTableEntry.Create;
- FPostscriptDataEntry.TableType := 'post';
+ TableType.AsAnsiChar := 'post';
+ FPostscriptDataEntry.TableType := TableType;
 end;
 
 procedure TPascalTypeDirectoryTable.LoadFromStream(Stream: TStream);
@@ -506,7 +515,7 @@ begin
     $00010000 :;
     $4F54544F :;
     $74727565 :;
-    else raise EPascalTypeError.Create(RCStrUnknownVersion);
+    else raise EPascalTypeError.CreateFmt(RCStrUnknownVersion, [Version]);
    end;
 
    // read number of tables
@@ -538,16 +547,16 @@ begin
      TableEntry.LoadFromStream(Stream);
 
      // add table entry as required table or add to directory table list
-     if TableEntry.TableType = 'head' then FHeaderTable := TableEntry else
-     if TableEntry.TableType = 'maxp' then FMaxProfileDataEntry := TableEntry else
-     if TableEntry.TableType = 'hhea' then FHorHeaderDataEntry := TableEntry else
-     if TableEntry.TableType = 'hmtx' then FHorMetricsDataEntry := TableEntry else
-     if TableEntry.TableType = 'cmap' then FCharMapDataEntry := TableEntry else
-     if TableEntry.TableType = 'name' then FNameDataEntry := TableEntry else
-     if TableEntry.TableType = 'post' then FPostscriptDataEntry := TableEntry else
-     if TableEntry.TableType = 'loca' then FLocationDataEntry := TableEntry else
-     if TableEntry.TableType = 'glyf' then FGlyphDataEntry := TableEntry else
-     if TableEntry.TableType = 'OS/2'
+     if CompareTableType(TableEntry.TableType, 'head') then FHeaderTable := TableEntry else
+     if CompareTableType(TableEntry.TableType, 'maxp') then FMaxProfileDataEntry := TableEntry else
+     if CompareTableType(TableEntry.TableType, 'hhea') then FHorHeaderDataEntry := TableEntry else
+     if CompareTableType(TableEntry.TableType, 'hmtx') then FHorMetricsDataEntry := TableEntry else
+     if CompareTableType(TableEntry.TableType, 'cmap') then FCharMapDataEntry := TableEntry else
+     if CompareTableType(TableEntry.TableType, 'name') then FNameDataEntry := TableEntry else
+     if CompareTableType(TableEntry.TableType, 'post') then FPostscriptDataEntry := TableEntry else
+     if CompareTableType(TableEntry.TableType, 'loca') then FLocationDataEntry := TableEntry else
+     if CompareTableType(TableEntry.TableType, 'glyf') then FGlyphDataEntry := TableEntry else
+     if CompareTableType(TableEntry.TableType, 'OS/2')
       then FOS2TableEntry := TableEntry
       else FTableList.Add(TableEntry);
     end;

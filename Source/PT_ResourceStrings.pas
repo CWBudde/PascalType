@@ -82,7 +82,7 @@ resourcestring
   RCStrUnknownFormat = 'Unknown format!';
   RCStrUnknownGlyphDataType = 'Unknown glyph data type (%d)';
   RCStrUnknownOpcode = 'Unknown opcode (%d)';
-  RCStrUnknownVersion = 'Unknown version';
+  RCStrUnknownVersion = 'Unknown version (%d)';
   RCStrUnsupportedPlatform = 'Unsupported Platform ID (%d)';
   RCStrUnsupportedVersion = 'Unsupported version';
   RCStrWrongChainLength = 'Chain length must be a multiple of 4!';

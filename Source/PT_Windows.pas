@@ -46,33 +46,34 @@ uses
 
 procedure StrResetLength(var S: string);
 begin
- SetLength(S, StrLen(PChar(S)));
+  SetLength(S, StrLen(PChar(S)));
 end;
 
 function PidlToPath(IdList: PItemIdList): string;
 begin
- SetLength(Result, MAX_PATH);
- if SHGetPathFromIDList(IdList, PChar(Result))
-  then StrResetLength(Result)
-  else Result := '';
+  SetLength(Result, MAX_PATH);
+  if SHGetPathFromIDList(IdList, PChar(Result)) then
+    StrResetLength(Result)
+  else
+    Result := '';
 end;
 
 function PidlFree(var IdList: PItemIdList): Boolean;
 var
   Malloc: IMalloc;
 begin
- Result := False;
- if IdList = nil
-  then Result := True
+  Result := False;
+  if IdList = nil then
+    Result := True
   else
-   begin
+  begin
     if Succeeded(SHGetMalloc(Malloc)) and (Malloc.DidAlloc(IdList) > 0) then
-     begin
+    begin
       Malloc.Free(IdList);
       IdList := nil;
       Result := True;
-     end;
-   end;
+    end;
+  end;
 end;
 
 function GetFontDirectory: string;

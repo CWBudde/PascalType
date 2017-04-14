@@ -2785,16 +2785,412 @@ type
 
 implementation
 
+resourcestring
+  RCStrAbaza = 'Abaza';
+  RCStrAbkhazian = 'Abkhazian';
+  RCStrAdyghe = 'Adyghe';
+  RCStrAfrikaans = 'Afrikaans';
+  RCStrAfar = 'Afar';
+  RCStrAgaw = 'Agaw';
+  RCStrAlsatian = 'Alsatian';
+  RCStrAltai = 'Altai';
+  RCStrAmharic = 'Amharic';
+  RCStrPhoneticTranscriptionAmericanistConventions = 'Phonetic transcription' +
+  '—Americanist conventions';
+  RCStrArabic = 'Arabic';
+  RCStrAari = 'Aari';
+  RCStrArakanese = 'Arakanese';
+  RCStrAssamese = 'Assamese';
+  RCStrAthapaskan = 'Athapaskan';
+  RCStrAvar = 'Avar';
+  RCStrAwadhi = 'Awadhi';
+  RCStrAymara = 'Aymara';
+  RCStrAzeri = 'Azeri';
+  RCStrBadaga = 'Badaga';
+  RCStrBaghelkhandi = 'Baghelkhandi';
+  RCStrBalkar = 'Balkar';
+  RCStrBaule = 'Baule';
+  RCStrBerber = 'Berber';
+  RCStrBench = 'Bench';
+  RCStrBibleCree = 'Bible Cree';
+  RCStrBelarussian = 'Belarussian';
+  RCStrBemba = 'Bemba';
+  RCStrBengali = 'Bengali';
+  RCStrBulgarian = 'Bulgarian';
+  RCStrBhili = 'Bhili';
+  RCStrBhojpuri = 'Bhojpuri';
+  RCStrBikol = 'Bikol';
+  RCStrBilen = 'Bilen';
+  RCStrBlackfoot = 'Blackfoot';
+  RCStrBalochi = 'Balochi';
+  RCStrBalante = 'Balante';
+  RCStrBalti = 'Balti';
+  RCStrBambara = 'Bambara';
+  RCStrBamileke = 'Bamileke';
+  RCStrBosnian = 'Bosnian';
+  RCStrBreton = 'Breton';
+  RCStrBrahui = 'Brahui';
+  RCStrBrajBhasha = 'Braj Bhasha';
+  RCStrBurmese = 'Burmese';
+  RCStrBashkir = 'Bashkir';
+  RCStrBeti = 'Beti';
+  RCStrCatalan = 'Catalan';
+  RCStrCebuano = 'Cebuano';
+  RCStrChechen = 'Chechen';
+  RCStrChahaGurage = 'Chaha Gurage';
+  RCStrChattisgarhi = 'Chattisgarhi';
+  RCStrChichewa = 'Chichewa';
+  RCStrChukchi = 'Chukchi';
+  RCStrChipewyan = 'Chipewyan';
+  RCStrCherokee = 'Cherokee';
+  RCStrChuvash = 'Chuvash';
+  RCStrComorian = 'Comorian';
+  RCStrCoptic = 'Coptic';
+  RCStrCorsican = 'Corsican';
+  RCStrCree = 'Cree';
+  RCStrCarrier = 'Carrier';
+  RCStrCrimeanTatar = 'Crimean Tatar';
+  RCStrChurchSlavonic = 'Church Slavonic';
+  RCStrCzech = 'Czech';
+  RCStrDanish = 'Danish';
+  RCStrDargwa = 'Dargwa';
+  RCStrWoodsCree = 'Woods Cree';
+  RCStrGerman = 'German';
+  RCStrDogri = 'Dogri';
+  RCStrDhivehi = 'Dhivehi';
+  RCStrDjerma = 'Djerma';
+  RCStrDangme = 'Dangme';
+  RCStrDinka = 'Dinka';
+  RCStrDari = 'Dari';
+  RCStrDungan = 'Dungan';
+  RCStrDzongkha = 'Dzongkha';
+  RCStrEbira = 'Ebira';
+  RCStrEasternCree = 'Eastern Cree';
+  RCStrEdo = 'Edo';
+  RCStrEfik = 'Efik';
+  RCStrGreek = 'Greek';
+  RCStrEnglish = 'English';
+  RCStrErzya = 'Erzya';
+  RCStrSpanish = 'Spanish';
+  RCStrEstonian = 'Estonian';
+  RCStrBasque = 'Basque';
+  RCStrEvenki = 'Evenki';
+  RCStrEven = 'Even';
+  RCStrEwe = 'Ewe';
+  RCStrFrenchAntillean = 'French Antillean';
+  RCStrFarsi = 'Farsi';
+  RCStrFinnish = 'Finnish';
+  RCStrFijian = 'Fijian';
+  RCStrFlemish = 'Flemish';
+  RCStrForestNenets = 'Forest Nenets';
+  RCStrFon = 'Fon';
+  RCStrFaroese = 'Faroese';
+  RCStrFrench = 'French';
+  RCStrFrisian = 'Frisian';
+  RCStrFriulian = 'Friulian';
+  RCStrFuta = 'Futa';
+  RCStrFulani = 'Fulani';
+  RCStrGa = 'Ga';
+  RCStrGaelic = 'Gaelic';
+  RCStrGagauz = 'Gagauz';
+  RCStrGalician = 'Galician';
+  RCStrGarshuni = 'Garshuni';
+  RCStrGarhwali = 'Garhwali';
+  RCStrGeez = 'Ge''ez';
+  RCStrGilyak = 'Gilyak';
+  RCStrGumuz = 'Gumuz';
+  RCStrGondi = 'Gondi';
+  RCStrGreenlandic = 'Greenlandic';
+  RCStrGaro = 'Garo';
+  RCStrGuarani = 'Guarani';
+  RCStrGujarati = 'Gujarati';
+  RCStrHaitian = 'Haitian';
+  RCStrHalam = 'Halam';
+  RCStrHarauti = 'Harauti';
+  RCStrHausa = 'Hausa';
+  RCStrHawaiin = 'Hawaiin';
+  RCStrHammerBanna = 'Hammer-Banna';
+  RCStrHiligaynon = 'Hiligaynon';
+  RCStrHindi = 'Hindi';
+  RCStrHighMari = 'High Mari';
+  RCStrHindko = 'Hindko';
+  RCStrHo = 'Ho';
+  RCStrHarari = 'Harari';
+  RCStrCroatian = 'Croatian';
+  RCStrHungarian = 'Hungarian';
+  RCStrArmenian = 'Armenian';
+  RCStrIgbo = 'Igbo';
+  RCStrIjo = 'Ijo';
+  RCStrIlokano = 'Ilokano';
+  RCStrIndonesian = 'Indonesian';
+  RCStrIngush = 'Ingush';
+  RCStrInuktitut = 'Inuktitut';
+  RCStrPhoneticTranscriptionIpaConventions = 'Phonetic transcription—IPA con' +
+  'ventions';
+  RCStrIrish = 'Irish';
+  RCStrIrishTraditional = 'Irish Traditional';
+  RCStrIcelandic = 'Icelandic';
+  RCStrInariSami = 'Inari Sami';
+  RCStrItalian = 'Italian';
+  RCStrHebrew = 'Hebrew';
+  RCStrJavanese = 'Javanese';
+  RCStrYiddish = 'Yiddish';
+  RCStrJapanese = 'Japanese';
+  RCStrJudezmo = 'Judezmo';
+  RCStrJula = 'Jula';
+  RCStrKabardian = 'Kabardian';
+  RCStrKachchi = 'Kachchi';
+  RCStrKalenjin = 'Kalenjin';
+  RCStrKannada = 'Kannada';
+  RCStrKarachay = 'Karachay';
+  RCStrGeorgian = 'Georgian';
+  RCStrKazakh = 'Kazakh';
+  RCStrKebena = 'Kebena';
+  RCStrKhutsuriGeorgian = 'Khutsuri Georgian';
+  RCStrKhakass = 'Khakass';
+  RCStrKhantyKazim = 'Khanty-Kazim';
+  RCStrKhmer = 'Khmer';
+  RCStrKhantyShurishkar = 'Khanty-Shurishkar';
+  RCStrKhantyVakhi = 'Khanty-Vakhi';
+  RCStrKhowar = 'Khowar';
+  RCStrKikuyu = 'Kikuyu';
+  RCStrKirghiz = 'Kirghiz';
+  RCStrKisii = 'Kisii';
+  RCStrKokni = 'Kokni';
+  RCStrKalmyk = 'Kalmyk';
+  RCStrKamba = 'Kamba';
+  RCStrKumaoni = 'Kumaoni';
+  RCStrKomo = 'Komo';
+  RCStrKomso = 'Komso';
+  RCStrKanuri = 'Kanuri';
+  RCStrKodagu = 'Kodagu';
+  RCStrKoreanOldHangul = 'Korean Old Hangul';
+  RCStrKonkani = 'Konkani';
+  RCStrKikongo = 'Kikongo';
+  RCStrKomiPermyak = 'Komi-Permyak';
+  RCStrKorean = 'Korean';
+  RCStrKomiZyrian = 'Komi-Zyrian';
+  RCStrKpelle = 'Kpelle';
+  RCStrKrio = 'Krio';
+  RCStrKarakalpak = 'Karakalpak';
+  RCStrKarelian = 'Karelian';
+  RCStrKaraim = 'Karaim';
+  RCStrKaren = 'Karen';
+  RCStrKoorete = 'Koorete';
+  RCStrKashmiri = 'Kashmiri';
+  RCStrKhasi = 'Khasi';
+  RCStrKildinSami = 'Kildin Sami';
+  RCStrKui = 'Kui';
+  RCStrKulvi = 'Kulvi';
+  RCStrKumyk = 'Kumyk';
+  RCStrKurdish = 'Kurdish';
+  RCStrKurukh = 'Kurukh';
+  RCStrKuy = 'Kuy';
+  RCStrKoryak = 'Koryak';
+  RCStrLadin = 'Ladin';
+  RCStrLahuli = 'Lahuli';
+  RCStrLak = 'Lak';
+  RCStrLambani = 'Lambani';
+  RCStrLao = 'Lao';
+  RCStrLatin = 'Latin';
+  RCStrLaz = 'Laz';
+  RCStrLCree = 'L-Cree';
+  RCStrLadakhi = 'Ladakhi';
+  RCStrLezgi = 'Lezgi';
+  RCStrLingala = 'Lingala';
+  RCStrLowMari = 'Low Mari';
+  RCStrLimbu = 'Limbu';
+  RCStrLomwe = 'Lomwe';
+  RCStrLowerSorbian = 'Lower Sorbian';
+  RCStrLuleSami = 'Lule Sami';
+  RCStrLithuanian = 'Lithuanian';
+  RCStrLuxembourgish = 'Luxembourgish';
+  RCStrLuba = 'Luba';
+  RCStrLuganda = 'Luganda';
+  RCStrLuhya = 'Luhya';
+  RCStrLuo = 'Luo';
+  RCStrLatvian = 'Latvian';
+  RCStrMajang = 'Majang';
+  RCStrMakua = 'Makua';
+  RCStrMalayalamTraditional = 'Malayalam Traditional';
+  RCStrMansi = 'Mansi';
+  RCStrMapudungun = 'Mapudungun';
+  RCStrMarathi = 'Marathi';
+  RCStrMarwari = 'Marwari';
+  RCStrMbundu = 'Mbundu';
+  RCStrManchu = 'Manchu';
+  RCStrMooseCree = 'Moose Cree';
+  RCStrMende = 'Mende';
+  RCStrMeen = 'Me''en';
+  RCStrMizo = 'Mizo';
+  RCStrMacedonian = 'Macedonian';
+  RCStrMale = 'Male';
+  RCStrMalagasy = 'Malagasy';
+  RCStrMalinke = 'Malinke';
+  RCStrMalayalamReformed = 'Malayalam Reformed';
+  RCStrMalay = 'Malay';
+  RCStrMandinka = 'Mandinka';
+  RCStrMongolian = 'Mongolian';
+  RCStrManipuri = 'Manipuri';
+  RCStrManinka = 'Maninka';
+  RCStrManxGaelic = 'Manx Gaelic';
+  RCStrMohawk = 'Mohawk';
+  RCStrMoksha = 'Moksha';
+  RCStrMoldavian = 'Moldavian';
+  RCStrMon = 'Mon';
+  RCStrMoroccan = 'Moroccan';
+  RCStrMaori = 'Maori';
+  RCStrMaithili = 'Maithili';
+  RCStrMaltese = 'Maltese';
+  RCStrMundari = 'Mundari';
+  RCStrNagaAssamese = 'Naga-Assamese';
+  RCStrNanai = 'Nanai';
+  RCStrNaskapi = 'Naskapi';
+  RCStrNCree = 'N-Cree';
+  RCStrNdebele = 'Ndebele';
+  RCStrNdonga = 'Ndonga';
+  RCStrNepali = 'Nepali';
+  RCStrNewari = 'Newari';
+  RCStrNagari = 'Nagari';
+  RCStrNorwayHouseCree = 'Norway House Cree';
+  RCStrNisi = 'Nisi';
+  RCStrNiuean = 'Niuean';
+  RCStrNkole = 'Nkole';
+  RCStrNKo = 'N''Ko';
+  RCStrDutch = 'Dutch';
+  RCStrNogai = 'Nogai';
+  RCStrNorwegian = 'Norwegian';
+  RCStrNorthernSami = 'Northern Sami';
+  RCStrNorthernTai = 'Northern Tai';
+  RCStrEsperanto = 'Esperanto';
+  RCStrNynorsk = 'Nynorsk';
+  RCStrOccitan = 'Occitan';
+  RCStrOjiCree = 'Oji-Cree';
+  RCStrOjibway = 'Ojibway';
+  RCStrOriya = 'Oriya';
+  RCStrOromo = 'Oromo';
+  RCStrOssetian = 'Ossetian';
+  RCStrPalestinianAramaic = 'Palestinian Aramaic';
+  RCStrPali = 'Pali';
+  RCStrPunjabi = 'Punjabi';
+  RCStrPalpa = 'Palpa';
+  RCStrPashto = 'Pashto';
+  RCStrPolytonicGreek = 'Polytonic Greek';
+  RCStrFilipino = 'Filipino';
+  RCStrPalaung = 'Palaung';
+  RCStrPolish = 'Polish';
+  RCStrProvencal = 'Provencal';
+  RCStrPortuguese = 'Portuguese';
+  RCStrChin = 'Chin';
+  RCStrRajasthani = 'Rajasthani';
+  RCStrRCree = 'R-Cree';
+  RCStrRussianBuriat = 'Russian Buriat';
+  RCStrRiang = 'Riang';
+  RCStrRhaetoRomanic = 'Rhaeto-Romanic';
+  RCStrRomanian = 'Romanian';
+  RCStrRomany = 'Romany';
+  RCStrRusyn = 'Rusyn';
+  RCStrRuanda = 'Ruanda';
+  RCStrRussian = 'Russian';
+  RCStrSadri = 'Sadri';
+  RCStrSanskrit = 'Sanskrit';
+  RCStrSantali = 'Santali';
+  RCStrSayisi = 'Sayisi';
+  RCStrSekota = 'Sekota';
+  RCStrSelkup = 'Selkup';
+  RCStrSango = 'Sango';
+  RCStrShan = 'Shan';
+  RCStrSibe = 'Sibe';
+  RCStrSidamo = 'Sidamo';
+  RCStrSilteGurage = 'Silte Gurage';
+  RCStrSkoltSami = 'Skolt Sami';
+  RCStrSlovak = 'Slovak';
+  RCStrSlavey = 'Slavey';
+  RCStrSlovenian = 'Slovenian';
+  RCStrSomali = 'Somali';
+  RCStrSamoan = 'Samoan';
+  RCStrSena = 'Sena';
+  RCStrSindhi = 'Sindhi';
+  RCStrSinhalese = 'Sinhalese';
+  RCStrSoninke = 'Soninke';
+  RCStrSodoGurage = 'Sodo Gurage';
+  RCStrSotho = 'Sotho';
+  RCStrAlbanian = 'Albanian';
+  RCStrSerbian = 'Serbian';
+  RCStrSaraiki = 'Saraiki';
+  RCStrSerer = 'Serer';
+  RCStrSouthSlavey = 'South Slavey';
+  RCStrSouthernSami = 'Southern Sami';
+  RCStrSvan = 'Svan';
+  RCStrSuri = 'Suri';
+  RCStrSwedish = 'Swedish';
+  RCStrSwadayaAramaic = 'Swadaya Aramaic';
+  RCStrSwahili = 'Swahili';
+  RCStrSwazi = 'Swazi';
+  RCStrSutu = 'Sutu';
+  RCStrSyriac = 'Syriac';
+  RCStrTabasaran = 'Tabasaran';
+  RCStrTajiki = 'Tajiki';
+  RCStrTamil = 'Tamil';
+  RCStrTatar = 'Tatar';
+  RCStrTHCree = 'TH-Cree';
+  RCStrTelugu = 'Telugu';
+  RCStrTongan = 'Tongan';
+  RCStrTigre = 'Tigre';
+  RCStrTigrinya = 'Tigrinya';
+  RCStrThai = 'Thai';
+  RCStrTahitian = 'Tahitian';
+  RCStrTibetan = 'Tibetan';
+  RCStrTurkmen = 'Turkmen';
+  RCStrTemne = 'Temne';
+  RCStrTswana = 'Tswana';
+  RCStrTundraNenets = 'Tundra Nenets';
+  RCStrTonga = 'Tonga';
+  RCStrTodo = 'Todo';
+  RCStrTurkish = 'Turkish';
+  RCStrTsonga = 'Tsonga';
+  RCStrTuroyoAramaic = 'Turoyo Aramaic';
+  RCStrTulu = 'Tulu';
+  RCStrTuvin = 'Tuvin';
+  RCStrTwi = 'Twi';
+  RCStrUdmurt = 'Udmurt';
+  RCStrUkrainian = 'Ukrainian';
+  RCStrUrdu = 'Urdu';
+  RCStrUpperSorbian = 'Upper Sorbian';
+  RCStrUyghur = 'Uyghur';
+  RCStrUzbek = 'Uzbek';
+  RCStrVenda = 'Venda';
+  RCStrVietnamese = 'Vietnamese';
+  RCStrWa = 'Wa';
+  RCStrWagdi = 'Wagdi';
+  RCStrWestCree = 'West-Cree';
+  RCStrWelsh = 'Welsh';
+  RCStrWolof = 'Wolof';
+  RCStrTaiLue = 'Tai Lue';
+  RCStrXhosa = 'Xhosa';
+  RCStrYakut = 'Yakut';
+  RCStrYoruba = 'Yoruba';
+  RCStrYCree = 'Y-Cree';
+  RCStrYiClassic = 'Yi Classic';
+  RCStrYiModern = 'Yi Modern';
+  RCStrChineseHongKong = 'Chinese Hong Kong';
+  RCStrChinesePhonetic = 'Chinese Phonetic';
+  RCStrChineseSimplified = 'Chinese Simplified';
+  RCStrChineseTraditional = 'Chinese Traditional';
+  RCStrZande = 'Zande';
+  RCStrZulu = 'Zulu';
+
+
 { TOpenTypeAbazaLanguageSystemTable }
 
 class function TOpenTypeAbazaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Abaza';
+  Result := RCStrAbaza;
 end;
 
 class function TOpenTypeAbazaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ABA ';
+  Result := 'ABA ';
 end;
 
 
@@ -2802,12 +3198,12 @@ end;
 
 class function TOpenTypeAbkhazianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Abkhazian';
+  Result := RCStrAbkhazian;
 end;
 
 class function TOpenTypeAbkhazianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ABK ';
+  Result := 'ABK ';
 end;
 
 
@@ -2815,12 +3211,12 @@ end;
 
 class function TOpenTypeAdygheLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Adyghe';
+  Result := RCStrAdyghe;
 end;
 
 class function TOpenTypeAdygheLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ADY ';
+  Result := 'ADY ';
 end;
 
 
@@ -2828,12 +3224,12 @@ end;
 
 class function TOpenTypeAfrikaansLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Afrikaans';
+  Result := RCStrAfrikaans;
 end;
 
 class function TOpenTypeAfrikaansLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'AFK ';
+  Result := 'AFK ';
 end;
 
 
@@ -2841,12 +3237,12 @@ end;
 
 class function TOpenTypeAfarLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Afar';
+  Result := RCStrAfar;
 end;
 
 class function TOpenTypeAfarLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'AFR ';
+  Result := 'AFR ';
 end;
 
 
@@ -2854,12 +3250,12 @@ end;
 
 class function TOpenTypeAgawLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Agaw';
+  Result := RCStrAgaw;
 end;
 
 class function TOpenTypeAgawLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'AGW ';
+  Result := 'AGW ';
 end;
 
 
@@ -2867,12 +3263,12 @@ end;
 
 class function TOpenTypeAlsatianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Alsatian';
+  Result := RCStrAlsatian;
 end;
 
 class function TOpenTypeAlsatianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ALS ';
+  Result := 'ALS ';
 end;
 
 
@@ -2880,12 +3276,12 @@ end;
 
 class function TOpenTypeAltaiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Altai';
+  Result := RCStrAltai;
 end;
 
 class function TOpenTypeAltaiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ALT ';
+  Result := 'ALT ';
 end;
 
 
@@ -2893,25 +3289,29 @@ end;
 
 class function TOpenTypeAmharicLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Amharic';
+  Result := RCStrAmharic;
 end;
 
 class function TOpenTypeAmharicLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'AMH ';
+  Result := 'AMH ';
 end;
 
 
 { TOpenTypePhoneticTranscriptionAmericanistConventionsLanguageSystemTable }
 
-class function TOpenTypePhoneticTranscriptionAmericanistConventionsLanguageSystemTable.GetDisplayName: string;
+class function
+  TOpenTypePhoneticTranscriptionAmericanistConventionsLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Phonetic transcription—Americanist conventions';
+  Result := RCStrPhoneticTranscriptionAmericanistConventions;
 end;
 
-class function TOpenTypePhoneticTranscriptionAmericanistConventionsLanguageSystemTable.GetTableType: TTableType;
+class function
+  TOpenTypePhoneticTranscriptionAmericanistConventionsLanguageSystemTable.
+  GetTableType: TTableType;
 begin
- Result := 'APPH';
+  Result := 'APPH';
 end;
 
 
@@ -2919,12 +3319,12 @@ end;
 
 class function TOpenTypeArabicLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Arabic';
+  Result := RCStrArabic;
 end;
 
 class function TOpenTypeArabicLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ARA ';
+  Result := 'ARA ';
 end;
 
 
@@ -2932,12 +3332,12 @@ end;
 
 class function TOpenTypeAariLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Aari';
+  Result := RCStrAari;
 end;
 
 class function TOpenTypeAariLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ARI ';
+  Result := 'ARI ';
 end;
 
 
@@ -2945,12 +3345,12 @@ end;
 
 class function TOpenTypeArakaneseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Arakanese';
+  Result := RCStrArakanese;
 end;
 
 class function TOpenTypeArakaneseLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ARK ';
+  Result := 'ARK ';
 end;
 
 
@@ -2958,12 +3358,12 @@ end;
 
 class function TOpenTypeAssameseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Assamese';
+  Result := RCStrAssamese;
 end;
 
 class function TOpenTypeAssameseLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ASM ';
+  Result := 'ASM ';
 end;
 
 
@@ -2971,12 +3371,12 @@ end;
 
 class function TOpenTypeAthapaskanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Athapaskan';
+  Result := RCStrAthapaskan;
 end;
 
 class function TOpenTypeAthapaskanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ATH ';
+  Result := 'ATH ';
 end;
 
 
@@ -2984,12 +3384,12 @@ end;
 
 class function TOpenTypeAvarLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Avar';
+  Result := RCStrAvar;
 end;
 
 class function TOpenTypeAvarLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'AVR ';
+  Result := 'AVR ';
 end;
 
 
@@ -2997,12 +3397,12 @@ end;
 
 class function TOpenTypeAwadhiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Awadhi';
+  Result := RCStrAwadhi;
 end;
 
 class function TOpenTypeAwadhiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'AWA ';
+  Result := 'AWA ';
 end;
 
 
@@ -3010,12 +3410,12 @@ end;
 
 class function TOpenTypeAymaraLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Aymara';
+  Result := RCStrAymara;
 end;
 
 class function TOpenTypeAymaraLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'AYM ';
+  Result := 'AYM ';
 end;
 
 
@@ -3023,12 +3423,12 @@ end;
 
 class function TOpenTypeAzeriLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Azeri';
+  Result := RCStrAzeri;
 end;
 
 class function TOpenTypeAzeriLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'AZE ';
+  Result := 'AZE ';
 end;
 
 
@@ -3036,12 +3436,12 @@ end;
 
 class function TOpenTypeBadagaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Badaga';
+  Result := RCStrBadaga;
 end;
 
 class function TOpenTypeBadagaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BAD ';
+  Result := 'BAD ';
 end;
 
 
@@ -3049,12 +3449,13 @@ end;
 
 class function TOpenTypeBaghelkhandiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Baghelkhandi';
+  Result := RCStrBaghelkhandi;
 end;
 
-class function TOpenTypeBaghelkhandiLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeBaghelkhandiLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'BAG ';
+  Result := 'BAG ';
 end;
 
 
@@ -3062,12 +3463,12 @@ end;
 
 class function TOpenTypeBalkarLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Balkar';
+  Result := RCStrBalkar;
 end;
 
 class function TOpenTypeBalkarLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BAL ';
+  Result := 'BAL ';
 end;
 
 
@@ -3075,12 +3476,12 @@ end;
 
 class function TOpenTypeBauleLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Baule';
+  Result := RCStrBaule;
 end;
 
 class function TOpenTypeBauleLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BAU ';
+  Result := 'BAU ';
 end;
 
 
@@ -3088,12 +3489,12 @@ end;
 
 class function TOpenTypeBerberLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Berber';
+  Result := RCStrBerber;
 end;
 
 class function TOpenTypeBerberLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BBR ';
+  Result := 'BBR ';
 end;
 
 
@@ -3101,12 +3502,12 @@ end;
 
 class function TOpenTypeBenchLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bench';
+  Result := RCStrBench;
 end;
 
 class function TOpenTypeBenchLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BCH ';
+  Result := 'BCH ';
 end;
 
 
@@ -3114,12 +3515,12 @@ end;
 
 class function TOpenTypeBibleCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bible Cree';
+  Result := RCStrBibleCree;
 end;
 
 class function TOpenTypeBibleCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BCR ';
+  Result := 'BCR ';
 end;
 
 
@@ -3127,12 +3528,12 @@ end;
 
 class function TOpenTypeBelarussianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Belarussian';
+  Result := RCStrBelarussian;
 end;
 
 class function TOpenTypeBelarussianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BEL ';
+  Result := 'BEL ';
 end;
 
 
@@ -3140,12 +3541,12 @@ end;
 
 class function TOpenTypeBembaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bemba';
+  Result := RCStrBemba;
 end;
 
 class function TOpenTypeBembaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BEM ';
+  Result := 'BEM ';
 end;
 
 
@@ -3153,12 +3554,12 @@ end;
 
 class function TOpenTypeBengaliLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bengali';
+  Result := RCStrBengali;
 end;
 
 class function TOpenTypeBengaliLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BEN ';
+  Result := 'BEN ';
 end;
 
 
@@ -3166,12 +3567,12 @@ end;
 
 class function TOpenTypeBulgarianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bulgarian';
+  Result := RCStrBulgarian;
 end;
 
 class function TOpenTypeBulgarianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BGR ';
+  Result := 'BGR ';
 end;
 
 
@@ -3179,12 +3580,12 @@ end;
 
 class function TOpenTypeBhiliLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bhili';
+  Result := RCStrBhili;
 end;
 
 class function TOpenTypeBhiliLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BHI ';
+  Result := 'BHI ';
 end;
 
 
@@ -3192,12 +3593,12 @@ end;
 
 class function TOpenTypeBhojpuriLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bhojpuri';
+  Result := RCStrBhojpuri;
 end;
 
 class function TOpenTypeBhojpuriLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BHO ';
+  Result := 'BHO ';
 end;
 
 
@@ -3205,12 +3606,12 @@ end;
 
 class function TOpenTypeBikolLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bikol';
+  Result := RCStrBikol;
 end;
 
 class function TOpenTypeBikolLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BIK ';
+  Result := 'BIK ';
 end;
 
 
@@ -3218,12 +3619,12 @@ end;
 
 class function TOpenTypeBilenLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bilen';
+  Result := RCStrBilen;
 end;
 
 class function TOpenTypeBilenLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BIL ';
+  Result := 'BIL ';
 end;
 
 
@@ -3231,12 +3632,12 @@ end;
 
 class function TOpenTypeBlackfootLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Blackfoot';
+  Result := RCStrBlackfoot;
 end;
 
 class function TOpenTypeBlackfootLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BKF ';
+  Result := 'BKF ';
 end;
 
 
@@ -3244,12 +3645,12 @@ end;
 
 class function TOpenTypeBalochiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Balochi';
+  Result := RCStrBalochi;
 end;
 
 class function TOpenTypeBalochiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BLI ';
+  Result := 'BLI ';
 end;
 
 
@@ -3257,12 +3658,12 @@ end;
 
 class function TOpenTypeBalanteLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Balante';
+  Result := RCStrBalante;
 end;
 
 class function TOpenTypeBalanteLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BLN ';
+  Result := 'BLN ';
 end;
 
 
@@ -3270,12 +3671,12 @@ end;
 
 class function TOpenTypeBaltiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Balti';
+  Result := RCStrBalti;
 end;
 
 class function TOpenTypeBaltiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BLT ';
+  Result := 'BLT ';
 end;
 
 
@@ -3283,12 +3684,12 @@ end;
 
 class function TOpenTypeBambaraLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bambara';
+  Result := RCStrBambara;
 end;
 
 class function TOpenTypeBambaraLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BMB ';
+  Result := 'BMB ';
 end;
 
 
@@ -3296,12 +3697,12 @@ end;
 
 class function TOpenTypeBamilekeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bamileke';
+  Result := RCStrBamileke;
 end;
 
 class function TOpenTypeBamilekeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BML ';
+  Result := 'BML ';
 end;
 
 
@@ -3309,12 +3710,12 @@ end;
 
 class function TOpenTypeBosnianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bosnian';
+  Result := RCStrBosnian;
 end;
 
 class function TOpenTypeBosnianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BOS ';
+  Result := 'BOS ';
 end;
 
 
@@ -3322,12 +3723,12 @@ end;
 
 class function TOpenTypeBretonLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Breton';
+  Result := RCStrBreton;
 end;
 
 class function TOpenTypeBretonLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BRE ';
+  Result := 'BRE ';
 end;
 
 
@@ -3335,12 +3736,12 @@ end;
 
 class function TOpenTypeBrahuiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Brahui';
+  Result := RCStrBrahui;
 end;
 
 class function TOpenTypeBrahuiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BRH ';
+  Result := 'BRH ';
 end;
 
 
@@ -3348,12 +3749,12 @@ end;
 
 class function TOpenTypeBrajBhashaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Braj Bhasha';
+  Result := RCStrBrajBhasha;
 end;
 
 class function TOpenTypeBrajBhashaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BRI ';
+  Result := 'BRI ';
 end;
 
 
@@ -3361,12 +3762,12 @@ end;
 
 class function TOpenTypeBurmeseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Burmese';
+  Result := RCStrBurmese;
 end;
 
 class function TOpenTypeBurmeseLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BRM ';
+  Result := 'BRM ';
 end;
 
 
@@ -3374,12 +3775,12 @@ end;
 
 class function TOpenTypeBashkirLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Bashkir';
+  Result := RCStrBashkir;
 end;
 
 class function TOpenTypeBashkirLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BSH ';
+  Result := 'BSH ';
 end;
 
 
@@ -3387,12 +3788,12 @@ end;
 
 class function TOpenTypeBetiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Beti';
+  Result := RCStrBeti;
 end;
 
 class function TOpenTypeBetiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'BTI ';
+  Result := 'BTI ';
 end;
 
 
@@ -3400,12 +3801,12 @@ end;
 
 class function TOpenTypeCatalanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Catalan';
+  Result := RCStrCatalan;
 end;
 
 class function TOpenTypeCatalanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CAT ';
+  Result := 'CAT ';
 end;
 
 
@@ -3413,12 +3814,12 @@ end;
 
 class function TOpenTypeCebuanoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Cebuano';
+  Result := RCStrCebuano;
 end;
 
 class function TOpenTypeCebuanoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CEB ';
+  Result := 'CEB ';
 end;
 
 
@@ -3426,12 +3827,12 @@ end;
 
 class function TOpenTypeChechenLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Chechen';
+  Result := RCStrChechen;
 end;
 
 class function TOpenTypeChechenLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CHE ';
+  Result := 'CHE ';
 end;
 
 
@@ -3439,12 +3840,12 @@ end;
 
 class function TOpenTypeChahaGurageLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Chaha Gurage';
+  Result := RCStrChahaGurage;
 end;
 
 class function TOpenTypeChahaGurageLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CHG ';
+  Result := 'CHG ';
 end;
 
 
@@ -3452,12 +3853,13 @@ end;
 
 class function TOpenTypeChattisgarhiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Chattisgarhi';
+  Result := RCStrChattisgarhi;
 end;
 
-class function TOpenTypeChattisgarhiLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeChattisgarhiLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'CHH ';
+  Result := 'CHH ';
 end;
 
 
@@ -3465,12 +3867,12 @@ end;
 
 class function TOpenTypeChichewaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Chichewa';
+  Result := RCStrChichewa;
 end;
 
 class function TOpenTypeChichewaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CHI ';
+  Result := 'CHI ';
 end;
 
 
@@ -3478,12 +3880,12 @@ end;
 
 class function TOpenTypeChukchiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Chukchi';
+  Result := RCStrChukchi;
 end;
 
 class function TOpenTypeChukchiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CHK ';
+  Result := 'CHK ';
 end;
 
 
@@ -3491,12 +3893,12 @@ end;
 
 class function TOpenTypeChipewyanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Chipewyan';
+  Result := RCStrChipewyan;
 end;
 
 class function TOpenTypeChipewyanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CHP ';
+  Result := 'CHP ';
 end;
 
 
@@ -3504,12 +3906,12 @@ end;
 
 class function TOpenTypeCherokeeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Cherokee';
+  Result := RCStrCherokee;
 end;
 
 class function TOpenTypeCherokeeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CHR ';
+  Result := 'CHR ';
 end;
 
 
@@ -3517,12 +3919,12 @@ end;
 
 class function TOpenTypeChuvashLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Chuvash';
+  Result := RCStrChuvash;
 end;
 
 class function TOpenTypeChuvashLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CHU ';
+  Result := 'CHU ';
 end;
 
 
@@ -3530,12 +3932,12 @@ end;
 
 class function TOpenTypeComorianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Comorian';
+  Result := RCStrComorian;
 end;
 
 class function TOpenTypeComorianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CMR ';
+  Result := 'CMR ';
 end;
 
 
@@ -3543,12 +3945,12 @@ end;
 
 class function TOpenTypeCopticLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Coptic';
+  Result := RCStrCoptic;
 end;
 
 class function TOpenTypeCopticLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'COP ';
+  Result := 'COP ';
 end;
 
 
@@ -3556,12 +3958,12 @@ end;
 
 class function TOpenTypeCorsicanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Corsican';
+  Result := RCStrCorsican;
 end;
 
 class function TOpenTypeCorsicanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'COS ';
+  Result := 'COS ';
 end;
 
 
@@ -3569,12 +3971,12 @@ end;
 
 class function TOpenTypeCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Cree';
+  Result := RCStrCree;
 end;
 
 class function TOpenTypeCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CRE ';
+  Result := 'CRE ';
 end;
 
 
@@ -3582,12 +3984,12 @@ end;
 
 class function TOpenTypeCarrierLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Carrier';
+  Result := RCStrCarrier;
 end;
 
 class function TOpenTypeCarrierLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CRR ';
+  Result := 'CRR ';
 end;
 
 
@@ -3595,25 +3997,28 @@ end;
 
 class function TOpenTypeCrimeanTatarLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Crimean Tatar';
+  Result := RCStrCrimeanTatar;
 end;
 
-class function TOpenTypeCrimeanTatarLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeCrimeanTatarLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'CRT ';
+  Result := 'CRT ';
 end;
 
 
 { TOpenTypeChurchSlavonicLanguageSystemTable }
 
-class function TOpenTypeChurchSlavonicLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeChurchSlavonicLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Church Slavonic';
+  Result := RCStrChurchSlavonic;
 end;
 
-class function TOpenTypeChurchSlavonicLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeChurchSlavonicLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'CSL ';
+  Result := 'CSL ';
 end;
 
 
@@ -3621,12 +4026,12 @@ end;
 
 class function TOpenTypeCzechLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Czech';
+  Result := RCStrCzech;
 end;
 
 class function TOpenTypeCzechLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'CSY ';
+  Result := 'CSY ';
 end;
 
 
@@ -3634,12 +4039,12 @@ end;
 
 class function TOpenTypeDanishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Danish';
+  Result := RCStrDanish;
 end;
 
 class function TOpenTypeDanishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DAN ';
+  Result := 'DAN ';
 end;
 
 
@@ -3647,12 +4052,12 @@ end;
 
 class function TOpenTypeDargwaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Dargwa';
+  Result := RCStrDargwa;
 end;
 
 class function TOpenTypeDargwaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DAR ';
+  Result := 'DAR ';
 end;
 
 
@@ -3660,12 +4065,12 @@ end;
 
 class function TOpenTypeWoodsCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Woods Cree';
+  Result := RCStrWoodsCree;
 end;
 
 class function TOpenTypeWoodsCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DCR ';
+  Result := 'DCR ';
 end;
 
 
@@ -3673,12 +4078,12 @@ end;
 
 class function TOpenTypeGermanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'German';
+  Result := RCStrGerman;
 end;
 
 class function TOpenTypeGermanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DEU ';
+  Result := 'DEU ';
 end;
 
 
@@ -3686,12 +4091,12 @@ end;
 
 class function TOpenTypeDogriLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Dogri';
+  Result := RCStrDogri;
 end;
 
 class function TOpenTypeDogriLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DGR ';
+  Result := 'DGR ';
 end;
 
 
@@ -3699,25 +4104,27 @@ end;
 
 class function TOpenTypeDhivehiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Dhivehi';
+  Result := RCStrDhivehi;
 end;
 
 class function TOpenTypeDhivehiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DHV ';
+  Result := 'DHV ';
 end;
 
 
 { TOpenTypeDhivehiDeprecatedLanguageSystemTable }
 
-class function TOpenTypeDhivehiDeprecatedLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeDhivehiDeprecatedLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Dhivehi';
+  Result := RCStrDhivehi;
 end;
 
-class function TOpenTypeDhivehiDeprecatedLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeDhivehiDeprecatedLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'DIV ';
+  Result := 'DIV ';
 end;
 
 
@@ -3725,12 +4132,12 @@ end;
 
 class function TOpenTypeDjermaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Djerma';
+  Result := RCStrDjerma;
 end;
 
 class function TOpenTypeDjermaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DJR ';
+  Result := 'DJR ';
 end;
 
 
@@ -3738,12 +4145,12 @@ end;
 
 class function TOpenTypeDangmeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Dangme';
+  Result := RCStrDangme;
 end;
 
 class function TOpenTypeDangmeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DNG ';
+  Result := 'DNG ';
 end;
 
 
@@ -3751,12 +4158,12 @@ end;
 
 class function TOpenTypeDinkaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Dinka';
+  Result := RCStrDinka;
 end;
 
 class function TOpenTypeDinkaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DNK ';
+  Result := 'DNK ';
 end;
 
 
@@ -3764,12 +4171,12 @@ end;
 
 class function TOpenTypeDariLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Dari';
+  Result := RCStrDari;
 end;
 
 class function TOpenTypeDariLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DRI ';
+  Result := 'DRI ';
 end;
 
 
@@ -3777,12 +4184,12 @@ end;
 
 class function TOpenTypeDunganLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Dungan';
+  Result := RCStrDungan;
 end;
 
 class function TOpenTypeDunganLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DUN ';
+  Result := 'DUN ';
 end;
 
 
@@ -3790,12 +4197,12 @@ end;
 
 class function TOpenTypeDzongkhaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Dzongkha';
+  Result := RCStrDzongkha;
 end;
 
 class function TOpenTypeDzongkhaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'DZN ';
+  Result := 'DZN ';
 end;
 
 
@@ -3803,12 +4210,12 @@ end;
 
 class function TOpenTypeEbiraLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ebira';
+  Result := RCStrEbira;
 end;
 
 class function TOpenTypeEbiraLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'EBI ';
+  Result := 'EBI ';
 end;
 
 
@@ -3816,12 +4223,12 @@ end;
 
 class function TOpenTypeEasternCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Eastern Cree';
+  Result := RCStrEasternCree;
 end;
 
 class function TOpenTypeEasternCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ECR ';
+  Result := 'ECR ';
 end;
 
 
@@ -3829,12 +4236,12 @@ end;
 
 class function TOpenTypeEdoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Edo';
+  Result := RCStrEdo;
 end;
 
 class function TOpenTypeEdoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'EDO ';
+  Result := 'EDO ';
 end;
 
 
@@ -3842,12 +4249,12 @@ end;
 
 class function TOpenTypeEfikLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Efik';
+  Result := RCStrEfik;
 end;
 
 class function TOpenTypeEfikLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'EFI ';
+  Result := 'EFI ';
 end;
 
 
@@ -3855,12 +4262,12 @@ end;
 
 class function TOpenTypeGreekLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Greek';
+  Result := RCStrGreek;
 end;
 
 class function TOpenTypeGreekLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ELL ';
+  Result := 'ELL ';
 end;
 
 
@@ -3868,12 +4275,12 @@ end;
 
 class function TOpenTypeEnglishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'English';
+  Result := RCStrEnglish;
 end;
 
 class function TOpenTypeEnglishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ENG ';
+  Result := 'ENG ';
 end;
 
 
@@ -3881,12 +4288,12 @@ end;
 
 class function TOpenTypeErzyaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Erzya';
+  Result := RCStrErzya;
 end;
 
 class function TOpenTypeErzyaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ERZ ';
+  Result := 'ERZ ';
 end;
 
 
@@ -3894,12 +4301,12 @@ end;
 
 class function TOpenTypeSpanishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Spanish';
+  Result := RCStrSpanish;
 end;
 
 class function TOpenTypeSpanishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ESP ';
+  Result := 'ESP ';
 end;
 
 
@@ -3907,12 +4314,12 @@ end;
 
 class function TOpenTypeEstonianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Estonian';
+  Result := RCStrEstonian;
 end;
 
 class function TOpenTypeEstonianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ETI ';
+  Result := 'ETI ';
 end;
 
 
@@ -3920,12 +4327,12 @@ end;
 
 class function TOpenTypeBasqueLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Basque';
+  Result := RCStrBasque;
 end;
 
 class function TOpenTypeBasqueLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'EUQ ';
+  Result := 'EUQ ';
 end;
 
 
@@ -3933,12 +4340,12 @@ end;
 
 class function TOpenTypeEvenkiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Evenki';
+  Result := RCStrEvenki;
 end;
 
 class function TOpenTypeEvenkiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'EVK ';
+  Result := 'EVK ';
 end;
 
 
@@ -3946,12 +4353,12 @@ end;
 
 class function TOpenTypeEvenLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Even';
+  Result := RCStrEven;
 end;
 
 class function TOpenTypeEvenLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'EVN ';
+  Result := 'EVN ';
 end;
 
 
@@ -3959,25 +4366,27 @@ end;
 
 class function TOpenTypeEweLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ewe';
+  Result := RCStrEwe;
 end;
 
 class function TOpenTypeEweLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'EWE ';
+  Result := 'EWE ';
 end;
 
 
 { TOpenTypeFrenchAntilleanLanguageSystemTable }
 
-class function TOpenTypeFrenchAntilleanLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeFrenchAntilleanLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'French Antillean';
+  Result := RCStrFrenchAntillean;
 end;
 
-class function TOpenTypeFrenchAntilleanLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeFrenchAntilleanLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'FAN ';
+  Result := 'FAN ';
 end;
 
 
@@ -3985,12 +4394,12 @@ end;
 
 class function TOpenTypeFarsiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Farsi';
+  Result := RCStrFarsi;
 end;
 
 class function TOpenTypeFarsiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FAR ';
+  Result := 'FAR ';
 end;
 
 
@@ -3998,12 +4407,12 @@ end;
 
 class function TOpenTypeFinnishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Finnish';
+  Result := RCStrFinnish;
 end;
 
 class function TOpenTypeFinnishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FIN ';
+  Result := 'FIN ';
 end;
 
 
@@ -4011,12 +4420,12 @@ end;
 
 class function TOpenTypeFijianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Fijian';
+  Result := RCStrFijian;
 end;
 
 class function TOpenTypeFijianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FJI ';
+  Result := 'FJI ';
 end;
 
 
@@ -4024,12 +4433,12 @@ end;
 
 class function TOpenTypeFlemishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Flemish';
+  Result := RCStrFlemish;
 end;
 
 class function TOpenTypeFlemishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FLE ';
+  Result := 'FLE ';
 end;
 
 
@@ -4037,12 +4446,13 @@ end;
 
 class function TOpenTypeForestNenetsLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Forest Nenets';
+  Result := RCStrForestNenets;
 end;
 
-class function TOpenTypeForestNenetsLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeForestNenetsLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'FNE ';
+  Result := 'FNE ';
 end;
 
 
@@ -4050,12 +4460,12 @@ end;
 
 class function TOpenTypeFonLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Fon';
+  Result := RCStrFon;
 end;
 
 class function TOpenTypeFonLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FON ';
+  Result := 'FON ';
 end;
 
 
@@ -4063,12 +4473,12 @@ end;
 
 class function TOpenTypeFaroeseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Faroese';
+  Result := RCStrFaroese;
 end;
 
 class function TOpenTypeFaroeseLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FOS ';
+  Result := 'FOS ';
 end;
 
 
@@ -4076,12 +4486,12 @@ end;
 
 class function TOpenTypeFrenchLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'French';
+  Result := RCStrFrench;
 end;
 
 class function TOpenTypeFrenchLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FRA ';
+  Result := 'FRA ';
 end;
 
 
@@ -4089,12 +4499,12 @@ end;
 
 class function TOpenTypeFrisianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Frisian';
+  Result := RCStrFrisian;
 end;
 
 class function TOpenTypeFrisianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FRI ';
+  Result := 'FRI ';
 end;
 
 
@@ -4102,12 +4512,12 @@ end;
 
 class function TOpenTypeFriulianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Friulian';
+  Result := RCStrFriulian;
 end;
 
 class function TOpenTypeFriulianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FRL ';
+  Result := 'FRL ';
 end;
 
 
@@ -4115,12 +4525,12 @@ end;
 
 class function TOpenTypeFutaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Futa';
+  Result := RCStrFuta;
 end;
 
 class function TOpenTypeFutaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FTA ';
+  Result := 'FTA ';
 end;
 
 
@@ -4128,12 +4538,12 @@ end;
 
 class function TOpenTypeFulaniLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Fulani';
+  Result := RCStrFulani;
 end;
 
 class function TOpenTypeFulaniLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'FUL ';
+  Result := 'FUL ';
 end;
 
 
@@ -4141,12 +4551,12 @@ end;
 
 class function TOpenTypeGaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ga';
+  Result := RCStrGa;
 end;
 
 class function TOpenTypeGaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GAD ';
+  Result := 'GAD ';
 end;
 
 
@@ -4154,12 +4564,12 @@ end;
 
 class function TOpenTypeGaelicLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Gaelic';
+  Result := RCStrGaelic;
 end;
 
 class function TOpenTypeGaelicLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GAE ';
+  Result := 'GAE ';
 end;
 
 
@@ -4167,12 +4577,12 @@ end;
 
 class function TOpenTypeGagauzLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Gagauz';
+  Result := RCStrGagauz;
 end;
 
 class function TOpenTypeGagauzLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GAG ';
+  Result := 'GAG ';
 end;
 
 
@@ -4180,12 +4590,12 @@ end;
 
 class function TOpenTypeGalicianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Galician';
+  Result := RCStrGalician;
 end;
 
 class function TOpenTypeGalicianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GAL ';
+  Result := 'GAL ';
 end;
 
 
@@ -4193,12 +4603,12 @@ end;
 
 class function TOpenTypeGarshuniLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Garshuni';
+  Result := RCStrGarshuni;
 end;
 
 class function TOpenTypeGarshuniLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GA  ';
+  Result := 'GA  ';
 end;
 
 
@@ -4206,12 +4616,12 @@ end;
 
 class function TOpenTypeGarhwaliLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Garhwali';
+  Result := RCStrGarhwali;
 end;
 
 class function TOpenTypeGarhwaliLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GAW ';
+  Result := 'GAW ';
 end;
 
 
@@ -4219,12 +4629,12 @@ end;
 
 class function TOpenTypeGeEzLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ge''ez';
+  Result := RCStrGeez;
 end;
 
 class function TOpenTypeGeEzLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GEZ ';
+  Result := 'GEZ ';
 end;
 
 
@@ -4232,12 +4642,12 @@ end;
 
 class function TOpenTypeGilyakLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Gilyak';
+  Result := RCStrGilyak;
 end;
 
 class function TOpenTypeGilyakLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GIL ';
+  Result := 'GIL ';
 end;
 
 
@@ -4245,12 +4655,12 @@ end;
 
 class function TOpenTypeGumuzLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Gumuz';
+  Result := RCStrGumuz;
 end;
 
 class function TOpenTypeGumuzLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GMZ ';
+  Result := 'GMZ ';
 end;
 
 
@@ -4258,12 +4668,12 @@ end;
 
 class function TOpenTypeGondiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Gondi';
+  Result := RCStrGondi;
 end;
 
 class function TOpenTypeGondiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GON ';
+  Result := 'GON ';
 end;
 
 
@@ -4271,12 +4681,12 @@ end;
 
 class function TOpenTypeGreenlandicLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Greenlandic';
+  Result := RCStrGreenlandic;
 end;
 
 class function TOpenTypeGreenlandicLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GRN ';
+  Result := 'GRN ';
 end;
 
 
@@ -4284,12 +4694,12 @@ end;
 
 class function TOpenTypeGaroLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Garo';
+  Result := RCStrGaro;
 end;
 
 class function TOpenTypeGaroLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GRO ';
+  Result := 'GRO ';
 end;
 
 
@@ -4297,12 +4707,12 @@ end;
 
 class function TOpenTypeGuaraniLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Guarani';
+  Result := RCStrGuarani;
 end;
 
 class function TOpenTypeGuaraniLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GUA ';
+  Result := 'GUA ';
 end;
 
 
@@ -4310,12 +4720,12 @@ end;
 
 class function TOpenTypeGujaratiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Gujarati';
+  Result := RCStrGujarati;
 end;
 
 class function TOpenTypeGujaratiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'GUJ ';
+  Result := 'GUJ ';
 end;
 
 
@@ -4323,12 +4733,12 @@ end;
 
 class function TOpenTypeHaitianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Haitian';
+  Result := RCStrHaitian;
 end;
 
 class function TOpenTypeHaitianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HAI ';
+  Result := 'HAI ';
 end;
 
 
@@ -4336,12 +4746,12 @@ end;
 
 class function TOpenTypeHalamLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Halam';
+  Result := RCStrHalam;
 end;
 
 class function TOpenTypeHalamLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HAL ';
+  Result := 'HAL ';
 end;
 
 
@@ -4349,12 +4759,12 @@ end;
 
 class function TOpenTypeHarautiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Harauti';
+  Result := RCStrHarauti;
 end;
 
 class function TOpenTypeHarautiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HAR ';
+  Result := 'HAR ';
 end;
 
 
@@ -4362,12 +4772,12 @@ end;
 
 class function TOpenTypeHausaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Hausa';
+  Result := RCStrHausa;
 end;
 
 class function TOpenTypeHausaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HAU ';
+  Result := 'HAU ';
 end;
 
 
@@ -4375,12 +4785,12 @@ end;
 
 class function TOpenTypeHawaiinLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Hawaiin';
+  Result := RCStrHawaiin;
 end;
 
 class function TOpenTypeHawaiinLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HAW ';
+  Result := 'HAW ';
 end;
 
 
@@ -4388,12 +4798,12 @@ end;
 
 class function TOpenTypeHammerBannaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Hammer-Banna';
+  Result := RCStrHammerBanna;
 end;
 
 class function TOpenTypeHammerBannaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HBN ';
+  Result := 'HBN ';
 end;
 
 
@@ -4401,12 +4811,12 @@ end;
 
 class function TOpenTypeHiligaynonLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Hiligaynon';
+  Result := RCStrHiligaynon;
 end;
 
 class function TOpenTypeHiligaynonLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HIL ';
+  Result := 'HIL ';
 end;
 
 
@@ -4414,12 +4824,12 @@ end;
 
 class function TOpenTypeHindiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Hindi';
+  Result := RCStrHindi;
 end;
 
 class function TOpenTypeHindiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HIN ';
+  Result := 'HIN ';
 end;
 
 
@@ -4427,12 +4837,12 @@ end;
 
 class function TOpenTypeHighMariLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'High Mari';
+  Result := RCStrHighMari;
 end;
 
 class function TOpenTypeHighMariLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HMA ';
+  Result := 'HMA ';
 end;
 
 
@@ -4440,12 +4850,12 @@ end;
 
 class function TOpenTypeHindkoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Hindko';
+  Result := RCStrHindko;
 end;
 
 class function TOpenTypeHindkoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HND ';
+  Result := 'HND ';
 end;
 
 
@@ -4453,12 +4863,12 @@ end;
 
 class function TOpenTypeHoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ho';
+  Result := RCStrHo;
 end;
 
 class function TOpenTypeHoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HO  ';
+  Result := 'HO  ';
 end;
 
 
@@ -4466,12 +4876,12 @@ end;
 
 class function TOpenTypeHarariLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Harari';
+  Result := RCStrHarari;
 end;
 
 class function TOpenTypeHarariLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HRI ';
+  Result := 'HRI ';
 end;
 
 
@@ -4479,12 +4889,12 @@ end;
 
 class function TOpenTypeCroatianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Croatian';
+  Result := RCStrCroatian;
 end;
 
 class function TOpenTypeCroatianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HRV ';
+  Result := 'HRV ';
 end;
 
 
@@ -4492,12 +4902,12 @@ end;
 
 class function TOpenTypeHungarianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Hungarian';
+  Result := RCStrHungarian;
 end;
 
 class function TOpenTypeHungarianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HUN ';
+  Result := 'HUN ';
 end;
 
 
@@ -4505,12 +4915,12 @@ end;
 
 class function TOpenTypeArmenianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Armenian';
+  Result := RCStrArmenian;
 end;
 
 class function TOpenTypeArmenianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'HYE ';
+  Result := 'HYE ';
 end;
 
 
@@ -4518,12 +4928,12 @@ end;
 
 class function TOpenTypeIgboLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Igbo';
+  Result := RCStrIgbo;
 end;
 
 class function TOpenTypeIgboLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'IBO ';
+  Result := 'IBO ';
 end;
 
 
@@ -4531,12 +4941,12 @@ end;
 
 class function TOpenTypeIjoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ijo';
+  Result := RCStrIjo;
 end;
 
 class function TOpenTypeIjoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'IJO ';
+  Result := 'IJO ';
 end;
 
 
@@ -4544,12 +4954,12 @@ end;
 
 class function TOpenTypeIlokanoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ilokano';
+  Result := RCStrIlokano;
 end;
 
 class function TOpenTypeIlokanoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ILO ';
+  Result := 'ILO ';
 end;
 
 
@@ -4557,12 +4967,12 @@ end;
 
 class function TOpenTypeIndonesianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Indonesian';
+  Result := RCStrIndonesian;
 end;
 
 class function TOpenTypeIndonesianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'IND ';
+  Result := 'IND ';
 end;
 
 
@@ -4570,12 +4980,12 @@ end;
 
 class function TOpenTypeIngushLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ingush';
+  Result := RCStrIngush;
 end;
 
 class function TOpenTypeIngushLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ING ';
+  Result := 'ING ';
 end;
 
 
@@ -4583,25 +4993,27 @@ end;
 
 class function TOpenTypeInuktitutLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Inuktitut';
+  Result := RCStrInuktitut;
 end;
 
 class function TOpenTypeInuktitutLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'INU ';
+  Result := 'INU ';
 end;
 
 
 { TOpenTypePhoneticTranscriptionLanguageSystemTable }
 
-class function TOpenTypePhoneticTranscriptionLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypePhoneticTranscriptionLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Phonetic transcription—IPA conventions';
+  Result := RCStrPhoneticTranscriptionIpaConventions;
 end;
 
-class function TOpenTypePhoneticTranscriptionLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypePhoneticTranscriptionLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'IPP ';
+  Result := 'IPP ';
 end;
 
 
@@ -4609,25 +5021,27 @@ end;
 
 class function TOpenTypeIrishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Irish';
+  Result := RCStrIrish;
 end;
 
 class function TOpenTypeIrishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'IRI ';
+  Result := 'IRI ';
 end;
 
 
 { TOpenTypeIrishTraditionalLanguageSystemTable }
 
-class function TOpenTypeIrishTraditionalLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeIrishTraditionalLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Irish Traditional';
+  Result := RCStrIrishTraditional;
 end;
 
-class function TOpenTypeIrishTraditionalLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeIrishTraditionalLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'IRT ';
+  Result := 'IRT ';
 end;
 
 
@@ -4635,12 +5049,12 @@ end;
 
 class function TOpenTypeIcelandicLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Icelandic';
+  Result := RCStrIcelandic;
 end;
 
 class function TOpenTypeIcelandicLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ISL ';
+  Result := 'ISL ';
 end;
 
 
@@ -4648,12 +5062,12 @@ end;
 
 class function TOpenTypeInariSamiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Inari Sami';
+  Result := RCStrInariSami;
 end;
 
 class function TOpenTypeInariSamiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ISM ';
+  Result := 'ISM ';
 end;
 
 
@@ -4661,12 +5075,12 @@ end;
 
 class function TOpenTypeItalianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Italian';
+  Result := RCStrItalian;
 end;
 
 class function TOpenTypeItalianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ITA ';
+  Result := 'ITA ';
 end;
 
 
@@ -4674,12 +5088,12 @@ end;
 
 class function TOpenTypeHebrewLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Hebrew';
+  Result := RCStrHebrew;
 end;
 
 class function TOpenTypeHebrewLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'IWR ';
+  Result := 'IWR ';
 end;
 
 
@@ -4687,12 +5101,12 @@ end;
 
 class function TOpenTypeJavaneseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Javanese';
+  Result := RCStrJavanese;
 end;
 
 class function TOpenTypeJavaneseLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'JAV ';
+  Result := 'JAV ';
 end;
 
 
@@ -4700,12 +5114,12 @@ end;
 
 class function TOpenTypeYiddishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Yiddish';
+  Result := RCStrYiddish;
 end;
 
 class function TOpenTypeYiddishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'JII ';
+  Result := 'JII ';
 end;
 
 
@@ -4713,12 +5127,12 @@ end;
 
 class function TOpenTypeJapaneseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Japanese';
+  Result := RCStrJapanese;
 end;
 
 class function TOpenTypeJapaneseLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'JAN ';
+  Result := 'JAN ';
 end;
 
 
@@ -4726,12 +5140,12 @@ end;
 
 class function TOpenTypeJudezmoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Judezmo';
+  Result := RCStrJudezmo;
 end;
 
 class function TOpenTypeJudezmoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'JUD ';
+  Result := 'JUD ';
 end;
 
 
@@ -4739,12 +5153,12 @@ end;
 
 class function TOpenTypeJulaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Jula';
+  Result := RCStrJula;
 end;
 
 class function TOpenTypeJulaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'JUL ';
+  Result := 'JUL ';
 end;
 
 
@@ -4752,12 +5166,12 @@ end;
 
 class function TOpenTypeKabardianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kabardian';
+  Result := RCStrKabardian;
 end;
 
 class function TOpenTypeKabardianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KAB ';
+  Result := 'KAB ';
 end;
 
 
@@ -4765,12 +5179,12 @@ end;
 
 class function TOpenTypeKachchiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kachchi';
+  Result := RCStrKachchi;
 end;
 
 class function TOpenTypeKachchiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KAC ';
+  Result := 'KAC ';
 end;
 
 
@@ -4778,12 +5192,12 @@ end;
 
 class function TOpenTypeKalenjinLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kalenjin';
+  Result := RCStrKalenjin;
 end;
 
 class function TOpenTypeKalenjinLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KAL ';
+  Result := 'KAL ';
 end;
 
 
@@ -4791,12 +5205,12 @@ end;
 
 class function TOpenTypeKannadaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kannada';
+  Result := RCStrKannada;
 end;
 
 class function TOpenTypeKannadaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KAN ';
+  Result := 'KAN ';
 end;
 
 
@@ -4804,12 +5218,12 @@ end;
 
 class function TOpenTypeKarachayLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Karachay';
+  Result := RCStrKarachay;
 end;
 
 class function TOpenTypeKarachayLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KAR ';
+  Result := 'KAR ';
 end;
 
 
@@ -4817,12 +5231,12 @@ end;
 
 class function TOpenTypeGeorgianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Georgian';
+  Result := RCStrGeorgian;
 end;
 
 class function TOpenTypeGeorgianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KAT ';
+  Result := 'KAT ';
 end;
 
 
@@ -4830,12 +5244,12 @@ end;
 
 class function TOpenTypeKazakhLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kazakh';
+  Result := RCStrKazakh;
 end;
 
 class function TOpenTypeKazakhLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KAZ ';
+  Result := 'KAZ ';
 end;
 
 
@@ -4843,25 +5257,27 @@ end;
 
 class function TOpenTypeKebenaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kebena';
+  Result := RCStrKebena;
 end;
 
 class function TOpenTypeKebenaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KEB ';
+  Result := 'KEB ';
 end;
 
 
 { TOpenTypeKhutsuriGeorgianLanguageSystemTable }
 
-class function TOpenTypeKhutsuriGeorgianLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeKhutsuriGeorgianLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Khutsuri Georgian';
+  Result := RCStrKhutsuriGeorgian;
 end;
 
-class function TOpenTypeKhutsuriGeorgianLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeKhutsuriGeorgianLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'KGE ';
+  Result := 'KGE ';
 end;
 
 
@@ -4869,12 +5285,12 @@ end;
 
 class function TOpenTypeKhakassLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Khakass';
+  Result := RCStrKhakass;
 end;
 
 class function TOpenTypeKhakassLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KHA ';
+  Result := 'KHA ';
 end;
 
 
@@ -4882,12 +5298,12 @@ end;
 
 class function TOpenTypeKhantyKazimLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Khanty-Kazim';
+  Result := RCStrKhantyKazim;
 end;
 
 class function TOpenTypeKhantyKazimLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KHK ';
+  Result := 'KHK ';
 end;
 
 
@@ -4895,25 +5311,27 @@ end;
 
 class function TOpenTypeKhmerLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Khmer';
+  Result := RCStrKhmer;
 end;
 
 class function TOpenTypeKhmerLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KHM ';
+  Result := 'KHM ';
 end;
 
 
 { TOpenTypeKhantyShurishkarLanguageSystemTable }
 
-class function TOpenTypeKhantyShurishkarLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeKhantyShurishkarLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Khanty-Shurishkar';
+  Result := RCStrKhantyShurishkar;
 end;
 
-class function TOpenTypeKhantyShurishkarLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeKhantyShurishkarLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'KHS ';
+  Result := 'KHS ';
 end;
 
 
@@ -4921,12 +5339,12 @@ end;
 
 class function TOpenTypeKhantyVakhiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Khanty-Vakhi';
+  Result := RCStrKhantyVakhi;
 end;
 
 class function TOpenTypeKhantyVakhiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KHV ';
+  Result := 'KHV ';
 end;
 
 
@@ -4934,12 +5352,12 @@ end;
 
 class function TOpenTypeKhowarLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Khowar';
+  Result := RCStrKhowar;
 end;
 
 class function TOpenTypeKhowarLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KHW ';
+  Result := 'KHW ';
 end;
 
 
@@ -4947,12 +5365,12 @@ end;
 
 class function TOpenTypeKikuyuLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kikuyu';
+  Result := RCStrKikuyu;
 end;
 
 class function TOpenTypeKikuyuLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KIK ';
+  Result := 'KIK ';
 end;
 
 
@@ -4960,12 +5378,12 @@ end;
 
 class function TOpenTypeKirghizLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kirghiz';
+  Result := RCStrKirghiz;
 end;
 
 class function TOpenTypeKirghizLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KIR ';
+  Result := 'KIR ';
 end;
 
 
@@ -4973,12 +5391,12 @@ end;
 
 class function TOpenTypeKisiiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kisii';
+  Result := RCStrKisii;
 end;
 
 class function TOpenTypeKisiiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KIS ';
+  Result := 'KIS ';
 end;
 
 
@@ -4986,12 +5404,12 @@ end;
 
 class function TOpenTypeKokniLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kokni';
+  Result := RCStrKokni;
 end;
 
 class function TOpenTypeKokniLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KKN ';
+  Result := 'KKN ';
 end;
 
 
@@ -4999,12 +5417,12 @@ end;
 
 class function TOpenTypeKalmykLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kalmyk';
+  Result := RCStrKalmyk;
 end;
 
 class function TOpenTypeKalmykLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KLM ';
+  Result := 'KLM ';
 end;
 
 
@@ -5012,12 +5430,12 @@ end;
 
 class function TOpenTypeKambaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kamba';
+  Result := RCStrKamba;
 end;
 
 class function TOpenTypeKambaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KMB ';
+  Result := 'KMB ';
 end;
 
 
@@ -5025,12 +5443,12 @@ end;
 
 class function TOpenTypeKumaoniLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kumaoni';
+  Result := RCStrKumaoni;
 end;
 
 class function TOpenTypeKumaoniLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KMN ';
+  Result := 'KMN ';
 end;
 
 
@@ -5038,12 +5456,12 @@ end;
 
 class function TOpenTypeKomoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Komo';
+  Result := RCStrKomo;
 end;
 
 class function TOpenTypeKomoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KMO ';
+  Result := 'KMO ';
 end;
 
 
@@ -5051,12 +5469,12 @@ end;
 
 class function TOpenTypeKomsoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Komso';
+  Result := RCStrKomso;
 end;
 
 class function TOpenTypeKomsoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KMS ';
+  Result := 'KMS ';
 end;
 
 
@@ -5064,12 +5482,12 @@ end;
 
 class function TOpenTypeKanuriLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kanuri';
+  Result := RCStrKanuri;
 end;
 
 class function TOpenTypeKanuriLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KNR ';
+  Result := 'KNR ';
 end;
 
 
@@ -5077,25 +5495,27 @@ end;
 
 class function TOpenTypeKodaguLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kodagu';
+  Result := RCStrKodagu;
 end;
 
 class function TOpenTypeKodaguLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KOD ';
+  Result := 'KOD ';
 end;
 
 
 { TOpenTypeKoreanOldHangulLanguageSystemTable }
 
-class function TOpenTypeKoreanOldHangulLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeKoreanOldHangulLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Korean Old Hangul';
+  Result := RCStrKoreanOldHangul;
 end;
 
-class function TOpenTypeKoreanOldHangulLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeKoreanOldHangulLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'KOH ';
+  Result := 'KOH ';
 end;
 
 
@@ -5103,12 +5523,12 @@ end;
 
 class function TOpenTypeKonkaniLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Konkani';
+  Result := RCStrKonkani;
 end;
 
 class function TOpenTypeKonkaniLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KOK ';
+  Result := 'KOK ';
 end;
 
 
@@ -5116,12 +5536,12 @@ end;
 
 class function TOpenTypeKikongoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kikongo';
+  Result := RCStrKikongo;
 end;
 
 class function TOpenTypeKikongoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KON ';
+  Result := 'KON ';
 end;
 
 
@@ -5129,12 +5549,12 @@ end;
 
 class function TOpenTypeKomiPermyakLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Komi-Permyak';
+  Result := RCStrKomiPermyak;
 end;
 
 class function TOpenTypeKomiPermyakLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KOP ';
+  Result := 'KOP ';
 end;
 
 
@@ -5142,12 +5562,12 @@ end;
 
 class function TOpenTypeKoreanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Korean';
+  Result := RCStrKorean;
 end;
 
 class function TOpenTypeKoreanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KOR ';
+  Result := 'KOR ';
 end;
 
 
@@ -5155,12 +5575,12 @@ end;
 
 class function TOpenTypeKomiZyrianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Komi-Zyrian';
+  Result := RCStrKomiZyrian;
 end;
 
 class function TOpenTypeKomiZyrianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KOZ ';
+  Result := 'KOZ ';
 end;
 
 
@@ -5168,12 +5588,12 @@ end;
 
 class function TOpenTypeKpelleLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kpelle';
+  Result := RCStrKpelle;
 end;
 
 class function TOpenTypeKpelleLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KPL ';
+  Result := 'KPL ';
 end;
 
 
@@ -5181,12 +5601,12 @@ end;
 
 class function TOpenTypeKrioLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Krio';
+  Result := RCStrKrio;
 end;
 
 class function TOpenTypeKrioLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KRI ';
+  Result := 'KRI ';
 end;
 
 
@@ -5194,12 +5614,12 @@ end;
 
 class function TOpenTypeKarakalpakLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Karakalpak';
+  Result := RCStrKarakalpak;
 end;
 
 class function TOpenTypeKarakalpakLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KRK ';
+  Result := 'KRK ';
 end;
 
 
@@ -5207,12 +5627,12 @@ end;
 
 class function TOpenTypeKarelianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Karelian';
+  Result := RCStrKarelian;
 end;
 
 class function TOpenTypeKarelianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KRL ';
+  Result := 'KRL ';
 end;
 
 
@@ -5220,12 +5640,12 @@ end;
 
 class function TOpenTypeKaraimLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Karaim';
+  Result := RCStrKaraim;
 end;
 
 class function TOpenTypeKaraimLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KRM ';
+  Result := 'KRM ';
 end;
 
 
@@ -5233,12 +5653,12 @@ end;
 
 class function TOpenTypeKarenLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Karen';
+  Result := RCStrKaren;
 end;
 
 class function TOpenTypeKarenLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KRN ';
+  Result := 'KRN ';
 end;
 
 
@@ -5246,12 +5666,12 @@ end;
 
 class function TOpenTypeKooreteLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Koorete';
+  Result := RCStrKoorete;
 end;
 
 class function TOpenTypeKooreteLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KRT ';
+  Result := 'KRT ';
 end;
 
 
@@ -5259,12 +5679,12 @@ end;
 
 class function TOpenTypeKashmiriLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kashmiri';
+  Result := RCStrKashmiri;
 end;
 
 class function TOpenTypeKashmiriLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KSH ';
+  Result := 'KSH ';
 end;
 
 
@@ -5272,12 +5692,12 @@ end;
 
 class function TOpenTypeKhasiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Khasi';
+  Result := RCStrKhasi;
 end;
 
 class function TOpenTypeKhasiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KSI ';
+  Result := 'KSI ';
 end;
 
 
@@ -5285,12 +5705,12 @@ end;
 
 class function TOpenTypeKildinSamiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kildin Sami';
+  Result := RCStrKildinSami;
 end;
 
 class function TOpenTypeKildinSamiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KSM ';
+  Result := 'KSM ';
 end;
 
 
@@ -5298,12 +5718,12 @@ end;
 
 class function TOpenTypeKuiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kui';
+  Result := RCStrKui;
 end;
 
 class function TOpenTypeKuiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KUI ';
+  Result := 'KUI ';
 end;
 
 
@@ -5311,12 +5731,12 @@ end;
 
 class function TOpenTypeKulviLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kulvi';
+  Result := RCStrKulvi;
 end;
 
 class function TOpenTypeKulviLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KUL ';
+  Result := 'KUL ';
 end;
 
 
@@ -5324,12 +5744,12 @@ end;
 
 class function TOpenTypeKumykLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kumyk';
+  Result := RCStrKumyk;
 end;
 
 class function TOpenTypeKumykLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KUM ';
+  Result := 'KUM ';
 end;
 
 
@@ -5337,12 +5757,12 @@ end;
 
 class function TOpenTypeKurdishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kurdish';
+  Result := RCStrKurdish;
 end;
 
 class function TOpenTypeKurdishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KUR ';
+  Result := 'KUR ';
 end;
 
 
@@ -5350,12 +5770,12 @@ end;
 
 class function TOpenTypeKurukhLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kurukh';
+  Result := RCStrKurukh;
 end;
 
 class function TOpenTypeKurukhLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KUU ';
+  Result := 'KUU ';
 end;
 
 
@@ -5363,12 +5783,12 @@ end;
 
 class function TOpenTypeKuyLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Kuy';
+  Result := RCStrKuy;
 end;
 
 class function TOpenTypeKuyLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KUY ';
+  Result := 'KUY ';
 end;
 
 
@@ -5376,12 +5796,12 @@ end;
 
 class function TOpenTypeKoryakLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Koryak';
+  Result := RCStrKoryak;
 end;
 
 class function TOpenTypeKoryakLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'KYK ';
+  Result := 'KYK ';
 end;
 
 
@@ -5389,12 +5809,12 @@ end;
 
 class function TOpenTypeLadinLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ladin';
+  Result := RCStrLadin;
 end;
 
 class function TOpenTypeLadinLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LAD ';
+  Result := 'LAD ';
 end;
 
 
@@ -5402,12 +5822,12 @@ end;
 
 class function TOpenTypeLahuliLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Lahuli';
+  Result := RCStrLahuli;
 end;
 
 class function TOpenTypeLahuliLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LAH ';
+  Result := 'LAH ';
 end;
 
 
@@ -5415,12 +5835,12 @@ end;
 
 class function TOpenTypeLakLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Lak';
+  Result := RCStrLak;
 end;
 
 class function TOpenTypeLakLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LAK ';
+  Result := 'LAK ';
 end;
 
 
@@ -5428,12 +5848,12 @@ end;
 
 class function TOpenTypeLambaniLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Lambani';
+  Result := RCStrLambani;
 end;
 
 class function TOpenTypeLambaniLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LAM ';
+  Result := 'LAM ';
 end;
 
 
@@ -5441,12 +5861,12 @@ end;
 
 class function TOpenTypeLaoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Lao';
+  Result := RCStrLao;
 end;
 
 class function TOpenTypeLaoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LAO ';
+  Result := 'LAO ';
 end;
 
 
@@ -5454,12 +5874,12 @@ end;
 
 class function TOpenTypeLatinLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Latin';
+  Result := RCStrLatin;
 end;
 
 class function TOpenTypeLatinLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LAT ';
+  Result := 'LAT ';
 end;
 
 
@@ -5467,12 +5887,12 @@ end;
 
 class function TOpenTypeLazLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Laz';
+  Result := RCStrLaz;
 end;
 
 class function TOpenTypeLazLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LAZ ';
+  Result := 'LAZ ';
 end;
 
 
@@ -5480,12 +5900,12 @@ end;
 
 class function TOpenTypeLCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'L-Cree';
+  Result := RCStrLCree;
 end;
 
 class function TOpenTypeLCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LCR ';
+  Result := 'LCR ';
 end;
 
 
@@ -5493,12 +5913,12 @@ end;
 
 class function TOpenTypeLadakhiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ladakhi';
+  Result := RCStrLadakhi;
 end;
 
 class function TOpenTypeLadakhiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LDK ';
+  Result := 'LDK ';
 end;
 
 
@@ -5506,12 +5926,12 @@ end;
 
 class function TOpenTypeLezgiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Lezgi';
+  Result := RCStrLezgi;
 end;
 
 class function TOpenTypeLezgiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LEZ ';
+  Result := 'LEZ ';
 end;
 
 
@@ -5519,12 +5939,12 @@ end;
 
 class function TOpenTypeLingalaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Lingala';
+  Result := RCStrLingala;
 end;
 
 class function TOpenTypeLingalaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LIN ';
+  Result := 'LIN ';
 end;
 
 
@@ -5532,12 +5952,12 @@ end;
 
 class function TOpenTypeLowMariLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Low Mari';
+  Result := RCStrLowMari;
 end;
 
 class function TOpenTypeLowMariLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LMA ';
+  Result := 'LMA ';
 end;
 
 
@@ -5545,12 +5965,12 @@ end;
 
 class function TOpenTypeLimbuLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Limbu';
+  Result := RCStrLimbu;
 end;
 
 class function TOpenTypeLimbuLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LMB ';
+  Result := 'LMB ';
 end;
 
 
@@ -5558,12 +5978,12 @@ end;
 
 class function TOpenTypeLomweLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Lomwe';
+  Result := RCStrLomwe;
 end;
 
 class function TOpenTypeLomweLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LMW ';
+  Result := 'LMW ';
 end;
 
 
@@ -5571,12 +5991,13 @@ end;
 
 class function TOpenTypeLowerSorbianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Lower Sorbian';
+  Result := RCStrLowerSorbian;
 end;
 
-class function TOpenTypeLowerSorbianLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeLowerSorbianLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'LSB ';
+  Result := 'LSB ';
 end;
 
 
@@ -5584,12 +6005,12 @@ end;
 
 class function TOpenTypeLuleSamiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Lule Sami';
+  Result := RCStrLuleSami;
 end;
 
 class function TOpenTypeLuleSamiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LSM ';
+  Result := 'LSM ';
 end;
 
 
@@ -5597,12 +6018,12 @@ end;
 
 class function TOpenTypeLithuanianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Lithuanian';
+  Result := RCStrLithuanian;
 end;
 
 class function TOpenTypeLithuanianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LTH ';
+  Result := 'LTH ';
 end;
 
 
@@ -5610,12 +6031,13 @@ end;
 
 class function TOpenTypeLuxembourgishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Luxembourgish';
+  Result := RCStrLuxembourgish;
 end;
 
-class function TOpenTypeLuxembourgishLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeLuxembourgishLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'LTZ ';
+  Result := 'LTZ ';
 end;
 
 
@@ -5623,12 +6045,12 @@ end;
 
 class function TOpenTypeLubaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Luba';
+  Result := RCStrLuba;
 end;
 
 class function TOpenTypeLubaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LUB ';
+  Result := 'LUB ';
 end;
 
 
@@ -5636,12 +6058,12 @@ end;
 
 class function TOpenTypeLugandaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Luganda';
+  Result := RCStrLuganda;
 end;
 
 class function TOpenTypeLugandaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LUG ';
+  Result := 'LUG ';
 end;
 
 
@@ -5649,12 +6071,12 @@ end;
 
 class function TOpenTypeLuhyaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Luhya';
+  Result := RCStrLuhya;
 end;
 
 class function TOpenTypeLuhyaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LUH ';
+  Result := 'LUH ';
 end;
 
 
@@ -5662,12 +6084,12 @@ end;
 
 class function TOpenTypeLuoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Luo';
+  Result := RCStrLuo;
 end;
 
 class function TOpenTypeLuoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LUO ';
+  Result := 'LUO ';
 end;
 
 
@@ -5675,12 +6097,12 @@ end;
 
 class function TOpenTypeLatvianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Latvian';
+  Result := RCStrLatvian;
 end;
 
 class function TOpenTypeLatvianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'LVI ';
+  Result := 'LVI ';
 end;
 
 
@@ -5688,12 +6110,12 @@ end;
 
 class function TOpenTypeMajangLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Majang';
+  Result := RCStrMajang;
 end;
 
 class function TOpenTypeMajangLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MAJ ';
+  Result := 'MAJ ';
 end;
 
 
@@ -5701,25 +6123,27 @@ end;
 
 class function TOpenTypeMakuaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Makua';
+  Result := RCStrMakua;
 end;
 
 class function TOpenTypeMakuaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MAK ';
+  Result := 'MAK ';
 end;
 
 
 { TOpenTypeMalayalamTraditionalLanguageSystemTable }
 
-class function TOpenTypeMalayalamTraditionalLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeMalayalamTraditionalLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Malayalam Traditional';
+  Result := RCStrMalayalamTraditional;
 end;
 
-class function TOpenTypeMalayalamTraditionalLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeMalayalamTraditionalLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'MAL ';
+  Result := 'MAL ';
 end;
 
 
@@ -5727,12 +6151,12 @@ end;
 
 class function TOpenTypeMansiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Mansi';
+  Result := RCStrMansi;
 end;
 
 class function TOpenTypeMansiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MAN ';
+  Result := 'MAN ';
 end;
 
 
@@ -5740,12 +6164,12 @@ end;
 
 class function TOpenTypeMapudungunLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Mapudungun';
+  Result := RCStrMapudungun;
 end;
 
 class function TOpenTypeMapudungunLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MAP ';
+  Result := 'MAP ';
 end;
 
 
@@ -5753,12 +6177,12 @@ end;
 
 class function TOpenTypeMarathiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Marathi';
+  Result := RCStrMarathi;
 end;
 
 class function TOpenTypeMarathiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MAR ';
+  Result := 'MAR ';
 end;
 
 
@@ -5766,12 +6190,12 @@ end;
 
 class function TOpenTypeMarwariLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Marwari';
+  Result := RCStrMarwari;
 end;
 
 class function TOpenTypeMarwariLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MAW ';
+  Result := 'MAW ';
 end;
 
 
@@ -5779,12 +6203,12 @@ end;
 
 class function TOpenTypeMbunduLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Mbundu';
+  Result := RCStrMbundu;
 end;
 
 class function TOpenTypeMbunduLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MBN ';
+  Result := 'MBN ';
 end;
 
 
@@ -5792,12 +6216,12 @@ end;
 
 class function TOpenTypeManchuLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Manchu';
+  Result := RCStrManchu;
 end;
 
 class function TOpenTypeManchuLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MCH ';
+  Result := 'MCH ';
 end;
 
 
@@ -5805,12 +6229,12 @@ end;
 
 class function TOpenTypeMooseCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Moose Cree';
+  Result := RCStrMooseCree;
 end;
 
 class function TOpenTypeMooseCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MCR ';
+  Result := 'MCR ';
 end;
 
 
@@ -5818,12 +6242,12 @@ end;
 
 class function TOpenTypeMendeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Mende';
+  Result := RCStrMende;
 end;
 
 class function TOpenTypeMendeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MDE ';
+  Result := 'MDE ';
 end;
 
 
@@ -5831,12 +6255,12 @@ end;
 
 class function TOpenTypeMeEnLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Me''en';
+  Result := RCStrMeen;
 end;
 
 class function TOpenTypeMeEnLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MEN ';
+  Result := 'MEN ';
 end;
 
 
@@ -5844,12 +6268,12 @@ end;
 
 class function TOpenTypeMizoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Mizo';
+  Result := RCStrMizo;
 end;
 
 class function TOpenTypeMizoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MIZ ';
+  Result := 'MIZ ';
 end;
 
 
@@ -5857,12 +6281,12 @@ end;
 
 class function TOpenTypeMacedonianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Macedonian';
+  Result := RCStrMacedonian;
 end;
 
 class function TOpenTypeMacedonianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MKD ';
+  Result := 'MKD ';
 end;
 
 
@@ -5870,12 +6294,12 @@ end;
 
 class function TOpenTypeMaleLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Male';
+  Result := RCStrMale;
 end;
 
 class function TOpenTypeMaleLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MLE ';
+  Result := 'MLE ';
 end;
 
 
@@ -5883,12 +6307,12 @@ end;
 
 class function TOpenTypeMalagasyLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Malagasy';
+  Result := RCStrMalagasy;
 end;
 
 class function TOpenTypeMalagasyLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MLG ';
+  Result := 'MLG ';
 end;
 
 
@@ -5896,25 +6320,27 @@ end;
 
 class function TOpenTypeMalinkeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Malinke';
+  Result := RCStrMalinke;
 end;
 
 class function TOpenTypeMalinkeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MLN ';
+  Result := 'MLN ';
 end;
 
 
 { TOpenTypeMalayalamReformedLanguageSystemTable }
 
-class function TOpenTypeMalayalamReformedLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeMalayalamReformedLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Malayalam Reformed';
+  Result := RCStrMalayalamReformed;
 end;
 
-class function TOpenTypeMalayalamReformedLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeMalayalamReformedLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'MLR ';
+  Result := 'MLR ';
 end;
 
 
@@ -5922,12 +6348,12 @@ end;
 
 class function TOpenTypeMalayLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Malay';
+  Result := RCStrMalay;
 end;
 
 class function TOpenTypeMalayLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MLY ';
+  Result := 'MLY ';
 end;
 
 
@@ -5935,12 +6361,12 @@ end;
 
 class function TOpenTypeMandinkaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Mandinka';
+  Result := RCStrMandinka;
 end;
 
 class function TOpenTypeMandinkaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MND ';
+  Result := 'MND ';
 end;
 
 
@@ -5948,12 +6374,12 @@ end;
 
 class function TOpenTypeMongolianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Mongolian';
+  Result := RCStrMongolian;
 end;
 
 class function TOpenTypeMongolianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MNG ';
+  Result := 'MNG ';
 end;
 
 
@@ -5961,12 +6387,12 @@ end;
 
 class function TOpenTypeManipuriLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Manipuri';
+  Result := RCStrManipuri;
 end;
 
 class function TOpenTypeManipuriLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MNI ';
+  Result := 'MNI ';
 end;
 
 
@@ -5974,12 +6400,12 @@ end;
 
 class function TOpenTypeManinkaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Maninka';
+  Result := RCStrManinka;
 end;
 
 class function TOpenTypeManinkaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MNK ';
+  Result := 'MNK ';
 end;
 
 
@@ -5987,12 +6413,12 @@ end;
 
 class function TOpenTypeManxGaelicLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Manx Gaelic';
+  Result := RCStrManxGaelic;
 end;
 
 class function TOpenTypeManxGaelicLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MNX ';
+  Result := 'MNX ';
 end;
 
 
@@ -6000,12 +6426,12 @@ end;
 
 class function TOpenTypeMohawkLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Mohawk';
+  Result := RCStrMohawk;
 end;
 
 class function TOpenTypeMohawkLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MOH ';
+  Result := 'MOH ';
 end;
 
 
@@ -6013,12 +6439,12 @@ end;
 
 class function TOpenTypeMokshaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Moksha';
+  Result := RCStrMoksha;
 end;
 
 class function TOpenTypeMokshaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MOK ';
+  Result := 'MOK ';
 end;
 
 
@@ -6026,12 +6452,12 @@ end;
 
 class function TOpenTypeMoldavianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Moldavian';
+  Result := RCStrMoldavian;
 end;
 
 class function TOpenTypeMoldavianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MOL ';
+  Result := 'MOL ';
 end;
 
 
@@ -6039,12 +6465,12 @@ end;
 
 class function TOpenTypeMonLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Mon';
+  Result := RCStrMon;
 end;
 
 class function TOpenTypeMonLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MON ';
+  Result := 'MON ';
 end;
 
 
@@ -6052,12 +6478,12 @@ end;
 
 class function TOpenTypeMoroccanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Moroccan';
+  Result := RCStrMoroccan;
 end;
 
 class function TOpenTypeMoroccanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MO  ';
+  Result := 'MO  ';
 end;
 
 
@@ -6065,12 +6491,12 @@ end;
 
 class function TOpenTypeMaoriLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Maori';
+  Result := RCStrMaori;
 end;
 
 class function TOpenTypeMaoriLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MRI ';
+  Result := 'MRI ';
 end;
 
 
@@ -6078,12 +6504,12 @@ end;
 
 class function TOpenTypeMaithiliLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Maithili';
+  Result := RCStrMaithili;
 end;
 
 class function TOpenTypeMaithiliLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MTH ';
+  Result := 'MTH ';
 end;
 
 
@@ -6091,12 +6517,12 @@ end;
 
 class function TOpenTypeMalteseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Maltese';
+  Result := RCStrMaltese;
 end;
 
 class function TOpenTypeMalteseLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MTS ';
+  Result := 'MTS ';
 end;
 
 
@@ -6104,12 +6530,12 @@ end;
 
 class function TOpenTypeMundariLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Mundari';
+  Result := RCStrMundari;
 end;
 
 class function TOpenTypeMundariLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'MUN ';
+  Result := 'MUN ';
 end;
 
 
@@ -6117,12 +6543,13 @@ end;
 
 class function TOpenTypeNagaAssameseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Naga-Assamese';
+  Result := RCStrNagaAssamese;
 end;
 
-class function TOpenTypeNagaAssameseLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeNagaAssameseLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'NAG ';
+  Result := 'NAG ';
 end;
 
 
@@ -6130,12 +6557,12 @@ end;
 
 class function TOpenTypeNanaiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Nanai';
+  Result := RCStrNanai;
 end;
 
 class function TOpenTypeNanaiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NAN ';
+  Result := 'NAN ';
 end;
 
 
@@ -6143,12 +6570,12 @@ end;
 
 class function TOpenTypeNaskapiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Naskapi';
+  Result := RCStrNaskapi;
 end;
 
 class function TOpenTypeNaskapiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NAS ';
+  Result := 'NAS ';
 end;
 
 
@@ -6156,12 +6583,12 @@ end;
 
 class function TOpenTypeNLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'N-Cree';
+  Result := RCStrNCree;
 end;
 
 class function TOpenTypeNLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NCR ';
+  Result := 'NCR ';
 end;
 
 
@@ -6169,12 +6596,12 @@ end;
 
 class function TOpenTypeNdebeleLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ndebele';
+  Result := RCStrNdebele;
 end;
 
 class function TOpenTypeNdebeleLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NDB ';
+  Result := 'NDB ';
 end;
 
 
@@ -6182,12 +6609,12 @@ end;
 
 class function TOpenTypeNdongaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ndonga';
+  Result := RCStrNdonga;
 end;
 
 class function TOpenTypeNdongaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NDG ';
+  Result := 'NDG ';
 end;
 
 
@@ -6195,12 +6622,12 @@ end;
 
 class function TOpenTypeNepaliLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Nepali';
+  Result := RCStrNepali;
 end;
 
 class function TOpenTypeNepaliLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NEP ';
+  Result := 'NEP ';
 end;
 
 
@@ -6208,12 +6635,12 @@ end;
 
 class function TOpenTypeNewariLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Newari';
+  Result := RCStrNewari;
 end;
 
 class function TOpenTypeNewariLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NEW ';
+  Result := 'NEW ';
 end;
 
 
@@ -6221,25 +6648,27 @@ end;
 
 class function TOpenTypeNagariLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Nagari';
+  Result := RCStrNagari;
 end;
 
 class function TOpenTypeNagariLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NG  ';
+  Result := 'NG  ';
 end;
 
 
 { TOpenTypeNorwayHouseCreeLanguageSystemTable }
 
-class function TOpenTypeNorwayHouseCreeLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeNorwayHouseCreeLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Norway House Cree';
+  Result := RCStrNorwayHouseCree;
 end;
 
-class function TOpenTypeNorwayHouseCreeLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeNorwayHouseCreeLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'NHC ';
+  Result := 'NHC ';
 end;
 
 
@@ -6247,12 +6676,12 @@ end;
 
 class function TOpenTypeNisiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Nisi';
+  Result := RCStrNisi;
 end;
 
 class function TOpenTypeNisiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NIS ';
+  Result := 'NIS ';
 end;
 
 
@@ -6260,12 +6689,12 @@ end;
 
 class function TOpenTypeNiueanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Niuean';
+  Result := RCStrNiuean;
 end;
 
 class function TOpenTypeNiueanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NIU ';
+  Result := 'NIU ';
 end;
 
 
@@ -6273,12 +6702,12 @@ end;
 
 class function TOpenTypeNkoleLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Nkole';
+  Result := RCStrNkole;
 end;
 
 class function TOpenTypeNkoleLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NKL ';
+  Result := 'NKL ';
 end;
 
 
@@ -6286,12 +6715,12 @@ end;
 
 class function TOpenTypeNKoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'N''Ko';
+  Result := RCStrNKo;
 end;
 
 class function TOpenTypeNKoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NKO ';
+  Result := 'NKO ';
 end;
 
 
@@ -6299,12 +6728,12 @@ end;
 
 class function TOpenTypeDutchLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Dutch';
+  Result := RCStrDutch;
 end;
 
 class function TOpenTypeDutchLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NLD ';
+  Result := 'NLD ';
 end;
 
 
@@ -6312,12 +6741,12 @@ end;
 
 class function TOpenTypeNogaiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Nogai';
+  Result := RCStrNogai;
 end;
 
 class function TOpenTypeNogaiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NOG ';
+  Result := 'NOG ';
 end;
 
 
@@ -6325,12 +6754,12 @@ end;
 
 class function TOpenTypeNorwegianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Norwegian';
+  Result := RCStrNorwegian;
 end;
 
 class function TOpenTypeNorwegianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NOR ';
+  Result := 'NOR ';
 end;
 
 
@@ -6338,12 +6767,13 @@ end;
 
 class function TOpenTypeNorthernSamiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Northern Sami';
+  Result := RCStrNorthernSami;
 end;
 
-class function TOpenTypeNorthernSamiLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeNorthernSamiLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'NSM ';
+  Result := 'NSM ';
 end;
 
 
@@ -6351,12 +6781,12 @@ end;
 
 class function TOpenTypeNorthernTaiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Northern Tai';
+  Result := RCStrNorthernTai;
 end;
 
 class function TOpenTypeNorthernTaiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NTA ';
+  Result := 'NTA ';
 end;
 
 
@@ -6364,12 +6794,12 @@ end;
 
 class function TOpenTypeEsperantoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Esperanto';
+  Result := RCStrEsperanto;
 end;
 
 class function TOpenTypeEsperantoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NTO ';
+  Result := 'NTO ';
 end;
 
 
@@ -6377,12 +6807,12 @@ end;
 
 class function TOpenTypeNynorskLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Nynorsk';
+  Result := RCStrNynorsk;
 end;
 
 class function TOpenTypeNynorskLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'NYN ';
+  Result := 'NYN ';
 end;
 
 
@@ -6390,12 +6820,12 @@ end;
 
 class function TOpenTypeOccitanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Occitan';
+  Result := RCStrOccitan;
 end;
 
 class function TOpenTypeOccitanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'OCI ';
+  Result := 'OCI ';
 end;
 
 
@@ -6403,12 +6833,12 @@ end;
 
 class function TOpenTypeOjiCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Oji-Cree';
+  Result := RCStrOjiCree;
 end;
 
 class function TOpenTypeOjiCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'OCR ';
+  Result := 'OCR ';
 end;
 
 
@@ -6416,12 +6846,12 @@ end;
 
 class function TOpenTypeOjibwayLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ojibway';
+  Result := RCStrOjibway;
 end;
 
 class function TOpenTypeOjibwayLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'OJB ';
+  Result := 'OJB ';
 end;
 
 
@@ -6429,12 +6859,12 @@ end;
 
 class function TOpenTypeOriyaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Oriya';
+  Result := RCStrOriya;
 end;
 
 class function TOpenTypeOriyaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ORI ';
+  Result := 'ORI ';
 end;
 
 
@@ -6442,12 +6872,12 @@ end;
 
 class function TOpenTypeOromoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Oromo';
+  Result := RCStrOromo;
 end;
 
 class function TOpenTypeOromoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ORO ';
+  Result := 'ORO ';
 end;
 
 
@@ -6455,25 +6885,27 @@ end;
 
 class function TOpenTypeOssetianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ossetian';
+  Result := RCStrOssetian;
 end;
 
 class function TOpenTypeOssetianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'OSS ';
+  Result := 'OSS ';
 end;
 
 
 { TOpenTypePalestinianAramaicLanguageSystemTable }
 
-class function TOpenTypePalestinianAramaicLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypePalestinianAramaicLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Palestinian Aramaic';
+  Result := RCStrPalestinianAramaic;
 end;
 
-class function TOpenTypePalestinianAramaicLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypePalestinianAramaicLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'PAA ';
+  Result := 'PAA ';
 end;
 
 
@@ -6481,12 +6913,12 @@ end;
 
 class function TOpenTypePaliLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Pali';
+  Result := RCStrPali;
 end;
 
 class function TOpenTypePaliLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'PAL ';
+  Result := 'PAL ';
 end;
 
 
@@ -6494,12 +6926,12 @@ end;
 
 class function TOpenTypePunjabiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Punjabi';
+  Result := RCStrPunjabi;
 end;
 
 class function TOpenTypePunjabiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'PAN ';
+  Result := 'PAN ';
 end;
 
 
@@ -6507,12 +6939,12 @@ end;
 
 class function TOpenTypePalpaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Palpa';
+  Result := RCStrPalpa;
 end;
 
 class function TOpenTypePalpaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'PAP ';
+  Result := 'PAP ';
 end;
 
 
@@ -6520,25 +6952,27 @@ end;
 
 class function TOpenTypePashtoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Pashto';
+  Result := RCStrPashto;
 end;
 
 class function TOpenTypePashtoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'PAS ';
+  Result := 'PAS ';
 end;
 
 
 { TOpenTypePolytonicGreekLanguageSystemTable }
 
-class function TOpenTypePolytonicGreekLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypePolytonicGreekLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Polytonic Greek';
+  Result := RCStrPolytonicGreek;
 end;
 
-class function TOpenTypePolytonicGreekLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypePolytonicGreekLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'PGR ';
+  Result := 'PGR ';
 end;
 
 
@@ -6546,12 +6980,12 @@ end;
 
 class function TOpenTypeFilipinoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Filipino';
+  Result := RCStrFilipino;
 end;
 
 class function TOpenTypeFilipinoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'PIL ';
+  Result := 'PIL ';
 end;
 
 
@@ -6559,12 +6993,12 @@ end;
 
 class function TOpenTypePalaungLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Palaung';
+  Result := RCStrPalaung;
 end;
 
 class function TOpenTypePalaungLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'PLG ';
+  Result := 'PLG ';
 end;
 
 
@@ -6572,12 +7006,12 @@ end;
 
 class function TOpenTypePolishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Polish';
+  Result := RCStrPolish;
 end;
 
 class function TOpenTypePolishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'PLK ';
+  Result := 'PLK ';
 end;
 
 
@@ -6585,12 +7019,12 @@ end;
 
 class function TOpenTypeProvencalLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Provencal';
+  Result := RCStrProvencal;
 end;
 
 class function TOpenTypeProvencalLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'PRO ';
+  Result := 'PRO ';
 end;
 
 
@@ -6598,12 +7032,12 @@ end;
 
 class function TOpenTypePortugueseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Portuguese';
+  Result := RCStrPortuguese;
 end;
 
 class function TOpenTypePortugueseLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'PTG ';
+  Result := 'PTG ';
 end;
 
 
@@ -6611,12 +7045,12 @@ end;
 
 class function TOpenTypeChinLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Chin';
+  Result := RCStrChin;
 end;
 
 class function TOpenTypeChinLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'QIN ';
+  Result := 'QIN ';
 end;
 
 
@@ -6624,12 +7058,12 @@ end;
 
 class function TOpenTypeRajasthaniLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Rajasthani';
+  Result := RCStrRajasthani;
 end;
 
 class function TOpenTypeRajasthaniLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'RAJ ';
+  Result := 'RAJ ';
 end;
 
 
@@ -6637,12 +7071,12 @@ end;
 
 class function TOpenTypeRCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'R-Cree';
+  Result := RCStrRCree;
 end;
 
 class function TOpenTypeRCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'RCR ';
+  Result := 'RCR ';
 end;
 
 
@@ -6650,12 +7084,13 @@ end;
 
 class function TOpenTypeRussianBuriatLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Russian Buriat';
+  Result := RCStrRussianBuriat;
 end;
 
-class function TOpenTypeRussianBuriatLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeRussianBuriatLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'RBU ';
+  Result := 'RBU ';
 end;
 
 
@@ -6663,12 +7098,12 @@ end;
 
 class function TOpenTypeRiangLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Riang';
+  Result := RCStrRiang;
 end;
 
 class function TOpenTypeRiangLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'RIA ';
+  Result := 'RIA ';
 end;
 
 
@@ -6676,12 +7111,13 @@ end;
 
 class function TOpenTypeRhaetoRomanicLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Rhaeto-Romanic';
+  Result := RCStrRhaetoRomanic;
 end;
 
-class function TOpenTypeRhaetoRomanicLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeRhaetoRomanicLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'RMS ';
+  Result := 'RMS ';
 end;
 
 
@@ -6689,12 +7125,12 @@ end;
 
 class function TOpenTypeRomanianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Romanian';
+  Result := RCStrRomanian;
 end;
 
 class function TOpenTypeRomanianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ROM ';
+  Result := 'ROM ';
 end;
 
 
@@ -6702,12 +7138,12 @@ end;
 
 class function TOpenTypeRomanyLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Romany';
+  Result := RCStrRomany;
 end;
 
 class function TOpenTypeRomanyLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ROY ';
+  Result := 'ROY ';
 end;
 
 
@@ -6715,12 +7151,12 @@ end;
 
 class function TOpenTypeRusynLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Rusyn';
+  Result := RCStrRusyn;
 end;
 
 class function TOpenTypeRusynLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'RSY ';
+  Result := 'RSY ';
 end;
 
 
@@ -6728,12 +7164,12 @@ end;
 
 class function TOpenTypeRuandaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ruanda';
+  Result := RCStrRuanda;
 end;
 
 class function TOpenTypeRuandaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'RUA ';
+  Result := 'RUA ';
 end;
 
 
@@ -6741,12 +7177,12 @@ end;
 
 class function TOpenTypeRussianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Russian';
+  Result := RCStrRussian;
 end;
 
 class function TOpenTypeRussianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'RUS ';
+  Result := 'RUS ';
 end;
 
 
@@ -6754,12 +7190,12 @@ end;
 
 class function TOpenTypeSadriLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sadri';
+  Result := RCStrSadri;
 end;
 
 class function TOpenTypeSadriLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SAD ';
+  Result := 'SAD ';
 end;
 
 
@@ -6767,12 +7203,12 @@ end;
 
 class function TOpenTypeSanskritLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sanskrit';
+  Result := RCStrSanskrit;
 end;
 
 class function TOpenTypeSanskritLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SAN ';
+  Result := 'SAN ';
 end;
 
 
@@ -6780,12 +7216,12 @@ end;
 
 class function TOpenTypeSantaliLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Santali';
+  Result := RCStrSantali;
 end;
 
 class function TOpenTypeSantaliLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SAT ';
+  Result := 'SAT ';
 end;
 
 
@@ -6793,12 +7229,12 @@ end;
 
 class function TOpenTypeSayisiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sayisi';
+  Result := RCStrSayisi;
 end;
 
 class function TOpenTypeSayisiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SAY ';
+  Result := 'SAY ';
 end;
 
 
@@ -6806,12 +7242,12 @@ end;
 
 class function TOpenTypeSekotaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sekota';
+  Result := RCStrSekota;
 end;
 
 class function TOpenTypeSekotaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SEK ';
+  Result := 'SEK ';
 end;
 
 
@@ -6819,12 +7255,12 @@ end;
 
 class function TOpenTypeSelkupLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Selkup';
+  Result := RCStrSelkup;
 end;
 
 class function TOpenTypeSelkupLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SEL ';
+  Result := 'SEL ';
 end;
 
 
@@ -6832,12 +7268,12 @@ end;
 
 class function TOpenTypeSangoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sango';
+  Result := RCStrSango;
 end;
 
 class function TOpenTypeSangoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SGO ';
+  Result := 'SGO ';
 end;
 
 
@@ -6845,12 +7281,12 @@ end;
 
 class function TOpenTypeShanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Shan';
+  Result := RCStrShan;
 end;
 
 class function TOpenTypeShanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SHN ';
+  Result := 'SHN ';
 end;
 
 
@@ -6858,12 +7294,12 @@ end;
 
 class function TOpenTypeSibeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sibe';
+  Result := RCStrSibe;
 end;
 
 class function TOpenTypeSibeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SIB ';
+  Result := 'SIB ';
 end;
 
 
@@ -6871,12 +7307,12 @@ end;
 
 class function TOpenTypeSidamoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sidamo';
+  Result := RCStrSidamo;
 end;
 
 class function TOpenTypeSidamoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SID ';
+  Result := 'SID ';
 end;
 
 
@@ -6884,12 +7320,12 @@ end;
 
 class function TOpenTypeSilteGurageLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Silte Gurage';
+  Result := RCStrSilteGurage;
 end;
 
 class function TOpenTypeSilteGurageLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SIG ';
+  Result := 'SIG ';
 end;
 
 
@@ -6897,12 +7333,12 @@ end;
 
 class function TOpenTypeSkoltSamiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Skolt Sami';
+  Result := RCStrSkoltSami;
 end;
 
 class function TOpenTypeSkoltSamiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SKS ';
+  Result := 'SKS ';
 end;
 
 
@@ -6910,12 +7346,12 @@ end;
 
 class function TOpenTypeSlovakLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Slovak';
+  Result := RCStrSlovak;
 end;
 
 class function TOpenTypeSlovakLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SKY ';
+  Result := 'SKY ';
 end;
 
 
@@ -6923,12 +7359,12 @@ end;
 
 class function TOpenTypeSlaveyLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Slavey';
+  Result := RCStrSlavey;
 end;
 
 class function TOpenTypeSlaveyLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SLA ';
+  Result := 'SLA ';
 end;
 
 
@@ -6936,12 +7372,12 @@ end;
 
 class function TOpenTypeSlovenianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Slovenian';
+  Result := RCStrSlovenian;
 end;
 
 class function TOpenTypeSlovenianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SLV ';
+  Result := 'SLV ';
 end;
 
 
@@ -6949,12 +7385,12 @@ end;
 
 class function TOpenTypeSomaliLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Somali';
+  Result := RCStrSomali;
 end;
 
 class function TOpenTypeSomaliLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SML ';
+  Result := 'SML ';
 end;
 
 
@@ -6962,12 +7398,12 @@ end;
 
 class function TOpenTypeSamoanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Samoan';
+  Result := RCStrSamoan;
 end;
 
 class function TOpenTypeSamoanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SMO ';
+  Result := 'SMO ';
 end;
 
 
@@ -6975,12 +7411,12 @@ end;
 
 class function TOpenTypeSenaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sena';
+  Result := RCStrSena;
 end;
 
 class function TOpenTypeSenaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SNA ';
+  Result := 'SNA ';
 end;
 
 
@@ -6988,12 +7424,12 @@ end;
 
 class function TOpenTypeSindhiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sindhi';
+  Result := RCStrSindhi;
 end;
 
 class function TOpenTypeSindhiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SND ';
+  Result := 'SND ';
 end;
 
 
@@ -7001,12 +7437,12 @@ end;
 
 class function TOpenTypeSinhaleseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sinhalese';
+  Result := RCStrSinhalese;
 end;
 
 class function TOpenTypeSinhaleseLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SNH ';
+  Result := 'SNH ';
 end;
 
 
@@ -7014,12 +7450,12 @@ end;
 
 class function TOpenTypeSoninkeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Soninke';
+  Result := RCStrSoninke;
 end;
 
 class function TOpenTypeSoninkeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SNK ';
+  Result := 'SNK ';
 end;
 
 
@@ -7027,12 +7463,12 @@ end;
 
 class function TOpenTypeSodoGurageLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sodo Gurage';
+  Result := RCStrSodoGurage;
 end;
 
 class function TOpenTypeSodoGurageLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SOG ';
+  Result := 'SOG ';
 end;
 
 
@@ -7040,12 +7476,12 @@ end;
 
 class function TOpenTypeSothoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sotho';
+  Result := RCStrSotho;
 end;
 
 class function TOpenTypeSothoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SOT ';
+  Result := 'SOT ';
 end;
 
 
@@ -7053,12 +7489,12 @@ end;
 
 class function TOpenTypeAlbanianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Albanian';
+  Result := RCStrAlbanian;
 end;
 
 class function TOpenTypeAlbanianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SQI ';
+  Result := 'SQI ';
 end;
 
 
@@ -7066,12 +7502,12 @@ end;
 
 class function TOpenTypeSerbianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Serbian';
+  Result := RCStrSerbian;
 end;
 
 class function TOpenTypeSerbianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SRB ';
+  Result := 'SRB ';
 end;
 
 
@@ -7079,12 +7515,12 @@ end;
 
 class function TOpenTypeSaraikiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Saraiki';
+  Result := RCStrSaraiki;
 end;
 
 class function TOpenTypeSaraikiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SRK ';
+  Result := 'SRK ';
 end;
 
 
@@ -7092,12 +7528,12 @@ end;
 
 class function TOpenTypeSererLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Serer';
+  Result := RCStrSerer;
 end;
 
 class function TOpenTypeSererLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SRR ';
+  Result := 'SRR ';
 end;
 
 
@@ -7105,12 +7541,12 @@ end;
 
 class function TOpenTypeSouthSlaveyLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'South Slavey';
+  Result := RCStrSouthSlavey;
 end;
 
 class function TOpenTypeSouthSlaveyLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SSL ';
+  Result := 'SSL ';
 end;
 
 
@@ -7118,12 +7554,13 @@ end;
 
 class function TOpenTypeSouthernSamiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Southern Sami';
+  Result := RCStrSouthernSami;
 end;
 
-class function TOpenTypeSouthernSamiLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeSouthernSamiLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'SSM ';
+  Result := 'SSM ';
 end;
 
 
@@ -7131,12 +7568,12 @@ end;
 
 class function TOpenTypeSuriLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Suri';
+  Result := RCStrSuri;
 end;
 
 class function TOpenTypeSuriLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SUR ';
+  Result := 'SUR ';
 end;
 
 
@@ -7144,12 +7581,12 @@ end;
 
 class function TOpenTypeSvanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Svan';
+  Result := RCStrSvan;
 end;
 
 class function TOpenTypeSvanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SVA ';
+  Result := 'SVA ';
 end;
 
 
@@ -7157,25 +7594,27 @@ end;
 
 class function TOpenTypeSwedishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Swedish';
+  Result := RCStrSwedish;
 end;
 
 class function TOpenTypeSwedishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SVE ';
+  Result := 'SVE ';
 end;
 
 
 { TOpenTypeSwadayaAramaicLanguageSystemTable }
 
-class function TOpenTypeSwadayaAramaicLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeSwadayaAramaicLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Swadaya Aramaic';
+  Result := RCStrSwadayaAramaic;
 end;
 
-class function TOpenTypeSwadayaAramaicLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeSwadayaAramaicLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'SWA ';
+  Result := 'SWA ';
 end;
 
 
@@ -7183,12 +7622,12 @@ end;
 
 class function TOpenTypeSwahiliLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Swahili';
+  Result := RCStrSwahili;
 end;
 
 class function TOpenTypeSwahiliLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SWK ';
+  Result := 'SWK ';
 end;
 
 
@@ -7196,12 +7635,12 @@ end;
 
 class function TOpenTypeSwaziLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Swazi';
+  Result := RCStrSwazi;
 end;
 
 class function TOpenTypeSwaziLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SWZ ';
+  Result := 'SWZ ';
 end;
 
 
@@ -7209,12 +7648,12 @@ end;
 
 class function TOpenTypeSutuLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Sutu';
+  Result := RCStrSutu;
 end;
 
 class function TOpenTypeSutuLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SXT ';
+  Result := 'SXT ';
 end;
 
 
@@ -7222,12 +7661,12 @@ end;
 
 class function TOpenTypeSyriacLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Syriac';
+  Result := RCStrSyriac;
 end;
 
 class function TOpenTypeSyriacLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'SYR ';
+  Result := 'SYR ';
 end;
 
 
@@ -7235,12 +7674,12 @@ end;
 
 class function TOpenTypeTabasaranLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tabasaran';
+  Result := RCStrTabasaran;
 end;
 
 class function TOpenTypeTabasaranLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TAB ';
+  Result := 'TAB ';
 end;
 
 
@@ -7248,12 +7687,12 @@ end;
 
 class function TOpenTypeTajikiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tajiki';
+  Result := RCStrTajiki;
 end;
 
 class function TOpenTypeTajikiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TAJ ';
+  Result := 'TAJ ';
 end;
 
 
@@ -7261,12 +7700,12 @@ end;
 
 class function TOpenTypeTamilLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tamil';
+  Result := RCStrTamil;
 end;
 
 class function TOpenTypeTamilLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TAM ';
+  Result := 'TAM ';
 end;
 
 
@@ -7274,12 +7713,12 @@ end;
 
 class function TOpenTypeTatarLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tatar';
+  Result := RCStrTatar;
 end;
 
 class function TOpenTypeTatarLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TAT ';
+  Result := 'TAT ';
 end;
 
 
@@ -7287,12 +7726,12 @@ end;
 
 class function TOpenTypeTHCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'TH-Cree';
+  Result := RCStrTHCree;
 end;
 
 class function TOpenTypeTHCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TCR ';
+  Result := 'TCR ';
 end;
 
 
@@ -7300,12 +7739,12 @@ end;
 
 class function TOpenTypeTeluguLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Telugu';
+  Result := RCStrTelugu;
 end;
 
 class function TOpenTypeTeluguLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TEL ';
+  Result := 'TEL ';
 end;
 
 
@@ -7313,12 +7752,12 @@ end;
 
 class function TOpenTypeTonganLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tongan';
+  Result := RCStrTongan;
 end;
 
 class function TOpenTypeTonganLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TGN ';
+  Result := 'TGN ';
 end;
 
 
@@ -7326,12 +7765,12 @@ end;
 
 class function TOpenTypeTigreLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tigre';
+  Result := RCStrTigre;
 end;
 
 class function TOpenTypeTigreLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TGR ';
+  Result := 'TGR ';
 end;
 
 
@@ -7339,12 +7778,12 @@ end;
 
 class function TOpenTypeTigrinyaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tigrinya';
+  Result := RCStrTigrinya;
 end;
 
 class function TOpenTypeTigrinyaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TGY ';
+  Result := 'TGY ';
 end;
 
 
@@ -7352,12 +7791,12 @@ end;
 
 class function TOpenTypeThaiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Thai';
+  Result := RCStrThai;
 end;
 
 class function TOpenTypeThaiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'THA ';
+  Result := 'THA ';
 end;
 
 
@@ -7365,12 +7804,12 @@ end;
 
 class function TOpenTypeTahitianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tahitian';
+  Result := RCStrTahitian;
 end;
 
 class function TOpenTypeTahitianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'THT ';
+  Result := 'THT ';
 end;
 
 
@@ -7378,12 +7817,12 @@ end;
 
 class function TOpenTypeTibetanLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tibetan';
+  Result := RCStrTibetan;
 end;
 
 class function TOpenTypeTibetanLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TIB ';
+  Result := 'TIB ';
 end;
 
 
@@ -7391,12 +7830,12 @@ end;
 
 class function TOpenTypeTurkmenLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Turkmen';
+  Result := RCStrTurkmen;
 end;
 
 class function TOpenTypeTurkmenLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TKM ';
+  Result := 'TKM ';
 end;
 
 
@@ -7404,12 +7843,12 @@ end;
 
 class function TOpenTypeTemneLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Temne';
+  Result := RCStrTemne;
 end;
 
 class function TOpenTypeTemneLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TMN ';
+  Result := 'TMN ';
 end;
 
 
@@ -7417,12 +7856,12 @@ end;
 
 class function TOpenTypeTswanaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tswana';
+  Result := RCStrTswana;
 end;
 
 class function TOpenTypeTswanaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TNA ';
+  Result := 'TNA ';
 end;
 
 
@@ -7430,12 +7869,13 @@ end;
 
 class function TOpenTypeTundraNenetsLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tundra Nenets';
+  Result := RCStrTundraNenets;
 end;
 
-class function TOpenTypeTundraNenetsLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeTundraNenetsLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'TNE ';
+  Result := 'TNE ';
 end;
 
 
@@ -7443,12 +7883,12 @@ end;
 
 class function TOpenTypeTongaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tonga';
+  Result := RCStrTonga;
 end;
 
 class function TOpenTypeTongaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TNG ';
+  Result := 'TNG ';
 end;
 
 
@@ -7456,12 +7896,12 @@ end;
 
 class function TOpenTypeTodoLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Todo';
+  Result := RCStrTodo;
 end;
 
 class function TOpenTypeTodoLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TOD ';
+  Result := 'TOD ';
 end;
 
 
@@ -7469,12 +7909,12 @@ end;
 
 class function TOpenTypeTurkishLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Turkish';
+  Result := RCStrTurkish;
 end;
 
 class function TOpenTypeTurkishLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TRK ';
+  Result := 'TRK ';
 end;
 
 
@@ -7482,12 +7922,12 @@ end;
 
 class function TOpenTypeTsongaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tsonga';
+  Result := RCStrTsonga;
 end;
 
 class function TOpenTypeTsongaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TSG ';
+  Result := 'TSG ';
 end;
 
 
@@ -7495,12 +7935,13 @@ end;
 
 class function TOpenTypeTuroyoAramaicLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Turoyo Aramaic';
+  Result := RCStrTuroyoAramaic;
 end;
 
-class function TOpenTypeTuroyoAramaicLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeTuroyoAramaicLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'TUA ';
+  Result := 'TUA ';
 end;
 
 
@@ -7508,12 +7949,12 @@ end;
 
 class function TOpenTypeTuluLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tulu';
+  Result := RCStrTulu;
 end;
 
 class function TOpenTypeTuluLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TUL ';
+  Result := 'TUL ';
 end;
 
 
@@ -7521,12 +7962,12 @@ end;
 
 class function TOpenTypeTuvinLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tuvin';
+  Result := RCStrTuvin;
 end;
 
 class function TOpenTypeTuvinLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TUV ';
+  Result := 'TUV ';
 end;
 
 
@@ -7534,12 +7975,12 @@ end;
 
 class function TOpenTypeTwiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Twi';
+  Result := RCStrTwi;
 end;
 
 class function TOpenTypeTwiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'TWI ';
+  Result := 'TWI ';
 end;
 
 
@@ -7547,12 +7988,12 @@ end;
 
 class function TOpenTypeUdmurtLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Udmurt';
+  Result := RCStrUdmurt;
 end;
 
 class function TOpenTypeUdmurtLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'UDM ';
+  Result := 'UDM ';
 end;
 
 
@@ -7560,12 +8001,12 @@ end;
 
 class function TOpenTypeUkrainianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Ukrainian';
+  Result := RCStrUkrainian;
 end;
 
 class function TOpenTypeUkrainianLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'UKR ';
+  Result := 'UKR ';
 end;
 
 
@@ -7573,12 +8014,12 @@ end;
 
 class function TOpenTypeUrduLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Urdu';
+  Result := RCStrUrdu;
 end;
 
 class function TOpenTypeUrduLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'URD ';
+  Result := 'URD ';
 end;
 
 
@@ -7586,12 +8027,13 @@ end;
 
 class function TOpenTypeUpperSorbianLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Upper Sorbian';
+  Result := RCStrUpperSorbian;
 end;
 
-class function TOpenTypeUpperSorbianLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeUpperSorbianLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'USB ';
+  Result := 'USB ';
 end;
 
 
@@ -7599,12 +8041,12 @@ end;
 
 class function TOpenTypeUyghurLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Uyghur';
+  Result := RCStrUyghur;
 end;
 
 class function TOpenTypeUyghurLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'UYG ';
+  Result := 'UYG ';
 end;
 
 
@@ -7612,12 +8054,12 @@ end;
 
 class function TOpenTypeUzbekLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Uzbek';
+  Result := RCStrUzbek;
 end;
 
 class function TOpenTypeUzbekLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'UZB ';
+  Result := 'UZB ';
 end;
 
 
@@ -7625,12 +8067,12 @@ end;
 
 class function TOpenTypeVendaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Venda';
+  Result := RCStrVenda;
 end;
 
 class function TOpenTypeVendaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'VEN ';
+  Result := 'VEN ';
 end;
 
 
@@ -7638,12 +8080,12 @@ end;
 
 class function TOpenTypeVietnameseLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Vietnamese';
+  Result := RCStrVietnamese;
 end;
 
 class function TOpenTypeVietnameseLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'VIT ';
+  Result := 'VIT ';
 end;
 
 
@@ -7651,12 +8093,12 @@ end;
 
 class function TOpenTypeWaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Wa';
+  Result := RCStrWa;
 end;
 
 class function TOpenTypeWaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'WA  ';
+  Result := 'WA  ';
 end;
 
 
@@ -7664,12 +8106,12 @@ end;
 
 class function TOpenTypeWagdiLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Wagdi';
+  Result := RCStrWagdi;
 end;
 
 class function TOpenTypeWagdiLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'WAG ';
+  Result := 'WAG ';
 end;
 
 
@@ -7677,12 +8119,12 @@ end;
 
 class function TOpenTypeWestCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'West-Cree';
+  Result := RCStrWestCree;
 end;
 
 class function TOpenTypeWestCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'WCR ';
+  Result := 'WCR ';
 end;
 
 
@@ -7690,12 +8132,12 @@ end;
 
 class function TOpenTypeWelshLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Welsh';
+  Result := RCStrWelsh;
 end;
 
 class function TOpenTypeWelshLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'WEL ';
+  Result := 'WEL ';
 end;
 
 
@@ -7703,12 +8145,12 @@ end;
 
 class function TOpenTypeWolofLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Wolof';
+  Result := RCStrWolof;
 end;
 
 class function TOpenTypeWolofLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'WLF ';
+  Result := 'WLF ';
 end;
 
 
@@ -7716,12 +8158,12 @@ end;
 
 class function TOpenTypeTaiLueLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Tai Lue';
+  Result := RCStrTaiLue;
 end;
 
 class function TOpenTypeTaiLueLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'XBD ';
+  Result := 'XBD ';
 end;
 
 
@@ -7729,12 +8171,12 @@ end;
 
 class function TOpenTypeXhosaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Xhosa';
+  Result := RCStrXhosa;
 end;
 
 class function TOpenTypeXhosaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'XHS ';
+  Result := 'XHS ';
 end;
 
 
@@ -7742,12 +8184,12 @@ end;
 
 class function TOpenTypeYakutLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Yakut';
+  Result := RCStrYakut;
 end;
 
 class function TOpenTypeYakutLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'YAK ';
+  Result := 'YAK ';
 end;
 
 
@@ -7755,12 +8197,12 @@ end;
 
 class function TOpenTypeYorubaLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Yoruba';
+  Result := RCStrYoruba;
 end;
 
 class function TOpenTypeYorubaLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'YBA ';
+  Result := 'YBA ';
 end;
 
 
@@ -7768,12 +8210,12 @@ end;
 
 class function TOpenTypeYCreeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Y-Cree';
+  Result := RCStrYCree;
 end;
 
 class function TOpenTypeYCreeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'YCR ';
+  Result := 'YCR ';
 end;
 
 
@@ -7781,12 +8223,12 @@ end;
 
 class function TOpenTypeYiClassicLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Yi Classic';
+  Result := RCStrYiClassic;
 end;
 
 class function TOpenTypeYiClassicLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'YI  ';
+  Result := 'YI  ';
 end;
 
 
@@ -7794,64 +8236,72 @@ end;
 
 class function TOpenTypeYiModernLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Yi Modern';
+  Result := RCStrYiModern;
 end;
 
 class function TOpenTypeYiModernLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'YIM ';
+  Result := 'YIM ';
 end;
 
 
 { TOpenTypeChineseHongKongLanguageSystemTable }
 
-class function TOpenTypeChineseHongKongLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeChineseHongKongLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Chinese Hong Kong';
+  Result := RCStrChineseHongKong;
 end;
 
-class function TOpenTypeChineseHongKongLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeChineseHongKongLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'ZHH ';
+  Result := 'ZHH ';
 end;
 
 
 { TOpenTypeChinesePhoneticLanguageSystemTable }
 
-class function TOpenTypeChinesePhoneticLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeChinesePhoneticLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Chinese Phonetic';
+  Result := RCStrChinesePhonetic;
 end;
 
-class function TOpenTypeChinesePhoneticLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeChinesePhoneticLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'ZHP ';
+  Result := 'ZHP ';
 end;
 
 
 { TOpenTypeChineseSimplifiedLanguageSystemTable }
 
-class function TOpenTypeChineseSimplifiedLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeChineseSimplifiedLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Chinese Simplified';
+  Result := RCStrChineseSimplified;
 end;
 
-class function TOpenTypeChineseSimplifiedLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeChineseSimplifiedLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'ZHS ';
+  Result := 'ZHS ';
 end;
 
 
 { TOpenTypeChineseTraditionalLanguageSystemTable }
 
-class function TOpenTypeChineseTraditionalLanguageSystemTable.GetDisplayName: string;
+class function TOpenTypeChineseTraditionalLanguageSystemTable.
+  GetDisplayName: string;
 begin
- Result := 'Chinese Traditional';
+  Result := RCStrChineseTraditional;
 end;
 
-class function TOpenTypeChineseTraditionalLanguageSystemTable.GetTableType: TTableType;
+class function TOpenTypeChineseTraditionalLanguageSystemTable.GetTableType
+  : TTableType;
 begin
- Result := 'ZHT ';
+  Result := 'ZHT ';
 end;
 
 
@@ -7859,12 +8309,12 @@ end;
 
 class function TOpenTypeZandeLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Zande';
+  Result := RCStrZande;
 end;
 
 class function TOpenTypeZandeLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ZND ';
+  Result := 'ZND ';
 end;
 
 
@@ -7872,239 +8322,226 @@ end;
 
 class function TOpenTypeZuluLanguageSystemTable.GetDisplayName: string;
 begin
- Result := 'Zulu';
+  Result := RCStrZulu;
 end;
 
 class function TOpenTypeZuluLanguageSystemTable.GetTableType: TTableType;
 begin
- Result := 'ZUL ';
+  Result := 'ZUL ';
 end;
 
-
 initialization
-  RegisterLanguageSystems([TOpenTypeAbazaLanguageSystemTable, 
-    TOpenTypeAbkhazianLanguageSystemTable, TOpenTypeAdygheLanguageSystemTable,
-    TOpenTypeAfrikaansLanguageSystemTable, TOpenTypeAfarLanguageSystemTable,
-    TOpenTypeAgawLanguageSystemTable, TOpenTypeAlsatianLanguageSystemTable,
-    TOpenTypeAltaiLanguageSystemTable, TOpenTypeAmharicLanguageSystemTable,
-    TOpenTypePhoneticTranscriptionAmericanistConventionsLanguageSystemTable,
-    TOpenTypeArabicLanguageSystemTable, TOpenTypeAariLanguageSystemTable,
-    TOpenTypeArakaneseLanguageSystemTable, TOpenTypeAssameseLanguageSystemTable,
-    TOpenTypeAthapaskanLanguageSystemTable, TOpenTypeAvarLanguageSystemTable,
-    TOpenTypeAwadhiLanguageSystemTable, TOpenTypeAymaraLanguageSystemTable,
-    TOpenTypeAzeriLanguageSystemTable, TOpenTypeBadagaLanguageSystemTable,
-    TOpenTypeBaghelkhandiLanguageSystemTable,
-    TOpenTypeBalkarLanguageSystemTable, TOpenTypeBauleLanguageSystemTable,
-    TOpenTypeBerberLanguageSystemTable, TOpenTypeBenchLanguageSystemTable,
-    TOpenTypeBibleCreeLanguageSystemTable,
-    TOpenTypeBelarussianLanguageSystemTable, TOpenTypeBembaLanguageSystemTable,
-    TOpenTypeBengaliLanguageSystemTable, TOpenTypeBulgarianLanguageSystemTable,
-    TOpenTypeBhiliLanguageSystemTable, TOpenTypeBhojpuriLanguageSystemTable,
-    TOpenTypeBikolLanguageSystemTable, TOpenTypeBilenLanguageSystemTable,
-    TOpenTypeBlackfootLanguageSystemTable, TOpenTypeBalochiLanguageSystemTable,
-    TOpenTypeBalanteLanguageSystemTable, TOpenTypeBaltiLanguageSystemTable,
-    TOpenTypeBambaraLanguageSystemTable, TOpenTypeBamilekeLanguageSystemTable,
-    TOpenTypeBosnianLanguageSystemTable, TOpenTypeBretonLanguageSystemTable,
-    TOpenTypeBrahuiLanguageSystemTable, TOpenTypeBrajBhashaLanguageSystemTable,
-    TOpenTypeBurmeseLanguageSystemTable, TOpenTypeBashkirLanguageSystemTable,
-    TOpenTypeBetiLanguageSystemTable, TOpenTypeCatalanLanguageSystemTable,
-    TOpenTypeCebuanoLanguageSystemTable, TOpenTypeChechenLanguageSystemTable,
-    TOpenTypeChahaGurageLanguageSystemTable,
-    TOpenTypeChattisgarhiLanguageSystemTable,
-    TOpenTypeChichewaLanguageSystemTable, TOpenTypeChukchiLanguageSystemTable,
-    TOpenTypeChipewyanLanguageSystemTable,
-    TOpenTypeCherokeeLanguageSystemTable, TOpenTypeChuvashLanguageSystemTable,
-    TOpenTypeComorianLanguageSystemTable, TOpenTypeCopticLanguageSystemTable,
-    TOpenTypeCorsicanLanguageSystemTable, TOpenTypeCreeLanguageSystemTable,
-    TOpenTypeCarrierLanguageSystemTable,
-    TOpenTypeCrimeanTatarLanguageSystemTable,
-    TOpenTypeChurchSlavonicLanguageSystemTable,
-    TOpenTypeCzechLanguageSystemTable, TOpenTypeDanishLanguageSystemTable,
-    TOpenTypeDargwaLanguageSystemTable, TOpenTypeWoodsCreeLanguageSystemTable,
-    TOpenTypeGermanLanguageSystemTable, TOpenTypeDogriLanguageSystemTable,
-    TOpenTypeDhivehiLanguageSystemTable,
-    TOpenTypeDhivehiDeprecatedLanguageSystemTable,
-    TOpenTypeDjermaLanguageSystemTable, TOpenTypeDangmeLanguageSystemTable,
-    TOpenTypeDinkaLanguageSystemTable, TOpenTypeDariLanguageSystemTable,
-    TOpenTypeDunganLanguageSystemTable, TOpenTypeDzongkhaLanguageSystemTable,
-    TOpenTypeEbiraLanguageSystemTable, TOpenTypeEasternCreeLanguageSystemTable,
-    TOpenTypeEdoLanguageSystemTable, TOpenTypeEfikLanguageSystemTable,
-    TOpenTypeGreekLanguageSystemTable, TOpenTypeEnglishLanguageSystemTable,
-    TOpenTypeErzyaLanguageSystemTable, TOpenTypeSpanishLanguageSystemTable,
-    TOpenTypeEstonianLanguageSystemTable, TOpenTypeBasqueLanguageSystemTable,
-    TOpenTypeEvenkiLanguageSystemTable, TOpenTypeEvenLanguageSystemTable,
-    TOpenTypeEweLanguageSystemTable,
-    TOpenTypeFrenchAntilleanLanguageSystemTable,
-    TOpenTypeFarsiLanguageSystemTable, TOpenTypeFinnishLanguageSystemTable,
-    TOpenTypeFijianLanguageSystemTable, TOpenTypeFlemishLanguageSystemTable,
-    TOpenTypeForestNenetsLanguageSystemTable,
-    TOpenTypeFonLanguageSystemTable, TOpenTypeFaroeseLanguageSystemTable,
-    TOpenTypeFrenchLanguageSystemTable, TOpenTypeFrisianLanguageSystemTable,
-    TOpenTypeFriulianLanguageSystemTable, TOpenTypeFutaLanguageSystemTable,
-    TOpenTypeFulaniLanguageSystemTable, TOpenTypeGaLanguageSystemTable,
-    TOpenTypeGaelicLanguageSystemTable, TOpenTypeGagauzLanguageSystemTable,
-    TOpenTypeGalicianLanguageSystemTable, TOpenTypeGarshuniLanguageSystemTable,
-    TOpenTypeGarhwaliLanguageSystemTable, TOpenTypeGeEzLanguageSystemTable,
-    TOpenTypeGilyakLanguageSystemTable, TOpenTypeGumuzLanguageSystemTable,
-    TOpenTypeGondiLanguageSystemTable, TOpenTypeGreenlandicLanguageSystemTable,
-    TOpenTypeGaroLanguageSystemTable, TOpenTypeGuaraniLanguageSystemTable,
-    TOpenTypeGujaratiLanguageSystemTable, TOpenTypeHaitianLanguageSystemTable,
-    TOpenTypeHalamLanguageSystemTable, TOpenTypeHarautiLanguageSystemTable,
-    TOpenTypeHausaLanguageSystemTable,  TOpenTypeHawaiinLanguageSystemTable,
-    TOpenTypeHammerBannaLanguageSystemTable,
-    TOpenTypeHiligaynonLanguageSystemTable, TOpenTypeHindiLanguageSystemTable,
-    TOpenTypeHighMariLanguageSystemTable, TOpenTypeHindkoLanguageSystemTable,
-    TOpenTypeHoLanguageSystemTable, TOpenTypeHarariLanguageSystemTable,
-    TOpenTypeCroatianLanguageSystemTable, TOpenTypeHungarianLanguageSystemTable,
-    TOpenTypeArmenianLanguageSystemTable, TOpenTypeIgboLanguageSystemTable,
-    TOpenTypeIjoLanguageSystemTable, TOpenTypeIlokanoLanguageSystemTable,
-    TOpenTypeIndonesianLanguageSystemTable, TOpenTypeIngushLanguageSystemTable,
-    TOpenTypeInuktitutLanguageSystemTable,
-    TOpenTypePhoneticTranscriptionLanguageSystemTable,
-    TOpenTypeIrishLanguageSystemTable,
-    TOpenTypeIrishTraditionalLanguageSystemTable,
-    TOpenTypeIcelandicLanguageSystemTable,
-    TOpenTypeInariSamiLanguageSystemTable, TOpenTypeItalianLanguageSystemTable,
-    TOpenTypeHebrewLanguageSystemTable, TOpenTypeJavaneseLanguageSystemTable,
-    TOpenTypeYiddishLanguageSystemTable, TOpenTypeJapaneseLanguageSystemTable,
-    TOpenTypeJudezmoLanguageSystemTable, TOpenTypeJulaLanguageSystemTable,
-    TOpenTypeKabardianLanguageSystemTable, TOpenTypeKachchiLanguageSystemTable,
-    TOpenTypeKalenjinLanguageSystemTable, TOpenTypeKannadaLanguageSystemTable,
-    TOpenTypeKarachayLanguageSystemTable, TOpenTypeGeorgianLanguageSystemTable,
-    TOpenTypeKazakhLanguageSystemTable, TOpenTypeKebenaLanguageSystemTable,
-    TOpenTypeKhutsuriGeorgianLanguageSystemTable,
-    TOpenTypeKhakassLanguageSystemTable,
-    TOpenTypeKhantyKazimLanguageSystemTable, TOpenTypeKhmerLanguageSystemTable,
-    TOpenTypeKhantyShurishkarLanguageSystemTable,
-    TOpenTypeKhantyVakhiLanguageSystemTable, TOpenTypeKhowarLanguageSystemTable,
-    TOpenTypeKikuyuLanguageSystemTable, TOpenTypeKirghizLanguageSystemTable,
-    TOpenTypeKisiiLanguageSystemTable, TOpenTypeKokniLanguageSystemTable,
-    TOpenTypeKalmykLanguageSystemTable, TOpenTypeKambaLanguageSystemTable,
-    TOpenTypeKumaoniLanguageSystemTable, TOpenTypeKomoLanguageSystemTable,
-    TOpenTypeKomsoLanguageSystemTable, TOpenTypeKanuriLanguageSystemTable,
-    TOpenTypeKodaguLanguageSystemTable,
-    TOpenTypeKoreanOldHangulLanguageSystemTable,
-    TOpenTypeKonkaniLanguageSystemTable, TOpenTypeKikongoLanguageSystemTable,
-    TOpenTypeKomiPermyakLanguageSystemTable,
-    TOpenTypeKoreanLanguageSystemTable, TOpenTypeKomiZyrianLanguageSystemTable,
-    TOpenTypeKpelleLanguageSystemTable, TOpenTypeKrioLanguageSystemTable,
-    TOpenTypeKarakalpakLanguageSystemTable,
-    TOpenTypeKarelianLanguageSystemTable, TOpenTypeKaraimLanguageSystemTable,
-    TOpenTypeKarenLanguageSystemTable, TOpenTypeKooreteLanguageSystemTable,
-    TOpenTypeKashmiriLanguageSystemTable, TOpenTypeKhasiLanguageSystemTable,
-    TOpenTypeKildinSamiLanguageSystemTable, TOpenTypeKuiLanguageSystemTable,
-    TOpenTypeKulviLanguageSystemTable, TOpenTypeKumykLanguageSystemTable,
-    TOpenTypeKurdishLanguageSystemTable, TOpenTypeKurukhLanguageSystemTable,
-    TOpenTypeKuyLanguageSystemTable, TOpenTypeKoryakLanguageSystemTable,
-    TOpenTypeLadinLanguageSystemTable, TOpenTypeLahuliLanguageSystemTable,
-    TOpenTypeLakLanguageSystemTable, TOpenTypeLambaniLanguageSystemTable,
-    TOpenTypeLaoLanguageSystemTable, TOpenTypeLatinLanguageSystemTable,
-    TOpenTypeLazLanguageSystemTable, TOpenTypeLCreeLanguageSystemTable,
-    TOpenTypeLadakhiLanguageSystemTable, TOpenTypeLezgiLanguageSystemTable,
-    TOpenTypeLingalaLanguageSystemTable, TOpenTypeLowMariLanguageSystemTable,
-    TOpenTypeLimbuLanguageSystemTable, TOpenTypeLomweLanguageSystemTable,
-    TOpenTypeLowerSorbianLanguageSystemTable,
-    TOpenTypeLuleSamiLanguageSystemTable,
-    TOpenTypeLithuanianLanguageSystemTable,
-    TOpenTypeLuxembourgishLanguageSystemTable,
-    TOpenTypeLubaLanguageSystemTable, TOpenTypeLugandaLanguageSystemTable,
-    TOpenTypeLuhyaLanguageSystemTable, TOpenTypeLuoLanguageSystemTable,
-    TOpenTypeLatvianLanguageSystemTable, TOpenTypeMajangLanguageSystemTable,
-    TOpenTypeMakuaLanguageSystemTable,
-    TOpenTypeMalayalamTraditionalLanguageSystemTable,
-    TOpenTypeMansiLanguageSystemTable, TOpenTypeMapudungunLanguageSystemTable,
-    TOpenTypeMarathiLanguageSystemTable, TOpenTypeMarwariLanguageSystemTable,
-    TOpenTypeMbunduLanguageSystemTable, TOpenTypeManchuLanguageSystemTable,
-    TOpenTypeMooseCreeLanguageSystemTable, TOpenTypeMendeLanguageSystemTable,
-    TOpenTypeMeEnLanguageSystemTable, TOpenTypeMizoLanguageSystemTable,
-    TOpenTypeMacedonianLanguageSystemTable, TOpenTypeMaleLanguageSystemTable,
-    TOpenTypeMalagasyLanguageSystemTable, TOpenTypeMalinkeLanguageSystemTable,
-    TOpenTypeMalayalamReformedLanguageSystemTable,
-    TOpenTypeMalayLanguageSystemTable, TOpenTypeMandinkaLanguageSystemTable,
-    TOpenTypeMongolianLanguageSystemTable, TOpenTypeManipuriLanguageSystemTable,
-    TOpenTypeManinkaLanguageSystemTable, TOpenTypeManxGaelicLanguageSystemTable,
-    TOpenTypeMohawkLanguageSystemTable, TOpenTypeMokshaLanguageSystemTable,
-    TOpenTypeMoldavianLanguageSystemTable, TOpenTypeMonLanguageSystemTable,
-    TOpenTypeMoroccanLanguageSystemTable, TOpenTypeMaoriLanguageSystemTable,
-    TOpenTypeMaithiliLanguageSystemTable, TOpenTypeMalteseLanguageSystemTable,
-    TOpenTypeMundariLanguageSystemTable,
-    TOpenTypeNagaAssameseLanguageSystemTable,
-    TOpenTypeNanaiLanguageSystemTable, TOpenTypeNaskapiLanguageSystemTable,
-    TOpenTypeNLanguageSystemTable, TOpenTypeNdebeleLanguageSystemTable,
-    TOpenTypeNdongaLanguageSystemTable, TOpenTypeNepaliLanguageSystemTable,
-    TOpenTypeNewariLanguageSystemTable, TOpenTypeNagariLanguageSystemTable,
-    TOpenTypeNorwayHouseCreeLanguageSystemTable,
-    TOpenTypeNisiLanguageSystemTable, TOpenTypeNiueanLanguageSystemTable,
-    TOpenTypeNkoleLanguageSystemTable, TOpenTypeNKoLanguageSystemTable,
-    TOpenTypeDutchLanguageSystemTable, TOpenTypeNogaiLanguageSystemTable,
-    TOpenTypeNorwegianLanguageSystemTable,
-    TOpenTypeNorthernSamiLanguageSystemTable,
-    TOpenTypeNorthernTaiLanguageSystemTable,
-    TOpenTypeEsperantoLanguageSystemTable, TOpenTypeNynorskLanguageSystemTable,
-    TOpenTypeOccitanLanguageSystemTable, TOpenTypeOjiCreeLanguageSystemTable,
-    TOpenTypeOjibwayLanguageSystemTable, TOpenTypeOriyaLanguageSystemTable,
-    TOpenTypeOromoLanguageSystemTable, TOpenTypeOssetianLanguageSystemTable,
-    TOpenTypePalestinianAramaicLanguageSystemTable,
-    TOpenTypePaliLanguageSystemTable, TOpenTypePunjabiLanguageSystemTable,
-    TOpenTypePalpaLanguageSystemTable, TOpenTypePashtoLanguageSystemTable,
-    TOpenTypePolytonicGreekLanguageSystemTable,
-    TOpenTypeFilipinoLanguageSystemTable, TOpenTypePalaungLanguageSystemTable,
-    TOpenTypePolishLanguageSystemTable, TOpenTypeProvencalLanguageSystemTable,
-    TOpenTypePortugueseLanguageSystemTable, TOpenTypeChinLanguageSystemTable,
-    TOpenTypeRajasthaniLanguageSystemTable, TOpenTypeRCreeLanguageSystemTable,
-    TOpenTypeRussianBuriatLanguageSystemTable,
-    TOpenTypeRiangLanguageSystemTable,
-    TOpenTypeRhaetoRomanicLanguageSystemTable,
-    TOpenTypeRomanianLanguageSystemTable, TOpenTypeRomanyLanguageSystemTable,
-    TOpenTypeRusynLanguageSystemTable, TOpenTypeRuandaLanguageSystemTable,
-    TOpenTypeRussianLanguageSystemTable, TOpenTypeSadriLanguageSystemTable,
-    TOpenTypeSanskritLanguageSystemTable, TOpenTypeSantaliLanguageSystemTable,
-    TOpenTypeSayisiLanguageSystemTable, TOpenTypeSekotaLanguageSystemTable,
-    TOpenTypeSelkupLanguageSystemTable, TOpenTypeSangoLanguageSystemTable,
-    TOpenTypeShanLanguageSystemTable, TOpenTypeSibeLanguageSystemTable,
-    TOpenTypeSidamoLanguageSystemTable, TOpenTypeSilteGurageLanguageSystemTable,
-    TOpenTypeSkoltSamiLanguageSystemTable, TOpenTypeSlovakLanguageSystemTable,
-    TOpenTypeSlaveyLanguageSystemTable, TOpenTypeSlovenianLanguageSystemTable,
-    TOpenTypeSomaliLanguageSystemTable, TOpenTypeSamoanLanguageSystemTable,
-    TOpenTypeSenaLanguageSystemTable, TOpenTypeSindhiLanguageSystemTable,
-    TOpenTypeSinhaleseLanguageSystemTable, TOpenTypeSoninkeLanguageSystemTable,
-    TOpenTypeSodoGurageLanguageSystemTable, TOpenTypeSothoLanguageSystemTable,
-    TOpenTypeAlbanianLanguageSystemTable, TOpenTypeSerbianLanguageSystemTable,
-    TOpenTypeSaraikiLanguageSystemTable, TOpenTypeSererLanguageSystemTable,
-    TOpenTypeSouthSlaveyLanguageSystemTable,
-    TOpenTypeSouthernSamiLanguageSystemTable,
-    TOpenTypeSuriLanguageSystemTable, TOpenTypeSvanLanguageSystemTable,
-    TOpenTypeSwedishLanguageSystemTable,
-    TOpenTypeSwadayaAramaicLanguageSystemTable,
-    TOpenTypeSwahiliLanguageSystemTable, TOpenTypeSwaziLanguageSystemTable,
-    TOpenTypeSutuLanguageSystemTable, TOpenTypeSyriacLanguageSystemTable,
-    TOpenTypeTabasaranLanguageSystemTable, TOpenTypeTajikiLanguageSystemTable,
-    TOpenTypeTamilLanguageSystemTable, TOpenTypeTatarLanguageSystemTable,
-    TOpenTypeTHCreeLanguageSystemTable, TOpenTypeTeluguLanguageSystemTable,
-    TOpenTypeTonganLanguageSystemTable, TOpenTypeTigreLanguageSystemTable,
-    TOpenTypeTigrinyaLanguageSystemTable, TOpenTypeThaiLanguageSystemTable,
-    TOpenTypeTahitianLanguageSystemTable, TOpenTypeTibetanLanguageSystemTable,
-    TOpenTypeTurkmenLanguageSystemTable, TOpenTypeTemneLanguageSystemTable,
-    TOpenTypeTswanaLanguageSystemTable,
-    TOpenTypeTundraNenetsLanguageSystemTable, TOpenTypeTongaLanguageSystemTable,
-    TOpenTypeTodoLanguageSystemTable, TOpenTypeTurkishLanguageSystemTable,
-    TOpenTypeTsongaLanguageSystemTable,
-    TOpenTypeTuroyoAramaicLanguageSystemTable, TOpenTypeTuluLanguageSystemTable,
-    TOpenTypeTuvinLanguageSystemTable, TOpenTypeTwiLanguageSystemTable,
-    TOpenTypeUdmurtLanguageSystemTable, TOpenTypeUkrainianLanguageSystemTable,
-    TOpenTypeUrduLanguageSystemTable, TOpenTypeUpperSorbianLanguageSystemTable,
-    TOpenTypeUyghurLanguageSystemTable, TOpenTypeUzbekLanguageSystemTable,
-    TOpenTypeVendaLanguageSystemTable, TOpenTypeVietnameseLanguageSystemTable,
-    TOpenTypeWaLanguageSystemTable, TOpenTypeWagdiLanguageSystemTable,
-    TOpenTypeWestCreeLanguageSystemTable, TOpenTypeWelshLanguageSystemTable,
-    TOpenTypeWolofLanguageSystemTable, TOpenTypeTaiLueLanguageSystemTable,
-    TOpenTypeXhosaLanguageSystemTable, TOpenTypeYakutLanguageSystemTable,
-    TOpenTypeYorubaLanguageSystemTable, TOpenTypeYCreeLanguageSystemTable,
-    TOpenTypeYiClassicLanguageSystemTable, TOpenTypeYiModernLanguageSystemTable,
-    TOpenTypeChineseHongKongLanguageSystemTable,
-    TOpenTypeChinesePhoneticLanguageSystemTable,
-    TOpenTypeChineseSimplifiedLanguageSystemTable,
-    TOpenTypeChineseTraditionalLanguageSystemTable,
-    TOpenTypeZandeLanguageSystemTable, TOpenTypeZuluLanguageSystemTable]);
+
+RegisterLanguageSystems([TOpenTypeAbazaLanguageSystemTable,
+  TOpenTypeAbkhazianLanguageSystemTable, TOpenTypeAdygheLanguageSystemTable,
+  TOpenTypeAfrikaansLanguageSystemTable, TOpenTypeAfarLanguageSystemTable,
+  TOpenTypeAgawLanguageSystemTable, TOpenTypeAlsatianLanguageSystemTable,
+  TOpenTypeAltaiLanguageSystemTable, TOpenTypeAmharicLanguageSystemTable,
+  TOpenTypePhoneticTranscriptionAmericanistConventionsLanguageSystemTable,
+  TOpenTypeArabicLanguageSystemTable, TOpenTypeAariLanguageSystemTable,
+  TOpenTypeArakaneseLanguageSystemTable, TOpenTypeAssameseLanguageSystemTable,
+  TOpenTypeAthapaskanLanguageSystemTable, TOpenTypeAvarLanguageSystemTable,
+  TOpenTypeAwadhiLanguageSystemTable, TOpenTypeAymaraLanguageSystemTable,
+  TOpenTypeAzeriLanguageSystemTable, TOpenTypeBadagaLanguageSystemTable,
+  TOpenTypeBaghelkhandiLanguageSystemTable, TOpenTypeBalkarLanguageSystemTable,
+  TOpenTypeBauleLanguageSystemTable, TOpenTypeBerberLanguageSystemTable,
+  TOpenTypeBenchLanguageSystemTable, TOpenTypeBibleCreeLanguageSystemTable,
+  TOpenTypeBelarussianLanguageSystemTable, TOpenTypeBembaLanguageSystemTable,
+  TOpenTypeBengaliLanguageSystemTable, TOpenTypeBulgarianLanguageSystemTable,
+  TOpenTypeBhiliLanguageSystemTable, TOpenTypeBhojpuriLanguageSystemTable,
+  TOpenTypeBikolLanguageSystemTable, TOpenTypeBilenLanguageSystemTable,
+  TOpenTypeBlackfootLanguageSystemTable, TOpenTypeBalochiLanguageSystemTable,
+  TOpenTypeBalanteLanguageSystemTable, TOpenTypeBaltiLanguageSystemTable,
+  TOpenTypeBambaraLanguageSystemTable, TOpenTypeBamilekeLanguageSystemTable,
+  TOpenTypeBosnianLanguageSystemTable, TOpenTypeBretonLanguageSystemTable,
+  TOpenTypeBrahuiLanguageSystemTable, TOpenTypeBrajBhashaLanguageSystemTable,
+  TOpenTypeBurmeseLanguageSystemTable, TOpenTypeBashkirLanguageSystemTable,
+  TOpenTypeBetiLanguageSystemTable, TOpenTypeCatalanLanguageSystemTable,
+  TOpenTypeCebuanoLanguageSystemTable, TOpenTypeChechenLanguageSystemTable,
+  TOpenTypeChahaGurageLanguageSystemTable,
+  TOpenTypeChattisgarhiLanguageSystemTable,
+  TOpenTypeChichewaLanguageSystemTable, TOpenTypeChukchiLanguageSystemTable,
+  TOpenTypeChipewyanLanguageSystemTable, TOpenTypeCherokeeLanguageSystemTable,
+  TOpenTypeChuvashLanguageSystemTable, TOpenTypeComorianLanguageSystemTable,
+  TOpenTypeCopticLanguageSystemTable, TOpenTypeCorsicanLanguageSystemTable,
+  TOpenTypeCreeLanguageSystemTable, TOpenTypeCarrierLanguageSystemTable,
+  TOpenTypeCrimeanTatarLanguageSystemTable,
+  TOpenTypeChurchSlavonicLanguageSystemTable, TOpenTypeCzechLanguageSystemTable,
+  TOpenTypeDanishLanguageSystemTable, TOpenTypeDargwaLanguageSystemTable,
+  TOpenTypeWoodsCreeLanguageSystemTable, TOpenTypeGermanLanguageSystemTable,
+  TOpenTypeDogriLanguageSystemTable, TOpenTypeDhivehiLanguageSystemTable,
+  TOpenTypeDhivehiDeprecatedLanguageSystemTable,
+  TOpenTypeDjermaLanguageSystemTable, TOpenTypeDangmeLanguageSystemTable,
+  TOpenTypeDinkaLanguageSystemTable, TOpenTypeDariLanguageSystemTable,
+  TOpenTypeDunganLanguageSystemTable, TOpenTypeDzongkhaLanguageSystemTable,
+  TOpenTypeEbiraLanguageSystemTable, TOpenTypeEasternCreeLanguageSystemTable,
+  TOpenTypeEdoLanguageSystemTable, TOpenTypeEfikLanguageSystemTable,
+  TOpenTypeGreekLanguageSystemTable, TOpenTypeEnglishLanguageSystemTable,
+  TOpenTypeErzyaLanguageSystemTable, TOpenTypeSpanishLanguageSystemTable,
+  TOpenTypeEstonianLanguageSystemTable, TOpenTypeBasqueLanguageSystemTable,
+  TOpenTypeEvenkiLanguageSystemTable, TOpenTypeEvenLanguageSystemTable,
+  TOpenTypeEweLanguageSystemTable, TOpenTypeFrenchAntilleanLanguageSystemTable,
+  TOpenTypeFarsiLanguageSystemTable, TOpenTypeFinnishLanguageSystemTable,
+  TOpenTypeFijianLanguageSystemTable, TOpenTypeFlemishLanguageSystemTable,
+  TOpenTypeForestNenetsLanguageSystemTable, TOpenTypeFonLanguageSystemTable,
+  TOpenTypeFaroeseLanguageSystemTable, TOpenTypeFrenchLanguageSystemTable,
+  TOpenTypeFrisianLanguageSystemTable, TOpenTypeFriulianLanguageSystemTable,
+  TOpenTypeFutaLanguageSystemTable, TOpenTypeFulaniLanguageSystemTable,
+  TOpenTypeGaLanguageSystemTable, TOpenTypeGaelicLanguageSystemTable,
+  TOpenTypeGagauzLanguageSystemTable, TOpenTypeGalicianLanguageSystemTable,
+  TOpenTypeGarshuniLanguageSystemTable, TOpenTypeGarhwaliLanguageSystemTable,
+  TOpenTypeGeEzLanguageSystemTable, TOpenTypeGilyakLanguageSystemTable,
+  TOpenTypeGumuzLanguageSystemTable, TOpenTypeGondiLanguageSystemTable,
+  TOpenTypeGreenlandicLanguageSystemTable, TOpenTypeGaroLanguageSystemTable,
+  TOpenTypeGuaraniLanguageSystemTable, TOpenTypeGujaratiLanguageSystemTable,
+  TOpenTypeHaitianLanguageSystemTable, TOpenTypeHalamLanguageSystemTable,
+  TOpenTypeHarautiLanguageSystemTable, TOpenTypeHausaLanguageSystemTable,
+  TOpenTypeHawaiinLanguageSystemTable, TOpenTypeHammerBannaLanguageSystemTable,
+  TOpenTypeHiligaynonLanguageSystemTable, TOpenTypeHindiLanguageSystemTable,
+  TOpenTypeHighMariLanguageSystemTable, TOpenTypeHindkoLanguageSystemTable,
+  TOpenTypeHoLanguageSystemTable, TOpenTypeHarariLanguageSystemTable,
+  TOpenTypeCroatianLanguageSystemTable, TOpenTypeHungarianLanguageSystemTable,
+  TOpenTypeArmenianLanguageSystemTable, TOpenTypeIgboLanguageSystemTable,
+  TOpenTypeIjoLanguageSystemTable, TOpenTypeIlokanoLanguageSystemTable,
+  TOpenTypeIndonesianLanguageSystemTable, TOpenTypeIngushLanguageSystemTable,
+  TOpenTypeInuktitutLanguageSystemTable,
+  TOpenTypePhoneticTranscriptionLanguageSystemTable,
+  TOpenTypeIrishLanguageSystemTable,
+  TOpenTypeIrishTraditionalLanguageSystemTable,
+  TOpenTypeIcelandicLanguageSystemTable, TOpenTypeInariSamiLanguageSystemTable,
+  TOpenTypeItalianLanguageSystemTable, TOpenTypeHebrewLanguageSystemTable,
+  TOpenTypeJavaneseLanguageSystemTable, TOpenTypeYiddishLanguageSystemTable,
+  TOpenTypeJapaneseLanguageSystemTable, TOpenTypeJudezmoLanguageSystemTable,
+  TOpenTypeJulaLanguageSystemTable, TOpenTypeKabardianLanguageSystemTable,
+  TOpenTypeKachchiLanguageSystemTable, TOpenTypeKalenjinLanguageSystemTable,
+  TOpenTypeKannadaLanguageSystemTable, TOpenTypeKarachayLanguageSystemTable,
+  TOpenTypeGeorgianLanguageSystemTable, TOpenTypeKazakhLanguageSystemTable,
+  TOpenTypeKebenaLanguageSystemTable,
+  TOpenTypeKhutsuriGeorgianLanguageSystemTable,
+  TOpenTypeKhakassLanguageSystemTable, TOpenTypeKhantyKazimLanguageSystemTable,
+  TOpenTypeKhmerLanguageSystemTable,
+  TOpenTypeKhantyShurishkarLanguageSystemTable,
+  TOpenTypeKhantyVakhiLanguageSystemTable, TOpenTypeKhowarLanguageSystemTable,
+  TOpenTypeKikuyuLanguageSystemTable, TOpenTypeKirghizLanguageSystemTable,
+  TOpenTypeKisiiLanguageSystemTable, TOpenTypeKokniLanguageSystemTable,
+  TOpenTypeKalmykLanguageSystemTable, TOpenTypeKambaLanguageSystemTable,
+  TOpenTypeKumaoniLanguageSystemTable, TOpenTypeKomoLanguageSystemTable,
+  TOpenTypeKomsoLanguageSystemTable, TOpenTypeKanuriLanguageSystemTable,
+  TOpenTypeKodaguLanguageSystemTable,
+  TOpenTypeKoreanOldHangulLanguageSystemTable,
+  TOpenTypeKonkaniLanguageSystemTable, TOpenTypeKikongoLanguageSystemTable,
+  TOpenTypeKomiPermyakLanguageSystemTable, TOpenTypeKoreanLanguageSystemTable,
+  TOpenTypeKomiZyrianLanguageSystemTable, TOpenTypeKpelleLanguageSystemTable,
+  TOpenTypeKrioLanguageSystemTable, TOpenTypeKarakalpakLanguageSystemTable,
+  TOpenTypeKarelianLanguageSystemTable, TOpenTypeKaraimLanguageSystemTable,
+  TOpenTypeKarenLanguageSystemTable, TOpenTypeKooreteLanguageSystemTable,
+  TOpenTypeKashmiriLanguageSystemTable, TOpenTypeKhasiLanguageSystemTable,
+  TOpenTypeKildinSamiLanguageSystemTable, TOpenTypeKuiLanguageSystemTable,
+  TOpenTypeKulviLanguageSystemTable, TOpenTypeKumykLanguageSystemTable,
+  TOpenTypeKurdishLanguageSystemTable, TOpenTypeKurukhLanguageSystemTable,
+  TOpenTypeKuyLanguageSystemTable, TOpenTypeKoryakLanguageSystemTable,
+  TOpenTypeLadinLanguageSystemTable, TOpenTypeLahuliLanguageSystemTable,
+  TOpenTypeLakLanguageSystemTable, TOpenTypeLambaniLanguageSystemTable,
+  TOpenTypeLaoLanguageSystemTable, TOpenTypeLatinLanguageSystemTable,
+  TOpenTypeLazLanguageSystemTable, TOpenTypeLCreeLanguageSystemTable,
+  TOpenTypeLadakhiLanguageSystemTable, TOpenTypeLezgiLanguageSystemTable,
+  TOpenTypeLingalaLanguageSystemTable, TOpenTypeLowMariLanguageSystemTable,
+  TOpenTypeLimbuLanguageSystemTable, TOpenTypeLomweLanguageSystemTable,
+  TOpenTypeLowerSorbianLanguageSystemTable,
+  TOpenTypeLuleSamiLanguageSystemTable, TOpenTypeLithuanianLanguageSystemTable,
+  TOpenTypeLuxembourgishLanguageSystemTable, TOpenTypeLubaLanguageSystemTable,
+  TOpenTypeLugandaLanguageSystemTable, TOpenTypeLuhyaLanguageSystemTable,
+  TOpenTypeLuoLanguageSystemTable, TOpenTypeLatvianLanguageSystemTable,
+  TOpenTypeMajangLanguageSystemTable, TOpenTypeMakuaLanguageSystemTable,
+  TOpenTypeMalayalamTraditionalLanguageSystemTable,
+  TOpenTypeMansiLanguageSystemTable, TOpenTypeMapudungunLanguageSystemTable,
+  TOpenTypeMarathiLanguageSystemTable, TOpenTypeMarwariLanguageSystemTable,
+  TOpenTypeMbunduLanguageSystemTable, TOpenTypeManchuLanguageSystemTable,
+  TOpenTypeMooseCreeLanguageSystemTable, TOpenTypeMendeLanguageSystemTable,
+  TOpenTypeMeEnLanguageSystemTable, TOpenTypeMizoLanguageSystemTable,
+  TOpenTypeMacedonianLanguageSystemTable, TOpenTypeMaleLanguageSystemTable,
+  TOpenTypeMalagasyLanguageSystemTable, TOpenTypeMalinkeLanguageSystemTable,
+  TOpenTypeMalayalamReformedLanguageSystemTable,
+  TOpenTypeMalayLanguageSystemTable, TOpenTypeMandinkaLanguageSystemTable,
+  TOpenTypeMongolianLanguageSystemTable, TOpenTypeManipuriLanguageSystemTable,
+  TOpenTypeManinkaLanguageSystemTable, TOpenTypeManxGaelicLanguageSystemTable,
+  TOpenTypeMohawkLanguageSystemTable, TOpenTypeMokshaLanguageSystemTable,
+  TOpenTypeMoldavianLanguageSystemTable, TOpenTypeMonLanguageSystemTable,
+  TOpenTypeMoroccanLanguageSystemTable, TOpenTypeMaoriLanguageSystemTable,
+  TOpenTypeMaithiliLanguageSystemTable, TOpenTypeMalteseLanguageSystemTable,
+  TOpenTypeMundariLanguageSystemTable, TOpenTypeNagaAssameseLanguageSystemTable,
+  TOpenTypeNanaiLanguageSystemTable, TOpenTypeNaskapiLanguageSystemTable,
+  TOpenTypeNLanguageSystemTable, TOpenTypeNdebeleLanguageSystemTable,
+  TOpenTypeNdongaLanguageSystemTable, TOpenTypeNepaliLanguageSystemTable,
+  TOpenTypeNewariLanguageSystemTable, TOpenTypeNagariLanguageSystemTable,
+  TOpenTypeNorwayHouseCreeLanguageSystemTable, TOpenTypeNisiLanguageSystemTable,
+  TOpenTypeNiueanLanguageSystemTable, TOpenTypeNkoleLanguageSystemTable,
+  TOpenTypeNKoLanguageSystemTable, TOpenTypeDutchLanguageSystemTable,
+  TOpenTypeNogaiLanguageSystemTable, TOpenTypeNorwegianLanguageSystemTable,
+  TOpenTypeNorthernSamiLanguageSystemTable,
+  TOpenTypeNorthernTaiLanguageSystemTable,
+  TOpenTypeEsperantoLanguageSystemTable, TOpenTypeNynorskLanguageSystemTable,
+  TOpenTypeOccitanLanguageSystemTable, TOpenTypeOjiCreeLanguageSystemTable,
+  TOpenTypeOjibwayLanguageSystemTable, TOpenTypeOriyaLanguageSystemTable,
+  TOpenTypeOromoLanguageSystemTable, TOpenTypeOssetianLanguageSystemTable,
+  TOpenTypePalestinianAramaicLanguageSystemTable,
+  TOpenTypePaliLanguageSystemTable, TOpenTypePunjabiLanguageSystemTable,
+  TOpenTypePalpaLanguageSystemTable, TOpenTypePashtoLanguageSystemTable,
+  TOpenTypePolytonicGreekLanguageSystemTable,
+  TOpenTypeFilipinoLanguageSystemTable, TOpenTypePalaungLanguageSystemTable,
+  TOpenTypePolishLanguageSystemTable, TOpenTypeProvencalLanguageSystemTable,
+  TOpenTypePortugueseLanguageSystemTable, TOpenTypeChinLanguageSystemTable,
+  TOpenTypeRajasthaniLanguageSystemTable, TOpenTypeRCreeLanguageSystemTable,
+  TOpenTypeRussianBuriatLanguageSystemTable, TOpenTypeRiangLanguageSystemTable,
+  TOpenTypeRhaetoRomanicLanguageSystemTable,
+  TOpenTypeRomanianLanguageSystemTable, TOpenTypeRomanyLanguageSystemTable,
+  TOpenTypeRusynLanguageSystemTable, TOpenTypeRuandaLanguageSystemTable,
+  TOpenTypeRussianLanguageSystemTable, TOpenTypeSadriLanguageSystemTable,
+  TOpenTypeSanskritLanguageSystemTable, TOpenTypeSantaliLanguageSystemTable,
+  TOpenTypeSayisiLanguageSystemTable, TOpenTypeSekotaLanguageSystemTable,
+  TOpenTypeSelkupLanguageSystemTable, TOpenTypeSangoLanguageSystemTable,
+  TOpenTypeShanLanguageSystemTable, TOpenTypeSibeLanguageSystemTable,
+  TOpenTypeSidamoLanguageSystemTable, TOpenTypeSilteGurageLanguageSystemTable,
+  TOpenTypeSkoltSamiLanguageSystemTable, TOpenTypeSlovakLanguageSystemTable,
+  TOpenTypeSlaveyLanguageSystemTable, TOpenTypeSlovenianLanguageSystemTable,
+  TOpenTypeSomaliLanguageSystemTable, TOpenTypeSamoanLanguageSystemTable,
+  TOpenTypeSenaLanguageSystemTable, TOpenTypeSindhiLanguageSystemTable,
+  TOpenTypeSinhaleseLanguageSystemTable, TOpenTypeSoninkeLanguageSystemTable,
+  TOpenTypeSodoGurageLanguageSystemTable, TOpenTypeSothoLanguageSystemTable,
+  TOpenTypeAlbanianLanguageSystemTable, TOpenTypeSerbianLanguageSystemTable,
+  TOpenTypeSaraikiLanguageSystemTable, TOpenTypeSererLanguageSystemTable,
+  TOpenTypeSouthSlaveyLanguageSystemTable,
+  TOpenTypeSouthernSamiLanguageSystemTable, TOpenTypeSuriLanguageSystemTable,
+  TOpenTypeSvanLanguageSystemTable, TOpenTypeSwedishLanguageSystemTable,
+  TOpenTypeSwadayaAramaicLanguageSystemTable,
+  TOpenTypeSwahiliLanguageSystemTable, TOpenTypeSwaziLanguageSystemTable,
+  TOpenTypeSutuLanguageSystemTable, TOpenTypeSyriacLanguageSystemTable,
+  TOpenTypeTabasaranLanguageSystemTable, TOpenTypeTajikiLanguageSystemTable,
+  TOpenTypeTamilLanguageSystemTable, TOpenTypeTatarLanguageSystemTable,
+  TOpenTypeTHCreeLanguageSystemTable, TOpenTypeTeluguLanguageSystemTable,
+  TOpenTypeTonganLanguageSystemTable, TOpenTypeTigreLanguageSystemTable,
+  TOpenTypeTigrinyaLanguageSystemTable, TOpenTypeThaiLanguageSystemTable,
+  TOpenTypeTahitianLanguageSystemTable, TOpenTypeTibetanLanguageSystemTable,
+  TOpenTypeTurkmenLanguageSystemTable, TOpenTypeTemneLanguageSystemTable,
+  TOpenTypeTswanaLanguageSystemTable, TOpenTypeTundraNenetsLanguageSystemTable,
+  TOpenTypeTongaLanguageSystemTable, TOpenTypeTodoLanguageSystemTable,
+  TOpenTypeTurkishLanguageSystemTable, TOpenTypeTsongaLanguageSystemTable,
+  TOpenTypeTuroyoAramaicLanguageSystemTable, TOpenTypeTuluLanguageSystemTable,
+  TOpenTypeTuvinLanguageSystemTable, TOpenTypeTwiLanguageSystemTable,
+  TOpenTypeUdmurtLanguageSystemTable, TOpenTypeUkrainianLanguageSystemTable,
+  TOpenTypeUrduLanguageSystemTable, TOpenTypeUpperSorbianLanguageSystemTable,
+  TOpenTypeUyghurLanguageSystemTable, TOpenTypeUzbekLanguageSystemTable,
+  TOpenTypeVendaLanguageSystemTable, TOpenTypeVietnameseLanguageSystemTable,
+  TOpenTypeWaLanguageSystemTable, TOpenTypeWagdiLanguageSystemTable,
+  TOpenTypeWestCreeLanguageSystemTable, TOpenTypeWelshLanguageSystemTable,
+  TOpenTypeWolofLanguageSystemTable, TOpenTypeTaiLueLanguageSystemTable,
+  TOpenTypeXhosaLanguageSystemTable, TOpenTypeYakutLanguageSystemTable,
+  TOpenTypeYorubaLanguageSystemTable, TOpenTypeYCreeLanguageSystemTable,
+  TOpenTypeYiClassicLanguageSystemTable, TOpenTypeYiModernLanguageSystemTable,
+  TOpenTypeChineseHongKongLanguageSystemTable,
+  TOpenTypeChinesePhoneticLanguageSystemTable,
+  TOpenTypeChineseSimplifiedLanguageSystemTable,
+  TOpenTypeChineseTraditionalLanguageSystemTable,
+  TOpenTypeZandeLanguageSystemTable, TOpenTypeZuluLanguageSystemTable]);
 
 end.

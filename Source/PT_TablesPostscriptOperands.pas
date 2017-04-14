@@ -39,9 +39,10 @@ uses
   PT_TablesPostscript;
 
 type
-  TPascalTypePostscriptOperandShortInt = class(TCustomPascalTypePostscriptDictOperand)
+  TPascalTypePostscriptOperandShortInt = class
+    (TCustomPascalTypePostscriptDictOperand)
   private
-    FValue : ShortInt;
+    FValue: ShortInt;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -52,9 +53,10 @@ type
     property Value: ShortInt read FValue write FValue;
   end;
 
-  TPascalTypePostscriptOperandComposite = class(TCustomPascalTypePostscriptDictOperand)
+  TPascalTypePostscriptOperandComposite = class
+    (TCustomPascalTypePostscriptDictOperand)
   private
-    FValue : SmallInt;
+    FValue: SmallInt;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -65,9 +67,10 @@ type
     property Value: SmallInt read FValue write FValue;
   end;
 
-  TPascalTypePostscriptOperandSmallInt = class(TCustomPascalTypePostscriptDictOperand)
+  TPascalTypePostscriptOperandSmallInt = class
+    (TCustomPascalTypePostscriptDictOperand)
   private
-    FValue : SmallInt;
+    FValue: SmallInt;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -78,9 +81,10 @@ type
     property Value: SmallInt read FValue write FValue;
   end;
 
-  TPascalTypePostscriptOperandInteger = class(TCustomPascalTypePostscriptDictOperand)
+  TPascalTypePostscriptOperandInteger = class
+    (TCustomPascalTypePostscriptDictOperand)
   private
-    FValue : Integer;
+    FValue: Integer;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -91,9 +95,10 @@ type
     property Value: Integer read FValue write FValue;
   end;
 
-  TPascalTypePostscriptOperandBCD = class(TCustomPascalTypePostscriptDictOperand)
+  TPascalTypePostscriptOperandBCD = class
+    (TCustomPascalTypePostscriptDictOperand)
   private
-    FValue : string;
+    FValue: string;
   protected
     procedure AssignTo(Dest: TPersistent); override;
 
@@ -104,34 +109,34 @@ type
     property Value: string read FValue write FValue;
   end;
 
-
 implementation
 
 { TPascalTypePostscriptOperandShortInt }
 
 procedure TPascalTypePostscriptOperandShortInt.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TPascalTypePostscriptOperandShortInt(Dest) do
-   begin
-    FValue := Self.FValue;
-   end
- else inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypePostscriptOperandShortInt(Dest) do
+    begin
+      FValue := Self.FValue;
+    end
+  else
+    inherited;
 end;
 
 function TPascalTypePostscriptOperandShortInt.GetAsInteger: Integer;
 begin
- Result := FValue;
+  Result := FValue;
 end;
 
 function TPascalTypePostscriptOperandShortInt.GetAsSingle: Single;
 begin
- Result := FValue;
+  Result := FValue;
 end;
 
 function TPascalTypePostscriptOperandShortInt.GetAsString: string;
 begin
- Result := IntToStr(FValue);
+  Result := IntToStr(FValue);
 end;
 
 
@@ -139,27 +144,28 @@ end;
 
 procedure TPascalTypePostscriptOperandComposite.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TPascalTypePostscriptOperandComposite(Dest) do
-   begin
-    FValue := Self.FValue;
-   end
- else inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypePostscriptOperandComposite(Dest) do
+    begin
+      FValue := Self.FValue;
+    end
+  else
+    inherited;
 end;
 
 function TPascalTypePostscriptOperandComposite.GetAsInteger: Integer;
 begin
- Result := FValue;
+  Result := FValue;
 end;
 
 function TPascalTypePostscriptOperandComposite.GetAsSingle: Single;
 begin
- Result := FValue;
+  Result := FValue;
 end;
 
 function TPascalTypePostscriptOperandComposite.GetAsString: string;
 begin
- Result := IntToStr(FValue);
+  Result := IntToStr(FValue);
 end;
 
 
@@ -167,81 +173,86 @@ end;
 
 procedure TPascalTypePostscriptOperandSmallInt.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TPascalTypePostscriptOperandSmallInt(Dest) do
-   begin
-    FValue := Self.FValue;
-   end
- else inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypePostscriptOperandSmallInt(Dest) do
+    begin
+      FValue := Self.FValue;
+    end
+  else
+    inherited;
 end;
 
 function TPascalTypePostscriptOperandSmallInt.GetAsInteger: Integer;
 begin
- Result := FValue;
+  Result := FValue;
 end;
 
 function TPascalTypePostscriptOperandSmallInt.GetAsSingle: Single;
 begin
- Result := FValue;
+  Result := FValue;
 end;
 
 function TPascalTypePostscriptOperandSmallInt.GetAsString: string;
 begin
- Result := IntToStr(FValue);
+  Result := IntToStr(FValue);
 end;
+
 
 { TPascalTypePostscriptOperandInteger }
 
 procedure TPascalTypePostscriptOperandInteger.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TPascalTypePostscriptOperandInteger(Dest) do
-   begin
-    FValue := Self.FValue;
-   end
- else inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypePostscriptOperandInteger(Dest) do
+    begin
+      FValue := Self.FValue;
+    end
+  else
+    inherited;
 end;
 
 function TPascalTypePostscriptOperandInteger.GetAsInteger: Integer;
 begin
- Result := FValue;
+  Result := FValue;
 end;
 
 function TPascalTypePostscriptOperandInteger.GetAsSingle: Single;
 begin
- Result := FValue;
+  Result := FValue;
 end;
 
 function TPascalTypePostscriptOperandInteger.GetAsString: string;
 begin
- Result := IntToStr(FValue);
+  Result := IntToStr(FValue);
 end;
+
 
 { TPascalTypePostscriptOperandBCD }
 
 procedure TPascalTypePostscriptOperandBCD.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TPascalTypePostscriptOperandBCD(Dest) do
-   begin
-    FValue := Self.FValue;
-   end
- else inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypePostscriptOperandBCD(Dest) do
+    begin
+      FValue := Self.FValue;
+    end
+  else
+    inherited;
 end;
 
 function TPascalTypePostscriptOperandBCD.GetAsInteger: Integer;
 begin
- Result := Round(GetAsSingle);
+  Result := Round(GetAsSingle);
 end;
 
 function TPascalTypePostscriptOperandBCD.GetAsSingle: Single;
 begin
- Result := StrToFloat(FValue);
+  Result := StrToFloat(FValue);
 end;
 
 function TPascalTypePostscriptOperandBCD.GetAsString: string;
 begin
- Result := FValue;
+  Result := FValue;
 end;
 
 end.

@@ -47,22 +47,24 @@ function FloorLog2(Value: Cardinal): Cardinal;
 function Mul32To64(Value, Scale: Integer): Int64;
 function MulDiv(Value, Scale, Divisor: Integer): Integer;
 
-
 implementation
 
 function Swap16(Value: Word): Word; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 {$IFDEF SUPPORTS_INLINE}
 begin
- Result := Swap(Value);
+  Result := Swap(Value);
 {$ELSE}
 {$IFDEF PUREPASCAL}
 begin
- Result := Swap(Value);
+  Result := Swap(Value);
 {$ELSE}
 asm
- XCHG AL, AH
-{$ENDIF}
-{$ENDIF}
+  {$IFDEF CPUx86_64}
+  MOV     EAX, ECX
+  {$ENDIF}
+  XCHG    AL, AH
+  {$ENDIF}
+  {$ENDIF}
 end;
 
 function Swap32(Value: Cardinal): Cardinal;
@@ -70,82 +72,86 @@ function Swap32(Value: Cardinal): Cardinal;
 type
   TTwoWords = array [0..1] of Word;
 begin
- TTwoWords(Result)[1] := Swap(TTwoWords(Value)[0]);
- TTwoWords(Result)[0] := Swap(TTwoWords(Value)[1]);
+  TTwoWords(Result)[1] := Swap(TTwoWords(Value)[0]);
+  TTwoWords(Result)[0] := Swap(TTwoWords(Value)[1]);
 {$ELSE}
 asm
- BSWAP EAX
-{$ENDIF}
+  {$IFDEF CPUx86_64}
+  MOV     EAX, ECX
+  {$ENDIF}
+  BSWAP   EAX
+  {$ENDIF}
 end;
 
 function Swap64(Value: Int64): Int64;
 type
   TFourWords = array [0..3] of Word;
 begin
- TFourWords(Result)[3] := Swap(TFourWords(Value)[0]);
- TFourWords(Result)[2] := Swap(TFourWords(Value)[1]);
- TFourWords(Result)[1] := Swap(TFourWords(Value)[2]);
- TFourWords(Result)[0] := Swap(TFourWords(Value)[3]);
+  TFourWords(Result)[3] := Swap(TFourWords(Value)[0]);
+  TFourWords(Result)[2] := Swap(TFourWords(Value)[1]);
+  TFourWords(Result)[1] := Swap(TFourWords(Value)[2]);
+  TFourWords(Result)[0] := Swap(TFourWords(Value)[3]);
 end;
 
 function FloorLog2(Value: Cardinal): Cardinal;
 begin
- // check if Value is zero as log2(0) is undefined
- if (Value = 0)
-  then raise EPascalTypeError.Create('FloorLog2 Error');
+  // check if Value is zero as log2(0) is undefined
+  if (Value = 0) then
+    raise EPascalTypeError.Create('FloorLog2 Error');
 
- // set basic value
- Result := 0;
+  // set basic value
+  Result := 0;
 
- if (Value >= 1 shl 16) then
+  if (Value >= 1 shl 16) then
   begin
-   Value := Value shr 16;
-   Result := Result + 16;
+    Value := Value shr 16;
+    Result := Result + 16;
   end;
- if (Value >= 1 shl  8) then
+  if (Value >= 1 shl 8) then
   begin
-   Value := Value shr  8;
-   Result := Result +  8;
+    Value := Value shr 8;
+    Result := Result + 8;
   end;
- if (Value >= 1 shl  4) then
+  if (Value >= 1 shl 4) then
   begin
-   Value := Value shr  4;
-   Result := Result +  4;
+    Value := Value shr 4;
+    Result := Result + 4;
   end;
- if (Value >= 1 shl  2) then
+  if (Value >= 1 shl 2) then
   begin
-   Value := Value shr  2;
-   Result := Result +  2;
+    Value := Value shr 2;
+    Result := Result + 2;
   end;
- if (Value >= 1 shl  1)
-  then Result := Result + 1;
+  if (Value >= 1 shl 1) then
+    Result := Result + 1;
 end;
 
 function Mul32To64(Value, Scale: Integer): Int64;
 begin
- Result := Value * Scale;
+  Result := Value * Scale;
 end;
 
 function MulDiv(Value, Scale, Divisor: Integer): Integer;
 var
-  Sign : Integer;
-  Temp : Int64;
+  Sign: Integer;
+  Temp: Int64;
 begin
- Sign := Value;
- Value := Abs(Value);
+  Sign := Value;
+  Value := Abs(Value);
 
- Sign := Sign xor Scale;
- Scale := Abs(Scale);
+  Sign := Sign xor Scale;
+  Scale := Abs(Scale);
 
- Sign := Sign xor Divisor;
- Divisor := Abs(Divisor);
+  Sign := Sign xor Divisor;
+  Divisor := Abs(Divisor);
 
- Temp := Value * Scale;
- Divisor := Temp div Divisor;
+  Temp := Value * Scale;
+  Divisor := Temp div Divisor;
 
- if Sign < 0
-  then Result := -Divisor
-  else Result := Divisor;
+  if Sign < 0 then
+    Result := -Divisor
+  else
+    Result := Divisor;
 end;
 
 end.

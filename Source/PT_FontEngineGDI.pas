@@ -662,8 +662,8 @@ begin
   end;
 end;
 
-procedure TPascalTypeFontEngineGDI.RasterizeSimpleGlyph(Glyph: TTrueTypeFontSimpleGlyphData;
-  Canvas: TCanvas; X, Y : Integer);
+procedure TPascalTypeFontEngineGDI.RasterizeSimpleGlyph(
+  Glyph: TTrueTypeFontSimpleGlyphData; Canvas: TCanvas; X, Y : Integer);
 var
   ContourIndex  : Integer;
   PointIndex    : Integer;

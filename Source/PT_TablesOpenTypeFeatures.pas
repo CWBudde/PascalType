@@ -942,17 +942,131 @@ type
 
 implementation
 
+resourcestring
+  RCStrAccessAllAlternates = 'Access All Alternates';
+  RCStrAboveBaseForms = 'Above-base Forms';
+  RCStrAboveBaseMarkPositioning = 'Above-base Mark Positioning';
+  RCStrAboveBaseSubstitutions = 'Above-base Substitutions';
+  RCStrAkhand = 'Akhand';
+  RCStrGlyphCompositionDecomposition = 'Glyph Composition/Decomposition';
+  RCStrAlternativeFractions = 'Alternative Fractions';
+  RCStrBelowBaseForms = 'Below-base Forms';
+  RCStrBelowBaseMarkPositioning = 'Below-base Mark Positioning';
+  RCStrBelowBaseSubstitutions = 'Below-base Substitutions';
+  RCStrContextualAlternates = 'Contextual Alternates';
+  RCStrCaseSensitiveForms = 'Case-Sensitive Forms';
+  RCStrConjunctFormAfterRo = 'Conjunct Form After Ro';
+  RCStrConjunctForms = 'Conjunct Forms';
+  RCStrContextualLigatures = 'Contextual Ligatures';
+  RCStrCJKPunctuation = 'CJK Punctuation';
+  RCStrCapitalSpacing = 'Capital Spacing';
+  RCStrContextualSwash = 'Contextual Swash';
+  RCStrCursivePositioning = 'Cursive Positioning';
+  RCStrPetiteCapitalsFromCapitals = 'Petite Capitals From Capitals';
+  RCStrSmallCapitalsFromCapitals = 'Small Capitals From Capitals';
+  RCStrDistances = 'Distances';
+  RCStrDiscretionaryLigatures = 'Discretionary Ligatures';
+  RCStrDenominators = 'Denominators';
+  RCStrExpertForms = 'Expert Forms';
+  RCStrTerminalForm2 = 'Terminal Form #2';
+  RCStrTerminalForm3 = 'Terminal Form #3';
+  RCStrTerminalForms = 'Terminal Forms';
+  RCStrFractions = 'Fractions';
+  RCStrFullWidths = 'Full Widths';
+  RCStrHalfForms = 'Half Forms';
+  RCStrHalantForms = 'Halant Forms';
+  RCStrAlternateHalfWidth = 'Alternate Half Widths';
+  RCStrHistoricalForms = 'Historical Forms';
+  RCStrHorizontalKanaAlternates = 'Horizontal Kana Alternates';
+  RCStrHistoricalLigatures = 'Historical Ligatures';
+  RCStrHangul = 'Hangul';
+  RCStrHojoKanjiForms = 'Hojo Kanji Forms (JIS X 0212-1990 Kanji Forms)';
+  RCStrHalfWidths = 'Half Widths';
+  RCStrInitialForms = 'Initial Forms';
+  RCStrIsolatedForms = 'Isolated Forms';
+  RCStrItalics = 'Italics';
+  RCStrJustificationAlternates = 'Justification Alternates';
+  RCStrJIS78Forms = 'JIS78 Forms';
+  RCStrJIS83Forms = 'JIS83 Forms';
+  RCStrJIS90Forms = 'JIS90 Forms';
+  RCStrJIS2004Forms = 'JIS2004 Forms';
+  RCStrKerning = 'Kerning';
+  RCStrLeftBounds = 'Left Bounds';
+  RCStrLigature = 'Ligature';
+  RCStrLeadingJamoForms = 'Leading Jamo Forms';
+  RCStrLiningFigures = 'Lining Figures';
+  RCStrLocalizedForms = 'Localized Forms';
+  RCStrLeftToRightGlyphAlternates = 'Left-to-right glyph alternates';
+  RCStrLeftToRightMirroredForms = 'Left-to-right mirrored forms';
+  RCStrMarkPositioning = 'Mark Positioning';
+  RCStrMedialForm3 = 'Medial Form #3';
+  RCStrMedialForms = 'Medial Forms';
+  RCStrMathematicalGreek = 'Mathematical Greek';
+  RCStrMarkToMarkPositioning = 'Mark to Mark Positioning';
+  RCStrAlternateAnnotationForms = 'Alternate Annotation Forms';
+  RCStrNLCKanjiForms = 'NLC Kanji Forms';
+  RCStrNuktaForms = 'Nukta Forms';
+  RCStrNumerators = 'Numerators';
+  RCStrOldstyleFigures = 'Oldstyle Figures';
+  RCStrOpticalBounds = 'Optical Bounds';
+  RCStrOrdinals = 'Ordinals';
+  RCStrOrnaments = 'Ornaments';
+  RCStrProportionalAlternateWidths = 'Proportional Alternate Widths';
+  RCStrPetiteCapitals = 'Petite Capitals';
+  RCStrProportionalKana = 'Proportional Kana';
+  RCStrProportionalFigures = 'Proportional Figures';
+  RCStrPrebaseForms = 'Pre-base Forms';
+  RCStrPrebaseSubstitutions = 'Pre-base Substitutions';
+  RCStrPostBaseForms = 'Post-base Forms';
+  RCStrPostBaseSubstitutions = 'Post-base Substitutions';
+  RCStrProportionalWidths = 'Proportional Widths';
+  RCStrQuarterWidths = 'Quarter Widths';
+  RCStrRandomize = 'Randomize';
+  RCStrRequiredLigatures = 'Required Ligatures';
+  RCStrRakarForms = 'Rakar Forms';
+  RCStrRephForm = 'Reph Form';
+  RCStrRightBounds = 'Right Bounds';
+  RCStrRighttoleftAlternates = 'Right-to-left alternates';
+  RCStrRightToLeftMirroredForms = 'Right-to-left mirrored forms';
+  RCStrRubyNotationForms = 'Ruby Notation Forms';
+  RCStrStylisticAlternates = 'Stylistic Alternates';
+  RCStrScientificInferiors = 'Scientific Inferiors';
+  RCStrOpticalSize = 'Optical size';
+  RCStrSmallCapitals = 'Small Capitals';
+  RCStrSimplifiedForms = 'Simplified Forms';
+  RCStrSubscript = 'Subscript';
+  RCStrSuperscript = 'Superscript';
+  RCStrSwash = 'Swash';
+  RCStrTitling = 'Titling';
+  RCStrTrailingJamoForms = 'Trailing Jamo Forms';
+  RCStrTraditionalNameForms = 'Traditional Name Forms';
+  RCStrTabularFigures = 'Tabular Figures';
+  RCStrTraditionalForms = 'Traditional Forms';
+  RCStrThirdWidths = 'Third Widths';
+  RCStrUnicase = 'Unicase';
+  RCStrAlternateVerticalMetrics = 'Alternate Vertical Metrics';
+  RCStrVattuVariants = 'Vattu Variants';
+  RCStrVerticalAlternates = 'Vertical Alternates';
+  RCStrAlternateVerticalHalfMetrics = 'Alternate Vertical Half Metrics';
+  RCStrVowelJamoForms = 'Vowel Jamo Forms';
+  RCStrVerticalKanaAlternates = 'Vertical Kana Alternates';
+  RCStrVerticalKerning = 'Vertical Kerning';
+  RCStrProportionalAlternateVerticalMetrics = 'Proportional Alternate ' +
+  'Vertical Metrics';
+  RCStrVerticalAlternatesAndRotation = 'Vertical Alternates and Rotation';
+  RCStrSlashedZero = 'Slashed Zero';
+
 
 { TOpenTypeAccessAllAlternatesTable }
 
 class function TOpenTypeAccessAllAlternatesTable.GetDisplayName: string;
 begin
- Result := 'Access All Alternates';
+  Result := RCStrAccessAllAlternates;
 end;
 
 class function TOpenTypeAccessAllAlternatesTable.GetTableType: TTableType;
 begin
- Result := 'aalt';
+  Result := 'aalt';
 end;
 
 
@@ -960,12 +1074,12 @@ end;
 
 class function TOpenTypeAboveBaseFormsTable.GetDisplayName: string;
 begin
- Result := 'Above-base Forms';
+  Result := RCStrAboveBaseForms;
 end;
 
 class function TOpenTypeAboveBaseFormsTable.GetTableType: TTableType;
 begin
- Result := 'abvf'
+  Result := 'abvf'
 end;
 
 
@@ -973,12 +1087,12 @@ end;
 
 class function TOpenTypeAboveBaseMarkPositioningTable.GetDisplayName: string;
 begin
- Result := 'Above-base Mark Positioning';
+  Result := RCStrAboveBaseMarkPositioning;
 end;
 
 class function TOpenTypeAboveBaseMarkPositioningTable.GetTableType: TTableType;
 begin
- Result := 'abvm';
+  Result := 'abvm';
 end;
 
 
@@ -986,12 +1100,12 @@ end;
 
 class function TOpenTypeAboveBaseSubstitutionTable.GetDisplayName: string;
 begin
- Result := 'Above-base Substitutions';
+  Result := RCStrAboveBaseSubstitutions;
 end;
 
 class function TOpenTypeAboveBaseSubstitutionTable.GetTableType: TTableType;
 begin
- Result := 'abvs';
+  Result := 'abvs';
 end;
 
 
@@ -999,12 +1113,12 @@ end;
 
 class function TOpenTypeAkhandTable.GetDisplayName: string;
 begin
- Result := 'Akhand';
+  Result := RCStrAkhand;
 end;
 
 class function TOpenTypeAkhandTable.GetTableType: TTableType;
 begin
- Result := 'akhn';
+  Result := 'akhn';
 end;
 
 
@@ -1012,12 +1126,12 @@ end;
 
 class function TOpenTypeCompositionFeatureTable.GetDisplayName: string;
 begin
- Result := 'Glyph Composition/Decomposition';
+  Result := RCStrGlyphCompositionDecomposition;
 end;
 
 class function TOpenTypeCompositionFeatureTable.GetTableType: TTableType;
 begin
- Result := 'ccmp';
+  Result := 'ccmp';
 end;
 
 
@@ -1025,12 +1139,12 @@ end;
 
 class function TOpenTypeAlternativeFractionsTable.GetDisplayName: string;
 begin
- Result := 'Alternative Fractions';
+  Result := RCStrAlternativeFractions;
 end;
 
 class function TOpenTypeAlternativeFractionsTable.GetTableType: TTableType;
 begin
- Result := 'afrc';
+  Result := 'afrc';
 end;
 
 
@@ -1038,12 +1152,12 @@ end;
 
 class function TOpenTypeBelowBaseFormsTable.GetDisplayName: string;
 begin
- Result := 'Below-base Forms';
+  Result := RCStrBelowBaseForms;
 end;
 
 class function TOpenTypeBelowBaseFormsTable.GetTableType: TTableType;
 begin
- Result := 'blwf';
+  Result := 'blwf';
 end;
 
 
@@ -1051,12 +1165,12 @@ end;
 
 class function TOpenTypeBelowBaseMarkPositioningTable.GetDisplayName: string;
 begin
- Result := 'Below-base Mark Positioning';
+  Result := RCStrBelowBaseMarkPositioning;
 end;
 
 class function TOpenTypeBelowBaseMarkPositioningTable.GetTableType: TTableType;
 begin
- Result := 'blwm';
+  Result := 'blwm';
 end;
 
 
@@ -1064,12 +1178,12 @@ end;
 
 class function TOpenTypeBelowBaseSubstitutionTable.GetDisplayName: string;
 begin
- Result := 'Below-base Substitutions';
+  Result := RCStrBelowBaseSubstitutions;
 end;
 
 class function TOpenTypeBelowBaseSubstitutionTable.GetTableType: TTableType;
 begin
- Result := 'blws';
+  Result := 'blws';
 end;
 
 
@@ -1077,12 +1191,12 @@ end;
 
 class function TOpenTypeContextualAlternatesTable.GetDisplayName: string;
 begin
- Result := 'Contextual Alternates';
+  Result := RCStrContextualAlternates;
 end;
 
 class function TOpenTypeContextualAlternatesTable.GetTableType: TTableType;
 begin
- Result := 'calt';
+  Result := 'calt';
 end;
 
 
@@ -1090,12 +1204,12 @@ end;
 
 class function TOpenTypeCaseSensitiveFormsTable.GetDisplayName: string;
 begin
- Result := 'Case-Sensitive Forms';
+  Result := RCStrCaseSensitiveForms;
 end;
 
 class function TOpenTypeCaseSensitiveFormsTable.GetTableType: TTableType;
 begin
- Result := 'case';
+  Result := 'case';
 end;
 
 
@@ -1103,12 +1217,12 @@ end;
 
 class function TOpenTypeConjunctFormAfterRoFeatureTable.GetDisplayName: string;
 begin
- Result := 'Conjunct Form After Ro';
+  Result := RCStrConjunctFormAfterRo;
 end;
 
 class function TOpenTypeConjunctFormAfterRoFeatureTable.GetTableType: TTableType;
 begin
- Result := 'cfar'
+  Result := 'cfar'
 end;
 
 
@@ -1116,12 +1230,12 @@ end;
 
 class function TOpenTypeConjunctFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Conjunct Forms';
+  Result := RCStrConjunctForms;
 end;
 
 class function TOpenTypeConjunctFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'cjct';
+  Result := 'cjct';
 end;
 
 
@@ -1129,12 +1243,12 @@ end;
 
 class function TOpenTypeContextualLigaturesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Contextual Ligatures'
+  Result := RCStrContextualLigatures;
 end;
 
 class function TOpenTypeContextualLigaturesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'clig';
+  Result := 'clig';
 end;
 
 
@@ -1142,12 +1256,12 @@ end;
 
 class function TOpenTypeCJKPunctuationFeatureTable.GetDisplayName: string;
 begin
- Result := 'CJK Punctuation';
+  Result := RCStrCJKPunctuation;
 end;
 
 class function TOpenTypeCJKPunctuationFeatureTable.GetTableType: TTableType;
 begin
- Result := 'cpct';
+  Result := 'cpct';
 end;
 
 
@@ -1155,12 +1269,12 @@ end;
 
 class function TOpenTypeCapitalSpacingFeatureTable.GetDisplayName: string;
 begin
- Result := 'Capital Spacing';
+  Result := RCStrCapitalSpacing;
 end;
 
 class function TOpenTypeCapitalSpacingFeatureTable.GetTableType: TTableType;
 begin
- Result := 'cpsp';
+  Result := 'cpsp';
 end;
 
 
@@ -1168,12 +1282,12 @@ end;
 
 class function TOpenTypeContextualSwashFeatureTable.GetDisplayName: string;
 begin
- Result := 'Contextual Swash';
+  Result := RCStrContextualSwash;
 end;
 
 class function TOpenTypeContextualSwashFeatureTable.GetTableType: TTableType;
 begin
- Result := 'cswh';
+  Result := 'cswh';
 end;
 
 
@@ -1181,24 +1295,25 @@ end;
 
 class function TOpenTypeCursivePositioningFeatureTable.GetDisplayName: string;
 begin
- Result := 'Cursive Positioning';
+  Result := RCStrCursivePositioning;
 end;
 
 class function TOpenTypeCursivePositioningFeatureTable.GetTableType: TTableType;
 begin
- Result := 'curs';
+  Result := 'curs';
 end;
+
 
 { TOpenTypePetiteCapitalsFromCapitalsFeatureTable }
 
 class function TOpenTypePetiteCapitalsFromCapitalsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Petite Capitals From Capitals';
+  Result := RCStrPetiteCapitalsFromCapitals;
 end;
 
 class function TOpenTypePetiteCapitalsFromCapitalsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'c2pc';
+  Result := 'c2pc';
 end;
 
 
@@ -1206,12 +1321,12 @@ end;
 
 class function TOpenTypeSmallCapitalsFromCapitalsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Small Capitals From Capitals';
+  Result := RCStrSmallCapitalsFromCapitals;
 end;
 
 class function TOpenTypeSmallCapitalsFromCapitalsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'c2sc';
+  Result := 'c2sc';
 end;
 
 
@@ -1219,12 +1334,12 @@ end;
 
 class function TOpenTypeDistancesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Distances';
+  Result := RCStrDistances;
 end;
 
 class function TOpenTypeDistancesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'dist';
+  Result := 'dist';
 end;
 
 
@@ -1232,12 +1347,12 @@ end;
 
 class function TOpenTypeDiscretionaryLigaturesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Discretionary Ligatures';
+  Result := RCStrDiscretionaryLigatures;
 end;
 
 class function TOpenTypeDiscretionaryLigaturesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'dlig';
+  Result := 'dlig';
 end;
 
 
@@ -1245,12 +1360,12 @@ end;
 
 class function TOpenTypeDenominatorsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Denominators';
+  Result := RCStrDenominators;
 end;
 
 class function TOpenTypeDenominatorsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'dnom';
+  Result := 'dnom';
 end;
 
 
@@ -1258,12 +1373,12 @@ end;
 
 class function TOpenTypeExpertFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Expert Forms';
+  Result := RCStrExpertForms;
 end;
 
 class function TOpenTypeExpertFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'expt';
+  Result := 'expt';
 end;
 
 
@@ -1271,12 +1386,12 @@ end;
 
 class function TOpenTypeFinalGlyphOnLineAlternatesFeatureTable.GetDisplayName: string;
 begin
- Result := '';
+  Result := '';
 end;
 
 class function TOpenTypeFinalGlyphOnLineAlternatesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'falt';
+  Result := 'falt';
 end;
 
 
@@ -1284,12 +1399,12 @@ end;
 
 class function TOpenTypeTerminalForm2FeatureTable.GetDisplayName: string;
 begin
- Result := 'Terminal Form #2';
+  Result := RCStrTerminalForm2;
 end;
 
 class function TOpenTypeTerminalForm2FeatureTable.GetTableType: TTableType;
 begin
- Result := 'fin2';
+  Result := 'fin2';
 end;
 
 
@@ -1297,12 +1412,12 @@ end;
 
 class function TOpenTypeTerminalForm3FeatureTable.GetDisplayName: string;
 begin
- Result := 'Terminal Form #3';
+  Result := RCStrTerminalForm3;
 end;
 
 class function TOpenTypeTerminalForm3FeatureTable.GetTableType: TTableType;
 begin
- Result := 'fin3';
+  Result := 'fin3';
 end;
 
 
@@ -1310,12 +1425,12 @@ end;
 
 class function TOpenTypeTerminalFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Terminal Forms';
+  Result := RCStrTerminalForms;
 end;
 
 class function TOpenTypeTerminalFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'fina';
+  Result := 'fina';
 end;
 
 
@@ -1323,12 +1438,12 @@ end;
 
 class function TOpenTypeFractionsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Fractions';
+  Result := RCStrFractions;
 end;
 
 class function TOpenTypeFractionsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'frac';
+  Result := 'frac';
 end;
 
 
@@ -1336,12 +1451,12 @@ end;
 
 class function TOpenTypeFullWidthsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Full Widths';
+  Result := RCStrFullWidths;
 end;
 
 class function TOpenTypeFullWidthsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'fwid';
+  Result := 'fwid';
 end;
 
 
@@ -1349,12 +1464,12 @@ end;
 
 class function TOpenTypeHalfFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Half Forms';
+  Result := RCStrHalfForms;
 end;
 
 class function TOpenTypeHalfFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'half';
+  Result := 'half';
 end;
 
 
@@ -1362,12 +1477,12 @@ end;
 
 class function TOpenTypeHalantFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Halant Forms';
+  Result := RCStrHalantForms;
 end;
 
 class function TOpenTypeHalantFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'haln';
+  Result := 'haln';
 end;
 
 
@@ -1375,12 +1490,12 @@ end;
 
 class function TOpenTypeAlternateHalfWidthsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Alternate Half Widths';
+  Result := RCStrAlternateHalfWidth;
 end;
 
 class function TOpenTypeAlternateHalfWidthsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'halt';
+  Result := 'halt';
 end;
 
 
@@ -1388,12 +1503,12 @@ end;
 
 class function TOpenTypeHistoricalFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Historical Forms';
+  Result := RCStrHistoricalForms;
 end;
 
 class function TOpenTypeHistoricalFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'hist';
+  Result := 'hist';
 end;
 
 
@@ -1401,12 +1516,12 @@ end;
 
 class function TOpenTypeHorizontalKanaAlternatesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Horizontal Kana Alternates';
+  Result := RCStrHorizontalKanaAlternates;
 end;
 
 class function TOpenTypeHorizontalKanaAlternatesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'hkna';
+  Result := 'hkna';
 end;
 
 
@@ -1414,12 +1529,12 @@ end;
 
 class function TOpenTypeHistoricalLigaturesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Historical Ligatures';
+  Result := RCStrHistoricalLigatures;
 end;
 
 class function TOpenTypeHistoricalLigaturesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'hlig';
+  Result := 'hlig';
 end;
 
 
@@ -1427,12 +1542,12 @@ end;
 
 class function TOpenTypeHangulFeatureTable.GetDisplayName: string;
 begin
- Result := 'Hangul';
+  Result := RCStrHangul;
 end;
 
 class function TOpenTypeHangulFeatureTable.GetTableType: TTableType;
 begin
- Result := 'hngl';
+  Result := 'hngl';
 end;
 
 
@@ -1440,12 +1555,12 @@ end;
 
 class function TOpenTypeHojoKanjiFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Hojo Kanji Forms (JIS X 0212-1990 Kanji Forms)';
+  Result := RCStrHojoKanjiForms;
 end;
 
 class function TOpenTypeHojoKanjiFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'hojo';
+  Result := 'hojo';
 end;
 
 
@@ -1453,12 +1568,12 @@ end;
 
 class function TOpenTypeHalfWidthsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Half Widths';
+  Result := RCStrHalfWidths;
 end;
 
 class function TOpenTypeHalfWidthsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'hwid';
+  Result := 'hwid';
 end;
 
 
@@ -1466,12 +1581,12 @@ end;
 
 class function TOpenTypeInitialFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Initial Forms';
+  Result := RCStrInitialForms;
 end;
 
 class function TOpenTypeInitialFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'init';
+  Result := 'init';
 end;
 
 
@@ -1479,12 +1594,12 @@ end;
 
 class function TOpenTypeIsolatedFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Isolated Forms';
+  Result := RCStrIsolatedForms;
 end;
 
 class function TOpenTypeIsolatedFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'isol';
+  Result := 'isol';
 end;
 
 
@@ -1492,12 +1607,12 @@ end;
 
 class function TOpenTypeItalicsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Italics';
+  Result := RCStrItalics;
 end;
 
 class function TOpenTypeItalicsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'ital';
+  Result := 'ital';
 end;
 
 
@@ -1505,7 +1620,7 @@ end;
 
 class function TOpenTypeJustificationAlternatesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Justification Alternates';
+  Result := RCStrJustificationAlternates;
 end;
 
 class function TOpenTypeJustificationAlternatesFeatureTable.GetTableType: TTableType;
@@ -1518,12 +1633,12 @@ end;
 
 class function TOpenTypeJIS78FormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'JIS78 Forms';
-end;
+ Result := RCStrJIS78Forms;
+ end;
 
 class function TOpenTypeJIS78FormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'jp78';
+  Result := 'jp78';
 end;
 
 
@@ -1531,12 +1646,12 @@ end;
 
 class function TOpenTypeJIS83FormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'JIS83 Forms';
+  Result := RCStrJIS83Forms;
 end;
 
 class function TOpenTypeJIS83FormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'jp83';
+  Result := 'jp83';
 end;
 
 
@@ -1544,12 +1659,12 @@ end;
 
 class function TOpenTypeJIS90FormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'JIS90 Forms';
+  Result := RCStrJIS90Forms;
 end;
 
 class function TOpenTypeJIS90FormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'jp90';
+  Result := 'jp90';
 end;
 
 
@@ -1557,12 +1672,12 @@ end;
 
 class function TOpenTypeJIS2004FormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'JIS2004 Forms';
+  Result := RCStrJIS2004Forms;
 end;
 
 class function TOpenTypeJIS2004FormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'jp04';
+  Result := 'jp04';
 end;
 
 
@@ -1570,12 +1685,12 @@ end;
 
 class function TOpenTypeKerningFeatureTable.GetDisplayName: string;
 begin
- Result := 'Kerning';
+  Result := RCStrKerning;
 end;
 
 class function TOpenTypeKerningFeatureTable.GetTableType: TTableType;
 begin
- Result := 'kern';
+  Result := 'kern';
 end;
 
 
@@ -1583,12 +1698,12 @@ end;
 
 class function TOpenTypeLeftBoundsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Left Bounds';
+  Result := RCStrLeftBounds;
 end;
 
 class function TOpenTypeLeftBoundsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'lfbd';
+  Result := 'lfbd';
 end;
 
 
@@ -1596,12 +1711,12 @@ end;
 
 class function TOpenTypeLigatureFeatureTable.GetDisplayName: string;
 begin
- Result := 'Ligature';
+  Result := RCStrLigature;
 end;
 
 class function TOpenTypeLigatureFeatureTable.GetTableType: TTableType;
 begin
- Result := 'liga';
+  Result := 'liga';
 end;
 
 
@@ -1609,12 +1724,12 @@ end;
 
 class function TOpenTypeLeadingJamoFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Leading Jamo Forms';
+  Result := RCStrLeadingJamoForms;
 end;
 
 class function TOpenTypeLeadingJamoFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'ljmo';
+  Result := 'ljmo';
 end;
 
 
@@ -1622,12 +1737,12 @@ end;
 
 class function TOpenTypeLiningFiguresFeatureTable.GetDisplayName: string;
 begin
- Result := 'Lining Figures';
+  Result := RCStrLiningFigures;
 end;
 
 class function TOpenTypeLiningFiguresFeatureTable.GetTableType: TTableType;
 begin
- Result := 'lnum';
+  Result := 'lnum';
 end;
 
 
@@ -1635,12 +1750,12 @@ end;
 
 class function TOpenTypeLocalizedFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Localized Forms';
+  Result := RCStrLocalizedForms;
 end;
 
 class function TOpenTypeLocalizedFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'locl';
+  Result := 'locl';
 end;
 
 
@@ -1648,12 +1763,12 @@ end;
 
 class function TOpenTypeLeftToRightGlyphAlternatesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Left-to-right glyph alternates';
+  Result := RCStrLeftToRightGlyphAlternates;
 end;
 
 class function TOpenTypeLeftToRightGlyphAlternatesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'ltra';
+  Result := 'ltra';
 end;
 
 
@@ -1661,12 +1776,12 @@ end;
 
 class function TOpenTypeLeftToRightMirroredFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Left-to-right mirrored forms';
+  Result := RCStrLeftToRightMirroredForms;
 end;
 
 class function TOpenTypeLeftToRightMirroredFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'ltrm';
+  Result := 'ltrm';
 end;
 
 
@@ -1674,12 +1789,12 @@ end;
 
 class function TOpenTypeMarkFeatureTable.GetDisplayName: string;
 begin
- Result := 'Mark Positioning';
+  Result := RCStrMarkPositioning;
 end;
 
 class function TOpenTypeMarkFeatureTable.GetTableType: TTableType;
 begin
- Result := 'mark';
+  Result := 'mark';
 end;
 
 
@@ -1687,12 +1802,12 @@ end;
 
 class function TOpenTypeMedialForm3FeatureTable.GetDisplayName: string;
 begin
- Result := 'Medial Form #3';
+  Result := RCStrMedialForm3;
 end;
 
 class function TOpenTypeMedialForm3FeatureTable.GetTableType: TTableType;
 begin
- Result := 'med2';
+  Result := 'med2';
 end;
 
 
@@ -1700,12 +1815,12 @@ end;
 
 class function TOpenTypeMedialFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Medial Forms';
+  Result := RCStrMedialForms;
 end;
 
 class function TOpenTypeMedialFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'medi';
+  Result := 'medi';
 end;
 
 
@@ -1713,12 +1828,12 @@ end;
 
 class function TOpenTypeMathematicalGreekFeatureTable.GetDisplayName: string;
 begin
- Result := 'Mathematical Greek';
+  Result := RCStrMathematicalGreek;
 end;
 
 class function TOpenTypeMathematicalGreekFeatureTable.GetTableType: TTableType;
 begin
- Result := 'mgrk';
+  Result := 'mgrk';
 end;
 
 
@@ -1726,12 +1841,12 @@ end;
 
 class function TOpenTypeMarkToMarkFeatureTable.GetDisplayName: string;
 begin
- Result := 'Mark to Mark Positioning';
+  Result := RCStrMarkToMarkPositioning;
 end;
 
 class function TOpenTypeMarkToMarkFeatureTable.GetTableType: TTableType;
 begin
- Result := 'mkmk';
+  Result := 'mkmk';
 end;
 
 
@@ -1739,12 +1854,12 @@ end;
 
 class function TOpenTypeAlternateAnnotationFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Alternate Annotation Forms';
+  Result := RCStrAlternateAnnotationForms;
 end;
 
 class function TOpenTypeAlternateAnnotationFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'nalt';
+  Result := 'nalt';
 end;
 
 
@@ -1752,12 +1867,12 @@ end;
 
 class function TOpenTypeNLCKanjiFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'NLC Kanji Forms';
+  Result := RCStrNLCKanjiForms;
 end;
 
 class function TOpenTypeNLCKanjiFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'nlck';
+  Result := 'nlck';
 end;
 
 
@@ -1765,12 +1880,12 @@ end;
 
 class function TOpenTypeNuktaFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Nukta Forms';
+  Result := RCStrNuktaForms;
 end;
 
 class function TOpenTypeNuktaFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'nukt';
+  Result := 'nukt';
 end;
 
 
@@ -1778,12 +1893,12 @@ end;
 
 class function TOpenTypeNumeratorsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Numerators';
+  Result := RCStrNumerators;
 end;
 
 class function TOpenTypeNumeratorsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'numr';
+  Result := 'numr';
 end;
 
 
@@ -1791,12 +1906,12 @@ end;
 
 class function TOpenTypeOldstyleFiguresFeatureTable.GetDisplayName: string;
 begin
- Result := 'Oldstyle Figures';
+  Result := RCStrOldstyleFigures;
 end;
 
 class function TOpenTypeOldstyleFiguresFeatureTable.GetTableType: TTableType;
 begin
- Result := 'onum';
+  Result := 'onum';
 end;
 
 
@@ -1804,12 +1919,12 @@ end;
 
 class function TOpenTypeOpticalBoundsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Optical Bounds';
+  Result := RCStrOpticalBounds;
 end;
 
 class function TOpenTypeOpticalBoundsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'opbd';
+  Result := 'opbd';
 end;
 
 
@@ -1817,12 +1932,12 @@ end;
 
 class function TOpenTypeOrdinalsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Ordinals';
+  Result := RCStrOrdinals;
 end;
 
 class function TOpenTypeOrdinalsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'ordn';
+  Result := 'ordn';
 end;
 
 
@@ -1830,12 +1945,12 @@ end;
 
 class function TOpenTypeOrnamentsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Ornaments';
+  Result := RCStrOrnaments;
 end;
 
 class function TOpenTypeOrnamentsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'ornm';
+  Result := 'ornm';
 end;
 
 
@@ -1843,12 +1958,12 @@ end;
 
 class function TOpenTypeProportionalAlternateWidthsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Proportional Alternate Widths';
+  Result := RCStrProportionalAlternateWidths;
 end;
 
 class function TOpenTypeProportionalAlternateWidthsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'palt';
+  Result := 'palt';
 end;
 
 
@@ -1856,12 +1971,12 @@ end;
 
 class function TOpenTypePetiteCapitalsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Petite Capitals';
+  Result := RCStrPetiteCapitals;
 end;
 
 class function TOpenTypePetiteCapitalsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'pcap';
+  Result := 'pcap';
 end;
 
 
@@ -1869,12 +1984,12 @@ end;
 
 class function TOpenTypeProportionalKanaFeatureTable.GetDisplayName: string;
 begin
- Result := 'Proportional Kana';
+  Result := RCStrProportionalKana;
 end;
 
 class function TOpenTypeProportionalKanaFeatureTable.GetTableType: TTableType;
 begin
- Result := 'pkna';
+  Result := 'pkna';
 end;
 
 
@@ -1882,12 +1997,12 @@ end;
 
 class function TOpenTypeProportionalFiguresFeatureTable.GetDisplayName: string;
 begin
- Result := 'Proportional Figures';
+  Result := RCStrProportionalFigures;
 end;
 
 class function TOpenTypeProportionalFiguresFeatureTable.GetTableType: TTableType;
 begin
- Result := 'pnum';
+  Result := 'pnum';
 end;
 
 
@@ -1895,12 +2010,12 @@ end;
 
 class function TOpenTypePreBaseFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Pre-base Forms';
+  Result := RCStrPrebaseForms;
 end;
 
 class function TOpenTypePreBaseFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'pref';
+  Result := 'pref';
 end;
 
 
@@ -1908,12 +2023,12 @@ end;
 
 class function TOpenTypePreBaseSubstitutionsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Pre-base Substitutions';
+  Result := RCStrPrebaseSubstitutions;
 end;
 
 class function TOpenTypePreBaseSubstitutionsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'pres';
+  Result := 'pres';
 end;
 
 
@@ -1921,12 +2036,12 @@ end;
 
 class function TOpenTypePostBaseFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Post-base Forms';
+  Result := RCStrPostBaseForms;
 end;
 
 class function TOpenTypePostBaseFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'pstf';
+  Result := 'pstf';
 end;
 
 
@@ -1934,12 +2049,12 @@ end;
 
 class function TOpenTypePostBaseSubstitutionsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Post-base Substitutions';
+  Result := RCStrPostBaseSubstitutions;
 end;
 
 class function TOpenTypePostBaseSubstitutionsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'psts';
+  Result := 'psts';
 end;
 
 
@@ -1947,12 +2062,12 @@ end;
 
 class function TOpenTypeProportionalWidthsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Proportional Widths';
+  Result := RCStrProportionalWidths;
 end;
 
 class function TOpenTypeProportionalWidthsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'pwid';
+  Result := 'pwid';
 end;
 
 
@@ -1960,12 +2075,12 @@ end;
 
 class function TOpenTypeQuarterWidthsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Quarter Widths';
+  Result := RCStrQuarterWidths;
 end;
 
 class function TOpenTypeQuarterWidthsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'qwid';
+  Result := 'qwid';
 end;
 
 
@@ -1973,12 +2088,12 @@ end;
 
 class function TOpenTypeRandomizeFeatureTable.GetDisplayName: string;
 begin
- Result := 'Randomize';
+  Result := RCStrRandomize;
 end;
 
 class function TOpenTypeRandomizeFeatureTable.GetTableType: TTableType;
 begin
- Result := 'rand';
+  Result := 'rand';
 end;
 
 
@@ -1986,12 +2101,12 @@ end;
 
 class function TOpenTypeRequiredLigaturesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Required Ligatures';
+  Result := RCStrRequiredLigatures;
 end;
 
 class function TOpenTypeRequiredLigaturesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'rlig';
+  Result := 'rlig';
 end;
 
 
@@ -1999,12 +2114,12 @@ end;
 
 class function TOpenTypeRakarFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Rakar Forms';
+  Result := RCStrRakarForms;
 end;
 
 class function TOpenTypeRakarFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'rkrf';
+  Result := 'rkrf';
 end;
 
 
@@ -2012,12 +2127,12 @@ end;
 
 class function TOpenTypeRephFormFeatureTable.GetDisplayName: string;
 begin
- Result := 'Reph Form';
+  Result := RCStrRephForm;
 end;
 
 class function TOpenTypeRephFormFeatureTable.GetTableType: TTableType;
 begin
- Result := 'rphf';
+  Result := 'rphf';
 end;
 
 
@@ -2025,12 +2140,12 @@ end;
 
 class function TOpenTypeRightBoundsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Right Bounds';
+  Result := RCStrRightBounds;
 end;
 
 class function TOpenTypeRightBoundsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'rtbd';
+  Result := 'rtbd';
 end;
 
 
@@ -2038,12 +2153,12 @@ end;
 
 class function TOpenTypeRightToLeftAlternatesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Right-to-left alternates';
+  Result := RCStrRighttoleftAlternates;
 end;
 
 class function TOpenTypeRightToLeftAlternatesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'rtla';
+  Result := 'rtla';
 end;
 
 
@@ -2051,12 +2166,12 @@ end;
 
 class function TOpenTypeRightToLeftMirroredFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Right-to-left mirrored forms';
+  Result := RCStrRightToLeftMirroredForms;
 end;
 
 class function TOpenTypeRightToLeftMirroredFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'rtlm';
+  Result := 'rtlm';
 end;
 
 
@@ -2064,12 +2179,12 @@ end;
 
 class function TOpenTypeRubyNotationFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Ruby Notation Forms';
+  Result := RCStrRubyNotationForms;
 end;
 
 class function TOpenTypeRubyNotationFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'ruby';
+  Result := 'ruby';
 end;
 
 
@@ -2077,12 +2192,12 @@ end;
 
 class function TOpenTypeStylisticAlternatesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Stylistic Alternates';
+  Result := RCStrStylisticAlternates;
 end;
 
 class function TOpenTypeStylisticAlternatesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'salt';
+  Result := 'salt';
 end;
 
 
@@ -2090,12 +2205,12 @@ end;
 
 class function TOpenTypeScientificInferiorsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Scientific Inferiors';
+  Result := RCStrScientificInferiors;
 end;
 
 class function TOpenTypeScientificInferiorsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'sinf';
+  Result := 'sinf';
 end;
 
 
@@ -2103,12 +2218,12 @@ end;
 
 class function TOpenTypeOpticalSizeFeatureTable.GetDisplayName: string;
 begin
- Result := 'Optical size';
+  Result := RCStrOpticalSize;
 end;
 
 class function TOpenTypeOpticalSizeFeatureTable.GetTableType: TTableType;
 begin
- Result := 'size';
+  Result := 'size';
 end;
 
 
@@ -2116,12 +2231,12 @@ end;
 
 class function TOpenTypeSmallCapitalsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Small Capitals';
+  Result := RCStrSmallCapitals;
 end;
 
 class function TOpenTypeSmallCapitalsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'smcp';
+  Result := 'smcp';
 end;
 
 
@@ -2129,12 +2244,12 @@ end;
 
 class function TOpenTypeSimplifiedFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Simplified Forms';
+  Result := RCStrSimplifiedForms;
 end;
 
 class function TOpenTypeSimplifiedFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'smpl';
+  Result := 'smpl';
 end;
 
 
@@ -2142,12 +2257,12 @@ end;
 
 class function TOpenTypeSubscriptFeatureTable.GetDisplayName: string;
 begin
- Result := 'Subscript';
+  Result := RCStrSubscript;
 end;
 
 class function TOpenTypeSubscriptFeatureTable.GetTableType: TTableType;
 begin
- Result := 'subs';
+  Result := 'subs';
 end;
 
 
@@ -2155,12 +2270,12 @@ end;
 
 class function TOpenTypeSuperscriptFeatureTable.GetDisplayName: string;
 begin
- Result := 'Superscript';
+  Result := RCStrSuperscript;
 end;
 
 class function TOpenTypeSuperscriptFeatureTable.GetTableType: TTableType;
 begin
- Result := 'sups';
+  Result := 'sups';
 end;
 
 
@@ -2168,12 +2283,12 @@ end;
 
 class function TOpenTypeSwashFeatureTable.GetDisplayName: string;
 begin
- Result := 'Swash';
+  Result := RCStrSwash;
 end;
 
 class function TOpenTypeSwashFeatureTable.GetTableType: TTableType;
 begin
- Result := 'swsh';
+  Result := 'swsh';
 end;
 
 
@@ -2181,12 +2296,12 @@ end;
 
 class function TOpenTypeTitlingFeatureTable.GetDisplayName: string;
 begin
- Result := 'Titling';
+  Result := RCStrTitling;
 end;
 
 class function TOpenTypeTitlingFeatureTable.GetTableType: TTableType;
 begin
- Result := 'titl';
+  Result := 'titl';
 end;
 
 
@@ -2194,12 +2309,12 @@ end;
 
 class function TOpenTypeTrailingJamoFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Trailing Jamo Forms';
+  Result := RCStrTrailingJamoForms;
 end;
 
 class function TOpenTypeTrailingJamoFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'tjmo';
+  Result := 'tjmo';
 end;
 
 
@@ -2207,12 +2322,12 @@ end;
 
 class function TOpenTypeTraditionalNameFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Traditional Name Forms';
+  Result := RCStrTraditionalNameForms;
 end;
 
 class function TOpenTypeTraditionalNameFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'tnam';
+  Result := 'tnam';
 end;
 
 
@@ -2220,12 +2335,12 @@ end;
 
 class function TOpenTypeTabularFiguresFeatureTable.GetDisplayName: string;
 begin
- Result := 'Tabular Figures';
+  Result := RCStrTabularFigures;
 end;
 
 class function TOpenTypeTabularFiguresFeatureTable.GetTableType: TTableType;
 begin
- Result := 'tnum';
+  Result := 'tnum';
 end;
 
 
@@ -2233,12 +2348,12 @@ end;
 
 class function TOpenTypeTraditionalFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Traditional Forms';
+  Result := RCStrTraditionalForms;
 end;
 
 class function TOpenTypeTraditionalFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'trad';
+  Result := 'trad';
 end;
 
 
@@ -2246,12 +2361,12 @@ end;
 
 class function TOpenTypeThirdWidthsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Third Widths';
+  Result := RCStrThirdWidths;
 end;
 
 class function TOpenTypeThirdWidthsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'twid';
+  Result := 'twid';
 end;
 
 
@@ -2259,12 +2374,12 @@ end;
 
 class function TOpenTypeUnicaseFeatureTable.GetDisplayName: string;
 begin
- Result := 'Unicase';
+  Result := RCStrUnicase;
 end;
 
 class function TOpenTypeUnicaseFeatureTable.GetTableType: TTableType;
 begin
- Result := 'unic';
+  Result := 'unic';
 end;
 
 
@@ -2272,12 +2387,12 @@ end;
 
 class function TOpenTypeAlternateVerticalMetricsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Alternate Vertical Metrics';
+  Result := RCStrAlternateVerticalMetrics;
 end;
 
 class function TOpenTypeAlternateVerticalMetricsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'valt';
+  Result := 'valt';
 end;
 
 
@@ -2285,12 +2400,12 @@ end;
 
 class function TOpenTypeVattuVariantsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Vattu Variants';
+  Result := RCStrVattuVariants;
 end;
 
 class function TOpenTypeVattuVariantsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'vatu';
+  Result := 'vatu';
 end;
 
 
@@ -2298,12 +2413,12 @@ end;
 
 class function TOpenTypeVerticalAlternatesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Vertical Alternates';
+  Result := RCStrVerticalAlternates;
 end;
 
 class function TOpenTypeVerticalAlternatesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'vert';
+  Result := 'vert';
 end;
 
 
@@ -2311,12 +2426,12 @@ end;
 
 class function TOpenTypeAlternateVerticalHalfMetricsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Alternate Vertical Half Metrics';
+  Result := RCStrAlternateVerticalHalfMetrics;
 end;
 
 class function TOpenTypeAlternateVerticalHalfMetricsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'vhal';
+  Result := 'vhal';
 end;
 
 
@@ -2324,12 +2439,12 @@ end;
 
 class function TOpenTypeVowelJamoFormsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Vowel Jamo Forms';
+  Result := RCStrVowelJamoForms;
 end;
 
 class function TOpenTypeVowelJamoFormsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'vjmo';
+  Result := 'vjmo';
 end;
 
 
@@ -2337,12 +2452,12 @@ end;
 
 class function TOpenTypeVerticalKanaAlternatesFeatureTable.GetDisplayName: string;
 begin
- Result := 'Vertical Kana Alternates';
+  Result := RCStrVerticalKanaAlternates;
 end;
 
 class function TOpenTypeVerticalKanaAlternatesFeatureTable.GetTableType: TTableType;
 begin
- Result := 'vkna';
+  Result := 'vkna';
 end;
 
 
@@ -2350,12 +2465,12 @@ end;
 
 class function TOpenTypeVerticalKerningFeatureTable.GetDisplayName: string;
 begin
- Result := 'Vertical Kerning';
+  Result := RCStrVerticalKerning;
 end;
 
 class function TOpenTypeVerticalKerningFeatureTable.GetTableType: TTableType;
 begin
- Result := 'vkrn';
+  Result := 'vkrn';
 end;
 
 
@@ -2363,12 +2478,12 @@ end;
 
 class function TOpenTypeProportionalAlternateVerticalMetricsFeatureTable.GetDisplayName: string;
 begin
- Result := 'Proportional Alternate Vertical Metrics';
+  Result := RCStrProportionalAlternateVerticalMetrics;
 end;
 
 class function TOpenTypeProportionalAlternateVerticalMetricsFeatureTable.GetTableType: TTableType;
 begin
- Result := 'vpal';
+  Result := 'vpal';
 end;
 
 
@@ -2376,12 +2491,12 @@ end;
 
 class function TOpenTypeVerticalAlternatesAndRotationFeatureTable.GetDisplayName: string;
 begin
- Result := 'Vertical Alternates and Rotation';
+  Result := RCStrVerticalAlternatesAndRotation;
 end;
 
 class function TOpenTypeVerticalAlternatesAndRotationFeatureTable.GetTableType: TTableType;
 begin
- Result := 'vrt2';
+  Result := 'vrt2';
 end;
 
 
@@ -2389,12 +2504,12 @@ end;
 
 class function TOpenTypeSlashedZeroFeatureTable.GetDisplayName: string;
 begin
- Result := 'Slashed Zero';
+  Result := RCStrSlashedZero;
 end;
 
 class function TOpenTypeSlashedZeroFeatureTable.GetTableType: TTableType;
 begin
- Result := 'zero';
+  Result := 'zero';
 end;
 
 
@@ -2470,6 +2585,5 @@ initialization
     TOpenTypeProportionalAlternateVerticalMetricsFeatureTable,
     TOpenTypeVerticalAlternatesAndRotationFeatureTable,
     TOpenTypeSlashedZeroFeatureTable]);
-
 
 end.

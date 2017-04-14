@@ -40,7 +40,7 @@ uses
 type
   TCustomPascalTypeEmbeddedBitmapTable = class(TCustomPascalTypeNamedTable)
   private
-    FVersion : TFixedPoint; // Initially defined as 0x00020000
+    FVersion: TFixedPoint; // Initially defined as 0x00020000
     procedure SetVersion(const Value: TFixedPoint);
   protected
     procedure AssignTo(Dest: TPersistent); override;
@@ -57,7 +57,8 @@ type
 
   // table 'EBDT'
 
-  TPascalTypeEmbeddedBitmapDataTable = class(TCustomPascalTypeEmbeddedBitmapTable)
+  TPascalTypeEmbeddedBitmapDataTable = class
+    (TCustomPascalTypeEmbeddedBitmapTable)
   private
   protected
     procedure AssignTo(Dest: TPersistent); override;
@@ -75,9 +76,10 @@ type
 
   // table 'EBLC'
 
-  TPascalTypeEmbeddedBitmapLocationTable = class(TCustomPascalTypeEmbeddedBitmapTable)
+  TPascalTypeEmbeddedBitmapLocationTable = class
+    (TCustomPascalTypeEmbeddedBitmapTable)
   private
-    FBitmapSizeList : TObjectList;
+    FBitmapSizeList: TObjectList;
     function GetBitmapSizeTable(Index: Integer): TPascalTypeBitmapSizeTable;
     function GetBitmapSizeTableCount: Integer;
   protected
@@ -94,7 +96,8 @@ type
     procedure SaveToStream(Stream: TStream); override;
 
     property BitmapSizeTableCount: Integer read GetBitmapSizeTableCount;
-    property BitmapSizeTable[Index: Integer]: TPascalTypeBitmapSizeTable read GetBitmapSizeTable;
+    property BitmapSizeTable[Index: Integer]: TPascalTypeBitmapSizeTable
+      read GetBitmapSizeTable;
   end;
 
 
@@ -102,13 +105,13 @@ type
 
   TPascalTypeBitmapScaleTable = class(TCustomPascalTypeTable)
   private
-    FPpemX             : Byte;  // target horizontal pixels per Em
-    FPpemY             : Byte;  // target vertical pixels per Em
-    FSubstitutePpemX   : Byte;  // use bitmaps of this size
-    FSubstitutePpemY   : Byte;  // use bitmaps of this size
+    FPpemX          : Byte; // target horizontal pixels per Em
+    FPpemY          : Byte; // target vertical pixels per Em
+    FSubstitutePpemX: Byte; // use bitmaps of this size
+    FSubstitutePpemY: Byte; // use bitmaps of this size
 
-    FHorizontalMetrics : TPascalTypeBitmapLineMetrics;
-    FVerticalMetrics   : TPascalTypeBitmapLineMetrics;
+    FHorizontalMetrics: TPascalTypeBitmapLineMetrics;
+    FVerticalMetrics  : TPascalTypeBitmapLineMetrics;
     procedure SetPpemX(const Value: Byte);
     procedure SetPpemY(const Value: Byte);
     procedure SetSubstitutePpemX(const Value: Byte);
@@ -130,16 +133,21 @@ type
 
     property PpemX: Byte read FPpemX write SetPpemX;
     property PpemY: Byte read FPpemY write SetPpemY;
-    property SubstitutePpemX: Byte read FSubstitutePpemX write SetSubstitutePpemX;
-    property SubstitutePpemY: Byte read FSubstitutePpemY write SetSubstitutePpemY;
+    property SubstitutePpemX: Byte read FSubstitutePpemX
+      write SetSubstitutePpemX;
+    property SubstitutePpemY: Byte read FSubstitutePpemY
+      write SetSubstitutePpemY;
 
-    property HorizontalMetrics: TPascalTypeBitmapLineMetrics read FHorizontalMetrics;
-    property VerticalMetrics: TPascalTypeBitmapLineMetrics read FVerticalMetrics;
+    property HorizontalMetrics: TPascalTypeBitmapLineMetrics
+      read FHorizontalMetrics;
+    property VerticalMetrics: TPascalTypeBitmapLineMetrics
+      read FVerticalMetrics;
   end;
 
-  TPascalTypeEmbeddedBitmapScalingTable = class(TCustomPascalTypeEmbeddedBitmapTable)
+  TPascalTypeEmbeddedBitmapScalingTable = class
+    (TCustomPascalTypeEmbeddedBitmapTable)
   private
-    FBitmapScaleList : TObjectList;
+    FBitmapScaleList: TObjectList;
     function GetBitmapScaleTable(Index: Integer): TPascalTypeBitmapScaleTable;
     function GetBitmapScaleTableCount: Integer;
   protected
@@ -156,7 +164,8 @@ type
     procedure SaveToStream(Stream: TStream); override;
 
     property BitmapScaleTableCount: Integer read GetBitmapScaleTableCount;
-    property BitmapScaleTable[Index: Integer]: TPascalTypeBitmapScaleTable read GetBitmapScaleTable;
+    property BitmapScaleTable[Index: Integer]: TPascalTypeBitmapScaleTable
+      read GetBitmapScaleTable;
   end;
 
 implementation
@@ -164,72 +173,72 @@ implementation
 uses
   PT_ResourceStrings;
 
-
 { TCustomPascalTypeEmbeddedBitmapTable }
 
 procedure TCustomPascalTypeEmbeddedBitmapTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TCustomPascalTypeEmbeddedBitmapTable(Dest) do
-   begin
-    FVersion := Self.FVersion;
-   end else inherited;
+  if Dest is Self.ClassType then
+    with TCustomPascalTypeEmbeddedBitmapTable(Dest) do
+    begin
+      FVersion := Self.FVersion;
+    end
+  else
+    inherited;
 end;
 
 procedure TCustomPascalTypeEmbeddedBitmapTable.ResetToDefaults;
 begin
- inherited;
- FVersion.Value := 2;
- FVersion.Fract := 0;
+  inherited;
+  FVersion.Value := 2;
+  FVersion.Fract := 0;
 end;
 
 procedure TCustomPascalTypeEmbeddedBitmapTable.LoadFromStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // check (minimum) table size
-   if Position + 4 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+    // check (minimum) table size
+    if Position + 4 > Size then
+      raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
-   // read version
-   FVersion.Fixed := ReadSwappedCardinal(Stream);
+    // read version
+    FVersion.Fixed := ReadSwappedCardinal(Stream);
 
-   if FVersion.Value < 2
-    then raise EPascalTypeError.Create(RCStrUnknownVersion);
+    if FVersion.Value < 2 then
+      raise EPascalTypeError.Create(RCStrUnknownVersion);
   end;
 end;
 
 procedure TCustomPascalTypeEmbeddedBitmapTable.SaveToStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- // write version
- WriteSwappedCardinal(Stream, Cardinal(FVersion));
+  // write version
+  WriteSwappedCardinal(Stream, Cardinal(FVersion));
 end;
 
-procedure TCustomPascalTypeEmbeddedBitmapTable.SetVersion(
-  const Value: TFixedPoint);
+procedure TCustomPascalTypeEmbeddedBitmapTable.SetVersion
+  (const Value: TFixedPoint);
 begin
- if (FVersion.Value <> Value.Value) or
-    (FVersion.Fract <> Value.Fract) then
+  if (FVersion.Value <> Value.Value) or (FVersion.Fract <> Value.Fract) then
   begin
-   FVersion := Value;
-   VersionChanged;
+    FVersion := Value;
+    VersionChanged;
   end;
 end;
 
 procedure TCustomPascalTypeEmbeddedBitmapTable.VersionChanged;
 begin
- Changed;
+  Changed;
 end;
 
 
 { TPascalTypeEmbeddedBitmapDataTable }
 
-constructor TPascalTypeEmbeddedBitmapDataTable.Create(
-  Storage: IPascalTypeStorageTable);
+constructor TPascalTypeEmbeddedBitmapDataTable.Create
+  (Storage: IPascalTypeStorageTable);
 begin
   inherited;
 
@@ -243,131 +252,134 @@ end;
 
 procedure TPascalTypeEmbeddedBitmapDataTable.AssignTo(Dest: TPersistent);
 begin
- inherited;
+  inherited;
 end;
 
 class function TPascalTypeEmbeddedBitmapDataTable.GetTableType: TTableType;
 begin
- Result := 'EBDT';
+  Result := 'EBDT';
 end;
 
 procedure TPascalTypeEmbeddedBitmapDataTable.ResetToDefaults;
 begin
- inherited;
+  inherited;
 end;
 
 procedure TPascalTypeEmbeddedBitmapDataTable.LoadFromStream(Stream: TStream);
-//var Value32 : Cardinal;
+// var Value32 : Cardinal;
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
   end;
 end;
 
 procedure TPascalTypeEmbeddedBitmapDataTable.SaveToStream(Stream: TStream);
 begin
- inherited;
- raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
+  inherited;
+  raise EPascalTypeNotImplemented.Create(RCStrNotImplemented);
 end;
 
 
 { TPascalTypeEmbeddedBitmapLocationTable }
 
-constructor TPascalTypeEmbeddedBitmapLocationTable.Create(
-  Storage: IPascalTypeStorageTable);
+constructor TPascalTypeEmbeddedBitmapLocationTable.Create
+  (Storage: IPascalTypeStorageTable);
 begin
- FBitmapSizeList := TObjectList.Create;
- inherited;
+  FBitmapSizeList := TObjectList.Create;
+  inherited;
 end;
 
 destructor TPascalTypeEmbeddedBitmapLocationTable.Destroy;
 begin
- FreeAndNil(FBitmapSizeList);
- inherited;
+  FreeAndNil(FBitmapSizeList);
+  inherited;
 end;
 
 procedure TPascalTypeEmbeddedBitmapLocationTable.AssignTo(Dest: TPersistent);
 begin
- inherited;
- if Dest is Self.ClassType then
-  with TPascalTypeEmbeddedBitmapLocationTable(Dest) do
-   begin
-    FBitmapSizeList.Assign(Self.FBitmapSizeList);
-   end;
+  inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypeEmbeddedBitmapLocationTable(Dest) do
+    begin
+      FBitmapSizeList.Assign(Self.FBitmapSizeList);
+    end;
 end;
 
-function TPascalTypeEmbeddedBitmapLocationTable.GetBitmapSizeTable(
-  Index: Integer): TPascalTypeBitmapSizeTable;
+function TPascalTypeEmbeddedBitmapLocationTable.GetBitmapSizeTable
+  (Index: Integer): TPascalTypeBitmapSizeTable;
 begin
- if (Index >= 0) and (Index < FBitmapSizeList.Count)
-  then Result := TPascalTypeBitmapSizeTable(FBitmapSizeList[Index])
-  else raise Exception.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+  if (Index >= 0) and (Index < FBitmapSizeList.Count) then
+    Result := TPascalTypeBitmapSizeTable(FBitmapSizeList[Index])
+  else
+    raise Exception.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TPascalTypeEmbeddedBitmapLocationTable.GetBitmapSizeTableCount: Integer;
+function TPascalTypeEmbeddedBitmapLocationTable.GetBitmapSizeTableCount
+  : Integer;
 begin
- Result := FBitmapSizeList.Count;
+  Result := FBitmapSizeList.Count;
 end;
 
 class function TPascalTypeEmbeddedBitmapLocationTable.GetTableType: TTableType;
 begin
- Result := 'EBLC';
+  Result := 'EBLC';
 end;
 
 procedure TPascalTypeEmbeddedBitmapLocationTable.ResetToDefaults;
 begin
- inherited;
- FBitmapSizeList.Clear;
+  inherited;
+  FBitmapSizeList.Clear;
 end;
 
-procedure TPascalTypeEmbeddedBitmapLocationTable.LoadFromStream(Stream: TStream);
+procedure TPascalTypeEmbeddedBitmapLocationTable.LoadFromStream
+  (Stream: TStream);
 var
-  BitmapSizeCount : Cardinal;
-  BitmapSizeIndex : Integer;
-  BitmapSizeTable : TPascalTypeBitmapSizeTable;
+  BitmapSizeCount: Cardinal;
+  BitmapSizeIndex: Integer;
+  BitmapSizeTable: TPascalTypeBitmapSizeTable;
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // check (minimum) table size
-   if Position + 4 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+    // check (minimum) table size
+    if Position + 4 > Size then
+      raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
-   // read number of BitmapSize tables
-   BitmapSizeCount := ReadSwappedCardinal(Stream);
+    // read number of BitmapSize tables
+    BitmapSizeCount := ReadSwappedCardinal(Stream);
 
-   // read bitmap size tables
-   for BitmapSizeIndex := 0 to BitmapSizeCount - 1 do
+    // read bitmap size tables
+    for BitmapSizeIndex := 0 to BitmapSizeCount - 1 do
     begin
-     // create bitmap size table
-     BitmapSizeTable := TPascalTypeBitmapSizeTable.Create;
+      // create bitmap size table
+      BitmapSizeTable := TPascalTypeBitmapSizeTable.Create;
 
-     // load bitmap size table
-     BitmapSizeTable.LoadFromStream(Stream);
+      // load bitmap size table
+      BitmapSizeTable.LoadFromStream(Stream);
 
-     // add bitmap size table
-     FBitmapSizeList.Add(BitmapSizeTable);
+      // add bitmap size table
+      FBitmapSizeList.Add(BitmapSizeTable);
     end;
   end;
 end;
 
 procedure TPascalTypeEmbeddedBitmapLocationTable.SaveToStream(Stream: TStream);
 var
-  BitmapSizeIndex : Integer;
+  BitmapSizeIndex: Integer;
 begin
- inherited;
+  inherited;
 
- // write number of BitmapSize tables
- WriteSwappedCardinal(Stream, FBitmapSizeList.Count);
+  // write number of BitmapSize tables
+  WriteSwappedCardinal(Stream, FBitmapSizeList.Count);
 
- // write bitmap size tables
- for BitmapSizeIndex := 0 to FBitmapSizeList.Count - 1 do
+  // write bitmap size tables
+  for BitmapSizeIndex := 0 to FBitmapSizeList.Count - 1 do
   begin
-   // save bitmap size table to stream
-   TPascalTypeBitmapSizeTable(FBitmapSizeList).SaveToStream(Stream);
+    // save bitmap size table to stream
+    TPascalTypeBitmapSizeTable(FBitmapSizeList).SaveToStream(Stream);
   end;
 end;
 
@@ -376,264 +388,266 @@ end;
 
 constructor TPascalTypeBitmapScaleTable.Create;
 begin
- inherited;
- FHorizontalMetrics := TPascalTypeBitmapLineMetrics.Create;
- FVerticalMetrics := TPascalTypeBitmapLineMetrics.Create;
+  inherited;
+  FHorizontalMetrics := TPascalTypeBitmapLineMetrics.Create;
+  FVerticalMetrics := TPascalTypeBitmapLineMetrics.Create;
 end;
 
 destructor TPascalTypeBitmapScaleTable.Destroy;
 begin
- FreeAndNil(FHorizontalMetrics);
- FreeAndNil(FVerticalMetrics);
- inherited;
+  FreeAndNil(FHorizontalMetrics);
+  FreeAndNil(FVerticalMetrics);
+  inherited;
 end;
 
 procedure TPascalTypeBitmapScaleTable.AssignTo(Dest: TPersistent);
 begin
- inherited;
- if Dest is Self.ClassType then
-  with TPascalTypeBitmapScaleTable(Dest) do
-   begin
-    FPpemX           := Self.FPpemX;
-    FPpemY           := Self.FPpemY;
-    FSubstitutePpemX := Self.FSubstitutePpemX;
-    FSubstitutePpemY := Self.FSubstitutePpemY;
+  inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypeBitmapScaleTable(Dest) do
+    begin
+      FPpemX := Self.FPpemX;
+      FPpemY := Self.FPpemY;
+      FSubstitutePpemX := Self.FSubstitutePpemX;
+      FSubstitutePpemY := Self.FSubstitutePpemY;
 
-    FHorizontalMetrics.Assign(Self.FHorizontalMetrics);
-    FVerticalMetrics.Assign(Self.FVerticalMetrics);
-   end;
+      FHorizontalMetrics.Assign(Self.FHorizontalMetrics);
+      FVerticalMetrics.Assign(Self.FVerticalMetrics);
+    end;
 end;
 
 procedure TPascalTypeBitmapScaleTable.ResetToDefaults;
 begin
- inherited;
- FPpemX           := 0;
- FPpemY           := 0;
- FSubstitutePpemX := 0;
- FSubstitutePpemY := 0;
+  inherited;
+  FPpemX := 0;
+  FPpemY := 0;
+  FSubstitutePpemX := 0;
+  FSubstitutePpemY := 0;
 
- FHorizontalMetrics.ResetToDefaults;
- FVerticalMetrics.ResetToDefaults;
+  FHorizontalMetrics.ResetToDefaults;
+  FVerticalMetrics.ResetToDefaults;
 end;
 
 procedure TPascalTypeBitmapScaleTable.LoadFromStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // load horizontal metrics from stream
-   FHorizontalMetrics.LoadFromStream(Stream);
+    // load horizontal metrics from stream
+    FHorizontalMetrics.LoadFromStream(Stream);
 
-   // load vertical metrics from stream
-   FVerticalMetrics.LoadFromStream(Stream);
+    // load vertical metrics from stream
+    FVerticalMetrics.LoadFromStream(Stream);
 
-   // check (minimum) table size
-   if Position + 4 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+    // check (minimum) table size
+    if Position + 4 > Size then
+      raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
-   // read horizontal pixels per Em
-   Read(FPpemX, 1);
+    // read horizontal pixels per Em
+    Read(FPpemX, 1);
 
-   // read vertical pixels per Em
-   Read(FPpemY, 1);
+    // read vertical pixels per Em
+    Read(FPpemY, 1);
 
-   // read horizontal substitute ppem
-   Read(FSubstitutePpemX, 1);
+    // read horizontal substitute ppem
+    Read(FSubstitutePpemX, 1);
 
-   // read vertical substitute ppem
-   Read(FSubstitutePpemY, 1);
+    // read vertical substitute ppem
+    Read(FSubstitutePpemY, 1);
   end;
 end;
 
 procedure TPascalTypeBitmapScaleTable.SaveToStream(Stream: TStream);
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // save horizontal metrics to stream
-   FHorizontalMetrics.SaveToStream(Stream);
+    // save horizontal metrics to stream
+    FHorizontalMetrics.SaveToStream(Stream);
 
-   // save vertical metrics to stream
-   FVerticalMetrics.SaveToStream(Stream);
+    // save vertical metrics to stream
+    FVerticalMetrics.SaveToStream(Stream);
 
-   // write horizontal pixels per Em
-   Write(FPpemX, 1);
+    // write horizontal pixels per Em
+    Write(FPpemX, 1);
 
-   // write vertical pixels per Em
-   Write(FPpemY, 1);
+    // write vertical pixels per Em
+    Write(FPpemY, 1);
 
-   // write horizontal substitute ppem
-   Write(FSubstitutePpemX, 1);
+    // write horizontal substitute ppem
+    Write(FSubstitutePpemX, 1);
 
-   // write vertical substitute ppem
-   Write(FSubstitutePpemY, 1);
+    // write vertical substitute ppem
+    Write(FSubstitutePpemY, 1);
   end;
 end;
 
 procedure TPascalTypeBitmapScaleTable.SetPpemX(const Value: Byte);
 begin
- if FPpemX <> Value then
+  if FPpemX <> Value then
   begin
-   FPpemX := Value;
-   PpemXChanged;
+    FPpemX := Value;
+    PpemXChanged;
   end;
 end;
 
 procedure TPascalTypeBitmapScaleTable.SetPpemY(const Value: Byte);
 begin
- if FPpemY <> Value then
+  if FPpemY <> Value then
   begin
-   FPpemY := Value;
-   PpemYChanged;
+    FPpemY := Value;
+    PpemYChanged;
   end;
 end;
 
 procedure TPascalTypeBitmapScaleTable.SetSubstitutePpemX(const Value: Byte);
 begin
- if FSubstitutePpemX <> Value then
+  if FSubstitutePpemX <> Value then
   begin
-   FSubstitutePpemX := Value;
-   SubstitutePpemXChanged;
+    FSubstitutePpemX := Value;
+    SubstitutePpemXChanged;
   end;
 end;
 
 procedure TPascalTypeBitmapScaleTable.SetSubstitutePpemY(const Value: Byte);
 begin
- if FSubstitutePpemY <> Value then
+  if FSubstitutePpemY <> Value then
   begin
-   FSubstitutePpemY := Value;
-   SubstitutePpemYChanged;
+    FSubstitutePpemY := Value;
+    SubstitutePpemYChanged;
   end;
 end;
 
 procedure TPascalTypeBitmapScaleTable.PpemXChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeBitmapScaleTable.PpemYChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeBitmapScaleTable.SubstitutePpemXChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeBitmapScaleTable.SubstitutePpemYChanged;
 begin
- Changed;
+  Changed;
 end;
 
 
 { TPascalTypeEmbeddedBitmapScalingTable }
 
-constructor TPascalTypeEmbeddedBitmapScalingTable.Create(
-  Storage: IPascalTypeStorageTable);
+constructor TPascalTypeEmbeddedBitmapScalingTable.Create
+  (Storage: IPascalTypeStorageTable);
 begin
- FBitmapScaleList := TObjectList.Create;
- inherited;
+  FBitmapScaleList := TObjectList.Create;
+  inherited;
 end;
 
 destructor TPascalTypeEmbeddedBitmapScalingTable.Destroy;
 begin
- FreeAndNil(FBitmapScaleList);
- inherited;
+  FreeAndNil(FBitmapScaleList);
+  inherited;
 end;
 
 procedure TPascalTypeEmbeddedBitmapScalingTable.AssignTo(Dest: TPersistent);
 begin
- inherited;
- if Dest is Self.ClassType then
-  with TPascalTypeEmbeddedBitmapScalingTable(Dest) do
-   begin
-    FBitmapScaleList.Assign(Self.FBitmapScaleList);
-   end;
+  inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypeEmbeddedBitmapScalingTable(Dest) do
+    begin
+      FBitmapScaleList.Assign(Self.FBitmapScaleList);
+    end;
 end;
 
-function TPascalTypeEmbeddedBitmapScalingTable.GetBitmapScaleTable(
-  Index: Integer): TPascalTypeBitmapScaleTable;
+function TPascalTypeEmbeddedBitmapScalingTable.GetBitmapScaleTable
+  (Index: Integer): TPascalTypeBitmapScaleTable;
 begin
- if (Index >= 0) and (Index < FBitmapScaleList.Count)
-  then Result := TPascalTypeBitmapScaleTable(FBitmapScaleList[Index])
-  else raise Exception.CreateFmt(RCStrIndexOutOfBounds, [Index]);
+  if (Index >= 0) and (Index < FBitmapScaleList.Count) then
+    Result := TPascalTypeBitmapScaleTable(FBitmapScaleList[Index])
+  else
+    raise Exception.CreateFmt(RCStrIndexOutOfBounds, [Index]);
 end;
 
-function TPascalTypeEmbeddedBitmapScalingTable.GetBitmapScaleTableCount: Integer;
+function TPascalTypeEmbeddedBitmapScalingTable.GetBitmapScaleTableCount
+  : Integer;
 begin
- Result := FBitmapScaleList.Count;
+  Result := FBitmapScaleList.Count;
 end;
 
 class function TPascalTypeEmbeddedBitmapScalingTable.GetTableType: TTableType;
 begin
- Result := 'EBLC';
+  Result := 'EBLC';
 end;
 
 procedure TPascalTypeEmbeddedBitmapScalingTable.ResetToDefaults;
 begin
- inherited;
- FBitmapScaleList.Clear;
+  inherited;
+  FBitmapScaleList.Clear;
 end;
 
 procedure TPascalTypeEmbeddedBitmapScalingTable.LoadFromStream(Stream: TStream);
 var
-  BitmapScaleCount : Cardinal;
-  BitmapScaleIndex : Integer;
-  BitmapScaleTable : TPascalTypeBitmapScaleTable;
+  BitmapScaleCount: Cardinal;
+  BitmapScaleIndex: Integer;
+  BitmapScaleTable: TPascalTypeBitmapScaleTable;
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // check (minimum) table size
-   if Position + 4 > Size
-    then raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
+    // check (minimum) table size
+    if Position + 4 > Size then
+      raise EPascalTypeTableIncomplete.Create(RCStrTableIncomplete);
 
-   // read number of bitmap scale tables
-   BitmapScaleCount := ReadSwappedCardinal(Stream);
+    // read number of bitmap scale tables
+    BitmapScaleCount := ReadSwappedCardinal(Stream);
 
-   // read bitmap size tables
-   for BitmapScaleIndex := 0 to BitmapScaleCount - 1 do
+    // read bitmap size tables
+    for BitmapScaleIndex := 0 to BitmapScaleCount - 1 do
     begin
-     // create bitmap size table
-     BitmapScaleTable := TPascalTypeBitmapScaleTable.Create;
+      // create bitmap size table
+      BitmapScaleTable := TPascalTypeBitmapScaleTable.Create;
 
-     // load bitmap size table
-     BitmapScaleTable.LoadFromStream(Stream);
+      // load bitmap size table
+      BitmapScaleTable.LoadFromStream(Stream);
 
-     // add bitmap size table
-     FBitmapScaleList.Add(BitmapScaleTable);
+      // add bitmap size table
+      FBitmapScaleList.Add(BitmapScaleTable);
     end;
   end;
 end;
 
 procedure TPascalTypeEmbeddedBitmapScalingTable.SaveToStream(Stream: TStream);
 var
-  BitmapScaleIndex : Integer;
+  BitmapScaleIndex: Integer;
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // write number of BitmapScale tables
-   WriteSwappedCardinal(Stream, FBitmapScaleList.Count);
+    // write number of BitmapScale tables
+    WriteSwappedCardinal(Stream, FBitmapScaleList.Count);
 
-   // write bitmap size tables
-   for BitmapScaleIndex := 0 to FBitmapScaleList.Count - 1 do
+    // write bitmap size tables
+    for BitmapScaleIndex := 0 to FBitmapScaleList.Count - 1 do
     begin
-     // save bitmap size table to stream
-     TPascalTypeBitmapScaleTable(FBitmapScaleList).SaveToStream(Stream);
+      // save bitmap size table to stream
+      TPascalTypeBitmapScaleTable(FBitmapScaleList).SaveToStream(Stream);
     end;
   end;
 end;
 
-
 initialization
-  RegisterPascalTypeTables([TPascalTypeEmbeddedBitmapDataTable,
-    TPascalTypeEmbeddedBitmapLocationTable,
-    TPascalTypeEmbeddedBitmapScalingTable]);
+
+RegisterPascalTypeTables([TPascalTypeEmbeddedBitmapDataTable,
+  TPascalTypeEmbeddedBitmapLocationTable,
+  TPascalTypeEmbeddedBitmapScalingTable]);
 
 end.

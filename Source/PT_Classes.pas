@@ -42,13 +42,17 @@ type
   TCustomPascalTypeNamedTableClass = class of TCustomPascalTypeNamedTable;
 
   IPascalTypeStorageTable = interface(IUnknown)
-  ['{A990D67B-BC60-4DA4-9D90-3C1D30AEC003}']
-    function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable;
-    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
+    ['{A990D67B-BC60-4DA4-9D90-3C1D30AEC003}']
+    function GetTableByTableName(TableNAme: TTableName)
+      : TCustomPascalTypeNamedTable;
+    function GetTableByTableType(TableType: TTableType)
+      : TCustomPascalTypeNamedTable;
+    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass)
+      : TCustomPascalTypeNamedTable;
   end;
 
   IPascalTypeStorageChange = interface(IUnknown)
-  ['{4C10BAEF-04DB-42D0-9A6C-5FE155E80AEB}']
+    ['{4C10BAEF-04DB-42D0-9A6C-5FE155E80AEB}']
     procedure Changed;
   end;
 
@@ -60,18 +64,13 @@ type
   public
     constructor Create; virtual;
 
-(*
-    procedure ReadFromStream(Stream: TStream; ChunkSize: Cardinal); virtual; abstract;
-    procedure WriteToStream(Stream: TStream); virtual; abstract;
-*)
-
     procedure LoadFromStream(Stream: TStream); virtual; abstract;
     procedure SaveToStream(Stream: TStream); virtual; abstract;
   end;
 
   TCustomPascalTypeInterfaceTable = class(TCustomPascalTypeTable)
   protected
-    FStorage : IPascalTypeStorageTable;
+    FStorage: IPascalTypeStorageTable;
     procedure Changed; override;
   public
     constructor Create(Storage: IPascalTypeStorageTable); reintroduce; virtual;
@@ -87,15 +86,23 @@ type
     property TableType: TTableType read GetInternalTableType;
   end;
 
-// big-endian stream I/O
-function ReadSwappedWord(Stream: TStream): Word; {$IFDEF UseInline} inline; {$ENDIF}
-function ReadSwappedSmallInt(Stream: TStream): SmallInt; {$IFDEF UseInline} inline; {$ENDIF}
-function ReadSwappedCardinal(Stream: TStream): Cardinal; {$IFDEF UseInline} inline; {$ENDIF}
-function ReadSwappedInt64(Stream: TStream): Int64; {$IFDEF UseInline} inline; {$ENDIF}
-procedure WriteSwappedWord(Stream: TStream; Value : Word); {$IFDEF UseInline} inline; {$ENDIF}
-procedure WriteSwappedSmallInt(Stream: TStream; Value : SmallInt); {$IFDEF UseInline} inline; {$ENDIF}
-procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal); {$IFDEF UseInline} inline; {$ENDIF}
-procedure WriteSwappedInt64(Stream: TStream; Value: Int64); {$IFDEF UseInline} inline; {$ENDIF}
+  // big-endian stream I/O
+function ReadSwappedWord(Stream: TStream): Word; {$IFDEF UseInline} inline;
+{$ENDIF}
+function ReadSwappedSmallInt(Stream: TStream): SmallInt;
+{$IFDEF UseInline} inline; {$ENDIF}
+function ReadSwappedCardinal(Stream: TStream): Cardinal;
+{$IFDEF UseInline} inline; {$ENDIF}
+function ReadSwappedInt64(Stream: TStream): Int64; {$IFDEF UseInline} inline;
+{$ENDIF}
+procedure WriteSwappedWord(Stream: TStream; Value: Word);
+{$IFDEF UseInline} inline; {$ENDIF}
+procedure WriteSwappedSmallInt(Stream: TStream; Value: SmallInt);
+{$IFDEF UseInline} inline; {$ENDIF}
+procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal);
+{$IFDEF UseInline} inline; {$ENDIF}
+procedure WriteSwappedInt64(Stream: TStream; Value: Int64);
+{$IFDEF UseInline} inline; {$ENDIF}
 procedure CopySwappedWord(Source: PWord; Destination: PWord; Size: Integer);
 
 implementation
@@ -105,81 +112,82 @@ uses
 
 function ReadSwappedWord(Stream: TStream): Word;
 begin
- {$IFDEF ValidateEveryReadOperation}
- if Stream.Read(Result, SizeOf(Word)) <> SizeOf(Word)
-  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
- {$ELSE}
- Stream.Read(Result, SizeOf(Word));
- {$ENDIF}
- Result := Swap16(Result);
+{$IFDEF ValidateEveryReadOperation}
+  if Stream.Read(Result, SizeOf(Word)) <> SizeOf(Word) then
+    raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
+{$ELSE}
+  Stream.Read(Result, SizeOf(Word));
+{$ENDIF}
+  Result := Swap16(Result);
 end;
 
 function ReadSwappedSmallInt(Stream: TStream): SmallInt;
 begin
- {$IFDEF ValidateEveryReadOperation}
- if Stream.Read(Result, SizeOf(SmallInt)) <> SizeOf(SmallInt)
-  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
- {$ELSE}
- Stream.Read(Result, SizeOf(SmallInt));
- {$ENDIF}
- Result := Swap16(Result);
+{$IFDEF ValidateEveryReadOperation}
+  if Stream.Read(Result, SizeOf(SmallInt)) <> SizeOf(SmallInt) then
+    raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
+{$ELSE}
+  Stream.Read(Result, SizeOf(SmallInt));
+{$ENDIF}
+  Result := Swap16(Result);
 end;
 
 function ReadSwappedCardinal(Stream: TStream): Cardinal;
 begin
- {$IFDEF ValidateEveryReadOperation}
- if Stream.Read(Result, SizeOf(Cardinal)) <> SizeOf(Cardinal)
-  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
- {$ELSE}
- Stream.Read(Result, SizeOf(Cardinal));
- {$ENDIF}
- Result := Swap32(Result);
+{$IFDEF ValidateEveryReadOperation}
+  Assert(SizeOf(Cardinal) = 4);
+  if Stream.Read(Result, SizeOf(Cardinal)) <> SizeOf(Cardinal) then
+    raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
+{$ELSE}
+  Stream.Read(Result, SizeOf(Cardinal));
+{$ENDIF}
+  Result := Swap32(Result);
 end;
 
 function ReadSwappedInt64(Stream: TStream): Int64;
 begin
- {$IFDEF ValidateEveryReadOperation}
- if Stream.Read(Result, SizeOf(Int64)) <> SizeOf(Int64)
-  then raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
- {$ELSE}
- Stream.Read(Result, SizeOf(Int64));
- {$ENDIF}
- Result := Swap64(Result);
+{$IFDEF ValidateEveryReadOperation}
+  if Stream.Read(Result, SizeOf(Int64)) <> SizeOf(Int64) then
+    raise EPascalTypeStremReadError.Create(RCStrStreamReadError);
+{$ELSE}
+  Stream.Read(Result, SizeOf(Int64));
+{$ENDIF}
+  Result := Swap64(Result);
 end;
 
 procedure WriteSwappedWord(Stream: TStream; Value: Word);
 begin
- Value := Swap16(Value);
- Stream.Write(Value, SizeOf(Word));
+  Value := Swap16(Value);
+  Stream.Write(Value, SizeOf(Word));
 end;
 
 procedure WriteSwappedSmallInt(Stream: TStream; Value: SmallInt);
 begin
- Value := Swap16(Value);
- Stream.Write(Value, SizeOf(SmallInt));
+  Value := Swap16(Value);
+  Stream.Write(Value, SizeOf(SmallInt));
 end;
 
 procedure WriteSwappedCardinal(Stream: TStream; Value: Cardinal);
 begin
- Value := Swap32(Value);
- Stream.Write(Value, SizeOf(Cardinal));
+  Value := Swap32(Value);
+  Stream.Write(Value, SizeOf(Cardinal));
 end;
 
 procedure WriteSwappedInt64(Stream: TStream; Value: Int64);
 begin
- Value := Swap64(Value);
- Stream.Write(Value, SizeOf(Int64));
+  Value := Swap64(Value);
+  Stream.Write(Value, SizeOf(Int64));
 end;
 
 procedure CopySwappedWord(Source: PWord; Destination: PWord; Size: Integer);
 var
-  Cnt : Integer;
+  Cnt: Integer;
 begin
- for Cnt := 0 to Size - 1 do
+  for Cnt := 0 to Size - 1 do
   begin
-   Destination^ := Swap16(Source^);
-   Inc(Source);
-   Inc(Destination);
+    Destination^ := Swap16(Source^);
+    Inc(Source);
+    Inc(Destination);
   end;
 end;
 
@@ -188,13 +196,13 @@ end;
 
 constructor TCustomPascalTypeTable.Create;
 begin
- ResetToDefaults;
- inherited Create;
+  ResetToDefaults;
+  inherited Create;
 end;
 
 procedure TCustomPascalTypeTable.Changed;
 begin
- // nothing here yet
+  // nothing here yet
 end;
 
 
@@ -202,16 +210,16 @@ end;
 
 procedure TCustomPascalTypeInterfaceTable.Changed;
 begin
- inherited;
-// if FStorage is IPascalTypeStorageChange
-//  then (FStorage as IPascalTypeStorageChange).Changed;
+  inherited;
+  // if FStorage is IPascalTypeStorageChange
+  // then (FStorage as IPascalTypeStorageChange).Changed;
 end;
 
-constructor TCustomPascalTypeInterfaceTable.Create(
-  Storage: IPascalTypeStorageTable);
+constructor TCustomPascalTypeInterfaceTable.Create
+  (Storage: IPascalTypeStorageTable);
 begin
- FStorage := Storage;
- inherited Create;
+  FStorage := Storage;
+  inherited Create;
 end;
 
 
@@ -219,16 +227,16 @@ end;
 
 function TCustomPascalTypeNamedTable.GetInternalTableType: TTableType;
 begin
- Result := GetTableType;
+  Result := GetTableType;
 end;
 
 procedure TCustomPascalTypeNamedTable.WriteTableTypeToStream(Stream: TStream);
 var
-  TableName: TTableType;
+  TableNAme: TTableType;
 begin
   // store chunk name to memory stream
-  TableName := GetTableType;
-  Stream.Write(TableName, 4);
+  TableNAme := GetTableType;
+  Stream.Write(TableNAme, 4);
 end;
 
 end.

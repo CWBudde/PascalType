@@ -50,28 +50,31 @@ type
   EPascalTypeChecksumError = class(EPascalTypeError);
   {$ENDIF}
 
+  TTableName = array [0..3] of AnsiChar;
+
   TTableType = record
-  {$IFDEF DELPHI10_UP}
+  {$IFDEF SUPPORTS_ENHANCED_RECORDS}
     constructor Create(const Value: Integer); overload;
     constructor Create(const Value: AnsiString); overload;
 
-    class operator Equal(const Lhs, Rhs: TTableType): Boolean;
-    class operator NotEqual(const Lhs, Rhs: TTableType): Boolean;
+    class operator Equal(const Lhs, Rhs: TTableType): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+    class operator NotEqual(const Lhs, Rhs: TTableType): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 
-    class operator Implicit(const Value: AnsiString): TTableType;
-    class operator Implicit(const Value: Integer): TTableType;
-    class operator Explicit(const Value: TTableType): string;
-    class operator Explicit(const Value: TTableType): AnsiString;
-    class operator Explicit(const Value: TTableType): Integer;
+    class operator Implicit(const Value: AnsiString): TTableType; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+    class operator Implicit(const Value: TTableName): TTableType; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+    class operator Implicit(const Value: Integer): TTableType; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+    class operator Explicit(const Value: TTableType): string; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+    class operator Explicit(const Value: TTableType): AnsiString; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+    class operator Explicit(const Value: TTableType): Integer; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
   {$ENDIF}
   case Integer of
     0: (AsCardinal : Cardinal);
     1: (AsInteger  : Integer);
-    2: (AsAnsiChar : array [0..3] of AnsiChar);
+    2: (AsAnsiChar : TTableName);
   end;
 
   TFixedPoint = packed record
-  {$IFDEF DELPHI10_UP}
+  {$IFDEF SUPPORTS_ENHANCED_RECORDS}
   public
     constructor Create(const Fixed: Integer); overload;
     constructor Create(const Fract: Word; Value: SmallInt); overload;
@@ -575,6 +578,7 @@ type
     vfFontRepackagers,
     vcVendorsOfUniqueTypefaces);
 
+function CompareTableType(TableType: TTableType; TableName: TTableName): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function VersionToString(Value: TFixedPoint): string;
 function FontHeaderTableFlagsToWord(Value: TFontHeaderTableFlags): Word;
 function WordToFontHeaderTableFlags(Value: Word): TFontHeaderTableFlags;
@@ -602,6 +606,13 @@ function NonAlphabeticCodeToFixedPoint(Value: TNonAlphabeticCode): TFixedPoint;
 
 implementation
 
+
+function CompareTableType(TableType: TTableType; TableName: TTableName): Boolean;
+var
+  TableNameAsCardinal : Cardinal absolute TableName;
+begin
+  Result := TableType.AsCardinal = TableNameAsCardinal;
+end;
 
 function VersionToString(Value: TFixedPoint): string;
 begin
@@ -1234,267 +1245,51 @@ begin
 end;
 
 function DefaultGlyphName(Value: Word): string;
+const
+  CDefaultGlyphNames : array [0..257] of string = ('.notdef',
+    '.null', 'nonmarkingreturn', 'space', 'exclam', 'quotedbl', 'numbersign',
+     'dollar', 'percent', 'ampersand', 'quotesingle', 'parenleft', 'parenright',
+     'asterisk', 'plus', 'comma', 'hyphen', 'period', 'slash', 'zero', 'one',
+     'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'colon',
+     'semicolon', 'less', 'equal', 'greater', 'question', 'at', 'A', 'B', 'C',
+     'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+     'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'bracketleft', 'backslash',
+     'bracketright', 'asciicircum', 'underscore', 'grave', 'a', 'b', 'c', 'd',
+     'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+     't', 'u', 'v', 'w', 'x', 'y', 'z', 'braceleft', 'bar', 'braceright',
+     'asciitilde', 'Adieresis', 'Aring', 'Ccedilla', 'Eacute', 'Ntilde',
+     'Odieresis', 'Udieresis', 'aacute', 'agrave', 'acircumflex', 'adieresis',
+     'atilde', 'aring', 'ccedilla', 'eacute', 'egrave', 'ecircumflex',
+     'edieresis', 'iacute', 'igrave', 'icircumflex', 'idieresis', 'ntilde',
+     'oacute', 'ograve', 'ocircumflex', 'odieresis', 'otilde', 'uacute',
+     'ugrave', 'ucircumflex', 'udieresis', 'dagger', 'degree', 'cent',
+     'sterling', 'section', 'bullet', 'paragraph', 'germandbls', 'registered',
+     'copyright', 'trademark', 'acute', 'dieresis', 'notequal', 'AE', 'Oslash',
+     'infinity', 'plusminus', 'lessequal', 'greaterequal', 'yen', 'mu',
+     'partialdiff', 'summation', 'product', 'pi', 'integral', 'ordfeminine',
+     'ordmasculine', 'Omega', 'ae', 'oslash', 'questiondown', 'exclamdown',
+     'logicalnot', 'radical', 'florin', 'approxequal', 'Delta',
+     'guillemotleft', 'guillemotright', 'ellipsis', 'nonbreakingspace',
+     'Agrave', 'Atilde', 'Otilde', 'OE', 'oe', 'endash', 'emdash',
+     'quotedblleft', 'quotedblright', 'quoteleft', 'quoteright', 'divide',
+     'lozenge', 'ydieresis', 'Ydieresis', 'fraction', 'currency',
+     'guilsinglleft', 'guilsinglright', 'fi', 'fl', 'daggerdbl',
+     'periodcentered', 'quotesinglbase', 'quotedblbase', 'perthousand',
+     'Acircumflex', 'Ecircumflex', 'Aacute', 'Edieresis', 'Egrave', 'Iacute',
+     'Icircumflex', 'Idieresis', 'Igrave', 'Oacute', 'Ocircumflex', 'apple',
+     'Ograve', 'Uacute', 'Ucircumflex', 'Ugrave', 'dotlessi', 'circumflex',
+     'tilde', 'macron', 'breve', 'dotaccent', 'ring', 'cedilla', 'hungarumlaut',
+     'ogonek', 'caron', 'Lslash', 'lslash', 'Scaron', 'scaron', 'Zcaron',
+     'zcaron', 'brokenbar', 'Eth', 'eth', 'Yacute', 'yacute', 'Thorn',
+     'thorn', 'minus', 'multiply', 'onesuperior', 'twosuperior',
+     'threesuperior', 'onehalf', 'onequarter', 'threequarters', 'franc',
+     'Gbreve', 'gbreve', 'Idotaccent', 'Scedilla', 'scedilla', 'Cacute',
+     'cacute', 'Ccaron', 'ccaron', 'dcroat');
 begin
-  case Value of
-     0 : Result := '.notdef';
-     1 : Result := '.null';
-     2 : Result := 'nonmarkingreturn';
-     3 : Result := 'space';
-     4 : Result := 'exclam';
-     5 : Result := 'quotedbl';
-     6 : Result := 'numbersign';
-     7 : Result := 'dollar';
-     8 : Result := 'percent';
-     9 : Result := 'ampersand';
-    10 : Result := 'quotesingle';
-    11 : Result := 'parenleft';
-    12 : Result := 'parenright';
-    13 : Result := 'asterisk';
-    14 : Result := 'plus';
-    15 : Result := 'comma';
-    16 : Result := 'hyphen';
-    17 : Result := 'period';
-    18 : Result := 'slash';
-    19 : Result := 'zero';
-    20 : Result := 'one';
-    21 : Result := 'two';
-    22 : Result := 'three';
-    23 : Result := 'four';
-    24 : Result := 'five';
-    25 : Result := 'six';
-    26 : Result := 'seven';
-    27 : Result := 'eight';
-    28 : Result := 'nine';
-    29 : Result := 'colon';
-    30 : Result := 'semicolon';
-    31 : Result := 'less';
-    32 : Result := 'equal';
-    33 : Result := 'greater';
-    34 : Result := 'question';
-    35 : Result := 'at';
-    36 : Result := 'A';
-    37 : Result := 'B';
-    38 : Result := 'C';
-    39 : Result := 'D';
-    40 : Result := 'E';
-    41 : Result := 'F';
-    42 : Result := 'G';
-    43 : Result := 'H';
-    44 : Result := 'I';
-    45 : Result := 'J';
-    46 : Result := 'K';
-    47 : Result := 'L';
-    48 : Result := 'M';
-    49 : Result := 'N';
-    50 : Result := 'O';
-    51 : Result := 'P';
-    52 : Result := 'Q';
-    53 : Result := 'R';
-    54 : Result := 'S';
-    55 : Result := 'T';
-    56 : Result := 'U';
-    57 : Result := 'V';
-    58 : Result := 'W';
-    59 : Result := 'X';
-    60 : Result := 'Y';
-    61 : Result := 'Z';
-    62 : Result := 'bracketleft';
-    63 : Result := 'backslash';
-    64 : Result := 'bracketright';
-    65 : Result := 'asciicircum';
-    66 : Result := 'underscore';
-    67 : Result := 'grave';
-    68 : Result := 'a';
-    69 : Result := 'b';
-    70 : Result := 'c';
-    71 : Result := 'd';
-    72 : Result := 'e';
-    73 : Result := 'f';
-    74 : Result := 'g';
-    75 : Result := 'h';
-    76 : Result := 'i';
-    77 : Result := 'j';
-    78 : Result := 'k';
-    79 : Result := 'l';
-    80 : Result := 'm';
-    81 : Result := 'n';
-    82 : Result := 'o';
-    83 : Result := 'p';
-    84 : Result := 'q';
-    85 : Result := 'r';
-    86 : Result := 's';
-    87 : Result := 't';
-    88 : Result := 'u';
-    89 : Result := 'v';
-    90 : Result := 'w';
-    91 : Result := 'x';
-    92 : Result := 'y';
-    93 : Result := 'z';
-    94 : Result := 'braceleft';
-    95 : Result := 'bar';
-    96 : Result := 'braceright';
-    97 : Result := 'asciitilde';
-    98 : Result := 'Adieresis';
-    99 : Result := 'Aring';
-   100 : Result := 'Ccedilla';
-   101 : Result := 'Eacute';
-   102 : Result := 'Ntilde';
-   103 : Result := 'Odieresis';
-   104 : Result := 'Udieresis';
-   105 : Result := 'aacute';
-   106 : Result := 'agrave';
-   107 : Result := 'acircumflex';
-   108 : Result := 'adieresis';
-   109 : Result := 'atilde';
-   110 : Result := 'aring';
-   111 : Result := 'ccedilla';
-   112 : Result := 'eacute';
-   113 : Result := 'egrave';
-   114 : Result := 'ecircumflex';
-   115 : Result := 'edieresis';
-   116 : Result := 'iacute';
-   117 : Result := 'igrave';
-   118 : Result := 'icircumflex';
-   119 : Result := 'idieresis';
-   120 : Result := 'ntilde';
-   121 : Result := 'oacute';
-   122 : Result := 'ograve';
-   123 : Result := 'ocircumflex';
-   124 : Result := 'odieresis';
-   125 : Result := 'otilde';
-   126 : Result := 'uacute';
-   127 : Result := 'ugrave';
-   128 : Result := 'ucircumflex';
-   129 : Result := 'udieresis';
-   130 : Result := 'dagger';
-   131 : Result := 'degree';
-   132 : Result := 'cent';
-   133 : Result := 'sterling';
-   134 : Result := 'section';
-   135 : Result := 'bullet';
-   136 : Result := 'paragraph';
-   137 : Result := 'germandbls';
-   138 : Result := 'registered';
-   139 : Result := 'copyright';
-   140 : Result := 'trademark';
-   141 : Result := 'acute';
-   142 : Result := 'dieresis';
-   143 : Result := 'notequal';
-   144 : Result := 'AE';
-   145 : Result := 'Oslash';
-   146 : Result := 'infinity';
-   147 : Result := 'plusminus';
-   148 : Result := 'lessequal';
-   149 : Result := 'greaterequal';
-   150 : Result := 'yen';
-   151 : Result := 'mu';
-   152 : Result := 'partialdiff';
-   153 : Result := 'summation';
-   154 : Result := 'product';
-   155 : Result := 'pi';
-   156 : Result := 'integral';
-   157 : Result := 'ordfeminine';
-   158 : Result := 'ordmasculine';
-   159 : Result := 'Omega';
-   160 : Result := 'ae';
-   161 : Result := 'oslash';
-   162 : Result := 'questiondown';
-   163 : Result := 'exclamdown';
-   164 : Result := 'logicalnot';
-   165 : Result := 'radical';
-   166 : Result := 'florin';
-   167 : Result := 'approxequal';
-   168 : Result := 'Delta';
-   169 : Result := 'guillemotleft';
-   170 : Result := 'guillemotright';
-   171 : Result := 'ellipsis';
-   172 : Result := 'nonbreakingspace';
-   173 : Result := 'Agrave';
-   174 : Result := 'Atilde';
-   175 : Result := 'Otilde';
-   176 : Result := 'OE';
-   177 : Result := 'oe';
-   178 : Result := 'endash';
-   179 : Result := 'emdash';
-   180 : Result := 'quotedblleft';
-   181 : Result := 'quotedblright';
-   182 : Result := 'quoteleft';
-   183 : Result := 'quoteright';
-   184 : Result := 'divide';
-   185 : Result := 'lozenge';
-   186 : Result := 'ydieresis';
-   187 : Result := 'Ydieresis';
-   188 : Result := 'fraction';
-   189 : Result := 'currency';
-   190 : Result := 'guilsinglleft';
-   191 : Result := 'guilsinglright';
-   192 : Result := 'fi';
-   193 : Result := 'fl';
-   194 : Result := 'daggerdbl';
-   195 : Result := 'periodcentered';
-   196 : Result := 'quotesinglbase';
-   197 : Result := 'quotedblbase';
-   198 : Result := 'perthousand';
-   199 : Result := 'Acircumflex';
-   200 : Result := 'Ecircumflex';
-   201 : Result := 'Aacute';
-   202 : Result := 'Edieresis';
-   203 : Result := 'Egrave';
-   204 : Result := 'Iacute';
-   205 : Result := 'Icircumflex';
-   206 : Result := 'Idieresis';
-   207 : Result := 'Igrave';
-   208 : Result := 'Oacute';
-   209 : Result := 'Ocircumflex';
-   210 : Result := 'apple';
-   211 : Result := 'Ograve';
-   212 : Result := 'Uacute';
-   213 : Result := 'Ucircumflex';
-   214 : Result := 'Ugrave';
-   215 : Result := 'dotlessi';
-   216 : Result := 'circumflex';
-   217 : Result := 'tilde';
-   218 : Result := 'macron';
-   219 : Result := 'breve';
-   220 : Result := 'dotaccent';
-   221 : Result := 'ring';
-   222 : Result := 'cedilla';
-   223 : Result := 'hungarumlaut';
-   224 : Result := 'ogonek';
-   225 : Result := 'caron';
-   226 : Result := 'Lslash';
-   227 : Result := 'lslash';
-   228 : Result := 'Scaron';
-   229 : Result := 'scaron';
-   230 : Result := 'Zcaron';
-   231 : Result := 'zcaron';
-   232 : Result := 'brokenbar';
-   233 : Result := 'Eth';
-   234 : Result := 'eth';
-   235 : Result := 'Yacute';
-   236 : Result := 'yacute';
-   237 : Result := 'Thorn';
-   238 : Result := 'thorn';
-   239 : Result := 'minus';
-   240 : Result := 'multiply';
-   241 : Result := 'onesuperior';
-   242 : Result := 'twosuperior';
-   243 : Result := 'threesuperior';
-   244 : Result := 'onehalf';
-   245 : Result := 'onequarter';
-   246 : Result := 'threequarters';
-   247 : Result := 'franc';
-   248 : Result := 'Gbreve';
-   249 : Result := 'gbreve';
-   250 : Result := 'Idotaccent';
-   251 : Result := 'Scedilla';
-   252 : Result := 'scedilla';
-   253 : Result := 'Cacute';
-   254 : Result := 'cacute';
-   255 : Result := 'Ccaron';
-   256 : Result := 'ccaron';
-   257 : Result := 'dcroat';
-  end
+  if Value < 258 then
+    Result := CDefaultGlyphNames[Value]
+  else
+    Result := '';
 end;
 
 function FixedPointToNonAlphabeticCode(Value: TFixedPoint): TNonAlphabeticCode;
@@ -1518,7 +1313,7 @@ begin
 end;
 
 
-{$IFDEF DELPHI10_UP}
+{$IFDEF SUPPORTS_ENHANCED_RECORDS}
 
 { TTableType }
 
@@ -1568,6 +1363,11 @@ begin
    1..4 : Move(Value[1], Result.AsAnsiChar[0], Length(Value));
    else Move(Value[1], Result.AsAnsiChar[0], 4);
   end;
+end;
+
+class operator TTableType.Implicit(const Value: TTableName): TTableType;
+begin
+  Move(Value[0], Result.AsAnsiChar[0], 4);
 end;
 
 class operator TTableType.Implicit(const Value: Integer): TTableType;
