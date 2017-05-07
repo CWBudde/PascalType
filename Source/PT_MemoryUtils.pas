@@ -25,7 +25,7 @@ unit PT_MemoryUtils;
 //                                                                            //
 //  The initial developer of this code is Christian-W. Budde                  //
 //                                                                            //
-//  Portions created by Christian-W. Budde are Copyright (C) 2010-2011        //
+//  Portions created by Christian-W. Budde are Copyright (C) 2010-2017        //
 //  by Christian-W. Budde. All Rights Reserved.                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -208,11 +208,9 @@ begin
 end;
 
 initialization
-
-UnalignedMemoryList := TList.Create;
+  UnalignedMemoryList := TList.Create;
 
 finalization
-
-FreeAndNil(UnalignedMemoryList);
+  FreeAndNil(UnalignedMemoryList);
 
 end.

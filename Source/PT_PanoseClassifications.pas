@@ -25,7 +25,7 @@ unit PT_PanoseClassifications;
 //                                                                            //
 //  The initial developer of this code is Christian-W. Budde                  //
 //                                                                            //
-//  Portions created by Christian-W. Budde are Copyright (C) 2010             //
+//  Portions created by Christian-W. Budde are Copyright (C) 2010-2017        //
 //  by Christian-W. Budde. All Rights Reserved.                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -204,21 +204,15 @@ type
     procedure AspectRatioCharacter163Changed; virtual;
     procedure AspectRatioCharacter211Changed; virtual;
   public
-    property Kind               : Byte read GetKind write SetKind;
-    property Weight             : Byte read GetWeight write SetWeight;
-    property Spacing            : Byte read GetSpacing write SetSpacing;
-    property AspectRatioContrast: Byte read GetAspectRatioContrast
-      write SetAspectRatioContrast;
-    property AspectRatioCharacter94: Byte read GetAspectRatioCharacter94
-      write SetAspectRatioCharacter94;
-    property AspectRatioCharacter119: Byte read GetAspectRatioCharacter119
-      write SetAspectRatioCharacter119;
-    property AspectRatioCharacter157: Byte read GetAspectRatioCharacter157
-      write SetAspectRatioCharacter157;
-    property AspectRatioCharacter163: Byte read GetAspectRatioCharacter163
-      write SetAspectRatioCharacter163;
-    property AspectRatioCharacter211: Byte read GetAspectRatioCharacter211
-      write SetAspectRatioCharacter211;
+    property Kind: Byte read GetKind write SetKind;
+    property Weight: Byte read GetWeight write SetWeight;
+    property Spacing: Byte read GetSpacing write SetSpacing;
+    property AspectRatioContrast: Byte read GetAspectRatioContrast write SetAspectRatioContrast;
+    property AspectRatioCharacter94: Byte read GetAspectRatioCharacter94 write SetAspectRatioCharacter94;
+    property AspectRatioCharacter119: Byte read GetAspectRatioCharacter119 write SetAspectRatioCharacter119;
+    property AspectRatioCharacter157: Byte read GetAspectRatioCharacter157 write SetAspectRatioCharacter157;
+    property AspectRatioCharacter163: Byte read GetAspectRatioCharacter163 write SetAspectRatioCharacter163;
+    property AspectRatioCharacter211: Byte read GetAspectRatioCharacter211 write SetAspectRatioCharacter211;
   end;
 
 function LatinTextSerifStyleToString(SerifStyle: Byte): string;

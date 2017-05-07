@@ -25,7 +25,7 @@ unit PT_TablesPostscript;
 //                                                                            //
 //  The initial developer of this code is Christian-W. Budde                  //
 //                                                                            //
-//  Portions created by Christian-W. Budde are Copyright (C) 2010             //
+//  Portions created by Christian-W. Budde are Copyright (C) 2010-2017        //
 //  by Christian-W. Budde. All Rights Reserved.                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -233,12 +233,9 @@ type
   end;
 
   // operators
-procedure RegisterOperator(OperatorClass
-  : TPascalTypePostscriptDictOperatorClass);
-procedure RegisterOperators(OperatorClasses
-  : array of TPascalTypePostscriptDictOperatorClass);
-function FindOperatorByEncoding(Encoding: Byte)
-  : TPascalTypePostscriptDictOperatorClass;
+procedure RegisterOperator(OperatorClass: TPascalTypePostscriptDictOperatorClass);
+procedure RegisterOperators(OperatorClasses: array of TPascalTypePostscriptDictOperatorClass);
+function FindOperatorByEncoding(Encoding: Byte): TPascalTypePostscriptDictOperatorClass;
 
 implementation
 

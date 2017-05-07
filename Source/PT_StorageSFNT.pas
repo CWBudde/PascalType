@@ -25,7 +25,7 @@ unit PT_StorageSFNT;
 //                                                                            //
 //  The initial developer of this code is Christian-W. Budde                  //
 //                                                                            //
-//  Portions created by Christian-W. Budde are Copyright (C) 2010             //
+//  Portions created by Christian-W. Budde are Copyright (C) 2010-2017        //
 //  by Christian-W. Budde. All Rights Reserved.                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,11 +47,11 @@ type
     IPascalTypeStorageTable)
   private
     // required tables
-    FHeaderTable     : TPascalTypeHeaderTable;
+    FHeaderTable: TPascalTypeHeaderTable;
     FHorizontalHeader: TPascalTypeHorizontalHeaderTable;
-    FMaximumProfile  : TPascalTypeMaximumProfileTable;
-    FNameTable       : TPascalTypeNameTable;
-    FPostScriptTable : TPascalTypePostscriptTable;
+    FMaximumProfile: TPascalTypeMaximumProfileTable;
+    FNameTable: TPascalTypeNameTable;
+    FPostScriptTable: TPascalTypePostscriptTable;
     function GetFontName: WideString;
     function GetFontStyle: TFontStyles;
     function GetFontFamilyName: WideString;
@@ -59,21 +59,15 @@ type
     function GetFontVersion: WideString;
     function GetUniqueIdentifier: WideString;
   protected
-    function GetTableByTableName(TableName: TTableName)
-      : TCustomPascalTypeNamedTable; virtual; abstract;
-    function GetTableByTableType(TableType: TTableType)
-      : TCustomPascalTypeNamedTable; virtual; abstract;
-    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass)
-      : TCustomPascalTypeNamedTable; virtual; abstract;
+    function GetTableByTableName(TableName: TTableName): TCustomPascalTypeNamedTable; virtual; abstract;
+    function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; virtual; abstract;
+    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; virtual; abstract;
 
-    procedure DirectoryTableReaded(DirectoryTable
-      : TPascalTypeDirectoryTable); virtual;
-    procedure LoadTableFromStream(Stream: TStream;
-      TableEntry: TPascalTypeDirectoryTableEntry); virtual; abstract;
+    procedure DirectoryTableReaded(DirectoryTable: TPascalTypeDirectoryTable); virtual;
+    procedure LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry); virtual; abstract;
 
 {$IFDEF ChecksumTest}
-    procedure ValidateChecksum(Stream: TStream;
-      TableEntry: TPascalTypeDirectoryTableEntry); virtual;
+    procedure ValidateChecksum(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry); virtual;
 {$ENDIF}
   public
     constructor Create; virtual;
@@ -83,10 +77,8 @@ type
 
     // required tables
     property HeaderTable: TPascalTypeHeaderTable read FHeaderTable;
-    property HorizontalHeader: TPascalTypeHorizontalHeaderTable
-      read FHorizontalHeader;
-    property MaximumProfile: TPascalTypeMaximumProfileTable
-      read FMaximumProfile;
+    property HorizontalHeader: TPascalTypeHorizontalHeaderTable read FHorizontalHeader;
+    property MaximumProfile: TPascalTypeMaximumProfileTable read FMaximumProfile;
     property NameTable: TPascalTypeNameTable read FNameTable;
     property PostScriptTable: TPascalTypePostscriptTable read FPostScriptTable;
 
@@ -101,15 +93,11 @@ type
 
   TPascalTypeStorageScan = class(TCustomPascalTypeStorageSFNT)
   protected
-    function GetTableByTableName(TableName: TTableName)
-      : TCustomPascalTypeNamedTable; override;
-    function GetTableByTableType(TableType: TTableType)
-      : TCustomPascalTypeNamedTable; override;
-    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass)
-      : TCustomPascalTypeNamedTable; override;
+    function GetTableByTableName(TableName: TTableName): TCustomPascalTypeNamedTable; override;
+    function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable; override;
+    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
 
-    procedure LoadTableFromStream(Stream: TStream;
-      TableEntry: TPascalTypeDirectoryTableEntry); override;
+    procedure LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry); override;
   public
     procedure SaveToStream(Stream: TStream); override;
   published
@@ -124,8 +112,8 @@ type
   private
     // required tables
     FHorizontalMetrics: TPascalTypeHorizontalMetricsTable;
-    FCharacterMap     : TPascalTypeCharacterMapTable;
-    FOS2Table         : TPascalTypeOS2Table;
+    FCharacterMap: TPascalTypeCharacterMapTable;
+    FOS2Table: TPascalTypeOS2Table;
 
     FOptionalTables: TObjectList;
 
@@ -137,17 +125,12 @@ type
     function GetBoundingBox: TRect;
     function GetGlyphCount: Word;
   protected
-    function GetTableByTableName(TableName: TTableName)
-      : TCustomPascalTypeNamedTable; override;
-    function GetTableByTableType(ATableType: TTableType)
-      : TCustomPascalTypeNamedTable; override;
-    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass)
-      : TCustomPascalTypeNamedTable; override;
+    function GetTableByTableName(TableName: TTableName): TCustomPascalTypeNamedTable; override;
+    function GetTableByTableType(ATableType: TTableType): TCustomPascalTypeNamedTable; override;
+    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable; override;
 
-    procedure DirectoryTableReaded(DirectoryTable
-      : TPascalTypeDirectoryTable); override;
-    procedure LoadTableFromStream(Stream: TStream;
-      TableEntry: TPascalTypeDirectoryTableEntry); override;
+    procedure DirectoryTableReaded(DirectoryTable : TPascalTypeDirectoryTable); override;
+    procedure LoadTableFromStream(Stream: TStream; TableEntry: TPascalTypeDirectoryTableEntry); override;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -157,11 +140,9 @@ type
     function GetAdvanceWidth(GlyphIndex: Integer): Word;
     function GetKerning(Last, Next: Integer): Word;
 
-    property GlyphData[Index: Integer]: TCustomPascalTypeGlyphDataTable
-      read GetGlyphData;
+    property GlyphData[Index: Integer]: TCustomPascalTypeGlyphDataTable read GetGlyphData;
 
-    property OptionalTable[Index: Integer]: TCustomPascalTypeNamedTable
-      read GetOptionalTable;
+    property OptionalTable[Index: Integer]: TCustomPascalTypeNamedTable read GetOptionalTable;
 
     // redirected properties
     property Panose: TCustomPascalTypePanoseTable read GetPanose;

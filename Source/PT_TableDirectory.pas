@@ -25,7 +25,7 @@ unit PT_TableDirectory;
 //                                                                            //
 //  The initial developer of this code is Christian-W. Budde                  //
 //                                                                            //
-//  Portions created by Christian-W. Budde are Copyright (C) 2010             //
+//  Portions created by Christian-W. Budde are Copyright (C) 2010-2017        //
 //  by Christian-W. Budde. All Rights Reserved.                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,10 +39,10 @@ uses
 type
   // TrueType Table Directory Entry type
   TDirectoryTableEntry = packed record
-    TableType : TTableType;  // Table type
-    CheckSum  : Cardinal;    // Table checksum
-    Offset    : Cardinal;    // Table file offset
-    Length    : Cardinal;    // Table length
+    TableType: TTableType; // Table type
+    CheckSum: Cardinal;    // Table checksum
+    Offset: Cardinal;      // Table file offset
+    Length: Cardinal;      // Table length
   end;
 
   TPascalTypeDirectoryTableEntry = class(TCustomPascalTypeTable)
@@ -96,22 +96,22 @@ type
   // TrueType Table Directory type
   TPascalTypeDirectoryTable = class(TCustomPascalTypeTable)
   private
-    FVersion             : Cardinal;  // A tag to indicate the OFA scaler (should be $10000)
+    FVersion: Cardinal;  // A tag to indicate the OFA scaler (should be $10000)
 
     // required tables
-    FHeaderTable         : TPascalTypeDirectoryTableEntry;
-    FMaxProfileDataEntry : TPascalTypeDirectoryTableEntry;
-    FHorHeaderDataEntry  : TPascalTypeDirectoryTableEntry;
-    FHorMetricsDataEntry : TPascalTypeDirectoryTableEntry;
-    FCharMapDataEntry    : TPascalTypeDirectoryTableEntry;
-    FNameDataEntry       : TPascalTypeDirectoryTableEntry;
-    FPostscriptDataEntry : TPascalTypeDirectoryTableEntry;
-    FLocationDataEntry   : TPascalTypeDirectoryTableEntry;
-    FGlyphDataEntry      : TPascalTypeDirectoryTableEntry;
-    FOS2TableEntry       : TPascalTypeDirectoryTableEntry;
+    FHeaderTable: TPascalTypeDirectoryTableEntry;
+    FMaxProfileDataEntry: TPascalTypeDirectoryTableEntry;
+    FHorHeaderDataEntry: TPascalTypeDirectoryTableEntry;
+    FHorMetricsDataEntry: TPascalTypeDirectoryTableEntry;
+    FCharMapDataEntry: TPascalTypeDirectoryTableEntry;
+    FNameDataEntry: TPascalTypeDirectoryTableEntry;
+    FPostscriptDataEntry: TPascalTypeDirectoryTableEntry;
+    FLocationDataEntry: TPascalTypeDirectoryTableEntry;
+    FGlyphDataEntry: TPascalTypeDirectoryTableEntry;
+    FOS2TableEntry: TPascalTypeDirectoryTableEntry;
 
     // table list
-    FTableList           : TPascalTypeDirectoryTableList;
+    FTableList: TPascalTypeDirectoryTableList;
   protected
     procedure AssignTo(Dest: TPersistent); override;
     procedure ResetToDefaults; override;
@@ -146,8 +146,8 @@ uses
 
 function SortTableEntryByOffset(Item1, Item2: Pointer): Integer;
 begin
- Result := Integer(TPascalTypeDirectoryTableEntry(Item1).Offset >
-   TPascalTypeDirectoryTableEntry(Item2).Offset);
+  Result := Integer(TPascalTypeDirectoryTableEntry(Item1).Offset >
+    TPascalTypeDirectoryTableEntry(Item2).Offset);
 end;
 
 
@@ -155,36 +155,38 @@ end;
 
 procedure TPascalTypeDirectoryTableEntry.AssignTo(Dest: TPersistent);
 begin
- if Dest is TPascalTypeDirectoryTableEntry then
-  with TPascalTypeDirectoryTableEntry(Dest) do
-   begin
-    FDirectoryTableEntry := Self.FDirectoryTableEntry;
-   end else inherited;
+  if Dest is TPascalTypeDirectoryTableEntry then
+    with TPascalTypeDirectoryTableEntry(Dest) do
+    begin
+      FDirectoryTableEntry := Self.FDirectoryTableEntry;
+    end
+  else
+    inherited;
 end;
 
 procedure TPascalTypeDirectoryTableEntry.LoadFromStream(Stream: TStream);
 var
   Value : Cardinal;
 begin
- with Stream, FDirectoryTableEntry do
+  with Stream, FDirectoryTableEntry do
   begin
-   if Position + SizeOf(TDirectoryTableEntry) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    if Position + SizeOf(TDirectoryTableEntry) > Size then
+      raise EPascalTypeError.Create(RCStrTableIncomplete);
 
-   // read table type
-   Read(TableType, SizeOf(TTableType));
+    // read table type
+    Read(TableType, SizeOf(TTableType));
 
-   // read checksum
-   Read(Value, SizeOf(LongInt));
-   CheckSum := Swap32(Value);
+    // read checksum
+    Read(Value, SizeOf(LongInt));
+    CheckSum := Swap32(Value);
 
-   // read offset
-   Read(Value, SizeOf(LongInt));
-   Offset := Swap32(Value);
+    // read offset
+    Read(Value, SizeOf(LongInt));
+    Offset := Swap32(Value);
 
-   // read length
-   Read(Value, SizeOf(LongInt));
-   Length := Swap32(Value);
+    // read length
+    Read(Value, SizeOf(LongInt));
+    Length := Swap32(Value);
   end;
 end;
 
@@ -192,86 +194,86 @@ procedure TPascalTypeDirectoryTableEntry.SaveToStream(Stream: TStream);
 var
   Value : Cardinal;
 begin
- with Stream do
+  with Stream do
   begin
-   if Position + SizeOf(TDirectoryTableEntry) > Size
-    then raise EPascalTypeError.Create(RCStrTableIncomplete);
+    if Position + SizeOf(TDirectoryTableEntry) > Size then
+      raise EPascalTypeError.Create(RCStrTableIncomplete);
 
-   with FDirectoryTableEntry do
+    with FDirectoryTableEntry do
     begin
-     // read table type
-     Write(TableType, SizeOf(TTableType));
+      // read table type
+      Write(TableType, SizeOf(TTableType));
 
-     // write checksum
-     Value := Swap32(CheckSum);
-     Write(Value, SizeOf(LongInt));
+      // write checksum
+      Value := Swap32(CheckSum);
+      Write(Value, SizeOf(LongInt));
 
-     // write offset
-     Value := Swap32(Offset);
-     Write(Value, SizeOf(LongInt));
+      // write offset
+      Value := Swap32(Offset);
+      Write(Value, SizeOf(LongInt));
 
-     // write length
-     Value := Swap32(Length);
-     Write(Value, SizeOf(LongInt));
+      // write length
+      Value := Swap32(Length);
+      Write(Value, SizeOf(LongInt));
     end;
   end;
 end;
 
 procedure TPascalTypeDirectoryTableEntry.ResetToDefaults;
 begin
- with FDirectoryTableEntry do
+  with FDirectoryTableEntry do
   begin
-   TableType.AsCardinal := 0;
-   CheckSum := 0;
-   Offset := 0;
-   Length := 0;
+    TableType.AsCardinal := 0;
+    CheckSum := 0;
+    Offset := 0;
+    Length := 0;
   end;
 end;
 
 procedure TPascalTypeDirectoryTableEntry.SetCheckSum(const Value: Cardinal);
 begin
- if FDirectoryTableEntry.CheckSum <> Value then
+  if FDirectoryTableEntry.CheckSum <> Value then
   begin
-   FDirectoryTableEntry.CheckSum := Value;
-   ChecksumChanged;
+    FDirectoryTableEntry.CheckSum := Value;
+    ChecksumChanged;
   end;
 end;
 
 procedure TPascalTypeDirectoryTableEntry.SetLength(const Value: Cardinal);
 begin
- if FDirectoryTableEntry.Length <> Value then
+  if FDirectoryTableEntry.Length <> Value then
   begin
-   FDirectoryTableEntry.Length := Value;
-   LengthChanged;
+    FDirectoryTableEntry.Length := Value;
+    LengthChanged;
   end;
 end;
 
 procedure TPascalTypeDirectoryTableEntry.SetOffset(const Value: Cardinal);
 begin
- if FDirectoryTableEntry.Offset <> Value then
+  if FDirectoryTableEntry.Offset <> Value then
   begin
-   FDirectoryTableEntry.Offset := Value;
-   OffsetChanged;
+    FDirectoryTableEntry.Offset := Value;
+    OffsetChanged;
   end;
 end;
 
 procedure TPascalTypeDirectoryTableEntry.SetTableType(const Value: TTableType);
 begin
- if FDirectoryTableEntry.TableType.AsCardinal <> Value.AsCardinal then
+  if FDirectoryTableEntry.TableType.AsCardinal <> Value.AsCardinal then
   begin
-   FDirectoryTableEntry.TableType := Value;
-   TableTypeChanged;
+    FDirectoryTableEntry.TableType := Value;
+    TableTypeChanged;
   end;
 end;
 
 procedure TPascalTypeDirectoryTableEntry.ChecksumChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeDirectoryTableEntry.LengthChanged;
 begin
- Changed;
+  Changed;
 end;
 
 procedure TPascalTypeDirectoryTableEntry.OffsetChanged;
@@ -281,7 +283,7 @@ end;
 
 procedure TPascalTypeDirectoryTableEntry.TableTypeChanged;
 begin
- Changed;
+  Changed;
 end;
 
 
@@ -289,17 +291,17 @@ end;
 
 constructor TPascalTypeDirectoryTableList.Create;
 begin
- inherited Create;
+  inherited Create;
 end;
 
 function TPascalTypeDirectoryTableList.Add(DirectoryTable: TPascalTypeDirectoryTableEntry): Integer;
 begin
- Result := inherited Add(DirectoryTable);
+  Result := inherited Add(DirectoryTable);
 end;
 
 function TPascalTypeDirectoryTableList.Extract(Item: TPascalTypeDirectoryTableEntry): TPascalTypeDirectoryTableEntry;
 begin
- Result := TPascalTypeDirectoryTableEntry(inherited Extract(Item));
+  Result := TPascalTypeDirectoryTableEntry(inherited Extract(Item));
 end;
 
 function TPascalTypeDirectoryTableList.FindByTableType(
@@ -307,60 +309,61 @@ function TPascalTypeDirectoryTableList.FindByTableType(
 var
   Index : Integer;
 begin
- Result := nil;
- for Index := 0 to Count - 1 do
-  if Items[Index].TableType.AsCardinal = TableType.AsCardinal then
-   begin
-    Result := Items[Index];
-    Exit;
-   end;
+  Result := nil;
+  for Index := 0 to Count - 1 do
+    if Items[Index].TableType.AsCardinal = TableType.AsCardinal then
+    begin
+      Result := Items[Index];
+      Exit;
+    end;
 end;
 
 function TPascalTypeDirectoryTableList.First: TPascalTypeDirectoryTableEntry;
 begin
- Result := TPascalTypeDirectoryTableEntry(inherited First);
+  Result := TPascalTypeDirectoryTableEntry(inherited First);
 end;
 
 function TPascalTypeDirectoryTableList.GetItem(Index: Integer): TPascalTypeDirectoryTableEntry;
 begin
- Result := inherited Items[Index];
+  Result := inherited Items[Index];
 end;
 
 function TPascalTypeDirectoryTableList.IndexOf(DirectoryTable: TPascalTypeDirectoryTableEntry): Integer;
 begin
- Result := inherited IndexOf(DirectoryTable);
+  Result := inherited IndexOf(DirectoryTable);
 end;
 
 procedure TPascalTypeDirectoryTableList.Insert(Index: Integer; DirectoryTable: TPascalTypeDirectoryTableEntry);
 begin
- inherited Insert(Index, DirectoryTable);
+  inherited Insert(Index, DirectoryTable);
 end;
 
 function TPascalTypeDirectoryTableList.Last: TPascalTypeDirectoryTableEntry;
 begin
- Result := TPascalTypeDirectoryTableEntry(inherited Last);
+  Result := TPascalTypeDirectoryTableEntry(inherited Last);
 end;
 
 procedure TPascalTypeDirectoryTableList.Notify(Ptr: Pointer; Action: TListNotification);
 begin
- if Action = lnDeleted
-  then TPascalTypeDirectoryTableEntry(Ptr).Free;
+  if Action = lnDeleted then
+    TPascalTypeDirectoryTableEntry(Ptr).Free;
+
  inherited Notify(Ptr, Action);
 end;
 
 function TPascalTypeDirectoryTableList.Remove(DirectoryTable: TPascalTypeDirectoryTableEntry): Integer;
 begin
- Result := inherited Remove(DirectoryTable);
+  Result := inherited Remove(DirectoryTable);
 end;
 
 procedure TPascalTypeDirectoryTableList.SetItem(Index: Integer; DirectoryTable: TPascalTypeDirectoryTableEntry);
 begin
- inherited Items[Index] := DirectoryTable;
+  inherited Items[Index] := DirectoryTable;
 end;
 
 procedure TPascalTypeDirectoryTableList.SortByOffset;
 begin
- Sort(SortTableEntryByOffset);
+  Sort(SortTableEntryByOffset);
 end;
 
 
@@ -368,124 +371,128 @@ end;
 
 constructor TPascalTypeDirectoryTable.Create;
 begin
- FTableList := TPascalTypeDirectoryTableList.Create;
- inherited;
+  FTableList := TPascalTypeDirectoryTableList.Create;
+
+  inherited;
 end;
 
 destructor TPascalTypeDirectoryTable.Destroy;
 begin
- if Assigned(FHeaderTable) then FreeAndNil(FHeaderTable);
- if Assigned(FMaxProfileDataEntry) then FreeAndNil(FMaxProfileDataEntry);
- if Assigned(FHorHeaderDataEntry) then FreeAndNil(FHorHeaderDataEntry);
- if Assigned(FHorMetricsDataEntry) then FreeAndNil(FHorMetricsDataEntry);
- if Assigned(FCharMapDataEntry) then FreeAndNil(FCharMapDataEntry);
- if Assigned(FNameDataEntry) then FreeAndNil(FNameDataEntry);
- if Assigned(FPostscriptDataEntry) then FreeAndNil(FPostscriptDataEntry);
- if Assigned(FLocationDataEntry) then FreeAndNil(FLocationDataEntry);
- if Assigned(FGlyphDataEntry) then FreeAndNil(FGlyphDataEntry);
- if Assigned(FOS2TableEntry) then FreeAndNil(FOS2TableEntry);
- FreeAndNil(FTableList);
- inherited;
+  if Assigned(FHeaderTable) then FreeAndNil(FHeaderTable);
+  if Assigned(FMaxProfileDataEntry) then FreeAndNil(FMaxProfileDataEntry);
+  if Assigned(FHorHeaderDataEntry) then FreeAndNil(FHorHeaderDataEntry);
+  if Assigned(FHorMetricsDataEntry) then FreeAndNil(FHorMetricsDataEntry);
+  if Assigned(FCharMapDataEntry) then FreeAndNil(FCharMapDataEntry);
+  if Assigned(FNameDataEntry) then FreeAndNil(FNameDataEntry);
+  if Assigned(FPostscriptDataEntry) then FreeAndNil(FPostscriptDataEntry);
+  if Assigned(FLocationDataEntry) then FreeAndNil(FLocationDataEntry);
+  if Assigned(FGlyphDataEntry) then FreeAndNil(FGlyphDataEntry);
+  if Assigned(FOS2TableEntry) then FreeAndNil(FOS2TableEntry);
+  FreeAndNil(FTableList);
+
+  inherited;
 end;
 
 function TPascalTypeDirectoryTable.AddTableEntry(
   TableType: TTableType): TPascalTypeDirectoryTableEntry;
 begin
- Result := TPascalTypeDirectoryTableEntry.Create;
- Result.TableType := TableType;
- FTableList.Add(Result);
+  Result := TPascalTypeDirectoryTableEntry.Create;
+  Result.TableType := TableType;
+  FTableList.Add(Result);
 end;
 
 procedure TPascalTypeDirectoryTable.AssignTo(Dest: TPersistent);
 begin
- if Dest is Self.ClassType then
-  with TPascalTypeDirectoryTable(Dest) do
-   begin
-    FVersion := Self.FVersion;
-    FTableList.Assign(Self.FTableList);
-   end else inherited;
+  if Dest is Self.ClassType then
+    with TPascalTypeDirectoryTable(Dest) do
+    begin
+      FVersion := Self.FVersion;
+      FTableList.Assign(Self.FTableList);
+    end
+  else
+    inherited;
 end;
 
 procedure TPascalTypeDirectoryTable.ResetToDefaults;
 begin
- inherited;
- FVersion       := $10000;
+  inherited;
+  FVersion := $10000;
 
- // clear fixed table entries
- if Assigned(FHeaderTable)
-  then FreeAndNil(FHeaderTable);
+  // clear fixed table entries
+  if Assigned(FHeaderTable) then
+    FreeAndNil(FHeaderTable);
 
- if Assigned(FMaxProfileDataEntry)
-  then FreeAndNil(FMaxProfileDataEntry);
+  if Assigned(FMaxProfileDataEntry) then
+    FreeAndNil(FMaxProfileDataEntry);
 
- if Assigned(FHorHeaderDataEntry)
-  then FreeAndNil(FHorHeaderDataEntry );
+  if Assigned(FHorHeaderDataEntry) then
+    FreeAndNil(FHorHeaderDataEntry );
 
- if Assigned(FHorMetricsDataEntry)
-  then FreeAndNil(FHorMetricsDataEntry);
+  if Assigned(FHorMetricsDataEntry) then
+    FreeAndNil(FHorMetricsDataEntry);
 
- if Assigned(FCharMapDataEntry)
-  then FreeAndNil(FCharMapDataEntry);
+  if Assigned(FCharMapDataEntry) then
+    FreeAndNil(FCharMapDataEntry);
 
- if Assigned(FNameDataEntry)
-  then FreeAndNil(FNameDataEntry);
+  if Assigned(FNameDataEntry) then
+    FreeAndNil(FNameDataEntry);
 
- if Assigned(FPostscriptDataEntry)
-  then FreeAndNil(FPostscriptDataEntry);
+  if Assigned(FPostscriptDataEntry) then
+    FreeAndNil(FPostscriptDataEntry);
 
- if Assigned(FLocationDataEntry)
-  then FreeAndNil(FLocationDataEntry);
+  if Assigned(FLocationDataEntry) then
+    FreeAndNil(FLocationDataEntry);
 
- if Assigned(FGlyphDataEntry)
-  then FreeAndNil(FGlyphDataEntry);
+  if Assigned(FGlyphDataEntry) then
+    FreeAndNil(FGlyphDataEntry);
 
- if Assigned(FOS2TableEntry)
-  then FreeAndNil(FOS2TableEntry);
+  if Assigned(FOS2TableEntry) then
+    FreeAndNil(FOS2TableEntry);
 
- // clear table list
- FTableList.Clear;
+  // clear table list
+  FTableList.Clear;
 end;
 
 procedure TPascalTypeDirectoryTable.ClearAndBuildRequiredEntries;
 var
   TableType : TTableType;
 begin
- ResetToDefaults;
+  ResetToDefaults;
 
- // create head table entry
- FHeaderTable := TPascalTypeDirectoryTableEntry.Create;
- TableType.AsAnsiChar := 'head';
- FHeaderTable.TableType := TableType;
+  // create head table entry
+  FHeaderTable := TPascalTypeDirectoryTableEntry.Create;
+  TableType.AsAnsiChar := 'head';
+  FHeaderTable.TableType := TableType;
 
- // create maxp table entry
- FMaxProfileDataEntry := TPascalTypeDirectoryTableEntry.Create;
- TableType.AsAnsiChar := 'maxp';
- FMaxProfileDataEntry.TableType := TableType;
+  // create maxp table entry
+  FMaxProfileDataEntry := TPascalTypeDirectoryTableEntry.Create;
+  TableType.AsAnsiChar := 'maxp';
+  FMaxProfileDataEntry.TableType := TableType;
 
- // create hhea table entry
- FHorHeaderDataEntry := TPascalTypeDirectoryTableEntry.Create;
- TableType.AsAnsiChar := 'hhea';
- FHorHeaderDataEntry.TableType := TableType;
+  // create hhea table entry
+  FHorHeaderDataEntry := TPascalTypeDirectoryTableEntry.Create;
+  TableType.AsAnsiChar := 'hhea';
+  FHorHeaderDataEntry.TableType := TableType;
 
- // create hmtx table entry
- FHorMetricsDataEntry := TPascalTypeDirectoryTableEntry.Create;
- TableType.AsAnsiChar := 'hmtx';
- FHorMetricsDataEntry.TableType := TableType;
+  // create hmtx table entry
+  FHorMetricsDataEntry := TPascalTypeDirectoryTableEntry.Create;
+  TableType.AsAnsiChar := 'hmtx';
+  FHorMetricsDataEntry.TableType := TableType;
 
- // create cmap table entry
- FCharMapDataEntry := TPascalTypeDirectoryTableEntry.Create;
- TableType.AsAnsiChar := 'cmap';
- FCharMapDataEntry.TableType := TableType;
+  // create cmap table entry
+  FCharMapDataEntry := TPascalTypeDirectoryTableEntry.Create;
+  TableType.AsAnsiChar := 'cmap';
+  FCharMapDataEntry.TableType := TableType;
 
- // create name table entry
- FNameDataEntry := TPascalTypeDirectoryTableEntry.Create;
- TableType.AsAnsiChar := 'name';
- FNameDataEntry.TableType := TableType;
+  // create name table entry
+  FNameDataEntry := TPascalTypeDirectoryTableEntry.Create;
+  TableType.AsAnsiChar := 'name';
+  FNameDataEntry.TableType := TableType;
 
- // create post table entry
- FPostscriptDataEntry := TPascalTypeDirectoryTableEntry.Create;
- TableType.AsAnsiChar := 'post';
- FPostscriptDataEntry.TableType := TableType;
+  // create post table entry
+  FPostscriptDataEntry := TPascalTypeDirectoryTableEntry.Create;
+  TableType.AsAnsiChar := 'post';
+  FPostscriptDataEntry.TableType := TableType;
 end;
 
 procedure TPascalTypeDirectoryTable.LoadFromStream(Stream: TStream);
@@ -499,89 +506,89 @@ var
   RangeShift    : Word; // numTables * 16 - searchRange
    {$ENDIF}
 begin
- inherited;
+  inherited;
 
- with Stream do
+  with Stream do
   begin
-   // make sure at least the offset subtable is contained in the file
-   if Size < 10
-    then raise EPascalTypeError.Create(RCStrWrongFilesize);
+    // make sure at least the offset subtable is contained in the file
+    if Size < 10 then
+      raise EPascalTypeError.Create(RCStrWrongFilesize);
 
-   // read version
-   FVersion := ReadSwappedCardinal(Stream);
+    // read version
+    FVersion := ReadSwappedCardinal(Stream);
 
-   // check for known scaler types (OSX and Windows)
-   case Version of
-    $00010000 :;
-    $4F54544F :;
-    $74727565 :;
-    else raise EPascalTypeError.CreateFmt(RCStrUnknownVersion, [Version]);
-   end;
+    // check for known scaler types (OSX and Windows)
+    case Version of
+      $00010000:;
+      $4F54544F:;
+      $74727565:;
+      else
+        raise EPascalTypeError.CreateFmt(RCStrUnknownVersion, [Version]);
+    end;
 
-   // read number of tables
-   NumTables := ReadSwappedWord(Stream);
+    // read number of tables
+    NumTables := ReadSwappedWord(Stream);
 
-   {$IFDEF AmbigiousExceptions}
-   // read search range
-   SearchRange := ReadSwappedWord(Stream);
-   if SearchRange > Round(16 * (1 shl FloorLog2(NumTables)))
-    then raise EPascalTypeError.Create(RCStrWrongSearchRange);
+    {$IFDEF AmbigiousExceptions}
+    // read search range
+    SearchRange := ReadSwappedWord(Stream);
+    if SearchRange > Round(16 * (1 shl FloorLog2(NumTables))) then
+      raise EPascalTypeError.Create(RCStrWrongSearchRange);
 
-   // read entry selector
-   EntrySelector := ReadSwappedWord(Stream);
-   if EntrySelector < Round(Log2(SearchRange / 16))
-    then raise EPascalTypeError.Create(RCStrWrongEntrySelector);
+    // read entry selector
+    EntrySelector := ReadSwappedWord(Stream);
+    if EntrySelector < Round(Log2(SearchRange / 16)) then
+      raise EPascalTypeError.Create(RCStrWrongEntrySelector);
 
-   // read range shift
-   RangeShift := ReadSwappedWord(Stream);
-   if RangeShift <> (16 * NumTables - SearchRange)
-    then raise EPascalTypeError.Create(RCStrWrongRangeShift);
-   {$ELSE}
-   Seek(6, soFromCurrent);
-   {$ENDIF}
+    // read range shift
+    RangeShift := ReadSwappedWord(Stream);
+    if RangeShift <> (16 * NumTables - SearchRange) then
+      raise EPascalTypeError.Create(RCStrWrongRangeShift);
+    {$ELSE}
+    Seek(6, soFromCurrent);
+    {$ENDIF}
 
-   // read table entries from stream
-   for TableIndex := 0 to NumTables - 1 do
+    // read table entries from stream
+    for TableIndex := 0 to NumTables - 1 do
     begin
-     TableEntry := TPascalTypeDirectoryTableEntry.Create;
-     TableEntry.LoadFromStream(Stream);
+      TableEntry := TPascalTypeDirectoryTableEntry.Create;
+      TableEntry.LoadFromStream(Stream);
 
-     // add table entry as required table or add to directory table list
-     if CompareTableType(TableEntry.TableType, 'head') then FHeaderTable := TableEntry else
-     if CompareTableType(TableEntry.TableType, 'maxp') then FMaxProfileDataEntry := TableEntry else
-     if CompareTableType(TableEntry.TableType, 'hhea') then FHorHeaderDataEntry := TableEntry else
-     if CompareTableType(TableEntry.TableType, 'hmtx') then FHorMetricsDataEntry := TableEntry else
-     if CompareTableType(TableEntry.TableType, 'cmap') then FCharMapDataEntry := TableEntry else
-     if CompareTableType(TableEntry.TableType, 'name') then FNameDataEntry := TableEntry else
-     if CompareTableType(TableEntry.TableType, 'post') then FPostscriptDataEntry := TableEntry else
-     if CompareTableType(TableEntry.TableType, 'loca') then FLocationDataEntry := TableEntry else
-     if CompareTableType(TableEntry.TableType, 'glyf') then FGlyphDataEntry := TableEntry else
-     if CompareTableType(TableEntry.TableType, 'OS/2')
-      then FOS2TableEntry := TableEntry
-      else FTableList.Add(TableEntry);
+      // add table entry as required table or add to directory table list
+      if CompareTableType(TableEntry.TableType, 'head') then FHeaderTable := TableEntry else
+      if CompareTableType(TableEntry.TableType, 'maxp') then FMaxProfileDataEntry := TableEntry else
+      if CompareTableType(TableEntry.TableType, 'hhea') then FHorHeaderDataEntry := TableEntry else
+      if CompareTableType(TableEntry.TableType, 'hmtx') then FHorMetricsDataEntry := TableEntry else
+      if CompareTableType(TableEntry.TableType, 'cmap') then FCharMapDataEntry := TableEntry else
+      if CompareTableType(TableEntry.TableType, 'name') then FNameDataEntry := TableEntry else
+      if CompareTableType(TableEntry.TableType, 'post') then FPostscriptDataEntry := TableEntry else
+      if CompareTableType(TableEntry.TableType, 'loca') then FLocationDataEntry := TableEntry else
+      if CompareTableType(TableEntry.TableType, 'glyf') then FGlyphDataEntry := TableEntry else
+      if CompareTableType(TableEntry.TableType, 'OS/2') then
+        FOS2TableEntry := TableEntry
+      else
+        FTableList.Add(TableEntry);
     end;
   end;
 
- // check for required tables 
- case Version of
-  $00010000 : if not Assigned(OS2TableEntry)
-   then raise EPascalTypeError.Create(RCStrNoOS2Table);
-  $74727565 :
-   begin
-    if not Assigned(FLocationDataEntry)
-     then raise EPascalTypeError.Create(RCStrNoIndexToLocationTable);
-    if not Assigned(FGlyphDataEntry)
-     then raise EPascalTypeError.Create(RCStrNoGlyphDataTable);
-   end;
- end;
-
-
+  // check for required tables
+  case Version of
+    $00010000:
+      if not Assigned(OS2TableEntry) then
+        raise EPascalTypeError.Create(RCStrNoOS2Table);
+    $74727565:
+      begin
+        if not Assigned(FLocationDataEntry) then
+          raise EPascalTypeError.Create(RCStrNoIndexToLocationTable);
+        if not Assigned(FGlyphDataEntry) then
+          raise EPascalTypeError.Create(RCStrNoGlyphDataTable);
+      end;
+  end;
 end;
 
 procedure TPascalTypeDirectoryTable.SaveToStream(Stream: TStream);
 begin
- inherited;
-
+  inherited;
 end;
 
 end.
