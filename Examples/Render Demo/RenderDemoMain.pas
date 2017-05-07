@@ -16,27 +16,27 @@ type
   end;
 
   TFmRenderDemo = class(TForm)
-    CbFont: TComboBox;
-    CbFontSize: TComboBox;
-    EdText: TEdit;
-    LbFont: TLabel;
-    LbFontSize: TLabel;
-    LbFontEngine: TLabel;
-    LbText: TLabel;
+    ComboBoxFont: TComboBox;
+    ComboBoxFontSize: TComboBox;
+    EditText: TEdit;
+    LabelFont: TLabel;
+    LabelFontSize: TLabel;
+    LabelFontEngine: TLabel;
+    LabelText: TLabel;
     PaintBox: TPaintBox;
-    PnText: TPanel;
-    RbPascalType: TRadioButton;
-    RbWindows: TRadioButton;
+    PanelText: TPanel;
+    RadioButtonPascalType: TRadioButton;
+    RadioButtonWindows: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure CbFontChange(Sender: TObject);
-    procedure CbFontSizeChange(Sender: TObject);
-    procedure EdTextChange(Sender: TObject);
+    procedure ComboBoxFontChange(Sender: TObject);
+    procedure ComboBoxFontSizeChange(Sender: TObject);
+    procedure EditTextChange(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
-    procedure PnTextResize(Sender: TObject);
-    procedure RbPascalTypeClick(Sender: TObject);
-    procedure RbWindowsClick(Sender: TObject);
+    procedure PanelTextResize(Sender: TObject);
+    procedure RadioButtonPascalTypeClick(Sender: TObject);
+    procedure RadioButtonWindowsClick(Sender: TObject);
   private
     FFontEngine  : TPascalTypeFontEngineGDI;
     FFontScanner : TFontNameStorageScan;
@@ -82,8 +82,8 @@ begin
  FFontEngine := TPascalTypeFontEngineGDI.Create;
 
  // set initial properties
- FBitmap.Canvas.Font.Size := StrToInt(CbFontSize.Text);
- FFontEngine.FontSize := StrToInt(CbFontSize.Text);
+ FBitmap.Canvas.Font.Size := StrToInt(ComboBoxFontSize.Text);
+ FFontEngine.FontSize := StrToInt(ComboBoxFontSize.Text);
 
  FFontScanner := TFontNameStorageScan.Create(True);
  with FFontScanner do
@@ -108,7 +108,7 @@ end;
 
 procedure TFmRenderDemo.FormShow(Sender: TObject);
 begin
- Text := EdText.Text;
+ Text := EditText.Text;
 end;
 
 procedure TFmRenderDemo.PaintBoxPaint(Sender: TObject);
@@ -117,7 +117,7 @@ begin
   then PaintBox.Canvas.Draw(0, 0, FBitmap);
 end;
 
-procedure TFmRenderDemo.PnTextResize(Sender: TObject);
+procedure TFmRenderDemo.PanelTextResize(Sender: TObject);
 begin
  if Assigned(FBitmap) then
   with FBitmap do
@@ -154,12 +154,12 @@ begin
  RenderText;
 end;
 
-procedure TFmRenderDemo.RbPascalTypeClick(Sender: TObject);
+procedure TFmRenderDemo.RadioButtonPascalTypeClick(Sender: TObject);
 begin
  RenderText;
 end;
 
-procedure TFmRenderDemo.RbWindowsClick(Sender: TObject);
+procedure TFmRenderDemo.RadioButtonWindowsClick(Sender: TObject);
 begin
  RenderText;
 end;
@@ -172,18 +172,18 @@ begin
    Brush.Color := clWhite;
    FillRect(ClipRect);
 
-   if RbWindows.Checked then
+   if RadioButtonWindows.Checked then
     begin
      with Font do
       begin
        Color := clBlack;
-       Name := CbFont.Text;
+       Name := ComboBoxFont.Text;
       end;
 
      TextOut(0, 0, FText);
     end;
 
-   if RbPascalType.Checked
+   if RadioButtonPascalType.Checked
     then FFontEngine.RenderText(FText, Canvas, 0, 0);
   end;
  PaintBox.Invalidate;
@@ -216,21 +216,21 @@ begin
   end;
 end;
 
-procedure TFmRenderDemo.CbFontChange(Sender: TObject);
+procedure TFmRenderDemo.ComboBoxFontChange(Sender: TObject);
 begin
- if (CbFont.ItemIndex >= 0) and (CbFont.ItemIndex < Length(FFontArray)) then
-  with FFontArray[CbFont.ItemIndex]
+ if (ComboBoxFont.ItemIndex >= 0) and (ComboBoxFont.ItemIndex < Length(FFontArray)) then
+  with FFontArray[ComboBoxFont.ItemIndex]
    do Self.FontName := FontName;
 end;
 
-procedure TFmRenderDemo.CbFontSizeChange(Sender: TObject);
+procedure TFmRenderDemo.ComboBoxFontSizeChange(Sender: TObject);
 begin
- FontSize := StrToInt(CbFontSize.Text);
+ FontSize := StrToInt(ComboBoxFontSize.Text);
 end;
 
-procedure TFmRenderDemo.EdTextChange(Sender: TObject);
+procedure TFmRenderDemo.EditTextChange(Sender: TObject);
 begin
- Text := EdText.Text;
+ Text := EditText.Text;
 end;
 
 procedure TFmRenderDemo.FontScannedHandler(Sender: TObject; FontFileName: TFilename;
@@ -240,7 +240,7 @@ var
 begin
  // add font name to font combo box
  CurrentFontName := TCustomPascalTypeStorageSFNT(Font).FontName;
- CbFont.Items.Add(CurrentFontName);
+ ComboBoxFont.Items.Add(CurrentFontName);
 
  SetLength(FFontArray, Length(FFontArray) + 1);
  with FFontArray[Length(FFontArray) - 1] do
@@ -252,7 +252,7 @@ begin
  // check if current font is the one requested
  if CurrentFontName = 'Arial' then
   begin
-   CbFont.ItemIndex := CbFont.Items.Count - 1;
+   ComboBoxFont.ItemIndex := ComboBoxFont.Items.Count - 1;
    FontName := CurrentFontName;
   end;
 end;

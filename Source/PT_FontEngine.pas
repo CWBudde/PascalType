@@ -25,7 +25,7 @@ unit PT_FontEngine;
 //                                                                            //
 //  The initial developer of this code is Christian-W. Budde                  //
 //                                                                            //
-//  Portions created by Christian-W. Budde are Copyright (C) 2010             //
+//  Portions created by Christian-W. Budde are Copyright (C) 2010-2017        //
 //  by Christian-W. Budde. All Rights Reserved.                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,9 +57,9 @@ type
     function GetContour(Index: Integer): TPascalTypeScaledContour;
     function GetContourCount: Integer;
   protected
-    FAdvanceWidth   : TScaleType;
+    FAdvanceWidth: TScaleType;
     FLeftSideBearing: TScaleType;
-    FGlyphName      : string;
+    FGlyphName: string;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -74,13 +74,13 @@ type
 
   TCustomPascalTypeFontEngine = class(TInterfacedPersistent, IStreamPersist)
   private
-    FStorage      : TPascalTypeStorage;
-    FFontHeight   : Integer;
+    FStorage: TPascalTypeStorage;
+    FFontHeight: Integer;
     FPixelPerInchX: Integer;
     FPixelPerInchY: Integer;
-    FScalerX      : TScaleType;
-    FScalerY      : TScaleType;
-    FScaledGlyphs : array of TPascalTypeScaledGlyph;
+    FScalerX: TScaleType;
+    FScalerY: TScaleType;
+    FScaledGlyphs: array of TPascalTypeScaledGlyph;
     procedure SetFontSize(const Value: Integer);
     procedure SetPixelPerInchX(const Value: Integer);
     procedure SetPixelPerInchY(const Value: Integer);
@@ -172,8 +172,7 @@ begin
   inherited;
 end;
 
-function TPascalTypeScaledGlyph.GetContour(Index: Integer)
-  : TPascalTypeScaledContour;
+function TPascalTypeScaledGlyph.GetContour(Index: Integer): TPascalTypeScaledContour;
 begin
   if (Index >= 0) and (Index < FContours.Count) then
     Result := TPascalTypeScaledContour(FContours[Index])
@@ -270,7 +269,7 @@ end;
 procedure TCustomPascalTypeFontEngine.PrecalculateScaledGlyphs;
 var
   GlyphIndex: Integer;
-  // HDMXTable  : TPascalTypeHorizontalDeviceMetricsSubTable;
+  // HDMXTable: TPascalTypeHorizontalDeviceMetricsSubTable;
 begin
   ClearScaledGlyphs;
   with Storage do
@@ -340,8 +339,7 @@ begin
 {$ENDIF}
 end;
 
-function TCustomPascalTypeFontEngine.GetAdvanceWidth(GlyphIndex: Integer)
-  : TScaleType;
+function TCustomPascalTypeFontEngine.GetAdvanceWidth(GlyphIndex: Integer): TScaleType;
 begin
   Result := RoundedScaleX(Storage.GetAdvanceWidth(GlyphIndex));
 end;
@@ -396,8 +394,7 @@ begin
   Result := GetGlyphByCharacter(Word(Character));
 end;
 
-function TCustomPascalTypeFontEngine.GetKerning(Last, Next: Integer)
-  : TScaleType;
+function TCustomPascalTypeFontEngine.GetKerning(Last, Next: Integer): TScaleType;
 begin
   Result := RoundedScaleX(Storage.GetKerning(Last, Next));
 end;

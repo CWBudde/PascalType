@@ -25,7 +25,7 @@ unit PT_CharacterMap;
 //                                                                            //
 //  The initial developer of this code is Christian-W. Budde                  //
 //                                                                            //
-//  Portions created by Christian-W. Budde are Copyright (C) 2010             //
+//  Portions created by Christian-W. Budde are Copyright (C) 2010-2017        //
 //  by Christian-W. Budde. All Rights Reserved.                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ uses
 type
   TPascalTypeFormat0CharacterMap = class(TCustomPascalTypeCharacterMap)
   private
-    FLength  : Word; // This is the length in bytes of the subtable.
+    FLength: Word; // This is the length in bytes of the subtable.
     FLanguage: Word; // Please see 'Note on the language field in 'cmap' subtables' in this document.
     FGlyphIdArray: array [0..255] of Byte; // An array that maps character codes to glyph index values.
   protected
@@ -56,7 +56,7 @@ type
 
   TPascalTypeFormat2CharacterMap = class(TCustomPascalTypeCharacterMap)
   private
-    FLength  : Word; // This is the length in bytes of the subtable.
+    FLength: Word; // This is the length in bytes of the subtable.
     FLanguage: Word; // Please see 'Note on the language field in 'cmap' subtables' in this document.
   protected
     class function GetFormat: Word; override;
@@ -71,17 +71,17 @@ type
 
   TPascalTypeFormat4CharacterMap = class(TCustomPascalTypeCharacterMap)
   private
-    FLength        : Word;              // This is the length in bytes of the subtable.
-    FLanguage      : Word;              // Please see 'Note on the language field in 'cmap' subtables' in this document.
-    FSegCountX2    : Word;              // 2 x segCount.
-    FSearchRange   : Word;              // 2 x (2**floor(log2(segCount)))
-    FEntrySelector : Word;              // log2(searchRange / 2)
-    FRangeShift    : Word;              // 2 x segCount - searchRange
-    FEndCount      : array of Word;     // End characterCode for each segment, last=0xFFFF.
-    FStartCount    : array of Word;     // Start character code for each segment.
-    FIdDelta       : array of SmallInt; // Delta for all character codes in segment.
-    FIdRangeOffset : array of Word;     // Offsets into glyphIdArray or 0
-    FGlyphIdArray  : array of Word;     // Glyph index array (arbitrary length)  protected
+    FLength: Word;                    // This is the length in bytes of the subtable.
+    FLanguage: Word;                  // Please see 'Note on the language field in 'cmap' subtables' in this document.
+    FSegCountX2: Word;                // 2 x segCount.
+    FSearchRange: Word;               // 2 x (2**floor(log2(segCount)))
+    FEntrySelector: Word;             // log2(searchRange / 2)
+    FRangeShift: Word;                // 2 x segCount - searchRange
+    FEndCount: array of Word;         // End characterCode for each segment, last=0xFFFF.
+    FStartCount: array of Word;       // Start character code for each segment.
+    FIdDelta: array of SmallInt;      // Delta for all character codes in segment.
+    FIdRangeOffset: array of Word;    // Offsets into glyphIdArray or 0
+    FGlyphIdArray: array of Word;     // Glyph index array (arbitrary length)  protected
   protected
     class function GetFormat: Word; override;
     procedure ResetToDefaults; override;
@@ -95,9 +95,9 @@ type
 
   TPascalTypeFormat6CharacterMap = class(TCustomPascalTypeCharacterMap)
   private
-    FLanguage     : Word;          // Please see “Note on the language field in 'cmap' subtables“ in this document.
-    FFirstCode    : Word;          // First character code of subrange.
-    FGlyphIdArray : array of Word; // Array of glyph index values for character codes in the range.
+    FLanguage: Word;              // Please see “Note on the language field in 'cmap' subtables“ in this document.
+    FFirstCode: Word;             // First character code of subrange.
+    FGlyphIdArray: array of Word; // Array of glyph index values for character codes in the range.
     function GetEntryCount: Word;
   protected
     class function GetFormat: Word; override;
@@ -113,9 +113,9 @@ type
   end;
 
   TCharMapSegmentedCoverageRecord = packed record
-    StartCharCode : Cardinal; // First character code in this group
-    EndCharCode   : Cardinal; // Last character code in this group
-    StartGlyphID  : Cardinal; // Glyph index corresponding to the starting character code
+    StartCharCode: Cardinal; // First character code in this group
+    EndCharCode: Cardinal;   // Last character code in this group
+    StartGlyphID: Cardinal;  // Glyph index corresponding to the starting character code
   end;
 
   TPascalTypeFormat12CharacterMap = class(TCustomPascalTypeCharacterMap)
@@ -196,8 +196,7 @@ begin
     inherited;
 end;
 
-function TPascalTypeFormat0CharacterMap.CharacterToGlyph(CharacterIndex
-  : Integer): Integer;
+function TPascalTypeFormat0CharacterMap.CharacterToGlyph(CharacterIndex: Integer): Integer;
 begin
   if CharacterIndex in [0..255] then
     Result := FGlyphIdArray[CharacterIndex]
@@ -231,8 +230,7 @@ begin
     inherited;
 end;
 
-function TPascalTypeFormat2CharacterMap.CharacterToGlyph(CharacterIndex
-  : Integer): Integer;
+function TPascalTypeFormat2CharacterMap.CharacterToGlyph(CharacterIndex: Integer): Integer;
 begin
   Result := CharacterIndex;
 end;
@@ -300,8 +298,7 @@ begin
     inherited;
 end;
 
-function TPascalTypeFormat4CharacterMap.CharacterToGlyph(CharacterIndex
-  : Integer): Integer;
+function TPascalTypeFormat4CharacterMap.CharacterToGlyph(CharacterIndex: Integer): Integer;
 var
   SegmentIndex: Integer;
 begin
@@ -477,8 +474,7 @@ begin
     inherited;
 end;
 
-function TPascalTypeFormat6CharacterMap.CharacterToGlyph(CharacterIndex
-  : Integer): Integer;
+function TPascalTypeFormat6CharacterMap.CharacterToGlyph(CharacterIndex: Integer): Integer;
 begin
   Result := 0;
   if CharacterIndex >= FFirstCode then
@@ -505,8 +501,8 @@ end;
 
 procedure TPascalTypeFormat6CharacterMap.LoadFromStream(Stream: TStream);
 var
-  StartPos   : Int64;
-  EntryIndex : Integer;
+  StartPos: Int64;
+  EntryIndex: Integer;
   TableLength: Word;
 begin
   inherited;
@@ -582,8 +578,7 @@ begin
     inherited;
 end;
 
-function TPascalTypeFormat12CharacterMap.CharacterToGlyph(CharacterIndex
-  : Integer): Integer;
+function TPascalTypeFormat12CharacterMap.CharacterToGlyph(CharacterIndex: Integer): Integer;
 var
   GroupIndex: Integer;
 begin
@@ -618,9 +613,9 @@ end;
 
 procedure TPascalTypeFormat12CharacterMap.LoadFromStream(Stream: TStream);
 var
-  StartPos   : Int64;
+  StartPos: Int64;
   TableLength: Cardinal;
-  GroupIndex : Cardinal;
+  GroupIndex: Cardinal;
 begin
   with Stream do
   begin

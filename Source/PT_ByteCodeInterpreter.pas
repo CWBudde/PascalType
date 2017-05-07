@@ -25,7 +25,7 @@ unit PT_ByteCodeInterpreter;
 //                                                                            //
 //  The initial developer of this code is Christian-W. Budde                  //
 //                                                                            //
-//  Portions created by Christian-W. Budde are Copyright (C) 2010             //
+//  Portions created by Christian-W. Budde are Copyright (C) 2010-2017        //
 //  by Christian-W. Budde. All Rights Reserved.                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,11 +47,11 @@ uses
 
 procedure ByteCodeToStrings(ByteCodeStream: TStream; Strings: TStrings);
 var
-  TempStr     : string;
-  Instruction : Byte;
-  ParamCount  : Byte;
-  ParamIndex  : Byte;
-  ParamValue8 : Byte;
+  TempStr: string;
+  Instruction: Byte;
+  ParamCount: Byte;
+  ParamIndex: Byte;
+  ParamValue8: Byte;
   ParamValue16: Word;
 begin
   with ByteCodeStream do

@@ -81,82 +81,82 @@ var
   VersionStr : WideString;
   FullName   : WideString;
 begin
- with TPascalTypeStorage.Create do
+  with TPascalTypeStorage.Create do
   try
-   MS := TMemoryStream.Create;
-   try
+    MS := TMemoryStream.Create;
     try
-     // load file to memory stream
-     MS.LoadFromFile(TtfFileName);
+      try
+        // load file to memory stream
+        MS.LoadFromFile(TtfFileName);
 
-     // reset stream position
-     MS.Seek(0, soFromBeginning);
+        // reset stream position
+        MS.Seek(0, soFromBeginning);
 
-     // load font from memory stream
-     LoadFromStream(MS);
-    except
-     on E: EPascalTypeError do Writeln('Error reading file: ' + E.Message);
+        // load font from memory stream
+        LoadFromStream(MS);
+      except
+        on E: EPascalTypeError do Writeln('Error reading file: ' + E.Message);
+      end;
+    finally
+      FreeAndNil(MS);
     end;
-   finally
-    FreeAndNil(MS);
-   end;
 
-   with EOTHeader do
+    with EOTHeader do
     begin
-     FontDataSize := MS.Size;
-     EotSize := SizeOf(EOTHeader) + FontDataSize;
-     Version := $00020001;
-     Charset := 0;
-     MagicNumber := $504c;
-     Reserved[0] := 0;
-     Reserved[1] := 0;
-     Reserved[2] := 0;
-     Reserved[3] := 0;
-     Padding1 := 0;
-     Italic := Byte(fsfItalic in OS2Table.FontSelectionFlags);
-     Weight := OS2Table.Weight;
-     for i := 0 to Length(FontPANOSE) - 1
-      do FontPANOSE[i] := Panose.Data[i];
-     fsType := 0;
+      FontDataSize := MS.Size;
+      EotSize := SizeOf(EOTHeader) + FontDataSize;
+      Version := $00020001;
+      Charset := 0;
+      MagicNumber := $504c;
+      Reserved[0] := 0;
+      Reserved[1] := 0;
+      Reserved[2] := 0;
+      Reserved[3] := 0;
+      Padding1 := 0;
+      Italic := Byte(fsfItalic in OS2Table.FontSelectionFlags);
+      Weight := OS2Table.Weight;
+      for i := 0 to Length(FontPANOSE) - 1 do
+        FontPANOSE[i] := Panose.Data[i];
+      fsType := 0;
 
-     if Assigned(OS2Table) then
+      if Assigned(OS2Table) then
       begin
-       if Assigned(OS2Table.UnicodeRange) then
+        if Assigned(OS2Table.UnicodeRange) then
         begin
-         UnicodeRange[0] := OS2Table.UnicodeRange.AsCardinal[0];
-         UnicodeRange[1] := OS2Table.UnicodeRange.AsCardinal[1];
-         UnicodeRange[2] := OS2Table.UnicodeRange.AsCardinal[2];
-         UnicodeRange[3] := OS2Table.UnicodeRange.AsCardinal[3];
+          UnicodeRange[0] := OS2Table.UnicodeRange.AsCardinal[0];
+          UnicodeRange[1] := OS2Table.UnicodeRange.AsCardinal[1];
+          UnicodeRange[2] := OS2Table.UnicodeRange.AsCardinal[2];
+          UnicodeRange[3] := OS2Table.UnicodeRange.AsCardinal[3];
         end;
-       if Assigned(OS2Table.CodePageRange) then
+        if Assigned(OS2Table.CodePageRange) then
         begin
-         CodePageRange[0] := OS2Table.CodePageRange.AsCardinal[0];
-         CodePageRange[1] := OS2Table.CodePageRange.AsCardinal[1];
+          CodePageRange[0] := OS2Table.CodePageRange.AsCardinal[0];
+          CodePageRange[1] := OS2Table.CodePageRange.AsCardinal[1];
         end;
       end;
-     CheckSumAdjustment := HeaderTable.CheckSumAdjustment;
+      CheckSumAdjustment := HeaderTable.CheckSumAdjustment;
     end;
 
-   // eventually backup and delete existing file
-   if FileExists(EotFileName) then
+    // eventually backup and delete existing file
+    if FileExists(EotFileName) then
     begin
-     RenameFile(EotFileName, ChangeFileExt(EotFileName, '.bak'));
-     DeleteFile(EotFileName);
+      RenameFile(EotFileName, ChangeFileExt(EotFileName, '.bak'));
+      DeleteFile(EotFileName);
     end;
 
-   // create output file
-   FS.Create(EotFileName, fmCreate);
+    // create output file
+    FS.Create(EotFileName, fmCreate);
 
-   // write EOT header
-   FS.Write(EOTHeader, SizeOf(EOTHeader));
+    // write EOT header
+    FS.Write(EOTHeader, SizeOf(EOTHeader));
 
-   // reset memory stream position
-   MS.Seek(0, soFromBeginning);
+    // reset memory stream position
+    MS.Seek(0, soFromBeginning);
 
-   // copy data from file stream
-   FS.CopyFrom(MS, MS.Size);
+    // copy data from file stream
+    FS.CopyFrom(MS, MS.Size);
   finally
-   Free;
+    Free;
   end;
 end;
 
@@ -164,18 +164,19 @@ end;
 var
   SR : TSearchRec;
 begin
- // show application information
- Writeln('PascalType TTF to EOT converter');
- Writeln('-------------------------------');
- Writeln('');
+  // show application information
+  Writeln('PascalType TTF to EOT converter');
+  Writeln('-------------------------------');
+  Writeln('');
 
- if (ParamStr(1) = '') or (not FileExists(ParamStr(1))) then
+  if (ParamStr(1) = '') or (not FileExists(ParamStr(1))) then
   begin
-   Writeln('Usage: ' + ExtractFileName(ParamStr(0)) + ' TTF-File [EOT-File]' );
-   Exit;
+    Writeln('Usage: ' + ExtractFileName(ParamStr(0)) + ' TTF-File [EOT-File]' );
+    Exit;
   end;
 
- if ParamStr(2) <> ''
-  then ConvertFile(ParamStr(1), ParamStr(2))
-  else ConvertFile(ParamStr(1), ChangeFileExt(ParamStr(1), '.eot'));
+  if ParamStr(2) <> '' then
+    ConvertFile(ParamStr(1), ParamStr(2))
+  else
+    ConvertFile(ParamStr(1), ChangeFileExt(ParamStr(1), '.eot'));
 end.

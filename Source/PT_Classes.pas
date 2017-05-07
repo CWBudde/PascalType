@@ -25,7 +25,7 @@ unit PT_Classes;
 //                                                                            //
 //  The initial developer of this code is Christian-W. Budde                  //
 //                                                                            //
-//  Portions created by Christian-W. Budde are Copyright (C) 2010             //
+//  Portions created by Christian-W. Budde are Copyright (C) 2010-2017        //
 //  by Christian-W. Budde. All Rights Reserved.                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,12 +43,9 @@ type
 
   IPascalTypeStorageTable = interface(IUnknown)
     ['{A990D67B-BC60-4DA4-9D90-3C1D30AEC003}']
-    function GetTableByTableName(TableNAme: TTableName)
-      : TCustomPascalTypeNamedTable;
-    function GetTableByTableType(TableType: TTableType)
-      : TCustomPascalTypeNamedTable;
-    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass)
-      : TCustomPascalTypeNamedTable;
+    function GetTableByTableName(TableNAme: TTableName): TCustomPascalTypeNamedTable;
+    function GetTableByTableType(TableType: TTableType): TCustomPascalTypeNamedTable;
+    function GetTableByTableClass(TableClass: TCustomPascalTypeNamedTableClass): TCustomPascalTypeNamedTable;
   end;
 
   IPascalTypeStorageChange = interface(IUnknown)
