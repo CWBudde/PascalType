@@ -10,7 +10,7 @@ uses
   FastMM4,
   Forms,
   FE_FontHeader in 'FE_FontHeader.pas' {FrameFontHeader: TFrame},
-  FontExplorerMain in 'FontExplorerMain.pas' {FmTTF},
+  FontExplorerMain in 'FontExplorerMain.pas' {FormTTF},
   AboutDialog in 'AboutDialog.pas',
   PT_Bindings in '..\..\Source\PT_Bindings.pas',
   PT_Bitmap in '..\..\Source\PT_Bitmap.pas',
@@ -52,6 +52,6 @@ uses
 
 begin
   Application.Initialize;
-  Application.CreateForm(TFmTTF, FmTTF);
+  Application.CreateForm(TFormTTF, FormTTF);
   Application.Run;
 end.

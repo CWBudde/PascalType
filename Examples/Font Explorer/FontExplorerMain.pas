@@ -17,68 +17,68 @@ uses
 {$ENDIF}
   PT_TablesPostscript, PT_TablesFontForge, PT_ByteCodeInterpreter, PT_Storage,
   PT_StorageSFNT, PT_UnicodeNames, PT_FontEngine, PT_PanoseClassifications,
-  PT_Windows, FE_FontHeader;
+  PT_Windows, FE_FontHeader, System.Actions;
 
 type
-  TFmTTF = class(TForm)
-    AcEditCopy: TEditCopy;
-    AcEditCut: TEditCut;
-    AcEditPaste: TEditPaste;
-    AcEditUndo: TEditUndo;
-    AcFileExit: TFileExit;
-    AcFileOpen: TFileOpen;
-    AcFileSaveAs: TFileSaveAs;
+  TFormTTF = class(TForm)
+    ActionFileExit: TFileExit;
+    ActionFileOpen: TFileOpen;
+    ActionFileSaveAs: TFileSaveAs;
+    ActionEditCopy: TEditCopy;
+    ActionEditCut: TEditCut;
+    ActionEditPaste: TEditPaste;
+    ActionEditUndo: TEditUndo;
     ActionList: TActionList;
-    CbFontSize: TComboBox;
+    ComboBoxFontSize: TComboBox;
     CoolBar: TCoolBar;
     FontDialog: TFontDialog;
     FrFontHeader: TFrameFontHeader;
-    LbFontSize: TLabel;
+    LabelFontSize: TLabel;
     ListBox: TListBox;
     ListView: TListView;
     MainMenu: TMainMenu;
-    MiAbout: TMenuItem;
-    MiArial: TMenuItem;
-    MiArialBold: TMenuItem;
-    MiArialBoldItalic: TMenuItem;
-    MiArialItalic: TMenuItem;
-    MiArialRegular: TMenuItem;
-    MiCopy: TMenuItem;
-    MiCourierNew: TMenuItem;
-    MiCourierNewBold: TMenuItem;
-    MiCourierNewBoldItalic: TMenuItem;
-    MiCourierNewItalic: TMenuItem;
-    MiCourierRegular: TMenuItem;
-    MiCut: TMenuItem;
-    MiEdit: TMenuItem;
-    MiExit: TMenuItem;
-    MiFile: TMenuItem;
-    MiHelp: TMenuItem;
-    MiInternal: TMenuItem;
-    MiNew: TMenuItem;
-    MiOpen: TMenuItem;
-    MiOpenDefaultFonts: TMenuItem;
-    MiOpenFromInstalled: TMenuItem;
-    MiPaste: TMenuItem;
-    MiSave: TMenuItem;
-    MiSaveAs: TMenuItem;
-    MiStatusBar: TMenuItem;
-    MiTimesNewRoman: TMenuItem;
-    MiTimesNewRomanBold: TMenuItem;
-    MiTimesNewRomanBoldItalic: TMenuItem;
-    MiTimesNewRomanItalic: TMenuItem;
-    MiTimesNewRomanRegular: TMenuItem;
-    MiToolbar: TMenuItem;
-    MiUndo: TMenuItem;
-    MiView: TMenuItem;
-    MiWingdings: TMenuItem;
+    MenuItemAbout: TMenuItem;
+    MenuItemCopy: TMenuItem;
+    MenuItemCourierNew: TMenuItem;
+    MenuItemCourierNewBold: TMenuItem;
+    MenuItemCourierNewBoldItalic: TMenuItem;
+    MenuItemCourierNewItalic: TMenuItem;
+    MenuItemCourierRegular: TMenuItem;
+    MenuItemCut: TMenuItem;
+    MenuItemEdit: TMenuItem;
+    MenuItemFile: TMenuItem;
+    MenuItemFileArial: TMenuItem;
+    MenuItemFileArialBold: TMenuItem;
+    MenuItemFileArialBoldItalic: TMenuItem;
+    MenuItemFileArialItalic: TMenuItem;
+    MenuItemFileArialRegular: TMenuItem;
+    MenuItemFileExit: TMenuItem;
+    MenuItemFileInternal: TMenuItem;
+    MenuItemFileNew: TMenuItem;
+    MenuItemFileOpen: TMenuItem;
+    MenuItemFileOpenDefaultFonts: TMenuItem;
+    MenuItemFileOpenFromInstalled: TMenuItem;
+    MenuItemFileSave: TMenuItem;
+    MenuItemFileSaveAs: TMenuItem;
+    MenuItemFileWingdings: TMenuItem;
+    MenuItemHelp: TMenuItem;
+    MenuItemPaste: TMenuItem;
+    MenuItemStatusBar: TMenuItem;
+    MenuItemTimesNewRoman: TMenuItem;
+    MenuItemTimesNewRomanBold: TMenuItem;
+    MenuItemTimesNewRomanBoldItalic: TMenuItem;
+    MenuItemTimesNewRomanItalic: TMenuItem;
+    MenuItemTimesNewRomanRegular: TMenuItem;
+    MenuItemToolbar: TMenuItem;
+    MenuItemUndo: TMenuItem;
+    MenuItemView: TMenuItem;
     N1: TMenuItem;
     N2: TMenuItem;
     N3: TMenuItem;
     N4: TMenuItem;
     PaintBox: TPaintBox;
-    PnMain: TPanel;
-    PnPaintBox: TPanel;
+    PanelMain: TPanel;
+    PanelPaintBox: TPanel;
     Splitter: TSplitter;
     StatusBar: TStatusBar;
     TbCopy: TToolButton;
@@ -93,31 +93,31 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure AcFileOpenAccept(Sender: TObject);
-    procedure CbFontSizeChange(Sender: TObject);
-    procedure MIArialBoldClick(Sender: TObject);
-    procedure MIArialBoldItalicClick(Sender: TObject);
-    procedure MIArialItalicClick(Sender: TObject);
-    procedure MIArialRegularClick(Sender: TObject);
-    procedure MICourierNewBoldClick(Sender: TObject);
-    procedure MICourierNewBoldItalicClick(Sender: TObject);
-    procedure MICourierNewItalicClick(Sender: TObject);
-    procedure MICourierRegularClick(Sender: TObject);
-    procedure MIInternalClick(Sender: TObject);
-    procedure MIOpenFromInstalledClick(Sender: TObject);
-    procedure MIStatusBarClick(Sender: TObject);
-    procedure MITimesNewRomanBoldClick(Sender: TObject);
-    procedure MITimesNewRomanBoldItalicClick(Sender: TObject);
-    procedure MITimesNewRomanItalicClick(Sender: TObject);
-    procedure MITimesNewRomanRegularClick(Sender: TObject);
-    procedure MIToolbarClick(Sender: TObject);
-    procedure MIWingdingsClick(Sender: TObject);
+    procedure ActionFileOpenAccept(Sender: TObject);
+    procedure ComboBoxFontSizeChange(Sender: TObject);
+    procedure MenuItemFileArialBoldClick(Sender: TObject);
+    procedure MenuItemFileArialBoldItalicClick(Sender: TObject);
+    procedure MenuItemFileArialItalicClick(Sender: TObject);
+    procedure MenuItemFileArialRegularClick(Sender: TObject);
+    procedure MenuItemCourierNewBoldClick(Sender: TObject);
+    procedure MenuItemCourierNewBoldItalicClick(Sender: TObject);
+    procedure MenuItemCourierNewItalicClick(Sender: TObject);
+    procedure MenuItemCourierRegularClick(Sender: TObject);
+    procedure MenuItemFileInternalClick(Sender: TObject);
+    procedure MenuItemFileOpenFromInstalledClick(Sender: TObject);
+    procedure MenuItemStatusBarClick(Sender: TObject);
+    procedure MenuItemTimesNewRomanBoldClick(Sender: TObject);
+    procedure MenuItemTimesNewRomanBoldItalicClick(Sender: TObject);
+    procedure MenuItemTimesNewRomanItalicClick(Sender: TObject);
+    procedure MenuItemTimesNewRomanRegularClick(Sender: TObject);
+    procedure MenuItemToolbarClick(Sender: TObject);
+    procedure MenuItemFileWingdingsClick(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure ShowHint(Sender: TObject);
     procedure TreeViewChange(Sender: TObject; Node: TTreeNode);
     procedure TreeViewMouseMove(Sender: TObject; Shift: TShiftState;
       X, Y: Integer);
-    procedure MiAboutClick(Sender: TObject);
+    procedure MenuItemAboutClick(Sender: TObject);
   private
     FFontEngine  : TPascalTypeFontEngine;
     FCurrentGlyph: TBitmap;
@@ -253,7 +253,7 @@ type
   end;
 
 var
-  FmTTF: TFmTTF;
+  FormTTF: TFormTTF;
 
 implementation
 
@@ -269,14 +269,14 @@ uses
 resourcestring
   RCStrFileDoesNotExists = 'File does not exists';
 
-procedure TFmTTF.FormCreate(Sender: TObject);
+procedure TFormTTF.FormCreate(Sender: TObject);
 var
   PWindowsDir: array [0..MAX_PATH] of Char;
 begin
   Application.OnHint := ShowHint;
 
   GetWindowsDirectory(PWindowsDir, MAX_PATH);
-  AcFileOpen.Dialog.InitialDir := GetFontDirectory;
+  ActionFileOpen.Dialog.InitialDir := GetFontDirectory;
 
   FFontEngine := TPascalTypeFontEngine.Create;
 
@@ -286,7 +286,7 @@ begin
   FontSizeChanged;
 end;
 
-procedure TFmTTF.FormDestroy(Sender: TObject);
+procedure TFormTTF.FormDestroy(Sender: TObject);
 begin
   // free pascal type Storage
   FreeAndNil(FFontEngine);
@@ -295,7 +295,7 @@ begin
   FreeAndNil(FCurrentGlyph);
 end;
 
-procedure TFmTTF.FormShow(Sender: TObject);
+procedure TFormTTF.FormShow(Sender: TObject);
 begin
   if FileExists(ParamStr(1)) then
     LoadFromFile(ParamStr(1))
@@ -303,19 +303,19 @@ begin
     LoadFromFile(GetFontDirectory + '\cour.ttf');
 end;
 
-procedure TFmTTF.FontSizeChanged;
+procedure TFormTTF.FontSizeChanged;
 begin
   Fppem := FFontSize * PixelsPerInch div 72;
   FScaler := Fppem / FFontEngine.Storage.HeaderTable.UnitsPerEm;
 end;
 
-procedure TFmTTF.InitializeDefaultListView;
+procedure TFormTTF.InitializeDefaultListView;
 begin
   // add columns
   ListViewColumns(['Name', 'Value']);
 end;
 
-procedure TFmTTF.ListViewColumns(Columns: array of string);
+procedure TFormTTF.ListViewColumns(Columns: array of string);
 var
   ColumnIndex: Integer;
 begin
@@ -336,7 +336,7 @@ begin
     end;
 end;
 
-procedure TFmTTF.ListViewData(Strings: array of string);
+procedure TFormTTF.ListViewData(Strings: array of string);
 var
   ValueIndex: Integer;
 begin
@@ -349,7 +349,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.SetFontSize(const Value: Integer);
+procedure TFormTTF.SetFontSize(const Value: Integer);
 begin
   if FFontSize <> Value then
   begin
@@ -358,7 +358,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.ShowHint(Sender: TObject);
+procedure TFormTTF.ShowHint(Sender: TObject);
 begin
   if Length(Application.Hint) > 0 then
   begin
@@ -369,29 +369,29 @@ begin
     StatusBar.SimplePanel := False;
 end;
 
-procedure TFmTTF.AcFileOpenAccept(Sender: TObject);
+procedure TFormTTF.ActionFileOpenAccept(Sender: TObject);
 begin
-  LoadFromFile(AcFileOpen.Dialog.Filename);
+  LoadFromFile(ActionFileOpen.Dialog.Filename);
 end;
 
-procedure TFmTTF.MiStatusBarClick(Sender: TObject);
+procedure TFormTTF.MenuItemStatusBarClick(Sender: TObject);
 begin
-  MIStatusBar.Checked := not MIStatusBar.Checked;
-  StatusBar.Visible := MIStatusBar.Checked;
+  MenuItemStatusBar.Checked := not MenuItemStatusBar.Checked;
+  StatusBar.Visible := MenuItemStatusBar.Checked;
 end;
 
-procedure TFmTTF.MiToolbarClick(Sender: TObject);
+procedure TFormTTF.MenuItemToolbarClick(Sender: TObject);
 begin
-  MIToolbar.Checked := not MIToolbar.Checked;
-  CoolBar.Visible := MIToolbar.Checked;
+  MenuItemToolbar.Checked := not MenuItemToolbar.Checked;
+  CoolBar.Visible := MenuItemToolbar.Checked;
 end;
 
-procedure TFmTTF.MiArialRegularClick(Sender: TObject);
+procedure TFormTTF.MenuItemFileArialRegularClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\Arial.ttf');
 end;
 
-procedure TFmTTF.MiAboutClick(Sender: TObject);
+procedure TFormTTF.MenuItemAboutClick(Sender: TObject);
 begin
   with TFmAbout.Create(Self) do
   try
@@ -401,67 +401,67 @@ begin
   end;
 end;
 
-procedure TFmTTF.MiArialBoldClick(Sender: TObject);
+procedure TFormTTF.MenuItemFileArialBoldClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\arialbd.ttf');
 end;
 
-procedure TFmTTF.MiArialBoldItalicClick(Sender: TObject);
+procedure TFormTTF.MenuItemFileArialBoldItalicClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\arialbi.ttf');
 end;
 
-procedure TFmTTF.MiArialItalicClick(Sender: TObject);
+procedure TFormTTF.MenuItemFileArialItalicClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\ariali.ttf');
 end;
 
-procedure TFmTTF.MiCourierRegularClick(Sender: TObject);
+procedure TFormTTF.MenuItemCourierRegularClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\cour.ttf');
 end;
 
-procedure TFmTTF.MiCourierNewBoldClick(Sender: TObject);
+procedure TFormTTF.MenuItemCourierNewBoldClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\courbd.ttf');
 end;
 
-procedure TFmTTF.MiCourierNewBoldItalicClick(Sender: TObject);
+procedure TFormTTF.MenuItemCourierNewBoldItalicClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\courbi.ttf');
 end;
 
-procedure TFmTTF.MiCourierNewItalicClick(Sender: TObject);
+procedure TFormTTF.MenuItemCourierNewItalicClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\couri.ttf');
 end;
 
-procedure TFmTTF.MiTimesNewRomanRegularClick(Sender: TObject);
+procedure TFormTTF.MenuItemTimesNewRomanRegularClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\times.ttf');
 end;
 
-procedure TFmTTF.MiTimesNewRomanBoldClick(Sender: TObject);
+procedure TFormTTF.MenuItemTimesNewRomanBoldClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\timesbd.ttf');
 end;
 
-procedure TFmTTF.MiTimesNewRomanItalicClick(Sender: TObject);
+procedure TFormTTF.MenuItemTimesNewRomanItalicClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\timesbi.ttf');
 end;
 
-procedure TFmTTF.MiTimesNewRomanBoldItalicClick(Sender: TObject);
+procedure TFormTTF.MenuItemTimesNewRomanBoldItalicClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\timesi.ttf');
 end;
 
-procedure TFmTTF.MiWingdingsClick(Sender: TObject);
+procedure TFormTTF.MenuItemFileWingdingsClick(Sender: TObject);
 begin
   LoadFromFile(GetFontDirectory + '\wingding.ttf');
 end;
 
-procedure TFmTTF.MiInternalClick(Sender: TObject);
+procedure TFormTTF.MenuItemFileInternalClick(Sender: TObject);
 var
   ResourceStream: TResourceStream;
 begin
@@ -473,18 +473,18 @@ begin
   end;
 end;
 
-procedure TFmTTF.PaintBoxPaint(Sender: TObject);
+procedure TFormTTF.PaintBoxPaint(Sender: TObject);
 begin
   PaintBox.Canvas.Draw((PaintBox.Width - FCurrentGlyph.Width) div 2,
     (PaintBox.Height - FCurrentGlyph.Height) div 2, FCurrentGlyph);
 end;
 
-procedure TFmTTF.CbFontSizeChange(Sender: TObject);
+procedure TFormTTF.ComboBoxFontSizeChange(Sender: TObject);
 begin
-  FontSize := StrToInt(CbFontSize.Text);
+  FontSize := StrToInt(ComboBoxFontSize.Text);
 end;
 
-procedure TFmTTF.DisplayBitmapLocationTable(BitmapLocationTable
+procedure TFormTTF.DisplayBitmapLocationTable(BitmapLocationTable
   : TPascalTypeBitmapLocationTable);
 begin
   with BitmapLocationTable do
@@ -497,7 +497,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayBitmapSizeTable(BitmapSizeTable
+procedure TFormTTF.DisplayBitmapSizeTable(BitmapSizeTable
   : TPascalTypeBitmapSizeTable);
 var
   str: string;
@@ -576,7 +576,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayCharacterMapSubTable(CharacterMapSubTable
+procedure TFormTTF.DisplayCharacterMapSubTable(CharacterMapSubTable
   : TCustomPascalTypeCharacterMapDirectory);
 var
   GlyphIndex: Integer;
@@ -647,7 +647,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayCharacterMapTable(CharacterMapTable
+procedure TFormTTF.DisplayCharacterMapTable(CharacterMapTable
   : TPascalTypeCharacterMapTable);
 begin
   with CharacterMapTable do
@@ -664,7 +664,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayControlValueTable(ControlValueTable
+procedure TFormTTF.DisplayControlValueTable(ControlValueTable
   : TTrueTypeFontControlValueTable);
 var
   ControlValueIndex: Integer;
@@ -694,7 +694,7 @@ end;
 
 {$IFDEF ShowOpenType}
 
-procedure TFmTTF.DisplayCustomOpenTypeClassDefinitionTable(ClasDefinitionTable
+procedure TFormTTF.DisplayCustomOpenTypeClassDefinitionTable(ClasDefinitionTable
   : TCustomOpenTypeClassDefinitionTable);
 var
   ClassIndex: Integer;
@@ -754,7 +754,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayOpenTypeMarkGlyphSetTable(MarkGlyphSetTable
+procedure TFormTTF.DisplayOpenTypeMarkGlyphSetTable(MarkGlyphSetTable
   : TOpenTypeMarkGlyphSetTable);
 var
   CoverageIndex: Integer;
@@ -781,7 +781,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayCustomOpenTypeFeatureTable(FeatureTable
+procedure TFormTTF.DisplayCustomOpenTypeFeatureTable(FeatureTable
   : TCustomOpenTypeFeatureTable);
 begin
   with FeatureTable do
@@ -798,7 +798,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayCustomOpenTypeLanguageSystemTable(LanguageSystemTable
+procedure TFormTTF.DisplayCustomOpenTypeLanguageSystemTable(LanguageSystemTable
   : TCustomOpenTypeLanguageSystemTable);
 begin
   with LanguageSystemTable do
@@ -823,7 +823,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayCustomOpenTypeScriptTable
+procedure TFormTTF.DisplayCustomOpenTypeScriptTable
   (ScriptTable: TCustomOpenTypeScriptTable);
 begin
   with ScriptTable do
@@ -839,7 +839,7 @@ begin
 end;
 {$ENDIF}
 
-procedure TFmTTF.DisplayDigitalSignatureBlock(DigitalSignatureBlock
+procedure TFormTTF.DisplayDigitalSignatureBlock(DigitalSignatureBlock
   : TPascalTypeDigitalSignatureBlock);
 begin
   with DigitalSignatureBlock do
@@ -859,7 +859,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayDigitalSignatureTable(DigitalSignatureTable
+procedure TFormTTF.DisplayDigitalSignatureTable(DigitalSignatureTable
   : TPascalTypeDigitalSignatureTable);
 begin
   with DigitalSignatureTable do
@@ -881,7 +881,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayAppleFeatureTable(FeatureTable
+procedure TFormTTF.DisplayAppleFeatureTable(FeatureTable
   : TPascalTypeFeatureTable);
 begin
   with FeatureTable do
@@ -895,7 +895,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayExtendedGlyphMetamorphosisTable
+procedure TFormTTF.DisplayExtendedGlyphMetamorphosisTable
   (ExtendedGlyphMetamorphosisTable: TPascalTypeExtendedGlyphMetamorphosisTable);
 begin
   with ExtendedGlyphMetamorphosisTable do
@@ -912,7 +912,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayEmbeddedBitmapDataTable(BitmapDataTable
+procedure TFormTTF.DisplayEmbeddedBitmapDataTable(BitmapDataTable
   : TPascalTypeEmbeddedBitmapDataTable);
 begin
   with BitmapDataTable do
@@ -926,7 +926,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayEmbeddedBitmapLocationTable(BitmapLocationTable
+procedure TFormTTF.DisplayEmbeddedBitmapLocationTable(BitmapLocationTable
   : TPascalTypeEmbeddedBitmapLocationTable);
 begin
   with BitmapLocationTable do
@@ -939,7 +939,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayEmbeddedBitmapScalingTable(BitmapScalingTable
+procedure TFormTTF.DisplayEmbeddedBitmapScalingTable(BitmapScalingTable
   : TPascalTypeEmbeddedBitmapScalingTable);
 begin
   with BitmapScalingTable do
@@ -952,7 +952,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayFontForgeTimeStampTable(FontForgeTimeStampTable
+procedure TFormTTF.DisplayFontForgeTimeStampTable(FontForgeTimeStampTable
   : TPascalTypeFontForgeTimeStampTable);
 begin
   with FontForgeTimeStampTable do
@@ -978,7 +978,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayFontDescriptionTable(FontDescription
+procedure TFormTTF.DisplayFontDescriptionTable(FontDescription
   : TPascalTypeFontDescriptionTable);
 begin
   with FontDescription do
@@ -992,7 +992,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayGlyphPropertiesTable(GlyphProperties
+procedure TFormTTF.DisplayGlyphPropertiesTable(GlyphProperties
   : TPascalTypeGlyphPropertiesTable);
 begin
   with GlyphProperties do
@@ -1006,7 +1006,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayFontForgeExtensionTable(FontForgeExtensionTable
+procedure TFormTTF.DisplayFontForgeExtensionTable(FontForgeExtensionTable
   : TPascalTypeFontForgeExtensionTable);
 begin
   with FontForgeExtensionTable do
@@ -1020,7 +1020,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayFontInstructionTable(InstructionTable
+procedure TFormTTF.DisplayFontInstructionTable(InstructionTable
   : TCustomTrueTypeFontInstructionTable);
 var
   TempStream: TMemoryStream;
@@ -1046,7 +1046,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayFontKerningSubTable(KerningSubtable
+procedure TFormTTF.DisplayFontKerningSubTable(KerningSubtable
   : TPascalTypeKerningSubTable);
 var
   GlyphIndex: Integer;
@@ -1076,7 +1076,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayFontKerningTable(KerningTable: TPascalTypeKerningTable);
+procedure TFormTTF.DisplayFontKerningTable(KerningTable: TPascalTypeKerningTable);
 begin
   with KerningTable do
   begin
@@ -1089,7 +1089,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayGaspTable(GaspTable
+procedure TFormTTF.DisplayGaspTable(GaspTable
   : TPascalTypeGridFittingAndScanConversionProcedureTable);
 var
   RangeIndex: Integer;
@@ -1139,7 +1139,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayGlyphData(GlyphData: TCustomTrueTypeFontGlyphData);
+procedure TFormTTF.DisplayGlyphData(GlyphData: TCustomTrueTypeFontGlyphData);
 begin
   with GlyphData do
   begin
@@ -1164,7 +1164,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayGlyphDataTable(GlyphDataTable
+procedure TFormTTF.DisplayGlyphDataTable(GlyphDataTable
   : TTrueTypeFontGlyphDataTable);
 begin
   with GlyphDataTable do
@@ -1180,7 +1180,7 @@ end;
 
 {$IFDEF ShowOpenType}
 
-procedure TFmTTF.DisplayGlyphDefinitionTable(GlyphDefinitionTable
+procedure TFormTTF.DisplayGlyphDefinitionTable(GlyphDefinitionTable
   : TOpenTypeGlyphDefinitionTable);
 begin
   with GlyphDefinitionTable do
@@ -1195,7 +1195,7 @@ begin
 end;
 {$ENDIF}
 
-procedure TFmTTF.DisplayGlyphInstructionTable(GlyphInstructionTable
+procedure TFormTTF.DisplayGlyphInstructionTable(GlyphInstructionTable
   : TTrueTypeFontGlyphInstructionTable);
 var
   TempStream: TMemoryStream;
@@ -1221,7 +1221,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayHeaderTable(HeaderTable: TPascalTypeHeaderTable);
+procedure TFormTTF.DisplayHeaderTable(HeaderTable: TPascalTypeHeaderTable);
 begin
   with FrFontHeader, HeaderTable do
   begin
@@ -1255,7 +1255,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayHorizontalHeader(HorizontalHeaderTable
+procedure TFormTTF.DisplayHorizontalHeader(HorizontalHeaderTable
   : TPascalTypeHorizontalHeaderTable);
 begin
   with HorizontalHeaderTable do
@@ -1302,7 +1302,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayHorizontalMetrics(HorizontalMetricsTable
+procedure TFormTTF.DisplayHorizontalMetrics(HorizontalMetricsTable
   : TPascalTypeHorizontalMetricsTable);
 var
   HorizontalMetricIndex: Integer;
@@ -1331,7 +1331,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayHorizontalDeviceMetricsTable(HorDevMetricsTable
+procedure TFormTTF.DisplayHorizontalDeviceMetricsTable(HorDevMetricsTable
   : TPascalTypeHorizontalDeviceMetricsTable);
 begin
   with HorDevMetricsTable do
@@ -1348,7 +1348,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayHorizontalDeviceMetricsSubTable(HorDevMetricsTable
+procedure TFormTTF.DisplayHorizontalDeviceMetricsSubTable(HorDevMetricsTable
   : TPascalTypeHorizontalDeviceMetricsSubTable);
 var
   WidthIndex: Integer;
@@ -1374,7 +1374,7 @@ end;
 
 {$IFDEF ShowOpenType}
 
-procedure TFmTTF.DisplayJustificationTable(JustificationTable
+procedure TFormTTF.DisplayJustificationTable(JustificationTable
   : TOpenTypeJustificationTable);
 begin
   with JustificationTable do
@@ -1392,7 +1392,7 @@ begin
 end;
 {$ENDIF}
 
-procedure TFmTTF.DisplayLinearThresholdTable(LinearThresholdTable
+procedure TFormTTF.DisplayLinearThresholdTable(LinearThresholdTable
   : TPascalTypeLinearThresholdTable);
 var
   VerticalPenIndex: Integer;
@@ -1421,7 +1421,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayLocationTable(LocationTable
+procedure TFormTTF.DisplayLocationTable(LocationTable
   : TTrueTypeFontLocationTable);
 var
   LocationIndex: Integer;
@@ -1443,7 +1443,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayMaximumProfileTable(MaximumProfileTable
+procedure TFormTTF.DisplayMaximumProfileTable(MaximumProfileTable
   : TPascalTypeMaximumProfileTable);
 begin
   with MaximumProfileTable do
@@ -1501,7 +1501,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayNameTable(NameTable: TPascalTypeNameTable);
+procedure TFormTTF.DisplayNameTable(NameTable: TPascalTypeNameTable);
 var
   str     : string;
   StrIndex: Integer;
@@ -1582,7 +1582,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayNameAppleTable(NameTable: TPascalTypeNameTable);
+procedure TFormTTF.DisplayNameAppleTable(NameTable: TPascalTypeNameTable);
 var
   StrIndex: Integer;
 begin
@@ -1658,7 +1658,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayNameUnicodeTable(NameTable: TPascalTypeNameTable);
+procedure TFormTTF.DisplayNameUnicodeTable(NameTable: TPascalTypeNameTable);
 var
   StrIndex: Integer;
 begin
@@ -1734,7 +1734,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayNameMicrosoftTable(NameTable: TPascalTypeNameTable);
+procedure TFormTTF.DisplayNameMicrosoftTable(NameTable: TPascalTypeNameTable);
 var
   StrIndex: Integer;
 begin
@@ -1812,7 +1812,7 @@ end;
 
 {$IFDEF ShowOpenType}
 
-procedure TFmTTF.DisplayOpenTypeCommonTable(OpenTypeCommonTable
+procedure TFormTTF.DisplayOpenTypeCommonTable(OpenTypeCommonTable
   : TCustomOpenTypeCommonTable);
 begin
   with OpenTypeCommonTable do
@@ -1826,7 +1826,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayOpenTypeFeatureListTable(FeatureListTable
+procedure TFormTTF.DisplayOpenTypeFeatureListTable(FeatureListTable
   : TOpenTypeFeatureListTable);
 begin
   with FeatureListTable do
@@ -1840,7 +1840,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayOpenTypeLookUpListTable(LookUpListTable
+procedure TFormTTF.DisplayOpenTypeLookUpListTable(LookUpListTable
   : TOpenTypeLookupListTable);
 begin
   with LookUpListTable do
@@ -1854,7 +1854,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayOpenTypeLookupTable(LookupTable: TOpenTypeLookupTable);
+procedure TFormTTF.DisplayOpenTypeLookupTable(LookupTable: TOpenTypeLookupTable);
 begin
   with LookupTable do
   begin
@@ -1876,7 +1876,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayOpenTypeScriptListTable(ScriptListTable
+procedure TFormTTF.DisplayOpenTypeScriptListTable(ScriptListTable
   : TOpenTypeScriptListTable);
 begin
   with ScriptListTable do
@@ -1891,7 +1891,7 @@ begin
 end;
 {$ENDIF}
 
-procedure TFmTTF.DisplayOS2Table(OS2Table: TPascalTypeOS2Table);
+procedure TFormTTF.DisplayOS2Table(OS2Table: TPascalTypeOS2Table);
 begin
   with OS2Table do
   begin
@@ -2054,7 +2054,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayOS2PanoseTable(OS2Panose: TCustomPascalTypePanoseTable);
+procedure TFormTTF.DisplayOS2PanoseTable(OS2Panose: TCustomPascalTypePanoseTable);
 begin
   // add columns
   ListViewColumns(['Name', 'Value', 'Description']);
@@ -2271,7 +2271,7 @@ begin
   ListView.BringToFront;
 end;
 
-procedure TFmTTF.DisplayOS2UnicodeRangeTable(OS2UnicodeRange
+procedure TFormTTF.DisplayOS2UnicodeRangeTable(OS2UnicodeRange
   : TPascalTypeUnicodeRangeTable);
 begin
   with OS2UnicodeRange do
@@ -2960,7 +2960,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayOS2CodePageRangeTable(OS2CodePageRange
+procedure TFormTTF.DisplayOS2CodePageRangeTable(OS2CodePageRange
   : TPascalTypeOS2CodePageRangeTable);
 begin
   with OS2CodePageRange do
@@ -3108,7 +3108,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayGlyphDataPoints(SimpleGlyphData
+procedure TFormTTF.DisplayGlyphDataPoints(SimpleGlyphData
   : TTrueTypeFontSimpleGlyphData);
 var
   ContourIndex: Integer;
@@ -3145,7 +3145,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayGlyphDataContour(Contour: TPascalTypeTrueTypeContour);
+procedure TFormTTF.DisplayGlyphDataContour(Contour: TPascalTypeTrueTypeContour);
 var
   PointIndex: Integer;
 begin
@@ -3175,7 +3175,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayGlyphDataSimpleOutline(SimpleGlyphData
+procedure TFormTTF.DisplayGlyphDataSimpleOutline(SimpleGlyphData
   : TTrueTypeFontSimpleGlyphData);
 var
   ContourIndex: Integer;
@@ -3325,11 +3325,11 @@ begin
       end;
 
     PaintBox.Invalidate;
-    PnPaintBox.BringToFront;
+    PanelPaintBox.BringToFront;
   end;
 end;
 
-procedure TFmTTF.DisplayGlyphDataCompositeOutline(CompositeGlyphData
+procedure TFormTTF.DisplayGlyphDataCompositeOutline(CompositeGlyphData
   : TTrueTypeFontCompositeGlyphData);
 var
   CompositeIndex: Integer;
@@ -3350,11 +3350,11 @@ begin
       end;
 
     PaintBox.Invalidate;
-    PnPaintBox.BringToFront;
+    PanelPaintBox.BringToFront;
   end;
 end;
 
-procedure TFmTTF.DisplayPCL5Table(PCL5Table: TPascalTypePCL5Table);
+procedure TFormTTF.DisplayPCL5Table(PCL5Table: TPascalTypePCL5Table);
 var
   str: string;
 begin
@@ -3441,7 +3441,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayPostscriptCFFTable
+procedure TFormTTF.DisplayPostscriptCFFTable
   (CFFTable: TPascalTypeCompactFontFormatTable);
 begin
   with CFFTable do
@@ -3468,7 +3468,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayPostscriptTable(PostscriptTable
+procedure TFormTTF.DisplayPostscriptTable(PostscriptTable
   : TPascalTypePostscriptTable);
 begin
   with PostscriptTable do
@@ -3507,7 +3507,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayPostscriptV2Table(PostscriptTable
+procedure TFormTTF.DisplayPostscriptV2Table(PostscriptTable
   : TPascalTypePostscriptVersion2Table);
 var
   GlyphIndex: Integer;
@@ -3538,7 +3538,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayVerticalDeviceMetricsTable(VerticalDeviceMetricsTable
+procedure TFormTTF.DisplayVerticalDeviceMetricsTable(VerticalDeviceMetricsTable
   : TPascalTypeVerticalDeviceMetricsTable);
 begin
   with VerticalDeviceMetricsTable do
@@ -3558,7 +3558,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.DisplayVerticalHeader(VerticalHeaderTable
+procedure TFormTTF.DisplayVerticalHeader(VerticalHeaderTable
   : TPascalTypeVerticalHeaderTable);
 begin
   with VerticalHeaderTable do
@@ -3572,7 +3572,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.TreeViewMouseMove(Sender: TObject; Shift: TShiftState;
+procedure TFormTTF.TreeViewMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
 var
   MouseOverNode: TTreeNode;
@@ -3600,7 +3600,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.MiOpenFromInstalledClick(Sender: TObject);
+procedure TFormTTF.MenuItemFileOpenFromInstalledClick(Sender: TObject);
 var
   SR: TSearchRec;
 begin
@@ -3642,7 +3642,7 @@ begin
   end;
 end;
 
-procedure TFmTTF.TreeViewChange(Sender: TObject; Node: TTreeNode);
+procedure TFormTTF.TreeViewChange(Sender: TObject; Node: TTreeNode);
 begin
   Node.Expanded := True;
 
@@ -3653,454 +3653,333 @@ begin
       DisplayHeaderTable(TPascalTypeHeaderTable(Node.Data))
     else
 
-      // Horizontal Header Table
-      if TObject(Node.Data) is TPascalTypeHorizontalHeaderTable then
-        DisplayHorizontalHeader(TPascalTypeHorizontalHeaderTable(Node.Data))
+    // Horizontal Header Table
+    if TObject(Node.Data) is TPascalTypeHorizontalHeaderTable then
+      DisplayHorizontalHeader(TPascalTypeHorizontalHeaderTable(Node.Data))
+    else
+
+    // Horizontal Metrics Table
+    if TObject(Node.Data) is TPascalTypeHorizontalMetricsTable then
+      DisplayHorizontalMetrics(TPascalTypeHorizontalMetricsTable(Node.Data))
+    else
+
+    // Horizontal Device Metrics
+    if TObject(Node.Data) is TPascalTypeHorizontalDeviceMetricsTable then
+      DisplayHorizontalDeviceMetricsTable(
+        TPascalTypeHorizontalDeviceMetricsTable(Node.Data))
+    else
+
+    // Horizontal Device Metrics Record
+    if TObject(Node.Data) is TPascalTypeHorizontalDeviceMetricsSubTable
+    then
+      DisplayHorizontalDeviceMetricsSubTable(
+        TPascalTypeHorizontalDeviceMetricsSubTable(Node.Data))
+    else
+
+    // 0S/2 Table
+    if TObject(Node.Data) is TPascalTypeOS2Table then
+      DisplayOS2Table(TPascalTypeOS2Table(Node.Data))
+    else
+
+    // 0S/2 Panose Table
+    if TObject(Node.Data) is TCustomPascalTypePanoseTable then
+      DisplayOS2PanoseTable(TCustomPascalTypePanoseTable(Node.Data))
+    else
+
+    // 0S/2 Unicode Range Table
+    if TObject(Node.Data) is TPascalTypeUnicodeRangeTable then
+      DisplayOS2UnicodeRangeTable(TPascalTypeUnicodeRangeTable(Node.Data))
+    else
+
+    // 0S/2 Unicode Range Table
+    if TObject(Node.Data) is TPascalTypeOS2CodePageRangeTable
+    then
+      DisplayOS2CodePageRangeTable(TPascalTypeOS2CodePageRangeTable(Node.Data))
+    else
+
+    // Character Map Table
+    if TObject(Node.Data) is TPascalTypeCharacterMapTable then
+      DisplayCharacterMapTable(TPascalTypeCharacterMapTable(Node.Data))
+    else
+
+    // Character Map SubTable
+    if TObject(Node.Data) is TCustomPascalTypeCharacterMapDirectory then
+      DisplayCharacterMapSubTable(
+        TCustomPascalTypeCharacterMapDirectory(Node.Data))
+    else
+
+    // Maximum Profile Table
+    if TObject(Node.Data) is TPascalTypeMaximumProfileTable then
+      DisplayMaximumProfileTable(
+        TPascalTypeMaximumProfileTable(Node.Data))
+    else
+
+    // Control Value Table
+    if TObject(Node.Data) is TTrueTypeFontControlValueTable then
+      DisplayControlValueTable(
+        TTrueTypeFontControlValueTable(Node.Data))
+    else
+
+    // Bitmap Location Table
+    if TObject(Node.Data) is TPascalTypeBitmapLocationTable then
+      DisplayBitmapLocationTable(
+        TPascalTypeBitmapLocationTable(Node.Data))
+    else
+
+    // Embedded Bitmap Data Table
+    if TObject(Node.Data) is TPascalTypeEmbeddedBitmapDataTable then
+      DisplayEmbeddedBitmapDataTable(
+        TPascalTypeEmbeddedBitmapDataTable(Node.Data))
+    else
+
+    // Embedded Bitmap Location Table
+    if TObject(Node.Data) is TPascalTypeEmbeddedBitmapLocationTable then
+      DisplayEmbeddedBitmapLocationTable(
+        TPascalTypeEmbeddedBitmapLocationTable(Node.Data))
+    else
+
+    // Embedded Bitmap Scaling Table
+    if TObject(Node.Data) is TPascalTypeEmbeddedBitmapScalingTable then
+      DisplayEmbeddedBitmapScalingTable(
+        TPascalTypeEmbeddedBitmapScalingTable(Node.Data))
+    else
+
+    // Extended Glyph Metamorphosis
+    if TObject(Node.Data) is TPascalTypeExtendedGlyphMetamorphosisTable then
+      DisplayExtendedGlyphMetamorphosisTable(
+        TPascalTypeExtendedGlyphMetamorphosisTable(Node.Data))
+    else
+
+    // Bitmap Size Table
+    if TObject(Node.Data) is TPascalTypeBitmapSizeTable then
+      DisplayBitmapSizeTable(TPascalTypeBitmapSizeTable(Node.Data))
+    else
+
+    // Font Instruction Table
+    if TObject(Node.Data) is TCustomTrueTypeFontInstructionTable then
+      DisplayFontInstructionTable(TCustomTrueTypeFontInstructionTable
+       (Node.Data))
+    else
+
+    // Postscript Table
+    if TObject(Node.Data) is TPascalTypePostscriptTable then
+      DisplayPostscriptTable(TPascalTypePostscriptTable(Node.Data))
+    else
+
+    // Postscript Compact Font Format Table
+    if TObject(Node.Data) is TPascalTypeCompactFontFormatTable then
+      DisplayPostscriptCFFTable(TPascalTypeCompactFontFormatTable(Node.Data))
+    else
+
+    // Name Table
+    if TObject(Node.Data) is TPascalTypeNameTable then
+    begin
+      if Node.Text = 'Unicode' then
+        DisplayNameUnicodeTable(TPascalTypeNameTable(Node.Data))
       else
+      if Node.Text = 'Apple' then
+        DisplayNameAppleTable(TPascalTypeNameTable(Node.Data))
+      else
+      if Node.Text = 'Microsoft' then
+        DisplayNameMicrosoftTable(TPascalTypeNameTable(Node.Data))
+      else
+        DisplayNameTable(TPascalTypeNameTable(Node.Data))
+    end
+    else
 
-        // Horizontal Metrics Table
-        if TObject(Node.Data) is TPascalTypeHorizontalMetricsTable then
-          DisplayHorizontalMetrics(TPascalTypeHorizontalMetricsTable(Node.Data))
-        else
+    // Postscript Glyph Name Table
+    if TObject(Node.Data) is TPascalTypePostscriptVersion2Table then
+      DisplayPostscriptV2Table(TPascalTypePostscriptVersion2Table(Node.Data))
+    else
 
-          // Horizontal Device Metrics
-          if TObject(Node.Data) is TPascalTypeHorizontalDeviceMetricsTable then
-            DisplayHorizontalDeviceMetricsTable
-              (TPascalTypeHorizontalDeviceMetricsTable(Node.Data))
-          else
+    // Grid Fitting and Scan Conversion Procedure Table
+    if TObject(Node.Data) is TPascalTypeGridFittingAndScanConversionProcedureTable then
+      DisplayGaspTable(TPascalTypeGridFittingAndScanConversionProcedureTable(Node.Data))
+    else
 
-            // Horizontal Device Metrics Record
-            if TObject(Node.Data) is TPascalTypeHorizontalDeviceMetricsSubTable
-            then
-              DisplayHorizontalDeviceMetricsSubTable
-                (TPascalTypeHorizontalDeviceMetricsSubTable(Node.Data))
-            else
-
-              // 0S/2 Table
-              if TObject(Node.Data) is TPascalTypeOS2Table then
-                DisplayOS2Table(TPascalTypeOS2Table(Node.Data))
-              else
-
-                // 0S/2 Panose Table
-                if TObject(Node.Data) is TCustomPascalTypePanoseTable then
-                  DisplayOS2PanoseTable(TCustomPascalTypePanoseTable(Node.Data))
-                else
-
-                  // 0S/2 Unicode Range Table
-                  if TObject(Node.Data) is TPascalTypeUnicodeRangeTable then
-                    DisplayOS2UnicodeRangeTable
-                      (TPascalTypeUnicodeRangeTable(Node.Data))
-                  else
-
-                    // 0S/2 Unicode Range Table
-                    if TObject(Node.Data) is TPascalTypeOS2CodePageRangeTable
-                    then
-                      DisplayOS2CodePageRangeTable
-                        (TPascalTypeOS2CodePageRangeTable(Node.Data))
-                    else
-
-                      // Character Map Table
-                      if TObject(Node.Data) is TPascalTypeCharacterMapTable then
-                        DisplayCharacterMapTable
-                          (TPascalTypeCharacterMapTable(Node.Data))
-                      else
-
-                        // Character Map SubTable
-                        if TObject(Node.Data) is TCustomPascalTypeCharacterMapDirectory
-                        then
-                          DisplayCharacterMapSubTable
-                            (TCustomPascalTypeCharacterMapDirectory(Node.Data))
-                        else
-
-                          // Maximum Profile Table
-                          if TObject(Node.Data) is TPascalTypeMaximumProfileTable
-                          then
-                            DisplayMaximumProfileTable
-                              (TPascalTypeMaximumProfileTable(Node.Data))
-                          else
-
-                            // Control Value Table
-                            if TObject(Node.Data) is TTrueTypeFontControlValueTable
-                            then
-                              DisplayControlValueTable
-                                (TTrueTypeFontControlValueTable(Node.Data))
-                            else
-
-                              // Bitmap Location Table
-                              if TObject(Node.Data) is TPascalTypeBitmapLocationTable
-                              then
-                                DisplayBitmapLocationTable
-                                  (TPascalTypeBitmapLocationTable(Node.Data))
-                              else
-
-                                // Embedded Bitmap Data Table
-                                if TObject(Node.Data) is TPascalTypeEmbeddedBitmapDataTable
-                                then
-                                  DisplayEmbeddedBitmapDataTable
-                                    (TPascalTypeEmbeddedBitmapDataTable
-                                    (Node.Data))
-                                else
-
-                                  // Embedded Bitmap Location Table
-                                  if TObject(Node.Data) is TPascalTypeEmbeddedBitmapLocationTable
-                                  then
-                                    DisplayEmbeddedBitmapLocationTable
-                                      (TPascalTypeEmbeddedBitmapLocationTable
-                                      (Node.Data))
-                                  else
-
-                                    // Embedded Bitmap Scaling Table
-                                    if TObject(Node.Data) is TPascalTypeEmbeddedBitmapScalingTable
-                                    then
-                                      DisplayEmbeddedBitmapScalingTable
-                                        (TPascalTypeEmbeddedBitmapScalingTable
-                                        (Node.Data))
-                                    else
-
-                                      // Extended Glyph Metamorphosis
-                                      if TObject(Node.Data) is TPascalTypeExtendedGlyphMetamorphosisTable
-                                      then
-                                        DisplayExtendedGlyphMetamorphosisTable
-                                        (TPascalTypeExtendedGlyphMetamorphosisTable
-                                        (Node.Data))
-                                      else
-
-                                        // Bitmap Size Table
-                                        if TObject(Node.Data) is TPascalTypeBitmapSizeTable
-                                        then
-                                        DisplayBitmapSizeTable
-                                        (TPascalTypeBitmapSizeTable(Node.Data))
-                                        else
-
-                                        // Font Instruction Table
-                                        if TObject(Node.Data) is TCustomTrueTypeFontInstructionTable
-                                        then
-                                        DisplayFontInstructionTable
-                                        (TCustomTrueTypeFontInstructionTable
-                                        (Node.Data))
-                                        else
-
-                                        // Postscript Table
-                                        if TObject(Node.Data) is TPascalTypePostscriptTable
-                                        then
-                                        DisplayPostscriptTable
-                                        (TPascalTypePostscriptTable(Node.Data))
-                                        else
-
-                                        // Postscript Compact Font Format Table
-                                        if TObject(Node.Data) is TPascalTypeCompactFontFormatTable
-                                        then
-                                        DisplayPostscriptCFFTable
-                                        (TPascalTypeCompactFontFormatTable
-                                        (Node.Data))
-                                        else
-
-                                        // Name Table
-                                        if TObject(Node.Data) is TPascalTypeNameTable
-                                        then
-                                        begin
-                                        if Node.Text = 'Unicode' then
-                                        DisplayNameUnicodeTable
-                                        (TPascalTypeNameTable(Node.Data))
-                                        else if Node.Text = 'Apple' then
-                                        DisplayNameAppleTable
-                                        (TPascalTypeNameTable(Node.Data))
-                                        else if Node.Text = 'Microsoft' then
-                                        DisplayNameMicrosoftTable
-                                        (TPascalTypeNameTable(Node.Data))
-                                        else
-                                        DisplayNameTable
-                                        (TPascalTypeNameTable(Node.Data))
-                                        end
-                                        else
-
-                                        // Postscript Glyph Name Table
-                                        if TObject(Node.Data) is TPascalTypePostscriptVersion2Table
-                                        then
-                                        DisplayPostscriptV2Table
-                                        (TPascalTypePostscriptVersion2Table
-                                        (Node.Data))
-                                        else
-
-                                        // Grid Fitting and Scan Conversion Procedure Table
-                                        if TObject(Node.Data) is TPascalTypeGridFittingAndScanConversionProcedureTable
-                                        then
-                                        DisplayGaspTable
-                                        (TPascalTypeGridFittingAndScanConversionProcedureTable
-                                        (Node.Data))
-                                        else
-
-                                        // Glyph Instruction Table
-                                        if TObject(Node.Data) is TTrueTypeFontGlyphInstructionTable
-                                        then
-                                        DisplayGlyphInstructionTable
-                                        (TTrueTypeFontGlyphInstructionTable
-                                        (Node.Data))
-                                        else
+    // Glyph Instruction Table
+    if TObject(Node.Data) is TTrueTypeFontGlyphInstructionTable then
+      DisplayGlyphInstructionTable(TTrueTypeFontGlyphInstructionTable(Node.Data))
+    else
 
 {$IFDEF ShowOpenType}
-                                        // Glyph Definition Table
-                                        if TObject(Node.Data) is TOpenTypeGlyphDefinitionTable
-                                        then
-                                        DisplayGlyphDefinitionTable
-                                        (TOpenTypeGlyphDefinitionTable
-                                        (Node.Data))
-                                        else
+    // Glyph Definition Table
+    if TObject(Node.Data) is TOpenTypeGlyphDefinitionTable then
+      DisplayGlyphDefinitionTable(TOpenTypeGlyphDefinitionTable(Node.Data))
+    else
 
-                                        // Justification Table
-                                        if TObject(Node.Data) is TOpenTypeJustificationTable
-                                        then
-                                        DisplayJustificationTable
-                                        (TOpenTypeJustificationTable(Node.Data))
-                                        else
+    // Justification Table
+    if TObject(Node.Data) is TOpenTypeJustificationTable then
+      DisplayJustificationTable(TOpenTypeJustificationTable(Node.Data))
+    else
 
-                                        // Open Type Common Table
-                                        if TObject(Node.Data) is TCustomOpenTypeCommonTable
-                                        then
-                                        DisplayOpenTypeCommonTable
-                                        (TCustomOpenTypeCommonTable(Node.Data))
-                                        else
+    // Open Type Common Table
+    if TObject(Node.Data) is TCustomOpenTypeCommonTable then
+      DisplayOpenTypeCommonTable(TCustomOpenTypeCommonTable(Node.Data))
+    else
 
-                                        // Open Type Script List Table
-                                        if TObject(Node.Data) is TOpenTypeScriptListTable
-                                        then
-                                        DisplayOpenTypeScriptListTable
-                                        (TOpenTypeScriptListTable(Node.Data))
-                                        else
+    // Open Type Script List Table
+    if TObject(Node.Data) is TOpenTypeScriptListTable then
+      DisplayOpenTypeScriptListTable(TOpenTypeScriptListTable(Node.Data))
+    else
 
-                                        // Open Type Feature List Table
-                                        if TObject(Node.Data) is TOpenTypeFeatureListTable
-                                        then
-                                        DisplayOpenTypeFeatureListTable
-                                        (TOpenTypeFeatureListTable(Node.Data))
-                                        else
+    // Open Type Feature List Table
+    if TObject(Node.Data) is TOpenTypeFeatureListTable then
+      DisplayOpenTypeFeatureListTable(TOpenTypeFeatureListTable(Node.Data))
+    else
 
-                                        // Open Type Lookup List Table
-                                        if TObject(Node.Data) is TOpenTypeLookupListTable
-                                        then
-                                        DisplayOpenTypeLookUpListTable
-                                        (TOpenTypeLookupListTable(Node.Data))
-                                        else
+    // Open Type Lookup List Table
+    if TObject(Node.Data) is TOpenTypeLookupListTable then
+      DisplayOpenTypeLookUpListTable (TOpenTypeLookupListTable(Node.Data))
+    else
 
-                                        // Open Type Language System Table
-                                        if TObject(Node.Data) is TCustomOpenTypeLanguageSystemTable
-                                        then
-                                        DisplayCustomOpenTypeLanguageSystemTable
-                                        (TCustomOpenTypeLanguageSystemTable
-                                        (Node.Data))
-                                        else
+    // Open Type Language System Table
+    if TObject(Node.Data) is TCustomOpenTypeLanguageSystemTable then
+      DisplayCustomOpenTypeLanguageSystemTable(TCustomOpenTypeLanguageSystemTable(Node.Data))
+    else
 
-                                        // Open Type Script Table
-                                        if TObject(Node.Data) is TCustomOpenTypeScriptTable
-                                        then
-                                        DisplayCustomOpenTypeScriptTable
-                                        (TCustomOpenTypeScriptTable(Node.Data))
-                                        else
+    // Open Type Script Table
+    if TObject(Node.Data) is TCustomOpenTypeScriptTable then
+      DisplayCustomOpenTypeScriptTable(TCustomOpenTypeScriptTable(Node.Data))
+    else
 
-                                        // Open Type Feature Table
-                                        if TObject(Node.Data) is TCustomOpenTypeFeatureTable
-                                        then
-                                        DisplayCustomOpenTypeFeatureTable
-                                        (TCustomOpenTypeFeatureTable(Node.Data))
-                                        else
+    // Open Type Feature Table
+    if TObject(Node.Data) is TCustomOpenTypeFeatureTable then
+      DisplayCustomOpenTypeFeatureTable(TCustomOpenTypeFeatureTable(Node.Data))
+    else
 
-                                        // Open Type Lookup Table
-                                        if TObject(Node.Data) is TOpenTypeLookupTable
-                                        then
-                                        DisplayOpenTypeLookupTable
-                                        (TOpenTypeLookupTable(Node.Data))
-                                        else
+    // Open Type Lookup Table
+    if TObject(Node.Data) is TOpenTypeLookupTable then
+      DisplayOpenTypeLookupTable(TOpenTypeLookupTable(Node.Data))
+    else
 
-                                        // Open Type Lookup Table
-                                        if TObject(Node.Data) is TCustomOpenTypeClassDefinitionTable
-                                        then
-                                        DisplayCustomOpenTypeClassDefinitionTable
-                                        (TCustomOpenTypeClassDefinitionTable
-                                        (Node.Data))
-                                        else
+    // Open Type Lookup Table
+    if TObject(Node.Data) is TCustomOpenTypeClassDefinitionTable then
+      DisplayCustomOpenTypeClassDefinitionTable(TCustomOpenTypeClassDefinitionTable(Node.Data))
+    else
 
-                                        // Open Type Mark Glyph Set Table
-                                        if TObject(Node.Data) is TOpenTypeMarkGlyphSetTable
-                                        then
-                                        DisplayOpenTypeMarkGlyphSetTable
-                                        (TOpenTypeMarkGlyphSetTable(Node.Data))
-                                        else
+    // Open Type Mark Glyph Set Table
+    if TObject(Node.Data) is TOpenTypeMarkGlyphSetTable then
+      DisplayOpenTypeMarkGlyphSetTable(TOpenTypeMarkGlyphSetTable(Node.Data))
+    else
 {$ENDIF}
-                                        // Digital Signature Table
-                                        if TObject(Node.Data) is TPascalTypeDigitalSignatureTable
-                                        then
-                                        DisplayDigitalSignatureTable
-                                        (TPascalTypeDigitalSignatureTable
-                                        (Node.Data))
-                                        else
+    // Digital Signature Table
+    if TObject(Node.Data) is TPascalTypeDigitalSignatureTable then
+      DisplayDigitalSignatureTable(TPascalTypeDigitalSignatureTable(Node.Data))
+    else
 
-                                        // Digital Signature Block
-                                        if TObject(Node.Data) is TPascalTypeDigitalSignatureBlock
-                                        then
-                                        DisplayDigitalSignatureBlock
-                                        (TPascalTypeDigitalSignatureBlock
-                                        (Node.Data))
-                                        else
+    // Digital Signature Block
+    if TObject(Node.Data) is TPascalTypeDigitalSignatureBlock then
+      DisplayDigitalSignatureBlock(TPascalTypeDigitalSignatureBlock(Node.Data))
+    else
 
-                                        // Apple Features
-                                        if TObject(Node.Data) is TPascalTypeFeatureTable
-                                        then
-                                        DisplayAppleFeatureTable
-                                        (TPascalTypeFeatureTable(Node.Data))
-                                        else
+    // Apple Features
+    if TObject(Node.Data) is TPascalTypeFeatureTable then
+      DisplayAppleFeatureTable(TPascalTypeFeatureTable(Node.Data))
+    else
 
-                                        // Font Forge Time Stamp Table
-                                        if TObject(Node.Data) is TPascalTypeFontForgeTimeStampTable
-                                        then
-                                        DisplayFontForgeTimeStampTable
-                                        (TPascalTypeFontForgeTimeStampTable
-                                        (Node.Data))
-                                        else
+    // Font Forge Time Stamp Table
+    if TObject(Node.Data) is TPascalTypeFontForgeTimeStampTable then
+      DisplayFontForgeTimeStampTable(TPascalTypeFontForgeTimeStampTable(Node.Data))
+    else
 
-                                        // Font Forge Extension Table
-                                        if TObject(Node.Data) is TPascalTypeFontForgeExtensionTable
-                                        then
-                                        DisplayFontForgeExtensionTable
-                                        (TPascalTypeFontForgeExtensionTable
-                                        (Node.Data))
-                                        else
+    // Font Forge Extension Table
+    if TObject(Node.Data) is TPascalTypeFontForgeExtensionTable then
+      DisplayFontForgeExtensionTable(TPascalTypeFontForgeExtensionTable(Node.Data))
+    else
 
-                                        // Font Description Table
-                                        if TObject(Node.Data) is TPascalTypeFontDescriptionTable
-                                        then
-                                        DisplayFontDescriptionTable
-                                        (TPascalTypeFontDescriptionTable
-                                        (Node.Data))
-                                        else
+    // Font Description Table
+    if TObject(Node.Data) is TPascalTypeFontDescriptionTable then
+      DisplayFontDescriptionTable(TPascalTypeFontDescriptionTable(Node.Data))
+    else
 
-                                        // Gylph Property Table
-                                        if TObject(Node.Data) is TPascalTypeGlyphPropertiesTable
-                                        then
-                                        DisplayGlyphPropertiesTable
-                                        (TPascalTypeGlyphPropertiesTable
-                                        (Node.Data))
-                                        else
+    // Gylph Property Table
+    if TObject(Node.Data) is TPascalTypeGlyphPropertiesTable then
+      DisplayGlyphPropertiesTable(TPascalTypeGlyphPropertiesTable(Node.Data))
+    else
 
-                                        // Kerning Table
-                                        if TObject(Node.Data) is TPascalTypeKerningTable
-                                        then
-                                        DisplayFontKerningTable
-                                        (TPascalTypeKerningTable(Node.Data))
-                                        else
+    // Kerning Table
+    if TObject(Node.Data) is TPascalTypeKerningTable then
+      DisplayFontKerningTable(TPascalTypeKerningTable(Node.Data))
+    else
 
-                                        // Kerning Subtable
-                                        if TObject(Node.Data) is TPascalTypeKerningSubTable
-                                        then
-                                        DisplayFontKerningSubTable
-                                        (TPascalTypeKerningSubTable(Node.Data))
-                                        else
+    // Kerning Subtable
+    if TObject(Node.Data) is TPascalTypeKerningSubTable then
+      DisplayFontKerningSubTable(TPascalTypeKerningSubTable(Node.Data))
+    else
 
-                                        // Location Table
-                                        if TObject(Node.Data) is TTrueTypeFontLocationTable
-                                        then
-                                        DisplayLocationTable
-                                        (TTrueTypeFontLocationTable(Node.Data))
-                                        else
+    // Location Table
+    if TObject(Node.Data) is TTrueTypeFontLocationTable then
+      DisplayLocationTable(TTrueTypeFontLocationTable(Node.Data))
+    else
 
-                                        // Glyph Data Table
-                                        if TObject(Node.Data) is TTrueTypeFontGlyphDataTable
-                                        then
-                                        DisplayGlyphDataTable
-                                        (TTrueTypeFontGlyphDataTable(Node.Data))
-                                        else
+    // Glyph Data Table
+    if TObject(Node.Data) is TTrueTypeFontGlyphDataTable then
+      DisplayGlyphDataTable(TTrueTypeFontGlyphDataTable(Node.Data))
+    else
 
-                                        // Glyph Data
-                                        if TObject(Node.Data) is TCustomTrueTypeFontGlyphData
-                                        then
-                                        if (TObject(Node.Data)
-                                        is TTrueTypeFontSimpleGlyphData) then
-                                        begin
-                                        if (Node.Text = 'Points') then
-                                        DisplayGlyphDataPoints
-                                        (TTrueTypeFontSimpleGlyphData
-                                        (Node.Data))
-                                        else if (Node.Text = 'Outline') then
-                                        DisplayGlyphDataSimpleOutline
-                                        (TTrueTypeFontSimpleGlyphData
-                                        (Node.Data))
-                                        else
-                                        DisplayGlyphData
-                                        (TCustomTrueTypeFontGlyphData
-                                        (Node.Data))
-                                        end
-                                        else if (TObject(Node.Data)
-                                        is TTrueTypeFontCompositeGlyphData) then
-                                        begin
-                                        if (Node.Text = 'Outline') then
-                                        DisplayGlyphDataCompositeOutline
-                                        (TTrueTypeFontCompositeGlyphData
-                                        (Node.Data))
-                                        else
-                                        DisplayGlyphData
-                                        (TCustomTrueTypeFontGlyphData
-                                        (Node.Data))
-                                        end
-                                        else
-                                        DisplayGlyphData
-                                        (TCustomTrueTypeFontGlyphData
-                                        (Node.Data))
-                                        else
+    // Glyph Data
+    if TObject(Node.Data) is TCustomTrueTypeFontGlyphData then
+      if (TObject(Node.Data) is TTrueTypeFontSimpleGlyphData) then
+      begin
+        if (Node.Text = 'Points') then
+          DisplayGlyphDataPoints(TTrueTypeFontSimpleGlyphData(Node.Data))
+        else if (Node.Text = 'Outline') then
+          DisplayGlyphDataSimpleOutline(TTrueTypeFontSimpleGlyphData(Node.Data))
+        else
+          DisplayGlyphData(TCustomTrueTypeFontGlyphData(Node.Data))
+      end
+      else if (TObject(Node.Data) is TTrueTypeFontCompositeGlyphData) then
+      begin
+        if (Node.Text = 'Outline') then
+          DisplayGlyphDataCompositeOutline(TTrueTypeFontCompositeGlyphData(Node.Data))
+        else
+          DisplayGlyphData(TCustomTrueTypeFontGlyphData(Node.Data))
+      end
+      else
+        DisplayGlyphData(TCustomTrueTypeFontGlyphData(Node.Data))
+    else
 
-                                        // Glyph Data Contour
-                                        if TObject(Node.Data) is TPascalTypeTrueTypeContour
-                                        then
-                                        DisplayGlyphDataContour
-                                        (TPascalTypeTrueTypeContour(Node.Data))
-                                        else
+    // Glyph Data Contour
+    if TObject(Node.Data) is TPascalTypeTrueTypeContour then
+      DisplayGlyphDataContour(TPascalTypeTrueTypeContour(Node.Data))
+    else
 
-                                        // Linear Threshold Table
-                                        if TObject(Node.Data) is TPascalTypeLinearThresholdTable
-                                        then
-                                        DisplayLinearThresholdTable
-                                        (TPascalTypeLinearThresholdTable
-                                        (Node.Data))
-                                        else
+    // Linear Threshold Table
+    if TObject(Node.Data) is TPascalTypeLinearThresholdTable then
+      DisplayLinearThresholdTable (TPascalTypeLinearThresholdTable(Node.Data))
+    else
 
-                                        // PCL 5 Table
-                                        if TObject(Node.Data) is TPascalTypePCL5Table
-                                        then
-                                        DisplayPCL5Table
-                                        (TPascalTypePCL5Table(Node.Data))
-                                        else
+    // PCL 5 Table
+    if TObject(Node.Data) is TPascalTypePCL5Table then
+      DisplayPCL5Table(TPascalTypePCL5Table(Node.Data))
+    else
 
-                                        // Vertical Metrics Header Table
-                                        if TObject(Node.Data) is TPascalTypeVerticalHeaderTable
-                                        then
-                                        DisplayVerticalHeader
-                                        (TPascalTypeVerticalHeaderTable
-                                        (Node.Data))
-                                        else
+    // Vertical Metrics Header Table
+    if TObject(Node.Data) is TPascalTypeVerticalHeaderTable then
+      DisplayVerticalHeader(TPascalTypeVerticalHeaderTable(Node.Data))
+    else
 
-                                        // Vertical Device Metrics Header Table
-                                        if TObject(Node.Data) is TPascalTypeVerticalDeviceMetricsTable
-                                        then
-                                        DisplayVerticalDeviceMetricsTable
-                                        (TPascalTypeVerticalDeviceMetricsTable
-                                        (Node.Data))
-                                        else
+    // Vertical Device Metrics Header Table
+    if TObject(Node.Data) is TPascalTypeVerticalDeviceMetricsTable then
+      DisplayVerticalDeviceMetricsTable(TPascalTypeVerticalDeviceMetricsTable(Node.Data))
+    else
 
-                                        // other non-required tables
-                                        if TObject(Node.Data) is TCustomPascalTypeNamedTable
-                                        then
-                                        with TCustomPascalTypeNamedTable
-                                        (Node.Data) do
-                                        begin
-                                        InitializeDefaultListView;
+    // other non-required tables
+    if TObject(Node.Data) is TCustomPascalTypeNamedTable then
+      with TCustomPascalTypeNamedTable(Node.Data) do
+      begin
+        InitializeDefaultListView;
 
-                                        ListViewData
-                                        (['Table Type', string(TableType)]);
+        ListViewData
+        (['Table Type', string(TableType)]);
 
-                                        ListView.BringToFront;
-                                        end;
+        ListView.BringToFront;
+      end;
   end;
 end;
 
-procedure TFmTTF.LoadFromFile(Filename: TFileName);
+procedure TFormTTF.LoadFromFile(Filename: TFileName);
 var
   Start, Stop, Freq: Int64;
   MemoryFileStream : TMemoryStream;
@@ -4175,7 +4054,7 @@ begin
     raise Exception.Create(RCStrFileDoesNotExists);
 end;
 
-procedure TFmTTF.LoadFromStream(Stream: TStream);
+procedure TFormTTF.LoadFromStream(Stream: TStream);
 var
   Start, Stop, Freq: Int64;
 begin
@@ -4225,7 +4104,7 @@ begin
   Caption := 'PascalType Font Explorer';
 end;
 
-procedure TFmTTF.FontChanged;
+procedure TFormTTF.FontChanged;
 var
   OptTableIndex: Integer;
   SubtableIndex: Integer;
@@ -4359,42 +4238,39 @@ begin
                 SignatureBlock[SubtableIndex])
         else
 
-          // kerning table
-          if OptionalTable[OptTableIndex] is TPascalTypeKerningTable then
-            with TPascalTypeKerningTable(OptionalTable[OptTableIndex]) do
-              for SubtableIndex := 0 to KerningSubtableCount - 1 do
-              begin
-                str := 'Subtable #' + IntToStr(SubtableIndex + 1);
-                if KerningSubtable[SubtableIndex].IsHorizontal then
-                  str := str + ' (horizontal'
-                else
-                  str := str + ' (vertical';
+        // kerning table
+        if OptionalTable[OptTableIndex] is TPascalTypeKerningTable then
+          with TPascalTypeKerningTable(OptionalTable[OptTableIndex]) do
+            for SubtableIndex := 0 to KerningSubtableCount - 1 do
+            begin
+              str := 'Subtable #' + IntToStr(SubtableIndex + 1);
+              if KerningSubtable[SubtableIndex].IsHorizontal then
+                str := str + ' (horizontal'
+              else
+                str := str + ' (vertical';
 
-                if KerningSubtable[SubtableIndex].IsMinimum then
-                  str := str + ', minimum)'
-                else
-                  str := str + ', kerning)';
+              if KerningSubtable[SubtableIndex].IsMinimum then
+                str := str + ', minimum)'
+              else
+                str := str + ', kerning)';
 
-                Items.AddChildObject(Node, str, KerningSubtable[SubtableIndex]);
-              end
-          else
+              Items.AddChildObject(Node, str, KerningSubtable[SubtableIndex]);
+            end
+        else
 
-            // horizontal device metrics
-            if OptionalTable[OptTableIndex] is TPascalTypeHorizontalDeviceMetricsTable
-            then
-              with TPascalTypeHorizontalDeviceMetricsTable
-                (OptionalTable[OptTableIndex]) do
-              begin
-                for SubtableIndex := 0 to DeviceRecordCount - 1 do
-                  Items.AddChildObject(Node, 'Device Record #' +
-                    IntToStr(SubtableIndex), DeviceRecord[SubtableIndex]);
-              end
-            else
+        // horizontal device metrics
+        if OptionalTable[OptTableIndex] is TPascalTypeHorizontalDeviceMetricsTable then
+          with TPascalTypeHorizontalDeviceMetricsTable(OptionalTable[OptTableIndex]) do
+          begin
+            for SubtableIndex := 0 to DeviceRecordCount - 1 do
+              Items.AddChildObject(Node, 'Device Record #' +
+                IntToStr(SubtableIndex), DeviceRecord[SubtableIndex]);
+          end
+        else
 
 {$IFDEF ShowOpenType}
               // open type common table
-              if OptionalTable[OptTableIndex] is TOpenTypeGlyphDefinitionTable
-              then
+              if OptionalTable[OptTableIndex] is TOpenTypeGlyphDefinitionTable then
                 with TOpenTypeGlyphDefinitionTable
                   (OptionalTable[OptTableIndex]) do
                 begin
@@ -4405,7 +4281,6 @@ begin
                   // Items.AddChildObject(Node, 'Mark Set', MarkGlyphSet);
                 end
               else
-
                 // embedded bitmap location table
                 if OptionalTable[OptTableIndex] is TPascalTypeEmbeddedBitmapLocationTable
                 then

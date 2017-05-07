@@ -3,9 +3,12 @@ program FontInfo;
 {$APPTYPE CONSOLE}
 
 uses
-  {$IFDEF CPU32} FastMove, {$ENDIF}
   FastMM4, SysUtils, Math,
-  PT_Types, PT_Tables, PT_TablesOptional, PT_Storage, PT_StorageSFNT;
+  PT_Types in '..\..\Source\PT_Types.pas',
+  PT_Tables in '..\..\Source\PT_Tables.pas',
+  PT_TablesOptional in '..\..\Source\PT_TablesOptional.pas',
+  PT_Storage in '..\..\Source\PT_Storage.pas',
+  PT_StorageSFNT in '..\..\Source\PT_StorageSFNT.pas';
 
 resourcestring
   RCStrUnknownFileFormat = 'Unknown file format!';
@@ -122,4 +125,8 @@ begin
     else
       LoadFontFile(ParamStr(1));
   until Random(200) = 1;
+
+  {$IFDEF DEBUG}
+  ReadLn;
+  {$ENDIF}
 end.

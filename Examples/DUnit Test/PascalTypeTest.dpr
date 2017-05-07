@@ -18,7 +18,6 @@ program PascalTypeTest;
 
 uses
   FastMM4,
-  FastMove,
   Forms,
   TestFramework,
   GUITestRunner,
@@ -53,8 +52,9 @@ uses
 
 begin
   Application.Initialize;
-  if IsConsole
-   then TextTestRunner.RunRegisteredTests
-   else GUITestRunner.RunRegisteredTests;
+  if IsConsole then
+    TextTestRunner.RunRegisteredTests
+  else
+    GUITestRunner.RunRegisteredTests;
 end.
 

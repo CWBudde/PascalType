@@ -28,38 +28,40 @@ implementation
 
 procedure TFontNameStorageScan.Execute;
 var
-  SR : TSearchRec;
+  SR: TSearchRec;
 begin
- if FindFirst('*.ttf', faAnyFile, SR) = 0 then
+  if FindFirst('*.ttf', faAnyFile, SR) = 0 then
   try
-   repeat
-    FStorageScan := TPascalTypeStorageScan.Create;
-    with FStorageScan do
-     try
-      // store current file
-      FCurrentFile := SR.Name;
+    repeat
+      FStorageScan := TPascalTypeStorageScan.Create;
+      with FStorageScan do
+        try
+          // store current file
+          FCurrentFile := SR.Name;
 
-      if FCurrentFile = 'tahoma.ttf'
-       then Continue;
+          if FCurrentFile = 'tahoma.ttf' then
+            Continue;
 
-      // load font from file
-      LoadFromFile(FCurrentFile);
+          // load font from file
+          LoadFromFile(FCurrentFile);
 
-      Synchronize(FontScanned);
-     except
-      on e: EPascalTypeError do Continue;
-      else Continue;
-     end;
-   until (FindNext(SR) <> 0) or Terminated;
+          Synchronize(FontScanned);
+        except
+          on
+            E: EPascalTypeError do Continue;
+          else
+            Continue;
+        end;
+    until (FindNext(SR) <> 0) or Terminated;
   finally
-   FindClose(SR);
+    FindClose(SR);
   end;
 end;
 
 procedure TFontNameStorageScan.FontScanned;
 begin
- if Assigned(FOnFontName)
-  then FOnFontName(Self, FCurrentFile, FStorageScan);
+  if Assigned(FOnFontName) then
+    FOnFontName(Self, FCurrentFile, FStorageScan);
 end;
 
 end.

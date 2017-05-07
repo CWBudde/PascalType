@@ -72,14 +72,14 @@ uses
 
 procedure TTestPascalTypeStorageScan.SetUp;
 begin
- inherited;
- FPascalTypeStorageScan := TPascalTypeStorageScan.Create;
+  inherited;
+  FPascalTypeStorageScan := TPascalTypeStorageScan.Create;
 end;
 
 procedure TTestPascalTypeStorageScan.TearDown;
 begin
- FreeAndNil(FPascalTypeStorageScan);
- inherited;
+  FreeAndNil(FPascalTypeStorageScan);
+  inherited;
 end;
 
 procedure TTestPascalTypeStorageScan.TestScanLocalFonts;
@@ -87,45 +87,49 @@ var
   SR      : TSearchRec;
   Succeed : Boolean;
 begin
- if FindFirst('*.ttf', faAnyFile, SR) = 0 then
+  if FindFirst('*.ttf', faAnyFile, SR) = 0 then
   try
-   repeat
-    Succeed := True;
-    try
-     FPascalTypeStorageScan.LoadFromFile(SR.Name)
-    except
-     on e: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
-     else Succeed := False;
-    end;
-    Check(Succeed, 'Error scanning file: ' + SR.Name);
-   until FindNext(SR) <> 0;
+    repeat
+      Succeed := True;
+      try
+        FPascalTypeStorageScan.LoadFromFile(SR.Name)
+      except
+        on
+          E: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
+        else
+          Succeed := False;
+      end;
+      Check(Succeed, 'Error scanning file: ' + SR.Name);
+    until FindNext(SR) <> 0;
   finally
-   FindClose(SR);
+    FindClose(SR);
   end;
 end;
 
 procedure TTestPascalTypeStorageScan.TestScanWindowsFonts;
 var
-  SR          : TSearchRec;
-  Succeed     : Boolean;
+  SR: TSearchRec;
+  Succeed: Boolean;
 begin
- SetCurrentDir(GetFontDirectory);
+  SetCurrentDir(GetFontDirectory);
 
- if FindFirst('*.ttf', faAnyFile, SR) = 0 then
+  if FindFirst('*.ttf', faAnyFile, SR) = 0 then
   try
-   repeat
-    Succeed := True;
-    try
-     FPascalTypeStorageScan.LoadFromFile(SR.Name);
-    except
-     on e: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
-//     on e: Exception do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
-     else Succeed := False;
-    end;
-    Check(Succeed, 'Error scanning file: ' + SR.Name);
-   until FindNext(SR) <> 0;
+    repeat
+      Succeed := True;
+      try
+        FPascalTypeStorageScan.LoadFromFile(SR.Name);
+      except
+        on
+          E: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
+//      on e: Exception do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
+        else
+          Succeed := False;
+      end;
+      Check(Succeed, 'Error scanning file: ' + SR.Name);
+    until FindNext(SR) <> 0;
   finally
-   FindClose(SR);
+    FindClose(SR);
   end;
 end;
 
@@ -135,79 +139,83 @@ end;
 
 procedure TTestPascalTypeStorage.SetUp;
 begin
- inherited;
- FPascalTypeStorage := TPascalTypeStorage.Create;
+  inherited;
+  FPascalTypeStorage := TPascalTypeStorage.Create;
 end;
 
 procedure TTestPascalTypeStorage.TearDown;
 begin
- FreeAndNil(FPascalTypeStorage);
- inherited;
+  FreeAndNil(FPascalTypeStorage);
+  inherited;
 end;
 
 procedure TTestPascalTypeStorage.TestInterpreteLocalFonts;
 var
-  SR          : TSearchRec;
-  Succeed     : Boolean;
+  SR: TSearchRec;
+  Succeed: Boolean;
 begin
- if FindFirst('*.ttf', faAnyFile, SR) = 0 then
+  if FindFirst('*.ttf', faAnyFile, SR) = 0 then
   try
-   repeat
-    Succeed := True;
-    try
-     FPascalTypeStorage.LoadFromFile(SR.Name)
-    except
-     on e: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
-     else Succeed := False;
-    end;
-    Check(Succeed, 'Error loading file: ' + SR.Name);
-   until FindNext(SR) <> 0;
+    repeat
+      Succeed := True;
+      try
+        FPascalTypeStorage.LoadFromFile(SR.Name)
+      except
+        on
+          E: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
+        else
+          Succeed := False;
+      end;
+      Check(Succeed, 'Error loading file: ' + SR.Name);
+    until FindNext(SR) <> 0;
   finally
-   FindClose(SR);
+    FindClose(SR);
   end;
 end;
 
 procedure TTestPascalTypeStorage.TestInterpreteWindowsFonts;
 var
-  SR          : TSearchRec;
-  Succeed     : Boolean;
+  SR: TSearchRec;
+  Succeed: Boolean;
 begin
- SetCurrentDir(GetFontDirectory);
+  SetCurrentDir(GetFontDirectory);
 
- if FindFirst('*.ttf', faAnyFile, SR) = 0 then
+  if FindFirst('*.ttf', faAnyFile, SR) = 0 then
   try
-   repeat
-    Succeed := True;
-    try
-     FPascalTypeStorage.LoadFromFile(SR.Name)
-    except
-     on e: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
-     else Succeed := False;
-    end;
-    Check(Succeed, 'Error loading file: ' + SR.Name);
-   until FindNext(SR) <> 0;
+    repeat
+      Succeed := True;
+      try
+        FPascalTypeStorage.LoadFromFile(SR.Name)
+      except
+        on
+          E: EPascalTypeError do MessageDlg(SR.Name + ': ' + e.Message, mtError, [mbOK], 0);
+        else
+          Succeed := False;
+      end;
+      Check(Succeed, 'Error loading file: ' + SR.Name);
+    until FindNext(SR) <> 0;
   finally
-   FindClose(SR);
+    FindClose(SR);
   end;
 end;
 
 procedure TTestPascalTypeStorage.TestWriteFont;
 var
-  ResourceStream : TResourceStream;
-  TempStream     : TMemoryStream;
+  ResourceStream: TResourceStream;
+  TempStream: TMemoryStream;
 begin
- ResourceStream := TResourceStream.Create(HInstance, 'Default', 'TTFFONT');
- try
-  FPascalTypeStorage.LoadFromStream(ResourceStream);
-  TempStream := TMemoryStream.Create;
+  ResourceStream := TResourceStream.Create(HInstance, 'Default', 'TTFFONT');
   try
-   FPascalTypeStorage.SaveToStream(TempStream);
+    FPascalTypeStorage.LoadFromStream(ResourceStream);
+    TempStream := TMemoryStream.Create;
+    try
+      FPascalTypeStorage.SaveToStream(TempStream);
+    finally
+      FreeAndNil(TempStream);
+    end;
   finally
-   FreeAndNil(TempStream);
+    FreeAndNil(ResourceStream);
   end;
- finally
-  FreeAndNil(ResourceStream);
- end;
 end;
 
 initialization

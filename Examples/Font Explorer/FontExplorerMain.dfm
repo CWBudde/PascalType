@@ -1,4 +1,4 @@
-object FmTTF: TFmTTF
+object FormTTF: TFormTTF
   Left = 309
   Top = 95
   Caption = 'PascalType Font Explorer'
@@ -40,7 +40,7 @@ object FmTTF: TFmTTF
     OnChange = TreeViewChange
     OnMouseMove = TreeViewMouseMove
   end
-  object PnMain: TPanel
+  object PanelMain: TPanel
     Left = 207
     Top = 24
     Width = 484
@@ -59,7 +59,7 @@ object FmTTF: TFmTTF
       TabOrder = 0
       ViewStyle = vsReport
     end
-    object PnPaintBox: TPanel
+    object PanelPaintBox: TPanel
       Left = 0
       Top = 0
       Width = 484
@@ -79,14 +79,14 @@ object FmTTF: TFmTTF
         ParentColor = False
         OnPaint = PaintBoxPaint
       end
-      object LbFontSize: TLabel
+      object LabelFontSize: TLabel
         Left = 6
         Top = 9
         Width = 26
         Height = 13
         Caption = 'Size: '
       end
-      object CbFontSize: TComboBox
+      object ComboBoxFontSize: TComboBox
         Left = 38
         Top = 6
         Width = 43
@@ -101,7 +101,7 @@ object FmTTF: TFmTTF
         ParentFont = False
         TabOrder = 0
         Text = '96'
-        OnChange = CbFontSizeChange
+        OnChange = ComboBoxFontSizeChange
         Items.Strings = (
           '8'
           '9'
@@ -198,7 +198,7 @@ object FmTTF: TFmTTF
       object TbOpen: TToolButton
         Left = 0
         Top = 0
-        Action = AcFileOpen
+        Action = ActionFileOpen
       end
       object TbSplit1: TToolButton
         Left = 23
@@ -211,17 +211,17 @@ object FmTTF: TFmTTF
       object TbCut: TToolButton
         Left = 31
         Top = 0
-        Action = AcEditCut
+        Action = ActionEditCut
       end
       object TbCopy: TToolButton
         Left = 54
         Top = 0
-        Action = AcEditCopy
+        Action = ActionEditCopy
       end
       object TbPaste: TToolButton
         Left = 77
         Top = 0
-        Action = AcEditPaste
+        Action = ActionEditPaste
       end
       object TbSplit2: TToolButton
         Left = 100
@@ -237,112 +237,112 @@ object FmTTF: TFmTTF
     Images = ToolbarImages
     Left = 8
     Top = 32
-    object MiFile: TMenuItem
+    object MenuItemFile: TMenuItem
       Caption = '&File'
-      object MiNew: TMenuItem
+      object MenuItemFileNew: TMenuItem
         Caption = 'New'
         SubMenuImages = ToolbarImages
         Enabled = False
         ImageIndex = 0
       end
-      object MiOpen: TMenuItem
-        Action = AcFileOpen
+      object MenuItemFileOpen: TMenuItem
+        Action = ActionFileOpen
       end
-      object MiOpenFromInstalled: TMenuItem
+      object MenuItemFileOpenFromInstalled: TMenuItem
         Caption = 'Open from installed...'
-        OnClick = MIOpenFromInstalledClick
+        OnClick = MenuItemFileOpenFromInstalledClick
       end
-      object MiOpenDefaultFonts: TMenuItem
+      object MenuItemFileOpenDefaultFonts: TMenuItem
         Caption = 'Open Default Fonts'
-        object MiInternal: TMenuItem
+        object MenuItemFileInternal: TMenuItem
           Caption = '(internal)'
-          OnClick = MIInternalClick
+          OnClick = MenuItemFileInternalClick
         end
         object N4: TMenuItem
           Caption = '-'
         end
-        object MiArial: TMenuItem
+        object MenuItemFileArial: TMenuItem
           Caption = 'Arial'
-          object MiArialRegular: TMenuItem
+          object MenuItemFileArialRegular: TMenuItem
             Caption = '&Regular'
-            OnClick = MIArialRegularClick
+            OnClick = MenuItemFileArialRegularClick
           end
-          object MiArialBold: TMenuItem
+          object MenuItemFileArialBold: TMenuItem
             Caption = '&Bold'
-            OnClick = MIArialBoldClick
+            OnClick = MenuItemFileArialBoldClick
           end
-          object MiArialItalic: TMenuItem
+          object MenuItemFileArialItalic: TMenuItem
             Caption = '&Italic'
-            OnClick = MIArialItalicClick
+            OnClick = MenuItemFileArialItalicClick
           end
-          object MiArialBoldItalic: TMenuItem
+          object MenuItemFileArialBoldItalic: TMenuItem
             Caption = 'B&old Italic'
-            OnClick = MIArialBoldItalicClick
+            OnClick = MenuItemFileArialBoldItalicClick
           end
         end
-        object MiCourierNew: TMenuItem
+        object MenuItemCourierNew: TMenuItem
           Caption = '&Courier New'
-          object MiCourierRegular: TMenuItem
+          object MenuItemCourierRegular: TMenuItem
             Caption = '&Regular'
-            OnClick = MICourierRegularClick
+            OnClick = MenuItemCourierRegularClick
           end
-          object MiCourierNewBold: TMenuItem
+          object MenuItemCourierNewBold: TMenuItem
             Caption = '&Bold'
-            OnClick = MICourierNewBoldClick
+            OnClick = MenuItemCourierNewBoldClick
           end
-          object MiCourierNewItalic: TMenuItem
+          object MenuItemCourierNewItalic: TMenuItem
             Caption = '&Italic'
-            OnClick = MICourierNewItalicClick
+            OnClick = MenuItemCourierNewItalicClick
           end
-          object MiCourierNewBoldItalic: TMenuItem
+          object MenuItemCourierNewBoldItalic: TMenuItem
             Caption = 'B&old Italic'
-            OnClick = MICourierNewBoldItalicClick
+            OnClick = MenuItemCourierNewBoldItalicClick
           end
         end
-        object MiTimesNewRoman: TMenuItem
+        object MenuItemTimesNewRoman: TMenuItem
           Caption = '&Times New Roman'
-          object MiTimesNewRomanRegular: TMenuItem
+          object MenuItemTimesNewRomanRegular: TMenuItem
             Caption = '&Regular'
-            OnClick = MITimesNewRomanRegularClick
+            OnClick = MenuItemTimesNewRomanRegularClick
           end
-          object MiTimesNewRomanBold: TMenuItem
+          object MenuItemTimesNewRomanBold: TMenuItem
             Caption = '&Bold'
-            OnClick = MITimesNewRomanBoldClick
+            OnClick = MenuItemTimesNewRomanBoldClick
           end
-          object MiTimesNewRomanItalic: TMenuItem
+          object MenuItemTimesNewRomanItalic: TMenuItem
             Caption = '&Italic'
-            OnClick = MITimesNewRomanItalicClick
+            OnClick = MenuItemTimesNewRomanItalicClick
           end
-          object MiTimesNewRomanBoldItalic: TMenuItem
+          object MenuItemTimesNewRomanBoldItalic: TMenuItem
             Caption = 'Bold Italic'
-            OnClick = MITimesNewRomanBoldItalicClick
+            OnClick = MenuItemTimesNewRomanBoldItalicClick
           end
         end
-        object MiWingdings: TMenuItem
+        object MenuItemFileWingdings: TMenuItem
           Caption = 'Wingdings'
-          OnClick = MIWingdingsClick
+          OnClick = MenuItemFileWingdingsClick
         end
       end
-      object MiSave: TMenuItem
+      object MenuItemFileSave: TMenuItem
         Caption = 'Save'
         Enabled = False
         ImageIndex = 2
       end
-      object MiSaveAs: TMenuItem
-        Action = AcFileSaveAs
+      object MenuItemFileSaveAs: TMenuItem
+        Action = ActionFileSaveAs
         Enabled = False
       end
       object N1: TMenuItem
         Caption = '-'
       end
-      object MiExit: TMenuItem
-        Action = AcFileExit
+      object MenuItemFileExit: TMenuItem
+        Action = ActionFileExit
       end
     end
-    object MiEdit: TMenuItem
+    object MenuItemEdit: TMenuItem
       Caption = '&Edit'
-      object MiUndo: TMenuItem
-        Action = AcEditUndo
+      object MenuItemUndo: TMenuItem
+        Action = ActionEditUndo
         Caption = '&Undo'
         Hint = 'Undo|Undo the last action'
       end
@@ -350,37 +350,37 @@ object FmTTF: TFmTTF
         Caption = '-'
         Enabled = False
       end
-      object MiCut: TMenuItem
-        Action = AcEditCut
+      object MenuItemCut: TMenuItem
+        Action = ActionEditCut
       end
-      object MiCopy: TMenuItem
-        Action = AcEditCopy
+      object MenuItemCopy: TMenuItem
+        Action = ActionEditCopy
       end
-      object MiPaste: TMenuItem
-        Action = AcEditPaste
+      object MenuItemPaste: TMenuItem
+        Action = ActionEditPaste
       end
     end
-    object MiView: TMenuItem
+    object MenuItemView: TMenuItem
       Caption = '&View'
-      object MiToolbar: TMenuItem
+      object MenuItemToolbar: TMenuItem
         Caption = '&Toolbar'
         Checked = True
-        OnClick = MIToolbarClick
+        OnClick = MenuItemToolbarClick
       end
-      object MiStatusBar: TMenuItem
+      object MenuItemStatusBar: TMenuItem
         Caption = '&Status Bar'
         Checked = True
-        OnClick = MIStatusBarClick
+        OnClick = MenuItemStatusBarClick
       end
       object N3: TMenuItem
         Caption = '-'
       end
     end
-    object MiHelp: TMenuItem
+    object MenuItemHelp: TMenuItem
       Caption = '&Help'
-      object MiAbout: TMenuItem
+      object MenuItemAbout: TMenuItem
         Caption = '&About'
-        OnClick = MiAboutClick
+        OnClick = MenuItemAboutClick
       end
     end
   end
@@ -388,7 +388,7 @@ object FmTTF: TFmTTF
     Images = ToolbarImages
     Left = 40
     Top = 32
-    object AcFileOpen: TFileOpen
+    object ActionFileOpen: TFileOpen
       Category = 'File'
       Caption = '&Open...'
       Dialog.Filter = 'TrueType Font (*.ttf)|*.ttf'
@@ -396,43 +396,43 @@ object FmTTF: TFmTTF
       Hint = 'Open|Open an existing document'
       ImageIndex = 1
       ShortCut = 16463
-      OnAccept = AcFileOpenAccept
+      OnAccept = ActionFileOpenAccept
     end
-    object AcEditCut: TEditCut
+    object ActionEditCut: TEditCut
       Category = 'Edit'
       Caption = 'Cu&t'
       Hint = 'Cut|Cut the selection and put it on the clipboard'
       ImageIndex = 5
       ShortCut = 16472
     end
-    object AcEditCopy: TEditCopy
+    object ActionEditCopy: TEditCopy
       Category = 'Edit'
       Caption = '&Copy'
       Hint = 'Copy|Copy the selection and put it on the clipboard'
       ImageIndex = 6
       ShortCut = 16451
     end
-    object AcEditPaste: TEditPaste
+    object ActionEditPaste: TEditPaste
       Category = 'Edit'
       Caption = '&Paste'
       Hint = 'Paste|Insert Clipboard Contents'
       ImageIndex = 7
       ShortCut = 16470
     end
-    object AcEditUndo: TEditUndo
+    object ActionEditUndo: TEditUndo
       Category = 'Edit'
       Caption = '&R'#252'ckg'#228'ngig'
       Hint = 'R'#252'ckg'#228'ngig|Letzte Aktion r'#252'ckg'#228'ngig machen'
       ImageIndex = 4
       ShortCut = 16474
     end
-    object AcFileSaveAs: TFileSaveAs
+    object ActionFileSaveAs: TFileSaveAs
       Category = 'File'
       Caption = 'Save &as...'
       Hint = 'Save as|Saves the opened font under a new name'
       ImageIndex = 15
     end
-    object AcFileExit: TFileExit
+    object ActionFileExit: TFileExit
       Category = 'File'
       Caption = 'E&xit'
       Hint = 'Exit|Quit the application'
