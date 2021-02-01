@@ -25,7 +25,7 @@ unit PT_Classes;
 //                                                                            //
 //  The initial developer of this code is Christian-W. Budde                  //
 //                                                                            //
-//  Portions created by Christian-W. Budde are Copyright (C) 2010-2017        //
+//  Portions created by Christian-W. Budde are Copyright (C) 2010-2021        //
 //  by Christian-W. Budde. All Rights Reserved.                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -229,11 +229,11 @@ end;
 
 procedure TCustomPascalTypeNamedTable.WriteTableTypeToStream(Stream: TStream);
 var
-  TableNAme: TTableType;
+  TableName: TTableType;
 begin
   // store chunk name to memory stream
-  TableNAme := GetTableType;
-  Stream.Write(TableNAme, 4);
+  TableName := GetTableType;
+  Stream.Write(TableName, 4);
 end;
 
 end.

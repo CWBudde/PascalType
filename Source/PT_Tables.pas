@@ -25,7 +25,7 @@ unit PT_Tables;
 //                                                                            //
 // The initial developer of this code is Christian-W. Budde                   //
 //                                                                            //
-// Portions created by Christian-W. Budde are Copyright (C) 2010-2017         //
+// Portions created by Christian-W. Budde are Copyright (C) 2010-2021         //
 // by Christian-W. Budde. All Rights Reserved.                                //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
