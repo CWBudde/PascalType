@@ -95,7 +95,7 @@ type
 
   TPascalTypeFormat6CharacterMap = class(TCustomPascalTypeCharacterMap)
   private
-    FLanguage: Word;              // Please see “Note on the language field in 'cmap' subtables“ in this document.
+    FLanguage: Word;              // Please see â€œNote on the language field in 'cmap' subtablesâ€œ in this document.
     FFirstCode: Word;             // First character code of subrange.
     FGlyphIdArray: array of Word; // Array of glyph index values for character codes in the range.
     function GetEntryCount: Word;
@@ -120,7 +120,7 @@ type
 
   TPascalTypeFormat12CharacterMap = class(TCustomPascalTypeCharacterMap)
   private
-    FLanguage: Cardinal; // Please see “Note on the language field in 'cmap' subtables“ in this document.
+    FLanguage: Cardinal; // Please see â€œNote on the language field in 'cmap' subtablesâ€œ in this document.
     FCoverageArray: array of TCharMapSegmentedCoverageRecord;
   protected
     class function GetFormat: Word; override;
@@ -298,20 +298,30 @@ begin
     inherited;
 end;
 
-function TPascalTypeFormat4CharacterMap.CharacterToGlyph(CharacterIndex: Integer): Integer;
+
+function TPascalTypeFormat4CharacterMap.CharacterToGlyph
+  (CharacterIndex: Integer): Integer;
 var
-  SegmentIndex: Integer;
+  SegmentIndex : Integer;
+  OffsetIndex  : Integer;
+  SegCount     : Integer;
 begin
   SegmentIndex := 0;
-  while (SegmentIndex < Length(FEndCount)) do
-    if (CharacterIndex <= FEndCount[SegmentIndex]) then
-      Break
-    else
-      Inc(SegmentIndex);
+  SegCount     := Length(FEndCount);
 
-  if not(CharacterIndex >= FStartCount[SegmentIndex]) then
+  // find matching segment
+  while (SegmentIndex < SegCount) and
+    (CharacterIndex > FEndCount[SegmentIndex]) do
+    Inc(SegmentIndex);
+
+  if SegmentIndex >= SegCount then
   begin
-    // missing glyph
+    Result := 0;
+    Exit;
+  end;
+
+  if CharacterIndex < FStartCount[SegmentIndex] then
+  begin
     Result := 0;
     Exit;
   end;
@@ -320,20 +330,22 @@ begin
     Result := (FIdDelta[SegmentIndex] + CharacterIndex) mod (1 shl 16)
   else
   begin
-    Result := FIdRangeOffset[SegmentIndex] +
-      (CharacterIndex - FStartCount[SegmentIndex]);
+    OffsetIndex := (FIdRangeOffset[SegmentIndex] div 2) +
+      (CharacterIndex - FStartCount[SegmentIndex]) -
+      (SegCount - SegmentIndex);
 
-    // modulo operation
-    Result := Result mod (1 shl 16);
+    if (OffsetIndex >= 0) and (OffsetIndex < Length(FGlyphIdArray)) then
+      Result := FGlyphIdArray[OffsetIndex]
+    else
+      Result := 0;
 
-    // check for missing character and add offset eventually
-    if Result = 0 then
-      Result := FIdDelta[SegmentIndex] mod (1 shl 16)
+    if Result <> 0 then
+      Result := (Result + FIdDelta[SegmentIndex]) mod (1 shl 16);
   end;
 
   Result := Result mod (1 shl 16);
-
 end;
+
 
 procedure TPascalTypeFormat4CharacterMap.LoadFromStream(Stream: TStream);
 var
